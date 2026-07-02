@@ -264,15 +264,15 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     exact Projective.map_dblXYZ (Int.castRingHom ℚ) _
   by_cases heq : (repr a₂ a₄ a₆ p (.some x₁ y₁ h₁)) ≈ (repr a₂ a₄ a₆ p (.some x₂ y₂ h₂))
   · -- `repr P ≈ repr Q` mod `p`: the reduced sum is a doubling.
+    have hadd : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.add
+          (repr a₂ a₄ a₆ p (.some x₁ y₁ h₁)) (repr a₂ a₄ a₆ p (.some x₂ y₂ h₂))
+        = (Int.castRingHom (ZMod p)) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (Trep x₁ y₁ w₁) := by
+      rw [Projective.add_of_equiv heq, hrP]
+      exact Projective.map_dblXYZ (Int.castRingHom (ZMod p)) _
+    rw [hadd]
     by_cases hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point)
         = .some x₂ y₂ h₂
     · -- `P = Q` over `ℚ` (case S1): honest doubling.
-      have hadd : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.add
-            (repr a₂ a₄ a₆ p (.some x₁ y₁ h₁)) (repr a₂ a₄ a₆ p (.some x₂ y₂ h₂))
-          = (Int.castRingHom (ZMod p)) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (Trep x₁ y₁ w₁) := by
-        rw [Projective.add_of_equiv heq, hrP]
-        exact Projective.map_dblXYZ (Int.castRingHom (ZMod p)) _
-      rw [hadd]
       have hgadd : (Int.castRingHom ℚ) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (Trep x₁ y₁ w₁)
           = (curve a₂ a₄ a₆).toProjective.add ((Int.castRingHom ℚ) ∘ Trep x₁ y₁ w₁)
               ((Int.castRingHom ℚ) ∘ Trep x₁ y₁ w₁) := by
@@ -291,15 +291,19 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
         rw [hgadd, Projective.Point.toAffine_add hns1 hns1,
           toAffine_g_Trep a₂ a₄ a₆ h₁ hden1 hden1', ← hPQ]
       exact repr_equiv_of_toAffine a₂ a₄ a₆ p hΔ _ hnsp hnsq hTℚ
-    · -- **S4 — tangent mod `p`.**  Here `repr P ≈ repr Q` in `ZMod p` (the reduced points
-      -- coincide) but `P ≠ Q` over `ℚ`, so the integer doubling formula `dblXYZ (Trep P)`
-      -- represents `2P ≠ P + Q` over `ℚ`; the well-definedness bridge `repr_equiv_of_toAffine`
-      -- does not apply and one must instead use the alternate-slope identity
-      --   `(y₁ - y₂)(y₁ + y₂) = (x₁ - x₂)(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)`
-      -- (`dev/reduction-plan.md` §2.4 / `dev/reduction-plan-elementary.md` Chunk D) to identify the
-      -- reduced tangent slope `(3X² + 2a₂X + a₄)/(2Ȳ)` and show `repr (P + Q) ≈ dblXYZ (repr P)`.
-      -- Remaining goal:
-      --   `repr (P + Q) ≈ E𝔽.add (repr P) (repr Q)`   with `repr P ≈ repr Q`, `P ≠ Q`.
+    · -- **S4 — tangent mod `p` (the intrinsic hard case).**  Here `repr P ≈ repr Q` in `ZMod p`
+      -- (the reduced points coincide) but `P ≠ Q` over `ℚ`.  The remaining goal is exactly
+      --   `repr (P + Q) ≈ (Int.castRingHom (ZMod p)) ∘ (curveℤ …).dblXYZ (Trep x₁ y₁ w₁)`,
+      -- i.e. the reduction of the rational sum `P + Q` equals the reduced *tangent* doubling of the
+      -- common reduced point.  This cannot go through the well-definedness bridge
+      -- `repr_equiv_of_toAffine`, because over `ℚ` the integer formula `dblXYZ (Trep P)` represents
+      -- `2P`, whereas `P + Q ≠ 2P`.  The fix (`dev/reduction-plan.md` §2.4 /
+      -- `dev/reduction-plan-elementary.md` Chunk D) is the alternate-slope identity
+      --   `(y₁ - y₂)(y₁ + y₂) = (x₁ - x₂)(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)`,
+      -- which mod `p` (using `x̄₁ = x̄₂`) rewrites the reduced secant slope `(ȳ₁ - ȳ₂)/(x̄₁ - x̄₂)`
+      -- (a `0/0`) as the tangent slope `(3X̄² + 2a₂X̄ + a₄)/(2Ȳ)`, so `x̄₃ = dblX(P̄)` and hence
+      -- the two `ZMod p` representatives are proportional.  This needs the reduced affine-coordinate
+      -- arithmetic (the removed `reduced_addX`/`reduced_on_curve` layer), so it is left here.
       sorry
   · -- `¬ (repr P ≈ repr Q)` mod `p`: the reduced sum is a secant.
     -- First, the two representatives are inequivalent over `ℚ` too.
