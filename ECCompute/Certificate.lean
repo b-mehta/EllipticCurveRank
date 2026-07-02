@@ -13,9 +13,9 @@ This file defines `ECCompute.Certificate`, the bundle of data a referee audits t
 lower bound on the Mordell–Weil rank of an elliptic curve over `ℚ`,
 `rank E(ℚ) ≥ ρ − t`.
 
-It is **pure data**: a plain `structure` with no `Prop` fields and no proofs. Downstream tickets
-supply the checkers (T4–T7), the deduction (T8), and the tactic (T9) that turn a value of this
-type into a verified bound. The intended witness is the general Weierstrass model
+It is pure data: a plain `structure` with no `Prop` fields and no proofs. Downstream code supplies
+the checkers that audit each field, the deduction that combines them, and the tactic that turns a
+value of this type into a verified bound. The intended witness is the general Weierstrass model
 `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` over `ℤ`.
 
 ## Fields
@@ -34,7 +34,7 @@ type into a verified bound. The intended witness is the general Weierstrass mode
 
 ## Layout conventions
 
-The three lists are expected to have length `rho` (`points`, `labels`, `matB`, `matM`), but no
+The four lists `points`, `labels`, `matB`, and `matM` are all expected to have length `rho`, but no
 length or well-formedness constraints are imposed here; the auditing checkers enforce them.
 -/
 
