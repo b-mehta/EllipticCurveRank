@@ -128,6 +128,16 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
       mul_ne_zero (pow_ne_zero 2 hw) (sub_ne_zero.mpr hxt)
     rw [if_neg hne, if_neg hxt, psi_mul_sq hw]
 
+/-- **Reduction of `λ` to `O`.**  When `p ∣ x.den` the point `some x y h` reduces to `O` of
+`E/𝔽ₚ`, and `λ` vanishes on it by definition. -/
+theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
+    lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
+  change (if (x.den : ZMod p) = 0 then (0 : ZMod 2)
+      else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
+           else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p))) = _
+  rw [if_pos hd]
+
 /-- `λ` on an affine point depends only on its `x`-coordinate: two points with equal `x`
 have equal `λ`.  In particular `λ(-P) = λ(P)`, since negation fixes `x`. -/
 theorem lambda_x_indep {θ : ZMod p} {x₁ y₁ x₂ y₂ : ℚ}
@@ -187,6 +197,27 @@ theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
 theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   den_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
+
+/-- Good denominators are closed under division by a rational whose reduction is nonzero: if
+`b.den`, `a.den` reduce nonzero and `(a : ZMod p) ≠ 0`, then `(b / a).den` reduces nonzero.
+This is the denominator half of "the reduced slope `(y₁ − y₂)/(x₁ − x₂)` is well-defined mod `p`
+when `X₁ ≠ X₂`". -/
+theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
+    (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
+    ((b / a).den : ZMod p) ≠ 0 := by
+  have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
+  have hnum : (a.num : ZMod p) ≠ 0 := by
+    rw [num_eq_xbar_mul_den ha]; exact mul_ne_zero ha0 ha
+  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := by
+    rw [Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd
+    apply hnum
+    rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
+    exact Int.dvd_natAbs.mp (Int.natCast_dvd_natCast.mpr hdvd)
+  rw [div_eq_mul_inv]
+  refine den_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
+  rw [Nat.cast_mul, Rat.den_inv_of_ne_zero ha']
+  exact mul_ne_zero hb hnatabs
 
 /-- **Reduced on-curve equation.**  A ℚ-point `(x, y)` on `E` with good denominators reduces to a
 point of `E` over `ZMod p`.  Proved by clearing denominators to an integer identity (cast via the
@@ -256,6 +287,106 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
       Rat.cast_add_of_ne_zero hdx3 (by simp)] at hcast
   rw [Rat.cast_intCast] at hcast
   exact hcast
+
+/-- Casting the derivative polynomial `f'(x) = 3x² + 2a₂x + a₄` commutes with reduction when
+`p ∤ x.den`.  Used by `reduced_doubleX`. -/
+theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) :
+    (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) : ℚ)) : ZMod p)
+      = 3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p) := by
+  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdx
+  have h3x2 : (((3 : ℚ) * x ^ 2).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) hx2
+  have h2a2 : (((2 : ℚ) * (a₂ : ℚ)).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) (by simp)
+  have h2a2x : (((2 : ℚ) * (a₂ : ℚ) * x).den : ZMod p) ≠ 0 := den_mul_ne_zero h2a2 hdx
+  rw [Rat.cast_add_of_ne_zero (den_add_ne_zero h3x2 h2a2x) (by simp),
+      Rat.cast_add_of_ne_zero h3x2 h2a2x,
+      Rat.cast_mul_of_ne_zero (by simp) hx2, Rat.cast_pow,
+      Rat.cast_mul_of_ne_zero h2a2 hdx,
+      Rat.cast_mul_of_ne_zero (by simp) (by simp)]
+  push_cast
+  ring
+
+/-- **Reduced tangent (doubling) relation.**  The doubling analogue of `reduced_addX`: for a
+point `(x, y)` with `y ≠ 0` and good denominators (including the doubled `x`-coordinate
+`x₃ = dblX`), the `ℓ`-free tangent identity
+`(x₃ + a₂ + 2x)·(2y)² = (3x² + 2a₂x + a₄)²` reduces mod `p`.  Combined with the reduced curve
+equation this pins down the reduced doubling as `X₃ = ℓ̄² − a₂ − 2X` for the tangent slope
+`ℓ̄ = f'(X)/(2Y)`. -/
+theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
+    (hdx : (x.den : ZMod p) ≠ 0) (hdy : (y.den : ZMod p) ≠ 0)
+    (hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x x
+      ((curve a₂ a₄ a₆).toAffine.slope x x y y)).den : ZMod p) ≠ 0) :
+    (((curve a₂ a₄ a₆).toAffine.addX x x
+        ((curve a₂ a₄ a₆).toAffine.slope x x y y) : ZMod p)
+      + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2
+      = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x x y y with hℓdef
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
+  have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
+    rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
+      simp [WeierstrassCurve.Affine.negY, curve]]
+    intro h; apply hy0; linarith
+  have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne,
+        show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
+          simp [WeierstrassCurve.Affine.negY, curve]]
+    simp only [curve]; field_simp; ring
+  have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
+    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
+  have REL : (x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2
+      = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 := by
+    rw [haddX]
+    linear_combination (ℓ * (2 * y) + (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ))) * hℓ
+  have hL : (((x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2 : ℚ) : ZMod p)
+      = ((x₃ : ZMod p) + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2 := by
+    rw [Rat.cast_mul_of_ne_zero
+          (den_add_ne_zero (den_add_ne_zero hdx3 (by simp)) (den_mul_ne_zero (by simp) hdx))
+          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 (den_mul_ne_zero (by simp) hdy)),
+        Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) hdy,
+        Rat.cast_add_of_ne_zero (den_add_ne_zero hdx3 (by simp)) (den_mul_ne_zero (by simp) hdx),
+        Rat.cast_add_of_ne_zero hdx3 (by simp),
+        Rat.cast_mul_of_ne_zero (by simp) hdx, Rat.cast_intCast]
+    push_cast; ring
+  have hR : (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 : ℚ) : ZMod p)
+      = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
+    rw [Rat.cast_pow, cast_fderivPoly hdx]
+  rw [← hL, ← hR]
+  exact_mod_cast congrArg (Rat.cast : ℚ → ZMod p) REL
+
+/-- The doubled `x`-coordinate has good denominator when `P = (x, y)` reduces to a
+non-`2`-torsion point (`p ∤ x.den, y.den` and `Y ≠ 0`): the reduced tangent slope
+`f'(x)/(2y)` has good denominator (`den_div_ne_zero`), and `dblX = ℓ² − a₂ − 2x`. -/
+theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 : ZMod p) ≠ 0)
+    (hdx : (x.den : ZMod p) ≠ 0) (hdy : (y.den : ZMod p) ≠ 0) (hy0 : (y : ZMod p) ≠ 0) :
+    (((curve a₂ a₄ a₆).toAffine.addX x x
+        ((curve a₂ a₄ a₆).toAffine.slope x x y y)).den : ZMod p) ≠ 0 := by
+  have hslopeval : (curve a₂ a₄ a₆).toAffine.slope x x y y
+      = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) / (2 * y) := by
+    have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
+      rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
+        simp [WeierstrassCurve.Affine.negY, curve]]
+      intro hh; apply hyℚ; linarith
+    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne,
+        show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
+          simp [WeierstrassCurve.Affine.negY, curve]]
+    simp only [curve]
+    rw [show y - -y = 2 * y by ring]; congr 1; ring
+  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdx
+  have hdnum : ((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
+    den_add_ne_zero (den_add_ne_zero (den_mul_ne_zero (by simp) hx2)
+      (den_mul_ne_zero (den_mul_ne_zero (by simp) (by simp)) hdx)) (by simp)
+  have hden2y : ((2 * y : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) hdy
+  have hcast2y : ((2 * y : ℚ) : ZMod p) ≠ 0 := by
+    rw [Rat.cast_mul_of_ne_zero (by simp) hdy]; push_cast; exact mul_ne_zero h2 hy0
+  have hdℓ : (((curve a₂ a₄ a₆).toAffine.slope x x y y).den : ZMod p) ≠ 0 := by
+    rw [hslopeval]; exact den_div_ne_zero hdnum hden2y hcast2y
+  have haddX : (curve a₂ a₄ a₆).toAffine.addX x x ((curve a₂ a₄ a₆).toAffine.slope x x y y)
+      = (curve a₂ a₄ a₆).toAffine.slope x x y y ^ 2 - (a₂ : ℚ) - x - x := by
+    simp only [WeierstrassCurve.Affine.addX, curve]; ring
+  rw [haddX]
+  exact den_sub_ne_zero (den_sub_ne_zero (den_sub_ne_zero
+    (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdℓ) (by simp)) hdx) hdx
 
 /-- The `y`-denominator reduces well whenever the `x`-denominator does (via T1a,
 `x.den = w²`, `y.den = w³`). -/
@@ -398,6 +529,83 @@ theorem lambda_map_add_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂
     rw [if_neg c3, if_neg c1, if_neg c2]
     exact hzero _ _ _ hpm
 
+/-- **Additivity of `λ`, good doubling case.**  If `P = (x, y)` reduces to a non-`2`-torsion
+point (`Y ≠ 0`) with good denominators — including the doubled `x`-coordinate — then the descent
+character vanishes on `2P`.  This is the doubling analogue of `lambda_map_add_of_good`: the
+collinear triple is `X, X, X₃` with `X₃ = ℓ̄² − a₂ − 2X` for the reduced tangent slope
+`ℓ̄ = f'(X)/(2Y)` (`reduced_doubleX`), so the double-root Vieta relations make
+`(X − θ)²(X₃ − θ)` a square and `ψ_p(X₃ − θ) = 0`. -/
+theorem lambda_double_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+    {x y : ℚ} (hP : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+    (hy0 : (y : ZMod p) ≠ 0) (hdx : (x.den : ZMod p) ≠ 0)
+    (hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x x
+        ((curve a₂ a₄ a₆).toAffine.slope x x y y)).den : ZMod p) ≠ 0) :
+    lambda a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
+  have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
+  have hyℚ : y ≠ 0 := fun hh => hy0 (by rw [hh, Rat.cast_zero])
+  have hdy : (y.den : ZMod p) ≠ 0 := ydenom_ne_zero hP.1 hdx
+  have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
+    rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
+      simp [WeierstrassCurve.Affine.negY, curve]]
+    intro hh; apply hyℚ; linarith
+  have h2 : (2 : ZMod p) ≠ 0 := by
+    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) by push_cast; ring, Ne, ZMod.natCast_eq_zero_iff]
+    intro hd; exact hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
+  have hdbl := reduced_doubleX hyℚ hdx hdy hdx3
+  have hcurve := reduced_on_curve hP.1 hdx hdy
+  have hθroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
+    have := h.root; simpa [fval] using this
+  set X : ZMod p := (x : ZMod p) with hX
+  set Y : ZMod p := (y : ZMod p) with hY
+  set X₃ : ZMod p := ((curve a₂ a₄ a₆).toAffine.addX x x
+    ((curve a₂ a₄ a₆).toAffine.slope x x y y) : ZMod p) with hX3
+  have h2Y : (2 : ZMod p) * Y ≠ 0 := mul_ne_zero h2 hy0
+  set ℓb : ZMod p := (3 * X ^ 2 + 2 * (a₂ : ZMod p) * X + (a₄ : ZMod p)) / (2 * Y) with hℓbdef
+  have hℓ2Y : ℓb * (2 * Y) = 3 * X ^ 2 + 2 * (a₂ : ZMod p) * X + (a₄ : ZMod p) :=
+    div_mul_cancel₀ _ h2Y
+  have hx3 : X₃ = ℓb ^ 2 - (a₂ : ZMod p) - 2 * X := by
+    have hcancel : (X₃ + (a₂ : ZMod p) + 2 * X) * (2 * Y) ^ 2 = ℓb ^ 2 * (2 * Y) ^ 2 := by
+      rw [hdbl]
+      linear_combination
+        (-(3 * X ^ 2 + 2 * (a₂ : ZMod p) * X + (a₄ : ZMod p)) - ℓb * (2 * Y)) * hℓ2Y
+    have := mul_right_cancel₀ (pow_ne_zero 2 h2Y) hcancel
+    linear_combination this
+  set mb : ZMod p := Y - ℓb * X with hmb
+  have hm : ℓb * X + mb = Y := by rw [hmb]; ring
+  have hpt : (ℓb * X + mb) ^ 2
+      = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
+    rw [hm]; exact hcurve
+  have htan : 3 * X ^ 2 + 2 * (a₂ : ZMod p) * X + (a₄ : ZMod p) = 2 * ℓb * (ℓb * X + mb) := by
+    rw [hm]; linear_combination -hℓ2Y
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
+    ℓb mb X X₃ hpt htan hx3
+  have hprod : (X - θ) * (X - θ) * (X₃ - θ) = (ℓb * θ + mb) ^ 2 :=
+    prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X X X₃ θ
+      hσ₁ hσ₂ hσ₃ hθroot
+  have hXθ : X ≠ θ := by
+    intro hc
+    apply hy0
+    have hYsq : Y ^ 2 = 0 := by rw [hcurve, hc]; exact hθroot
+    exact pow_eq_zero_iff (by norm_num) |>.mp hYsq
+  rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne, lambda_some_of_den_ne _ hdx3]
+  simp only [xbar, ← hX3]
+  by_cases c3 : X₃ = θ
+  · rw [if_pos c3]
+    have hfd : fderiv a₂ a₄ a₆ p θ = (X - θ) * (X - θ) := by
+      have := fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₃ X X θ
+        (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+        hθroot c3
+      simpa [fderiv] using this
+    rw [hfd]; exact psi_of_isSquare ⟨X - θ, by ring⟩
+  · rw [if_neg c3]
+    have hs : X - θ ≠ 0 := sub_ne_zero.mpr hXθ
+    have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
+    have hpm : psi p ((X - θ) * (X - θ) * (X₃ - θ)) = 0 := by
+      rw [hprod]; exact psi_of_isSquare ⟨ℓb * θ + mb, by ring⟩
+    rw [psi_mul h.prime hp2 (mul_ne_zero hs hs) hs3, psi_mul h.prime hp2 hs hs] at hpm
+    have hfin : ∀ a b : ZMod 2, a + a + b = 0 → b = 0 := by decide
+    exact hfin _ _ hpm
+
 end ECCompute
 
 namespace ECCompute
@@ -427,25 +635,57 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     -- reduction and `X₁ ≠ X₂` mod `p`, `lambda_map_add_of_good` closes it via T1a/T1b reduced
     -- mod `p` (including the three `2`-torsion sub-cases `Xᵢ = θ`).
     --
-    -- The five remaining `sorry`s are the loci where the elementary reduction of the secant
-    -- degenerates.  They are executable formalization content — deferred here, not a fundamental
-    -- obstruction — sharing one theme: they need the good-reduction behavior of the group law
-    -- where a point or the sum reduces to `O`, or two reduced points coincide.  The
-    -- denominator-clearing method used for the good case does not reach them, because either
-    -- `Rat.cast xᵢ` is *junk* once `(xᵢ.den : ZMod p) = 0` (the `→ O` patches: `x₁.num / x₁.den`
-    -- casts to `x₁.num · 0 = 0`, not the true reduction), or the secant Vieta identities
-    -- `reduced_addX` require both `x₁ ≠ x₂` over `ℚ` *and* `X₁ ≠ X₂` mod `p` and a non-tangent
-    -- slope (the tangent/doubling patches).  Closing them needs a `padicValRat` argument tracking
-    -- `p`-adic valuations through the secant/tangent formulas (e.g. `p ∣ x(P+Q).den` forces
-    -- `v_p(x₁ − x₂) > 0`, i.e. `X₁ = X₂`), or equivalently a reduction homomorphism
-    -- `E(ℚ) → E(𝔽ₚ)`, plus a `reduced_doubleX` counterpart of `reduced_addX` for the tangent
-    -- slope.  See ticket T1d.
+    -- Of the original five degenerate patches, two are now closed by genuine reduction content:
+    -- the `ℚ`-doubling case `x₁ = x₂` (via `reduced_doubleX` / `lambda_double_of_good`, save the
+    -- sub-case where `2P` itself reduces to `O`), and `P + Q → O` mod `p` (via `den_div_ne_zero`:
+    -- if `X₁ ≠ X₂` the reduced secant slope, hence `x(P+Q).den`, survives, so `x(P+Q).den ≡ 0`
+    -- forces `X₁ = X₂` and `λP = λQ`).  The four remaining `sorry`s all share one theme: a point
+    -- or the sum reduces to `O` "unexpectedly".  The denominator-clearing method does not reach
+    -- them because `Rat.cast xᵢ` is *junk* once `(xᵢ.den : ZMod p) = 0` (`x₁.num / x₁.den` casts
+    -- to `x₁.num · 0 = 0`).  Closing them needs a `padicValRat` argument tracking `p`-adic
+    -- valuations through the secant/tangent formulas — equivalently, the reduction homomorphism
+    -- `E(ℚ) → E(𝔽ₚ)` and the fact that its kernel is a subgroup.  See ticket T1d.
     by_cases hne : x₁ = x₂
-    · -- PATCH (ℚ-tangent/doubling): `x₁ = x₂`.  Since `y₁² = y₂² = f(x₁)` and `y₁ ≠ negY x₂ y₂ =
-      -- -y₂`, we have `y₁ = y₂`, i.e. `P = Q`; the goal is `λ(2P) = λP + λP = 0`.  Blocked: needs
-      -- a `reduced_doubleX` (tangent-slope) lemma, and the sub-cases where `2P ≡ O` mod `p`
-      -- (`P → O` or `P` `2`-torsion mod `p`) need `x(2P).den ≡ 0`, i.e. the reduction hom.
-      sorry
+    · -- ℚ-tangent/doubling: `x₁ = x₂`, hence `y₁ = y₂` (from `y₁² = y₂²` and `y₁ ≠ -y₂`), so
+      -- `P = Q` and the goal is `λ(2P) = λP + λP = 2λP = 0`, i.e. `λ(2P) = 0`.  When `P` reduces
+      -- to a non-`2`-torsion point (`X.den, Y.den` good, `Y ≠ 0`) the doubled `x`-coordinate has
+      -- good denominator (`den_dblX_ne_zero`) and `lambda_double_of_good` closes it.
+      have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
+      have hynegY : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := by
+        simp [WeierstrassCurve.Affine.negY, curve]
+      have hyne' : y₁ ≠ -y₂ := fun hcon => hxy ⟨hne, by rw [hynegY]; exact hcon⟩
+      have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
+        have e1 : y₁ ^ 2 = x₁ ^ 3 + (a₂ : ℚ) * x₁ ^ 2 + a₄ * x₁ + a₆ := by
+          have := (WeierstrassCurve.Affine.equation_iff
+            (W := (curve a₂ a₄ a₆).toAffine) x₁ y₁).mp h₁.1
+          simpa [curve] using this
+        have e2 : y₂ ^ 2 = x₂ ^ 3 + (a₂ : ℚ) * x₂ ^ 2 + a₄ * x₂ + a₆ := by
+          have := (WeierstrassCurve.Affine.equation_iff
+            (W := (curve a₂ a₄ a₆).toAffine) x₂ y₂).mp h₂.1
+          simpa [curve] using this
+        rw [e1, e2, hne]
+      have hyeq : y₁ = y₂ := by
+        rcases mul_eq_zero.mp (show (y₁ - y₂) * (y₁ + y₂) = 0 by linear_combination hy2eq) with hh | hh
+        · exact sub_eq_zero.mp hh
+        · exact absurd (by linear_combination hh : y₁ = -y₂) hyne'
+      subst hne; subst hyeq
+      rw [show (Affine.Point.some x₁ y₁ h₂ : (curve a₂ a₄ a₆).toAffine.Point)
+          = Affine.Point.some x₁ y₁ h₁ from rfl, ← two_mul,
+        show (2 : ZMod 2) = 0 from by decide, zero_mul]
+      by_cases hbad : (x₁.den : ZMod p) = 0 ∨ (y₁ : ZMod p) = 0
+      · -- `2P` reduces to `O` mod `p` (`P → O`, or `P̄` is `2`-torsion): then `λ(2P) = 0`.  This
+        -- needs `x(2P).den ≡ 0`, i.e. that the kernel of reduction is preserved by doubling — the
+        -- `padicValRat`/reduction-homomorphism content still open in T1d.
+        sorry
+      · obtain ⟨hd1, hyz⟩ := not_or.mp hbad
+        have h2 : (2 : ZMod p) ≠ 0 := by
+          rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) by push_cast; ring, Ne,
+            ZMod.natCast_eq_zero_iff]
+          intro hd; exact hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
+        have hyℚ : y₁ ≠ 0 := fun hh => hyz (by rw [hh, Rat.cast_zero])
+        have hdy : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hd1
+        exact lambda_double_of_good h h₁ hyz hd1
+          (den_dblX_ne_zero (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) hyℚ h2 hd1 hdy hyz)
     by_cases hdx1 : (x₁.den : ZMod p) = 0
     · -- PATCH (`P → O` mod `p`): `p ∣ w₁`, so `P` reduces to `O` of `E/𝔽ₚ` and `λP = 0`; the goal
       -- is `λ(P+Q) = λQ`, i.e. `X₃ = X₂` (as reduction data).  Blocked: `Rat.cast x₁` is junk,
@@ -456,16 +696,40 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
       sorry
     by_cases hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0
-    · -- PATCH (`P + Q → O` mod `p`): `p ∣ w₃`, so `λ(P+Q) = 0`; goal `λP + λQ = 0`.  Here
-      -- `P̄ + Q̄ = O`, so `Q̄ = -P̄` and `X₁ = X₂`, forcing `λP = λQ` (equal reduced `x`), whence
-      -- `λP + λQ = 0` in `ZMod 2`.  Blocked: deducing `X₁ = X₂` from `x(P+Q).den ≡ 0` is again
-      -- the reduction hom (this branch also has `X₁ ≠ X₂` mod `p` still open below).
-      sorry
+    · -- PATCH (`P + Q → O` mod `p`): `p ∣ w₃`, so `λ(P+Q) = 0`.  We show `X₁ = X₂` mod `p`
+      -- directly: if `X₁ ≠ X₂`, the reduced secant slope `(y₁ − y₂)/(x₁ − x₂)` has good
+      -- denominator (`den_div_ne_zero`), hence so does `x₃ = ℓ² − a₂ − x₁ − x₂`, contradicting
+      -- `hdx3`.  With `X₁ = X₂` we get `λP = λQ`, so `λP + λQ = 2λP = 0` in `ZMod 2`.
+      have hdy1 : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hdx1
+      have hdy2 : (y₂.den : ZMod p) ≠ 0 := ydenom_ne_zero h₂.1 hdx2
+      have hsum0 : lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂) = 0 := by
+        rw [Affine.Point.add_of_X_ne hne]; exact lambda_some_of_den_zero _ hdx3
+      rw [hsum0]
+      have hbne : (x₁ : ZMod p) = (x₂ : ZMod p) := by
+        by_contra hbne
+        have hdℓ : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
+          rw [WeierstrassCurve.Affine.slope_of_X_ne hne]
+          exact den_div_ne_zero (den_sub_ne_zero hdy1 hdy2) (den_sub_ne_zero hdx1 hdx2)
+            (by rw [Rat.cast_sub_of_ne_zero hdx1 hdx2]; exact sub_ne_zero.mpr hbne)
+        have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)
+            = (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
+          simp only [WeierstrassCurve.Affine.addX, curve]; ring
+        have hgood : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by
+          rw [haddX]
+          exact den_sub_ne_zero (den_sub_ne_zero (den_sub_ne_zero
+            (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdℓ) (by simp)) hdx1) hdx2
+        exact hgood hdx3
+      rw [lambda_some_of_den_ne h₁ hdx1, lambda_some_of_den_ne h₂ hdx2]
+      simp only [xbar, hbne, ← two_mul, show (2 : ZMod 2) = 0 from by decide, zero_mul]
     by_cases hbne : (x₁ : ZMod p) = (x₂ : ZMod p)
     · -- PATCH (tangent mod `p`): good denominators but `X₁ = X₂` mod `p`, so the reduced points
-      -- coincide and the reduced slope is a tangent (doubling) slope, outside the secant Vieta
-      -- relations `reduced_addX` (which need `X₁ ≠ X₂`).  Blocked: needs `reduced_doubleX` and,
-      -- in the `Ȳ₁ = -Ȳ₂` sub-case (`P̄ = -Q̄`), the reduction hom to get `x(P+Q).den ≡ 0`.
+      -- coincide and the reduced slope is a *tangent* (doubling) slope.  Unlike the `ℚ`-doubling
+      -- case, here `P ≠ Q` over `ℚ` (a genuine secant), so `reduced_doubleX` does not apply: the
+      -- reduced tangent slope `f'(X)/(2Y)` is the `0/0` limit of the secant slope
+      -- `(y₁ − y₂)/(x₁ − x₂)`, whose value needs `v_p(y₁ − y₂)` and `v_p(x₁ − x₂)` — the
+      -- reduction-homomorphism/`padicValRat` content still open in T1d.
       sorry
     -- GOOD REDUCTION (denominators survive, `X₁ ≠ X₂` mod `p`): fully proven, including the three
     -- `2`-torsion patches `Xᵢ = θ`, which are folded into `lambda_map_add_of_good`.

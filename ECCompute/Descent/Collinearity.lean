@@ -73,6 +73,21 @@ theorem prod_sub_theta_eq_lineSq
   have key := cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ θ
   linear_combination key - hθ
 
+/-- **Vieta relations for a tangent (double root).**  If the line `y = ℓx + m` is tangent to
+`E` at `(x₁, ℓx₁ + m)` — the point lies on the curve (`hpt`) and the tangent-slope condition
+`f'(x₁) = 2ℓ(ℓx₁ + m)` holds (`htan`) — then `x₁` is a double root of `f − (ℓx + m)²` and the
+third root is `x₃ = ℓ² − a₂ − 2x₁`, so the three Vieta relations hold for the collinear triple
+`x₁, x₁, x₃`.  This is the doubling analogue of `vieta_of_roots`. -/
+theorem vieta_of_double_root
+    (hpt : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
+    (htan : 3 * x₁ ^ 2 + 2 * a₂ * x₁ + a₄ = 2 * ℓ * (ℓ * x₁ + m))
+    (hx₃ : x₃ = ℓ ^ 2 - a₂ - 2 * x₁) :
+    x₁ + x₁ + x₃ = ℓ ^ 2 - a₂ ∧
+      x₁ * x₁ + x₁ * x₃ + x₁ * x₃ = a₄ - 2 * ℓ * m ∧
+        x₁ * x₁ * x₃ = m ^ 2 - a₆ :=
+  ⟨by linear_combination hx₃, by linear_combination 2 * x₁ * hx₃ - htan,
+    by linear_combination x₁ ^ 2 * hx₃ - hpt - x₁ * htan⟩
+
 end CommRing
 
 section Field
