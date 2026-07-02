@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # The descent character (T1)
