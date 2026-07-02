@@ -3,45 +3,24 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Data.ZMod.Basic
+import ECCompute.Descent.Defs
+import ECCompute.Descent.DenominatorSquare
+import ECCompute.Descent.Collinearity
+import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
-# The descent character (T1)
+# The descent character: additivity (T1)
 
-For an elliptic curve `E : y² = f(x)` with `f = x³ + a₂x² + a₄x + a₆` a monic integral
-cubic of non-zero discriminant, a prime `p ∤ 6Δ`, and a root `θ ∈ 𝔽ₚ` of `f`, this file
-defines the *descent character*
-
-  `λ_{p,θ} : E(ℚ) → ZMod 2`
-
-and states that it is an additive group homomorphism.  Being a homomorphism into `ZMod 2`
-it automatically vanishes on `2·E(ℚ)`, hence factors through `E(ℚ)/2E(ℚ)`.
-
-## Mathematical definition
-
-Write a rational `x` in lowest terms.  Mathlib gives `x.num : ℤ` and `x.den : ℕ` with
-`gcd(num, den) = 1`.  For a point `P = (x, y)` on `E` the standard theory shows
-`x.den = w²` is a perfect square (and `x.num = u`), so the point is `(u/w², v/w³)`.  We
-never need that fact to *define* `λ`, because dividing by the square `w²` does not change a
-Legendre symbol.  Concretely, modulo `p` (when `p ∤ w`, i.e. `(x.den : ZMod p) ≠ 0`):
-
-  `α := u − θ·w² = x.num − θ·x.den   (in ZMod p)`.
-
-Then
-* `λ(O) = 0`;
-* `λ(P) = 0`                          if `p ∣ w`   (i.e. `(x.den : ZMod p) = 0`);
-* `λ(P) = ψ_p(f'(θ))`                 if `α = 0`   (`u ≡ θw²`, the tangent case);
-* `λ(P) = ψ_p(α)`                     otherwise,
-where `ψ_p : ZMod p → ZMod 2` sends squares (and `0`) to `0` and non-squares to `1` — the
-Legendre symbol pushed into `(ZMod 2, +)`.
+This file assembles the additivity of the descent character `λ_{p,θ}` defined in
+`ECCompute.Descent.Defs`, using the denominator-is-a-square lemma (T1a,
+`ECCompute.Descent.DenominatorSquare`) and the collinearity identity (T1b,
+`ECCompute.Descent.Collinearity`).
 
 ## Main declarations
 
-* `ECCompute.psi`        — the Legendre symbol into `ZMod 2`.
-* `ECCompute.curve`      — the Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
-* `ECCompute.lambda`     — the raw function `E(ℚ) → ZMod 2`.
-* `ECCompute.lambda_map_add` — **the trusted theorem**: `λ` is additive.  Proof `sorry`.
+* `ECCompute.psi_mul` — `ψ_p` is multiplicative-to-additive on nonzero elements.
+* `ECCompute.lambda_some_of_den_ne` — reduction of `λ` on an affine point to `ψ_p(X − θ)`.
+* `ECCompute.lambda_map_add` — **the trusted theorem**: `λ` is additive.
 * `ECCompute.lambdaHom`  — `λ` packaged as an `AddMonoidHom`.
 * `ECCompute.lambdaHom_two_nsmul` — `λ` vanishes on `2·E(ℚ)` (follows for free from `ZMod 2`).
 -/
@@ -52,66 +31,137 @@ namespace ECCompute
 
 open scoped Classical
 
-/-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
-non-squares.  For a prime `p ∤ a`, this is `0` iff `a` is a quadratic residue mod `p`. -/
-noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  if IsSquare a then 0 else 1
+variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
-/-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
-def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
-  a₁ := 0
-  a₂ := a₂
-  a₃ := 0
-  a₄ := a₄
-  a₆ := a₆
+/-! ### The Legendre character `ψ_p` is a homomorphism away from zero
+
+`ψ_p` sends squares to `0` and non-squares to `1` in `ZMod 2`.  On the nonzero elements of the
+field `ZMod p` (`p` an odd prime) it is the quadratic-residue character transported along the
+group isomorphism `{±1} ≅ ZMod 2`, hence multiplicative-to-additive: `ψ_p(ab) = ψ_p a + ψ_p b`.
+We prove this via `quadraticChar`. -/
+
+section Psi
+
+variable {p}
+
+/-- `ψ_p` vanishes on squares. -/
+theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
+  if_pos ha
+
+/-- Multiplying by a nonzero square does not change `ψ_p`. -/
+theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
+    psi p (w ^ 2 * a) = psi p a := by
+  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a := by
+    constructor
+    · rintro ⟨s, hs⟩
+      exact ⟨s / w, by
+        rw [div_mul_div_comm, eq_div_iff (mul_ne_zero hw hw)]; linear_combination hs⟩
+    · rintro ⟨r, rfl⟩
+      exact ⟨w * r, by ring⟩
+  unfold psi
+  rw [hiff]
+
+/-- On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` turns products into sums:
+`ψ_p(ab) = ψ_p a + ψ_p b`.  Proved by transporting the multiplicativity of `quadraticChar`. -/
+theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
+    psi p (a * b) = psi p a + psi p b := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
+  have key : IsSquare (a * b) ↔ (IsSquare a ↔ IsSquare b) := by
+    have hab : a * b ≠ 0 := mul_ne_zero ha hb
+    rw [← quadraticChar_one_iff_isSquare hab, ← quadraticChar_one_iff_isSquare ha,
+      ← quadraticChar_one_iff_isSquare hb, map_mul]
+    rcases quadraticChar_dichotomy ha with hA | hA <;>
+      rcases quadraticChar_dichotomy hb with hB | hB <;>
+      rw [hA, hB] <;> decide
+  unfold psi
+  by_cases hA : IsSquare a <;> by_cases hB : IsSquare b
+  · rw [if_pos hA, if_pos hB, if_pos (key.mpr (by tauto)), add_zero]
+  · rw [if_pos hA, if_neg hB, if_neg (fun h => hB ((key.mp h).mp hA)), zero_add]
+  · rw [if_neg hA, if_pos hB, if_neg (fun h => hA ((key.mp h).mpr hB)), add_zero]
+  · rw [if_neg hA, if_neg hB, if_pos (key.mpr (by tauto))]; decide
+
+end Psi
+
+/-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate
+
+For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
+`w` with `x.den = w²` (T1a).  Then `α = x.num − θ·x.den = w²·(X − θ)`, so `ψ_p(α) = ψ_p(X − θ)`,
+and the tangent branch `α = 0` is exactly `X = θ`. -/
+
+/-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
+noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
+
+variable {a₂ a₄ a₆ p}
+
+/-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
+theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
+    (x.num : ZMod p) = xbar p x * (x.den : ZMod p) := by
+  rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
+
+/-- `α = w² (X − θ)` where `x.den = w²`, hence `α` and `X − θ` differ by a nonzero square. -/
+theorem alpha_eq [Fact p.Prime] {x : ℚ} {θ : ZMod p} {w : ℕ} (hden : x.den = w ^ 2)
+    (hd : (x.den : ZMod p) ≠ 0) :
+    (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
+  have hw : ((w : ZMod p)) ^ 2 = (x.den : ZMod p) := by rw [hden]; push_cast; ring
+  rw [num_eq_xbar_mul_den hd, ← hw]; ring
+
+/-- **Reduction of `λ`.**  For a point `some x y h` with `p ∤ x.den`, writing `X = (x : ZMod p)`,
+the descent character is `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X − θ)` otherwise. -/
+theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
+    lambda a₂ a₄ a₆ p θ (.some x y h)
+      = if xbar p x = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (xbar p x - θ) := by
+  obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
+  have hw : (w : ZMod p) ≠ 0 := by
+    intro h0; apply hd; rw [hxden]; push_cast; rw [h0]; ring
+  have halpha := alpha_eq (θ := θ) hxden hd
+  change (if (x.den : ZMod p) = 0 then (0 : ZMod 2)
+        else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
+             else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p))) = _
+  rw [if_neg hd, halpha]
+  by_cases hxt : xbar p x = θ
+  · rw [if_pos (show (w : ZMod p) ^ 2 * (xbar p x - θ) = 0 by rw [hxt]; ring), if_pos hxt]
+  · have hne : (w : ZMod p) ^ 2 * (xbar p x - θ) ≠ 0 :=
+      mul_ne_zero (pow_ne_zero 2 hw) (sub_ne_zero.mpr hxt)
+    rw [if_neg hne, if_neg hxt, psi_mul_sq hw]
+
+/-- `λ` on an affine point depends only on its `x`-coordinate: two points with equal `x`
+have equal `λ`.  In particular `λ(-P) = λ(P)`, since negation fixes `x`. -/
+theorem lambda_x_indep {θ : ZMod p} {x₁ y₁ x₂ y₂ : ℚ}
+    {h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁}
+    {h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂} (hx : x₁ = x₂) :
+    lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = lambda a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
+  subst hx; rfl
+
+/-- **Collinear triple, character version.**  If `X₁, X₂, X₃` are the reduced `x`-coordinates
+of three collinear points on `E` (encoded by the Vieta relations of the line `y = ℓx + m`),
+all distinct from the root `θ`, then the `ψ_p`-values sum to zero.  This is the `𝔽ₚ`-arithmetic
+heart of additivity: T1b makes `(X₁−θ)(X₂−θ)(X₃−θ)` a square, and `ψ_p` is additive on the
+nonzero factors. -/
+theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : ZMod p}
+    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
+    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
+    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - (a₆ : ZMod p))
+    (hroot : fval a₂ a₄ a₆ p θ = 0)
+    (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
+    psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  have hprod := prod_sub_theta_eq_lineSq_zmod a₂ a₄ a₆ p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
+  have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
+  have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
+  have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃
+  have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
+    rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
+  rwa [psi_mul hp hp2 (mul_ne_zero h1 h2) h3, psi_mul hp hp2 h1 h2] at hpm
+
+end ECCompute
+
+namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
-/-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
-def fval (θ : ZMod p) : ZMod p :=
-  θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
-
-/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`.  (The coefficient `_a₆` is unused, but
-kept in the signature so `fval` and `fderiv` share the same interface.) -/
-def fderiv (b₂ b₄ _b₆ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
-  3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)
-
-/-- The descent character as a raw function.  See the module docstring for the definition. -/
-noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
-  | .zero => 0
-  | .some x _ _ =>
-      if (x.den : ZMod p) = 0 then 0
-      else
-        let α : ZMod p := (x.num : ZMod p) - θ * (x.den : ZMod p)
-        if α = 0 then psi p (fderiv a₂ a₄ a₆ p θ) else psi p α
-
-@[simp]
-theorem lambda_zero (θ : ZMod p) :
-    lambda a₂ a₄ a₆ p θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 :=
-  rfl
-
-/-! ### The hypotheses of the descent lemma
-
-We package the arithmetic hypotheses as a structure so downstream tickets can pass them
-around uniformly.  `p ∤ 6Δ` is expressed as: `p` prime, `p ∤ 6` (so `p ≠ 2, 3`), and the
-integer discriminant is a unit mod `p`.  Since the coefficients are integers, `Δ` is an
-integer, so `(curve …).Δ.num` is that integer and `(curve …).Δ.den = 1`. -/
-
-/-- Arithmetic hypotheses of the descent lemma for the label `(p, θ)`. -/
-structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where
-  /-- `p` is prime. -/
-  prime : p.Prime
-  /-- `p ∤ 6` (equivalently `p ≠ 2` and `p ≠ 3`). -/
-  ne_six : ¬ p ∣ 6
-  /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
-  discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
-  /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
-  root : fval a₂ a₄ a₆ p θ = 0
-
-/-! ### The trusted theorem: additivity
-
-This is the sole mathematical obligation of ticket T1.  Everything else (the
-`AddMonoidHom` packaging and vanishing on `2E`) is formal once this is proved. -/
+/-! ### The trusted theorem: additivity -/
 
 /-- **Descent character is additive.**  Under the hypotheses `p ∤ 6Δ` and `f(θ) ≡ 0`, the
 descent character `λ_{p,θ}` is a homomorphism `(E(ℚ), +) → (ZMod 2, +)`.  This is the one
@@ -119,7 +169,33 @@ trusted mathematical input of the whole development; see the proof plan below. -
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
-  sorry
+  haveI : Fact p.Prime := ⟨h.prime⟩
+  rcases P with _ | ⟨x₁, y₁, h₁⟩
+  · rw [← Affine.Point.zero_def, zero_add, lambda_zero, zero_add]
+  rcases Q with _ | ⟨x₂, y₂, h₂⟩
+  · rw [← Affine.Point.zero_def, add_zero, lambda_zero, add_zero]
+  by_cases hxy : x₁ = x₂ ∧ y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂
+  · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `λP + λQ = 2λP = 0`.
+    rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, lambda_zero,
+      lambda_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul,
+      show (2 : ZMod 2) = 0 from by decide, zero_mul]
+  · -- Generic case: the secant/tangent gives `P + Q = some x₃ y₃`, and `P`, `Q`, `-(P + Q)`
+    -- are three collinear points on `E` with `x`-coordinates `x₁, x₂, x₃ = addX x₁ x₂ ℓ`.
+    -- Since `λ` ignores the `y`-coordinate, `λ(P + Q) = λ(-(P + Q)) = ψ_p(xbar x₃ − θ)`.
+    -- The arithmetic heart `psi_collinear` closes the "good, non-tangent" subcase: taking
+    -- `Xᵢ = xbar xᵢ`, `ℓ, m` the reduced slope/intercept, T1b makes the product a square, and
+    -- the three `λ`-values (via `lambda_some_of_den_ne`) sum to zero, giving additivity in the
+    -- character group `ZMod 2`.
+    --
+    -- REMAINING BRIDGE (the T1d core, blocked — see report): to feed `psi_collinear` one must
+    -- produce, from the `ℚ` group-law data, the reduced Vieta relations `hσ₁, hσ₂, hσ₃` in
+    -- `ZMod p` and the genericity `xbar xᵢ ≠ θ`, plus dispatch the exceptional patches
+    -- `(xᵢ.den : ZMod p) = 0` (a point reducing to `O` mod `p`) and `xbar xᵢ = θ` (tangent /
+    -- 2-torsion mod `p`).  Because `Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in
+    -- positive characteristic, casting the curve/line/`addX` identities requires clearing
+    -- denominators per point (T1a gives `x.den = w²`) and controlling `p`-divisibility of the
+    -- slope denominator `x₁ − x₂` — i.e. the reduction map `E(ℚ) → E(𝔽ₚ)`, which mathlib lacks.
+    sorry
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
@@ -150,54 +226,3 @@ theorem lambdaHom_apply_eq_zero_of_mem_range_two_nsmul {θ : ZMod p}
   exact lambdaHom_two_nsmul a₂ a₄ a₆ p h P
 
 end ECCompute
-
-/-!
-## Proof plan for `lambda_map_add`  (the remaining `sorry`)
-
-The additivity is a valuation / quadratic-residue computation.  Strategy:
-
-**1. Reduce to the arithmetic of `α(P) := x(P).num − θ·x(P).den` in `𝔽ₚ`.**
-   First establish the *denominator-is-a-square* lemma: for `P = (x,y)` on `E`, `x.den` is
-   a perfect square in `ℕ` and, writing `x = u/w²` with `gcd(u,w)=1`, `x.num = u`,
-   `x.den = w²`.  (Standard: clear denominators in `y² = f(x)`, use `f` integral monic.)
-   Consequence used repeatedly: `(x.den : ZMod p)` is always a square, so
-   `ψ_p(x.num − θ x.den) = ψ_p((x − θ)·w²)` is unchanged by the `w²` factor.
-
-**2. Set up the local invariant.**  Define `μ(P) ∈ 𝔽ₚ* / (𝔽ₚ*)²` = "the class of `x(P) − θ`",
-   with the two exceptional patches:
-   * `P = O` and `p ∣ w` (bad reduction / point reducing to `O` mod `p`) ↦ trivial class;
-   * `x(P) ≡ θ` (tangent case) ↦ class of `f'(θ)`.
-   `λ = ψ_p ∘ μ` where `ψ_p` is the group iso `𝔽ₚ*/(𝔽ₚ*)² ≅ ZMod 2`.  So it suffices to
-   show `μ` is a homomorphism `E(ℚ) → 𝔽ₚ*/(𝔽ₚ*)²`.
-
-**3. Homomorphism property via the group law.**  For `P₁ + P₂ + P₃ = O` (collinear points
-   on `E`, `y = ℓx + m`), one shows
-     `(x₁ − θ)(x₂ − θ)(x₃ − θ) = (ℓθ + m − y(θ))²`  ... i.e. a *square* in `𝔽ₚ`,
-   because `x³ + a₂x² + a₄x + a₆ − (ℓx+m)² = (x−x₁)(x−x₂)(x−x₃)` (the cubic minus the line²
-   has those three roots), evaluated at `x = θ` and using `f(θ) = 0` so
-   `f(θ) − (ℓθ+m)² = −(ℓθ+m)²`.  Hence `μ(P₁)μ(P₂)μ(P₃) = 1` in `𝔽ₚ*/(𝔽ₚ*)²`, and with
-   `μ(−P) = μ(P)` (negation fixes `x`) this gives `μ(P₁+P₂) = μ(P₁)μ(P₂)`.  Push through
-   `ψ_p` (a group hom to `ZMod 2`) to get additivity of `λ`.
-
-**4. Exceptional cases.**
-   * A factor `xᵢ − θ` vanishes mod `p` ⇔ that point reduces to the `θ`-2-torsion point mod
-     `p`.  There `f'(θ) ≠ 0` (simple root, from `p ∤ 6Δ`) replaces `xᵢ − θ`; the identity of
-     step 3 degenerates to the tangent/`f'(θ)` value — this is exactly the `α = 0` branch.
-   * `p ∣ w` (a `Pᵢ` reduces to `O` mod `p`): that factor contributes a square (the reduction
-     is `O`, contributing trivially), matching the `λ = 0` clause.
-   Formally: work in `ℚ_p` (or with `p`-adic valuations `Int → WithTop ℕ`) so that "reduces
-   to" statements are clean; `p ∤ 6Δ` guarantees good reduction of `E` at `p` and simple
-   roots of `f mod p`, so the reduction map `E(ℚ) → E(𝔽ₚ)` is a homomorphism compatible with
-   `x ↦ x − θ`.
-
-**5. Vanishing on `2E` is free** (already proved): `λ` into `ZMod 2` and `x + x = 0` there.
-   So `λ(2P) = 2·λ(P) = 0`; no separate valuation argument is needed for this half of the
-   ticket statement.
-
-Mathlib inputs to lean on: `WeierstrassCurve.Affine.Point.add_of_X_ne` / `add_some` and the
-slope formulae (`WeierstrassCurve.Affine.slope`, `addX`, `addY`) for the collinearity
-identity; `Cubic`/`Polynomial.roots` for the "cubic − line² factors as `∏(x−xᵢ)`" step;
-`ZMod.isSquare_*` / `legendreSym` / `ZMod.unitsMap` and the isomorphism
-`𝔽ₚ*/(𝔽ₚ*)² ≅ ZMod 2` for `ψ_p` being a homomorphism; `Rat.num`, `Rat.den`, and
-`WeierstrassCurve` reduction (`WeierstrassCurve.map`) for the arithmetic in steps 1 & 4.
--/
