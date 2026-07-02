@@ -56,8 +56,6 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
   unfold psi
   rw [hiff]
 
-end Psi
-
 /-- On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`.  Proved by transporting the multiplicativity of `quadraticChar`. -/
 theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
@@ -77,6 +75,8 @@ theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (
   · rw [if_pos hA, if_neg hB, if_neg (fun h => hB ((key.mp h).mp hA)), zero_add]
   · rw [if_neg hA, if_pos hB, if_neg (fun h => hA ((key.mp h).mpr hB)), add_zero]
   · rw [if_neg hA, if_neg hB, if_pos (key.mpr (by tauto))]; decide
+
+end Psi
 
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate
 
@@ -129,6 +129,27 @@ theorem lambda_x_indep {θ : ZMod p} {x₁ y₁ x₂ y₂ : ℚ}
     lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = lambda a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
+/-- **Collinear triple, character version.**  If `X₁, X₂, X₃` are the reduced `x`-coordinates
+of three collinear points on `E` (encoded by the Vieta relations of the line `y = ℓx + m`),
+all distinct from the root `θ`, then the `ψ_p`-values sum to zero.  This is the `𝔽ₚ`-arithmetic
+heart of additivity: T1b makes `(X₁−θ)(X₂−θ)(X₃−θ)` a square, and `ψ_p` is additive on the
+nonzero factors. -/
+theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : ZMod p}
+    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
+    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
+    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - (a₆ : ZMod p))
+    (hroot : fval a₂ a₄ a₆ p θ = 0)
+    (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
+    psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  have hprod := prod_sub_theta_eq_lineSq_zmod a₂ a₄ a₆ p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
+  have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
+  have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
+  have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃
+  have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
+    rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
+  rwa [psi_mul hp hp2 (mul_ne_zero h1 h2) h3, psi_mul hp hp2 h1 h2] at hpm
+
 end ECCompute
 
 namespace ECCompute
@@ -153,8 +174,22 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, lambda_zero,
       lambda_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul,
       show (2 : ZMod 2) = 0 from by decide, zero_mul]
-  · -- Generic case: `P`, `Q`, `-(P + Q)` are three collinear points on `E`.
-    -- COLLINEARITY / REDUCTION CORE (T1b cast to `𝔽ₚ` + T1d exceptional patches). See below.
+  · -- Generic case: the secant/tangent gives `P + Q = some x₃ y₃`, and `P`, `Q`, `-(P + Q)`
+    -- are three collinear points on `E` with `x`-coordinates `x₁, x₂, x₃ = addX x₁ x₂ ℓ`.
+    -- Since `λ` ignores the `y`-coordinate, `λ(P + Q) = λ(-(P + Q)) = ψ_p(xbar x₃ − θ)`.
+    -- The arithmetic heart `psi_collinear` closes the "good, non-tangent" subcase: taking
+    -- `Xᵢ = xbar xᵢ`, `ℓ, m` the reduced slope/intercept, T1b makes the product a square, and
+    -- the three `λ`-values (via `lambda_some_of_den_ne`) sum to zero, giving additivity in the
+    -- character group `ZMod 2`.
+    --
+    -- REMAINING BRIDGE (the T1d core, blocked — see report): to feed `psi_collinear` one must
+    -- produce, from the `ℚ` group-law data, the reduced Vieta relations `hσ₁, hσ₂, hσ₃` in
+    -- `ZMod p` and the genericity `xbar xᵢ ≠ θ`, plus dispatch the exceptional patches
+    -- `(xᵢ.den : ZMod p) = 0` (a point reducing to `O` mod `p`) and `xbar xᵢ = θ` (tangent /
+    -- 2-torsion mod `p`).  Because `Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in
+    -- positive characteristic, casting the curve/line/`addX` identities requires clearing
+    -- denominators per point (T1a gives `x.den = w²`) and controlling `p`-divisibility of the
+    -- slope denominator `x₁ − x₂` — i.e. the reduction map `E(ℚ) → E(𝔽ₚ)`, which mathlib lacks.
     sorry
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
