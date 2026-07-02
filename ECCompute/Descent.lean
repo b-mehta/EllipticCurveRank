@@ -267,13 +267,45 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
     intro h0; apply hdx; rw [hxw]; push_cast; rw [h0]; ring
   rw [hyw]; push_cast; exact pow_ne_zero 3 hw
 
-/-- **Additivity of `λ`, generic good-reduction case.**  When `P = (x₁, y₁)` and `Q = (x₂, y₂)`
-have distinct `x`-coordinates over `ℚ`, all of `x₁, x₂` and the sum's `x`-coordinate reduce (good
-denominators), the reduced `x`-coordinates are pairwise distinct and none equals the root `θ`, then
-`λ(P + Q) = λ P + λ Q`.  The reduced `x`-coordinates `X₁, X₂, X₃` satisfy the collinearity square
-`(X₁ − θ)(X₂ − θ)(X₃ − θ) = (ℓ̄θ + m̄)²` (T1b over `ZMod p` via `reduced_on_curve`/`reduced_addX`),
-so their `ψ_p`-values sum to zero. -/
-theorem lambda_map_add_of_generic [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+/-- **The descent derivative `f'(θ)` is nonzero.**  Since `p ∤ 6Δ` and `θ` is a root of `f`,
+`θ` is a *simple* root: `disc(f) = f'(θ)² · (B² − 4C)` for the complementary quadratic factor
+`x² + Bx + C = f(x)/(x − θ)`, and `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
+theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+    fderiv a₂ a₄ a₆ p θ ≠ 0 := by
+  have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
+    have := h.root; simpa [fval] using this
+  have hΔ : (curve a₂ a₄ a₆).Δ.num
+      = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
+        + 18 * a₂ * a₄ * a₆) := by
+    have hval : (curve a₂ a₄ a₆).Δ
+        = ((16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
+            + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
+      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+      push_cast; ring
+    rw [hval, Rat.num_intCast]
+  intro hfd
+  apply h.discr
+  rw [hΔ]
+  have hfd' : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := by
+    have := hfd; simpa [fderiv] using this
+  push_cast
+  linear_combination
+    (16 * (-3 * θ ^ 2 - 2 * (a₂ : ZMod p) * θ + (a₂ : ZMod p) ^ 2 - 4 * (a₄ : ZMod p)) *
+      (3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p))) * hfd'
+    + (16 * (-4 * (a₂ : ZMod p) ^ 3 + 18 * (a₂ : ZMod p) * (a₄ : ZMod p)
+      + 27 * (a₂ : ZMod p) * θ ^ 2 + 27 * (a₄ : ZMod p) * θ - 27 * (a₆ : ZMod p) + 27 * θ ^ 3))
+        * hroot
+
+/-- **Additivity of `λ`, good-reduction case.**  When `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
+distinct `x`-coordinates over `ℚ`, all of `x₁, x₂` and the sum's `x`-coordinate reduce (good
+denominators), and the reduced `x`-coordinates `X₁, X₂` are distinct mod `p`, then
+`λ(P + Q) = λ P + λ Q`.  This covers the generic (non-`2`-torsion) case together with the three
+`2`-torsion patches `Xᵢ = θ`: the collinearity square `(X₁ − θ)(X₂ − θ)(X₃ − θ) = (ℓ̄θ + m̄)²`
+(T1b via `reduced_on_curve`/`reduced_addX`) gives additivity of `ψ_p` on the nonzero factors,
+while at a factor `Xᵢ = θ` the identity `f'(θ) = (Xⱼ − θ)(Xₖ − θ)` (`fderiv_eq_prod`) replaces
+that factor by `f'(θ)`, which is nonzero by `fderiv_ne_zero`. -/
+theorem lambda_map_add_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
@@ -281,10 +313,7 @@ theorem lambda_map_add_of_generic [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a
     (hdx1 : (x₁.den : ZMod p) ≠ 0) (hdx2 : (x₂.den : ZMod p) ≠ 0)
     (hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0)
-    (hbne : (x₁ : ZMod p) ≠ (x₂ : ZMod p))
-    (hθ1 : (x₁ : ZMod p) ≠ θ) (hθ2 : (x₂ : ZMod p) ≠ θ)
-    (hθ3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) : ℚ) : ZMod p) ≠ θ) :
+    (hbne : (x₁ : ZMod p) ≠ (x₂ : ZMod p)) :
     lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + lambda a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
@@ -314,23 +343,60 @@ theorem lambda_map_add_of_generic [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a
     linear_combination this
   have hθroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
     have := h.root; simpa [fval] using this
+  -- Vieta relations of the collinear triple, and the collinearity square.
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb
+    X₁ X₂ X₃ hbne hx3 hpt1 hpt2
   have hprod : (X₁ - θ) * (X₂ - θ) * (X₃ - θ) = (ℓb * θ + mb) ^ 2 :=
-    prod_sub_theta_eq_lineSq_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₁ X₂ X₃ θ
-      hbne hx3 hpt1 hpt2 hθroot
-  have hs1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hθ1
-  have hs2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hθ2
-  have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hθ3
-  have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
-    rw [hprod]; exact psi_of_isSquare ⟨ℓb * θ + mb, by ring⟩
-  rw [psi_mul h.prime hp2 (mul_ne_zero hs1 hs2) hs3, psi_mul h.prime hp2 hs1 hs2] at hpm
+    prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₁ X₂ X₃ θ
+      hσ₁ hσ₂ hσ₃ hθroot
+  -- `f'(θ)` is nonzero, and equals the product of the two non-`θ` factors at each `2`-torsion case.
+  have hfd_ne : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero h
+  have hfd1 : X₁ = θ → fderiv a₂ a₄ a₆ p θ = (X₂ - θ) * (X₃ - θ) := fun hc =>
+    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₁ X₂ X₃ θ
+      hσ₁ hσ₂ hσ₃ hθroot hc
+  have hfd2 : X₂ = θ → fderiv a₂ a₄ a₆ p θ = (X₁ - θ) * (X₃ - θ) := fun hc =>
+    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₂ X₁ X₃ θ
+      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      hθroot hc
+  have hfd3 : X₃ = θ → fderiv a₂ a₄ a₆ p θ = (X₁ - θ) * (X₂ - θ) := fun hc =>
+    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓb mb X₃ X₁ X₂ θ
+      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      hθroot hc
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne,
       lambda_some_of_den_ne (h := (curve a₂ a₄ a₆).toAffine.nonsingular_add h₁ h₂
         (fun hxy => hne hxy.left)) hdx3,
       lambda_some_of_den_ne h₁ hdx1, lambda_some_of_den_ne h₂ hdx2]
   simp only [xbar, ← hX1, ← hX2, ← hX3]
-  rw [if_neg hθ3, if_neg hθ1, if_neg hθ2]
-  have key : ∀ a b c : ZMod 2, a + b + c = 0 → c = a + b := by decide
-  exact key _ _ _ hpm
+  -- Bookkeeping in `ZMod 2` (`x + x = 0`), split on which reduced `x`-coordinate hits `θ`.
+  have hz : ∀ a b : ZMod 2, a + b + a = b := by decide
+  have hz' : ∀ a b : ZMod 2, b = a + (a + b) := by decide
+  have hzero : ∀ a b c : ZMod 2, a + b + c = 0 → c = a + b := by decide
+  by_cases c1 : X₁ = θ
+  · -- `P` is `2`-torsion mod `p`; then `X₂ ≠ θ` (as `X₁ ≠ X₂`) and `X₃ ≠ θ` (else `f'(θ) = 0`).
+    have hX2ne : X₂ ≠ θ := fun hc => hbne (c1.trans hc.symm)
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; ring)
+    rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
+      psi_mul h.prime hp2 (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
+    exact (hz _ _).symm
+  by_cases c2 : X₂ = θ
+  · -- `Q` is `2`-torsion mod `p`; symmetric to the previous case.
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; ring)
+    rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
+      psi_mul h.prime hp2 (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
+    exact hz' _ _
+  by_cases c3 : X₃ = θ
+  · -- `P + Q` is `2`-torsion mod `p`.
+    rw [if_pos c3, if_neg c1, if_neg c2, hfd3 c3,
+      psi_mul h.prime hp2 (sub_ne_zero.mpr c1) (sub_ne_zero.mpr c2)]
+  · -- Generic case: `ψ_p` is additive on the three nonzero factors of the collinearity square.
+    have hs1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr c1
+    have hs2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr c2
+    have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
+    have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
+      rw [hprod]; exact psi_of_isSquare ⟨ℓb * θ + mb, by ring⟩
+    rw [psi_mul h.prime hp2 (mul_ne_zero hs1 hs2) hs3, psi_mul h.prime hp2 hs1 hs2] at hpm
+    rw [if_neg c3, if_neg c1, if_neg c2]
+    exact hzero _ _ _ hpm
 
 end ECCompute
 
@@ -357,42 +423,53 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
       lambda_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul,
       show (2 : ZMod 2) = 0 from by decide, zero_mul]
   · -- Generic case.  The secant `P + Q = some x₃ y₃` gives three collinear points `P, Q, -(P+Q)`
-    -- with `x`-coordinates `x₁, x₂, x₃ = addX x₁ x₂ (slope …)`.  In the *good, non-tangent*
-    -- subcase (all denominators survive reduction, reduced `x`-coordinates pairwise distinct and
-    -- distinct from `θ`) `lambda_map_add_of_generic` closes it via T1a/T1b reduced mod `p`.
-    -- The remaining `sorry`s are the exceptional patches, each strictly smaller than the original
-    -- gap: they are the loci where the elementary reduction map `E(ℚ) → E(𝔽ₚ)` degenerates.
+    -- with `x`-coordinates `x₁, x₂, x₃ = addX x₁ x₂ (slope …)`.  When denominators survive
+    -- reduction and `X₁ ≠ X₂` mod `p`, `lambda_map_add_of_good` closes it via T1a/T1b reduced
+    -- mod `p` (including the three `2`-torsion sub-cases `Xᵢ = θ`).
+    --
+    -- The five remaining `sorry`s are the loci where the elementary reduction of the secant
+    -- degenerates.  They are executable formalization content — deferred here, not a fundamental
+    -- obstruction — sharing one theme: they need the good-reduction behavior of the group law
+    -- where a point or the sum reduces to `O`, or two reduced points coincide.  The
+    -- denominator-clearing method used for the good case does not reach them, because either
+    -- `Rat.cast xᵢ` is *junk* once `(xᵢ.den : ZMod p) = 0` (the `→ O` patches: `x₁.num / x₁.den`
+    -- casts to `x₁.num · 0 = 0`, not the true reduction), or the secant Vieta identities
+    -- `reduced_addX` require both `x₁ ≠ x₂` over `ℚ` *and* `X₁ ≠ X₂` mod `p` and a non-tangent
+    -- slope (the tangent/doubling patches).  Closing them needs a `padicValRat` argument tracking
+    -- `p`-adic valuations through the secant/tangent formulas (e.g. `p ∣ x(P+Q).den` forces
+    -- `v_p(x₁ − x₂) > 0`, i.e. `X₁ = X₂`), or equivalently a reduction homomorphism
+    -- `E(ℚ) → E(𝔽ₚ)`, plus a `reduced_doubleX` counterpart of `reduced_addX` for the tangent
+    -- slope.  See ticket T1d.
     by_cases hne : x₁ = x₂
-    · -- PATCH (ℚ-tangent/doubling): `x₁ = x₂`.  Here the secant slope becomes the tangent slope;
-      -- `P = Q` or `P = -Q`, and the reduced Vieta relations need the doubling formula.
+    · -- PATCH (ℚ-tangent/doubling): `x₁ = x₂`.  Since `y₁² = y₂² = f(x₁)` and `y₁ ≠ negY x₂ y₂ =
+      -- -y₂`, we have `y₁ = y₂`, i.e. `P = Q`; the goal is `λ(2P) = λP + λP = 0`.  Blocked: needs
+      -- a `reduced_doubleX` (tangent-slope) lemma, and the sub-cases where `2P ≡ O` mod `p`
+      -- (`P → O` or `P` `2`-torsion mod `p`) need `x(2P).den ≡ 0`, i.e. the reduction hom.
       sorry
     by_cases hdx1 : (x₁.den : ZMod p) = 0
-    · -- PATCH (`P → O` mod `p`): `p ∣ w₁`, so `P` reduces to the point at infinity of `E/𝔽ₚ`.
+    · -- PATCH (`P → O` mod `p`): `p ∣ w₁`, so `P` reduces to `O` of `E/𝔽ₚ` and `λP = 0`; the goal
+      -- is `λ(P+Q) = λQ`, i.e. `X₃ = X₂` (as reduction data).  Blocked: `Rat.cast x₁` is junk,
+      -- so `reduced_addX` is unavailable; `X₃ = X₂` is exactly `O + Q̄ = Q̄`, the reduction hom.
       sorry
     by_cases hdx2 : (x₂.den : ZMod p) = 0
-    · -- PATCH (`Q → O` mod `p`): `p ∣ w₂`.
+    · -- PATCH (`Q → O` mod `p`): `p ∣ w₂`.  Symmetric to the previous; goal `λ(P+Q) = λP`.
       sorry
     by_cases hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0
-    · -- PATCH (`P + Q → O` mod `p`): `p ∣ w₃`.
+    · -- PATCH (`P + Q → O` mod `p`): `p ∣ w₃`, so `λ(P+Q) = 0`; goal `λP + λQ = 0`.  Here
+      -- `P̄ + Q̄ = O`, so `Q̄ = -P̄` and `X₁ = X₂`, forcing `λP = λQ` (equal reduced `x`), whence
+      -- `λP + λQ = 0` in `ZMod 2`.  Blocked: deducing `X₁ = X₂` from `x(P+Q).den ≡ 0` is again
+      -- the reduction hom (this branch also has `X₁ ≠ X₂` mod `p` still open below).
       sorry
     by_cases hbne : (x₁ : ZMod p) = (x₂ : ZMod p)
-    · -- PATCH (tangent mod `p`): `p ∣ (x₁ − x₂)`, so the reduced points coincide and the reduced
-      -- slope is a tangent (doubling) slope, outside the secant Vieta relations used here.
+    · -- PATCH (tangent mod `p`): good denominators but `X₁ = X₂` mod `p`, so the reduced points
+      -- coincide and the reduced slope is a tangent (doubling) slope, outside the secant Vieta
+      -- relations `reduced_addX` (which need `X₁ ≠ X₂`).  Blocked: needs `reduced_doubleX` and,
+      -- in the `Ȳ₁ = -Ȳ₂` sub-case (`P̄ = -Q̄`), the reduction hom to get `x(P+Q).den ≡ 0`.
       sorry
-    by_cases hθ1 : (x₁ : ZMod p) = θ
-    · -- PATCH (`P` is `2`-torsion mod `p`): `X₁ = θ`, so `λ P = ψ_p(f'(θ))` and the product
-      -- `(X₁ − θ)(X₂ − θ)(X₃ − θ)` degenerates.
-      sorry
-    by_cases hθ2 : (x₂ : ZMod p) = θ
-    · -- PATCH (`Q` is `2`-torsion mod `p`): `X₂ = θ`.
-      sorry
-    by_cases hθ3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) : ℚ) : ZMod p) = θ
-    · -- PATCH (`P + Q` is `2`-torsion mod `p`): `X₃ = θ`.
-      sorry
-    -- GENERIC (good reduction, non-tangent, non-`2`-torsion): fully proven.
-    exact lambda_map_add_of_generic h h₁ h₂ hne hdx1 hdx2 hdx3 hbne hθ1 hθ2 hθ3
+    -- GOOD REDUCTION (denominators survive, `X₁ ≠ X₂` mod `p`): fully proven, including the three
+    -- `2`-torsion patches `Xᵢ = θ`, which are folded into `lambda_map_add_of_good`.
+    exact lambda_map_add_of_good h h₁ h₂ hne hdx1 hdx2 hdx3 hbne
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :

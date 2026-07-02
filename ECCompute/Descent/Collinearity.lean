@@ -82,7 +82,7 @@ variable {F : Type*} [Field F] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F)
 /-- The Vieta relations for the line `y = ℓx + m` meeting `E` at `x₁, x₂, x₃`, recovered from
 the two points `(x₁, ℓx₁ + m)` and `(x₂, ℓx₂ + m)` lying on the curve (with `x₁ ≠ x₂`) and the
 group-law value `x₃ = ℓ² − a₂ − x₁ − x₂` for the third `x`-coordinate. -/
-private theorem vieta_of_roots (hne : x₁ ≠ x₂)
+theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆) :
@@ -122,6 +122,25 @@ theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hne hx₃ h₁ h₂
   exact prod_sub_theta_eq_lineSq a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ hσ₁ hσ₂ hσ₃ hθ
+
+/-- **The derivative at a root equals the product of the other two factors.**  If `θ` is a root
+of `f` and one of the three collinear `x`-coordinates equals `θ` (here `x₁ = θ`), then the line
+passes through `(θ, 0)` and `f'(θ) = (x₂ − θ)(x₃ − θ)`.  This is the analogue of
+`prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion mod `p`) branch of the descent character,
+where the factor `X_i − θ` in the collinearity product is replaced by `f'(θ)`. -/
+theorem fderiv_eq_prod
+    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
+    (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) (h1 : x₁ = θ) :
+    3 * θ ^ 2 + 2 * a₂ * θ + a₄ = (x₂ - θ) * (x₃ - θ) := by
+  have hlm : ℓ * θ + m = 0 := by
+    have hg := cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ θ
+    rw [h1] at hg
+    have h0 : (ℓ * θ + m) ^ 2 = 0 := by linear_combination hθ - hg
+    exact pow_eq_zero_iff (by norm_num) |>.mp h0
+  subst h1
+  linear_combination 2 * x₁ * hσ₁ - hσ₂ + 2 * ℓ * hlm
 
 end Field
 
