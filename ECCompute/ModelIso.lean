@@ -107,25 +107,38 @@ completing the square. Its `a₁` and `a₃` coefficients vanish (`shortModel_a�
 def shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   completeSquare a₁ a₃ • toCurveQ a₁ a₂ a₃ a₄ a₆
 
-/-- Reduce a goal about the general or short model to an identity between their `ℚ`-coefficients: it
-unfolds both models, the change of variables, and the affine addition operations, then evaluates
-the Weierstrass coefficients via the `variableChange` lemmas. Follow with `ring` or
-`linear_combination` to finish. -/
-local macro "unfold_models" : tactic =>
-  `(tactic| simp only [WeierstrassCurve.Affine.negY, WeierstrassCurve.Affine.negAddY,
-      WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY, shortModel, completeSquare,
-      toCurveQ, WeierstrassCurve.toAffine, WeierstrassCurve.variableChange_a₁,
-      WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₃,
-      WeierstrassCurve.variableChange_a₄, WeierstrassCurve.variableChange_a₆, inv_one,
-      Units.val_one, one_pow])
-
 @[simp]
 theorem shortModel_a₁ (a₁ a₂ a₃ a₄ a₆ : ℤ) : (shortModel a₁ a₂ a₃ a₄ a₆).a₁ = 0 := by
-  unfold_models; ring
+  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₁, inv_one,
+    Units.val_one]
+  ring
+
+@[simp]
+theorem shortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).a₂ = (a₂ : ℚ) + (a₁ : ℚ) ^ 2 / 4 := by
+  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₂, inv_one,
+    Units.val_one, one_pow]
+  ring
 
 @[simp]
 theorem shortModel_a₃ (a₁ a₂ a₃ a₄ a₆ : ℤ) : (shortModel a₁ a₂ a₃ a₄ a₆).a₃ = 0 := by
-  unfold_models; ring
+  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₃, inv_one,
+    Units.val_one, one_pow]
+  ring
+
+@[simp]
+theorem shortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).a₄ = (a₄ : ℚ) + (a₁ : ℚ) * a₃ / 2 := by
+  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₄, inv_one,
+    Units.val_one, one_pow]
+  ring
+
+@[simp]
+theorem shortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).a₆ = (a₆ : ℚ) + (a₃ : ℚ) ^ 2 / 4 := by
+  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₆, inv_one,
+    Units.val_one, one_pow]
+  ring
 
 /-- **The completing-the-square isomorphism, on the defining equations.** A rational point `(x, y)`
 lies on the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` if and only if `(x, y + (a₁x + a₃)/2)` lies on
@@ -135,7 +148,7 @@ theorem equation_completeSquare (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y ↔
       (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Equation x (y + ((a₁ : ℚ) * x + a₃) / 2) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff]
-  unfold_models
+  simp only [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆, toCurveQ]
   constructor <;> intro h <;> linear_combination h
 
 section GroupIso
@@ -174,12 +187,12 @@ theorem nonsingular_completeSquare (x y : ℚ) :
               + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₄))
         - (a₁ : ℚ) / 2 * (2 * y + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
             + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₃) := by
-    unfold_models; ring
+    simp only [shortModel_a₁, shortModel_a₂, shortModel_a₄, toCurveQ]; ring
   have e2 : 2 * (y + ((a₁ : ℚ) * x + a₃) / 2) + (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
         + (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₃
       = 2 * y + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
         + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₃ := by
-    unfold_models; ring
+    simp only [shortModel_a₁, shortModel_a₃, toCurveQ]; ring
   rw [e1, e2]
   exact or_ne_zero_sub_iff _ _ _
 
@@ -187,13 +200,13 @@ theorem nonsingular_completeSquare (x y : ℚ) :
 theorem negY_completeSquare (x y : ℚ) :
     (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x (y + ((a₁ : ℚ) * x + a₃) / 2)
       = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x y + ((a₁ : ℚ) * x + a₃) / 2 := by
-  unfold_models; ring
+  simp only [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃, toCurveQ]; ring
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
 theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
     (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ (ℓ + (a₁ : ℚ) / 2)
       = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ ℓ := by
-  unfold_models; ring
+  simp only [WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂, toCurveQ]; ring
 
 /-- The `Y`-coordinate of the sum commutes with the shift. -/
 theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
@@ -201,7 +214,10 @@ theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
         (ℓ + (a₁ : ℚ) / 2)
       = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
         + ((a₁ : ℚ) * (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₃) / 2 := by
-  unfold_models; ring
+  simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
+    WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂,
+    shortModel_a₃, toCurveQ]
+  ring
 
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
@@ -225,15 +241,15 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       exact hy (add_right_cancel hcontra)
     have hDval : y₁ - (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x₁ y₁
         = 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) := by
-      unfold_models; ring
+      simp only [WeierstrassCurve.Affine.negY, toCurveQ]; ring
     have hDval' : (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
           - (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x₁ (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
         = 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) := by
-      unfold_models; ring
+      simp only [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]; ring
     have hden : 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) ≠ 0 := hDval ▸ sub_ne_zero.mpr hy
     rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hDval, hDval', div_add' _ _ _ hden,
       div_eq_div_iff hden hden]
-    unfold_models
+    simp only [shortModel_a₁, shortModel_a₂, shortModel_a₄, toCurveQ]
     ring
   · rw [slope_of_X_ne hx, slope_of_X_ne hx, div_add' _ _ _ (sub_ne_zero.mpr hx),
       div_eq_div_iff (sub_ne_zero.mpr hx) (sub_ne_zero.mpr hx)]
