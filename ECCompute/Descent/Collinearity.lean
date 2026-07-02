@@ -1,4 +1,4 @@
-import ECCompute.Descent
+import ECCompute.Descent.Defs
 import Mathlib.Tactic.LinearCombination
 
 /-!

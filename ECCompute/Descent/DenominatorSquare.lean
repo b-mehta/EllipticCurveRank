@@ -1,4 +1,4 @@
-import ECCompute.Descent
+import ECCompute.Descent.Defs
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.RingTheory.Int.Basic
