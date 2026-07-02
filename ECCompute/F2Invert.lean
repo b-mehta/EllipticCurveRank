@@ -61,9 +61,7 @@ def toMatCols (M : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
 /-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `Nat.land`. -/
 private theorem prodTerm (a b j : Nat) :
     (if a.testBit j then (1 : ZMod 2) else 0) * (if b.testBit j then 1 else 0)
-      = if (a &&& b).testBit j then 1 else 0 := by
-  rw [Nat.testBit_and]
-  cases a.testBit j <;> cases b.testBit j <;> simp
+      = if (a &&& b).testBit j then 1 else 0 := by grind
 
 /-- `Bool.xor` corresponds to addition of 𝔽₂ indicators. -/
 private theorem xor_add (p q : Bool) :
@@ -75,12 +73,10 @@ theorem popParity_sum (fuel a : Nat) :
     (if popParity fuel a then (1 : ZMod 2) else 0)
       = ∑ j ∈ Finset.range fuel, (if a.testBit j then (1 : ZMod 2) else 0) := by
   induction fuel generalizing a with
-  | zero => simp [popParity]
+  | zero => rfl
   | succ f ih =>
-    rw [popParity, Finset.sum_range_succ', xor_add, add_comm]
-    congr 1
-    rw [ih]
-    exact Finset.sum_congr rfl fun j _ => by rw [Nat.testBit_succ]
+    rw [popParity, Finset.sum_range_succ', xor_add, add_comm, ih]
+    simp [Nat.testBit_succ]
 
 /-- **Bridge lemma.** If the kernel-reducible checker `checkInv n B M` returns `true`, then the
 matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
@@ -89,28 +85,16 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
   -- First: `B * M = 1` as matrices over `ZMod 2`.
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
-    rw [Matrix.mul_apply]
     -- Turn the product-of-indicators sum into a single indicator sum, then use `popParity_sum`.
-    simp only [toMat, toMatCols, prodTerm]
+    simp only [Matrix.mul_apply, toMat, toMatCols, prodTerm]
     rw [Fin.sum_univ_eq_sum_range
         (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
-    -- Extract the pointwise certificate equation from `h`.
-    unfold checkInv at h
-    rw [List.all_eq_true] at h
-    have hi := h i (List.mem_range.mpr i.isLt)
-    rw [List.all_eq_true] at hi
-    have hik := hi k (List.mem_range.mpr k.isLt)
-    have hEq : popParity n (B.getD i 0 &&& M.getD k 0) = ((i : Nat) == (k : Nat)) :=
-      beq_iff_eq.mp hik
-    rw [hEq]
-    by_cases hik' : i = k
-    · simp [hik']
-    · have hne : (i : Nat) ≠ (k : Nat) := fun hc => hik' (Fin.ext hc)
-      simp [beq_eq_false_iff_ne.mpr hne, hik']
+    -- Unfold the checker to its pointwise form; `grind` reads off the `(i, k)` certificate.
+    simp only [checkInv, List.all_eq_true, List.mem_range] at h
+    grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
-  have hcomm : toMatCols M n * toMat B n = 1 := mul_eq_one_comm.mp key
-  exact ⟨⟨toMat B n, toMatCols M n, key, hcomm⟩, rfl⟩
+  exact ⟨⟨toMat B n, toMatCols M n, key, mul_eq_one_comm.mp key⟩, rfl⟩
 
 /-! ## Worked 3×3 example
 
