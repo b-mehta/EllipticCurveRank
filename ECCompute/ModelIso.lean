@@ -134,27 +134,213 @@ theorem equation_completeSquare (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     inv_one, Units.val_one, one_pow]
   constructor <;> intro h <;> linear_combination h
 
-/-- **Rank is an isomorphism invariant.** The completing-the-square change of variables induces a
-group isomorphism between the Mordell–Weil groups of the general model and the short model, so any
-rank lower bound proven on the short model transfers back to the general model.
+section GroupIso
 
-The coordinate-level content of this isomorphism — that `y ↦ y + (a₁x + a₃)/2` is a bijection of the
-defining Weierstrass loci — is proven in `equation_completeSquare`. Upgrading it to an `AddEquiv`
-additionally requires that the affine group law is preserved by the substitution. Mathlib does not
-yet provide a `VariableChange`-induced isomorphism of `Affine.Point` groups (it has `Point` maps
-only for base-change ring homomorphisms), so the group-law compatibility is left as the one
-remaining obligation here.
+open WeierstrassCurve.Affine
 
-TODO (rank transfer): construct the `AddEquiv` explicitly. Forward map: `Point.zero ↦ Point.zero`
-and `Point.some x y h ↦ Point.some x (y + (a₁x + a₃)/2) h'`, with `h'` obtained from
-`equation_completeSquare` together with a matching `Nonsingular` transfer; inverse map: subtract the
-same shift. `map_add` then reduces to checking that the affine addition formulas
-(`WeierstrassCurve.Affine.slope`, `addX`, `addY`) commute with the `s = -a₁/2`, `t = -a₃/2`
-substitution — a finite `ring`-style verification once the addition is unfolded on each branch. -/
-theorem nonempty_pointAddEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+variable (a₁ a₂ a₃ a₄ a₆ : ℤ)
+
+/-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
+partial-derivative non-vanishing conditions on the general and short models are related by the
+invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
+private theorem or_ne_zero_sub_iff (A B σ : ℚ) :
+    (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
+  by_cases hB : B = 0 <;> simp [hB]
+
+/-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
+private theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
+    {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
+    (hx : x₁ = x₂) (hy : y₁ = y₂) :
+    (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
+  subst hx; subst hy; rfl
+
+/-- **Nonsingularity transfers along the completing-the-square substitution.** A point `(x, y)` is
+nonsingular on the general model iff `(x, y + (a₁x + a₃)/2)` is nonsingular on the short model. -/
+theorem nonsingular_completeSquare (x y : ℚ) :
+    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x y ↔
+      (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x (y + ((a₁ : ℚ) * x + a₃) / 2) := by
+  rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
+    ← equation_completeSquare]
+  refine and_congr_right fun _ => ?_
+  have e1 : (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * (y + ((a₁ : ℚ) * x + a₃) / 2)
+        - (3 * x ^ 2 + 2 * (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₂ * x
+            + (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₄)
+      = ((toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * y
+          - (3 * x ^ 2 + 2 * (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₂ * x
+              + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₄))
+        - (a₁ : ℚ) / 2 * (2 * y + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
+            + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₃) := by
+    simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.toAffine,
+      variableChange_a₁, variableChange_a₂, variableChange_a₄,
+      inv_one, Units.val_one, one_pow]
+    ring
+  have e2 : 2 * (y + ((a₁ : ℚ) * x + a₃) / 2) + (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
+        + (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.a₃
+      = 2 * y + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₁ * x
+        + (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.a₃ := by
+    simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.toAffine,
+      variableChange_a₁, variableChange_a₃, inv_one, Units.val_one, one_pow]
+    ring
+  rw [e1, e2]
+  exact or_ne_zero_sub_iff _ _ _
+
+/-- The `Y`-negation commutes with the completing-the-square shift. -/
+theorem negY_completeSquare (x y : ℚ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x (y + ((a₁ : ℚ) * x + a₃) / 2)
+      = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x y + ((a₁ : ℚ) * x + a₃) / 2 := by
+  simp only [WeierstrassCurve.Affine.negY, shortModel, completeSquare, toCurveQ,
+    WeierstrassCurve.toAffine, variableChange_a₁, variableChange_a₃, inv_one, Units.val_one,
+    one_pow]
+  ring
+
+/-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
+theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ (ℓ + (a₁ : ℚ) / 2)
+      = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ ℓ := by
+  simp only [WeierstrassCurve.Affine.addX, shortModel, completeSquare, toCurveQ,
+    WeierstrassCurve.toAffine, variableChange_a₁, variableChange_a₂, inv_one, Units.val_one,
+    one_pow]
+  ring
+
+/-- The `Y`-coordinate of the sum commutes with the shift. -/
+theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.addY x₁ x₂ (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
+        (ℓ + (a₁ : ℚ) / 2)
+      = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
+        + ((a₁ : ℚ) * (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₃) / 2 := by
+  simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY,
+    WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.negY, shortModel, completeSquare,
+    toCurveQ, WeierstrassCurve.toAffine, variableChange_a₁, variableChange_a₂, variableChange_a₃,
+    inv_one, Units.val_one, one_pow]
+  ring
+
+/-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
+straightening of the tangent/secant line. Requires both points to lie on the general model and to be
+in the non-degenerate branch of the addition law. -/
+theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
+    (h₁ : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x₂ y₂)) :
+    (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.slope x₁ x₂ (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
+        (y₂ + ((a₁ : ℚ) * x₂ + a₃) / 2)
+      = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ + (a₁ : ℚ) / 2 := by
+  by_cases hx : x₁ = x₂
+  · have hy : y₁ ≠ (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x₂ y₂ := fun h => hxy ⟨hx, h⟩
+    have hyeq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ hx hy
+    subst hx
+    subst hyeq
+    have hy' : y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2
+        ≠ (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x₁ (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2) := by
+      rw [negY_completeSquare]
+      intro hcontra
+      exact hy (add_right_cancel hcontra)
+    have hDval : y₁ - (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x₁ y₁
+        = 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) := by
+      simp only [WeierstrassCurve.Affine.negY, toCurveQ, WeierstrassCurve.toAffine]
+      ring
+    have hDval' : (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
+          - (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x₁ (y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2)
+        = 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) := by
+      simp only [WeierstrassCurve.Affine.negY, shortModel, completeSquare, toCurveQ,
+        WeierstrassCurve.toAffine, variableChange_a₁, variableChange_a₃, inv_one, Units.val_one,
+        one_pow]
+      ring
+    have hden : 2 * y₁ + (a₁ : ℚ) * x₁ + (a₃ : ℚ) ≠ 0 := hDval ▸ sub_ne_zero.mpr hy
+    rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hDval, hDval', div_add' _ _ _ hden,
+      div_eq_div_iff hden hden]
+    simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.toAffine,
+      variableChange_a₁, variableChange_a₂, variableChange_a₄,
+      inv_one, Units.val_one, one_pow]
+    ring
+  · rw [slope_of_X_ne hx, slope_of_X_ne hx, div_add' _ _ _ (sub_ne_zero.mpr hx),
+      div_eq_div_iff (sub_ne_zero.mpr hx) (sub_ne_zero.mpr hx)]
+    ring
+
+/-- Forward coordinate map on Mordell–Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
+def fwd :
+    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point → (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point
+  | .zero => .zero
+  | .some x y h =>
+    .some x (y + ((a₁ : ℚ) * x + a₃) / 2) ((nonsingular_completeSquare a₁ a₂ a₃ a₄ a₆ x y).mp h)
+
+/-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
+def bwd :
+    (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point → (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point
+  | .zero => .zero
+  | .some x y h =>
+    .some x (y - ((a₁ : ℚ) * x + a₃) / 2)
+      ((nonsingular_completeSquare a₁ a₂ a₃ a₄ a₆ x (y - ((a₁ : ℚ) * x + a₃) / 2)).mpr
+        (by rw [show y - ((a₁ : ℚ) * x + a₃) / 2 + ((a₁ : ℚ) * x + a₃) / 2 = y from by ring]
+            exact h))
+
+@[simp] theorem fwd_some (x y : ℚ)
+    (h : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x y) :
+    fwd a₁ a₂ a₃ a₄ a₆ (.some x y h)
+      = .some x (y + ((a₁ : ℚ) * x + a₃) / 2)
+        ((nonsingular_completeSquare a₁ a₂ a₃ a₄ a₆ x y).mp h) :=
+  rfl
+
+@[simp] theorem bwd_some (x y : ℚ)
+    (h : (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x y) :
+    bwd a₁ a₂ a₃ a₄ a₆ (.some x y h)
+      = .some x (y - ((a₁ : ℚ) * x + a₃) / 2)
+        ((nonsingular_completeSquare a₁ a₂ a₃ a₄ a₆ x (y - ((a₁ : ℚ) * x + a₃) / 2)).mpr
+          (by rw [show y - ((a₁ : ℚ) * x + a₃) / 2 + ((a₁ : ℚ) * x + a₃) / 2 = y from by ring]
+              exact h)) :=
+  rfl
+
+/-- The forward map is additive: it commutes with the affine group law on both models. -/
+theorem fwd_map_add (P Q : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point) :
+    fwd a₁ a₂ a₃ a₄ a₆ (P + Q) = fwd a₁ a₂ a₃ a₄ a₆ P + fwd a₁ a₂ a₃ a₄ a₆ Q := by
+  rcases P with _ | ⟨x₁, y₁, h₁⟩ <;> rcases Q with _ | ⟨x₂, y₂, h₂⟩
+  any_goals rfl
+  by_cases hxy : x₁ = x₂ ∧ y₁ = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.negY x₂ y₂
+  · obtain ⟨hx, hy⟩ := hxy
+    have hycond : y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2
+        = (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x₂ (y₂ + ((a₁ : ℚ) * x₂ + a₃) / 2) := by
+      rw [negY_completeSquare, ← hy, hx]
+    rw [Point.add_of_Y_eq hx hy, fwd_some, fwd_some, Point.add_of_Y_eq hx hycond]
+    rfl
+  · have hxy' : ¬(x₁ = x₂ ∧ y₁ + ((a₁ : ℚ) * x₁ + a₃) / 2
+        = (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.negY x₂ (y₂ + ((a₁ : ℚ) * x₂ + a₃) / 2)) := by
+      rintro ⟨hx, hy⟩
+      refine hxy ⟨hx, ?_⟩
+      rw [negY_completeSquare, hx] at hy
+      exact add_right_cancel hy
+    have hℓ := slope_completeSquare a₁ a₂ a₃ a₄ a₆ x₁ x₂ y₁ y₂ h₁.left h₂.left hxy
+    rw [Point.add_some hxy]
+    simp only [fwd_some]
+    rw [Point.add_some hxy']
+    refine point_some_congr ?_ ?_
+    · rw [hℓ, addX_completeSquare]
+    · rw [hℓ, addY_completeSquare]
+
+/-- **Rank is an isomorphism invariant.** The completing-the-square change of variables `y ↦
+y + (a₁x + a₃)/2` induces a group isomorphism between the Mordell–Weil groups of the general model
+`toCurveQ a₁ a₂ a₃ a₄ a₆` and the short model `shortModel a₁ a₂ a₃ a₄ a₆`, so any rank lower bound
+proven on the short model transfers back to the general model.
+
+The bijection of affine loci is `equation_completeSquare`/`nonsingular_completeSquare`; the
+group-law compatibility (`fwd_map_add`) is the substantive content: it reduces, on unfolding the
+affine addition, to the facts that negation (`negY_completeSquare`), the slope
+(`slope_completeSquare`), and the sum coordinates (`addX_completeSquare`, `addY_completeSquare`) all
+commute with the shift. -/
+theorem nonempty_pointAddEquiv :
     Nonempty ((toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+
-      (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point) := by
-  sorry
+      (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point) :=
+  ⟨AddEquiv.mk'
+    ⟨fwd a₁ a₂ a₃ a₄ a₆, bwd a₁ a₂ a₃ a₄ a₆,
+      fun P => by
+        rcases P with _ | ⟨x, y, h⟩
+        · rfl
+        · rw [fwd_some, bwd_some]; exact point_some_congr rfl (by ring),
+      fun P => by
+        rcases P with _ | ⟨x, y, h⟩
+        · rfl
+        · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by ring)⟩
+    (fwd_map_add a₁ a₂ a₃ a₄ a₆)⟩
+
+end GroupIso
 
 /-! ## Worked example
 
