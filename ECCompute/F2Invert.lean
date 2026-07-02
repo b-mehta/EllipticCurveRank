@@ -3,7 +3,11 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib
+import Mathlib.Data.Nat.Bitwise
+import Mathlib.Data.ZMod.Basic
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Data.List.Range
 
 /-!
 # Kernel-reducible 𝔽₂ matrix invertibility certificates
