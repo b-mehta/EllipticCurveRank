@@ -6,8 +6,13 @@ Authors: Bhavik Mehta
 import ECCompute.Descent.Defs
 import ECCompute.Descent.DenominatorSquare
 import ECCompute.Descent.Collinearity
+import ECCompute.Descent.PsiBase
+import ECCompute.Descent.Reduction.Def
+import ECCompute.Descent.Reduction.Hom
+import ECCompute.Descent.Reduction.EpsFinite
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
+import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
@@ -34,56 +39,6 @@ namespace ECCompute
 open scoped Classical
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
-
-/-! ### The Legendre character `ψ_p` is a homomorphism away from zero
-
-`ψ_p` sends squares to `0` and non-squares to `1` in `ZMod 2`.  On the nonzero elements of the
-field `ZMod p` (`p` an odd prime) it is the quadratic-residue character transported along the
-group isomorphism `{±1} ≅ ZMod 2`, hence multiplicative-to-additive: `ψ_p(ab) = ψ_p a + ψ_p b`.
-We prove this via `quadraticChar`. -/
-
-section Psi
-
-variable {p}
-
-/-- `ψ_p` vanishes on squares. -/
-theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
-  if_pos ha
-
-/-- Multiplying by a nonzero square does not change `ψ_p`. -/
-theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
-    psi p (w ^ 2 * a) = psi p a := by
-  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a := by
-    constructor
-    · rintro ⟨s, hs⟩
-      exact ⟨s / w, by
-        rw [div_mul_div_comm, eq_div_iff (mul_ne_zero hw hw)]; linear_combination hs⟩
-    · rintro ⟨r, rfl⟩
-      exact ⟨w * r, by ring⟩
-  unfold psi
-  rw [hiff]
-
-/-- On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` turns products into sums:
-`ψ_p(ab) = ψ_p a + ψ_p b`.  Proved by transporting the multiplicativity of `quadraticChar`. -/
-theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
-    psi p (a * b) = psi p a + psi p b := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
-  have key : IsSquare (a * b) ↔ (IsSquare a ↔ IsSquare b) := by
-    have hab : a * b ≠ 0 := mul_ne_zero ha hb
-    rw [← quadraticChar_one_iff_isSquare hab, ← quadraticChar_one_iff_isSquare ha,
-      ← quadraticChar_one_iff_isSquare hb, map_mul]
-    rcases quadraticChar_dichotomy ha with hA | hA <;>
-      rcases quadraticChar_dichotomy hb with hB | hB <;>
-      rw [hA, hB] <;> decide
-  unfold psi
-  by_cases hA : IsSquare a <;> by_cases hB : IsSquare b
-  · rw [if_pos hA, if_pos hB, if_pos (key.mpr (by tauto)), add_zero]
-  · rw [if_pos hA, if_neg hB, if_neg (fun h => hB ((key.mp h).mp hA)), zero_add]
-  · rw [if_neg hA, if_pos hB, if_neg (fun h => hA ((key.mp h).mpr hB)), add_zero]
-  · rw [if_neg hA, if_neg hB, if_pos (key.mpr (by tauto))]; decide
-
-end Psi
 
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate
 
@@ -145,27 +100,6 @@ theorem lambda_x_indep {θ : ZMod p} {x₁ y₁ x₂ y₂ : ℚ}
     {h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂} (hx : x₁ = x₂) :
     lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = lambda a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
-
-/-- **Collinear triple, character version.**  If `X₁, X₂, X₃` are the reduced `x`-coordinates
-of three collinear points on `E` (encoded by the Vieta relations of the line `y = ℓx + m`),
-all distinct from the root `θ`, then the `ψ_p`-values sum to zero.  This is the `𝔽ₚ`-arithmetic
-heart of additivity: T1b makes `(X₁−θ)(X₂−θ)(X₃−θ)` a square, and `ψ_p` is additive on the
-nonzero factors. -/
-theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : ZMod p}
-    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
-    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
-    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - (a₆ : ZMod p))
-    (hroot : fval a₂ a₄ a₆ p θ = 0)
-    (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
-    psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq_zmod a₂ a₄ a₆ p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
-  have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
-  have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
-  have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃
-  have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
-    rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
-  rwa [psi_mul hp hp2 (mul_ne_zero h1 h2) h3, psi_mul hp hp2 h1 h2] at hpm
 
 /-! ### Elementary reduction mod `p` (T1d)
 
@@ -398,36 +332,6 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
     intro h0; apply hdx; rw [hxw]; push_cast; rw [h0]; ring
   rw [hyw]; push_cast; exact pow_ne_zero 3 hw
 
-/-- **The descent derivative `f'(θ)` is nonzero.**  Since `p ∤ 6Δ` and `θ` is a root of `f`,
-`θ` is a *simple* root: `disc(f) = f'(θ)² · (B² − 4C)` for the complementary quadratic factor
-`x² + Bx + C = f(x)/(x − θ)`, and `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
-theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
-    fderiv a₂ a₄ a₆ p θ ≠ 0 := by
-  have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
-    have := h.root; simpa [fval] using this
-  have hΔ : (curve a₂ a₄ a₆).Δ.num
-      = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
-        + 18 * a₂ * a₄ * a₆) := by
-    have hval : (curve a₂ a₄ a₆).Δ
-        = ((16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
-            + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
-      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-      push_cast; ring
-    rw [hval, Rat.num_intCast]
-  intro hfd
-  apply h.discr
-  rw [hΔ]
-  have hfd' : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := by
-    have := hfd; simpa [fderiv] using this
-  push_cast
-  linear_combination
-    (16 * (-3 * θ ^ 2 - 2 * (a₂ : ZMod p) * θ + (a₂ : ZMod p) ^ 2 - 4 * (a₄ : ZMod p)) *
-      (3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p))) * hfd'
-    + (16 * (-4 * (a₂ : ZMod p) ^ 3 + 18 * (a₂ : ZMod p) * (a₄ : ZMod p)
-      + 27 * (a₂ : ZMod p) * θ ^ 2 + 27 * (a₄ : ZMod p) * θ - 27 * (a₆ : ZMod p) + 27 * θ ^ 3))
-        * hroot
-
 /-- **Additivity of `λ`, good-reduction case.**  When `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
 distinct `x`-coordinates over `ℚ`, all of `x₁, x₂` and the sum's `x`-coordinate reduce (good
 denominators), and the reduced `x`-coordinates `X₁, X₂` are distinct mod `p`, then
@@ -612,128 +516,92 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
-/-! ### The trusted theorem: additivity -/
+/-! ### The trusted theorem: additivity via the reduction factorisation
+
+Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
+`λ = εp_finite ∘ red_p`, where `red_p : E(ℚ) → E(𝔽ₚ)` is the reduction map
+(`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εp_finite : E(𝔽ₚ) → ZMod 2` is the
+finite-field descent character (`ECCompute.Descent.Reduction.EpsFinite`, also an
+`AddMonoidHom`).  Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
+The reduction map lands in `((curveℤ …).map (ℤ → ZMod p)).toAffine.Point`, which is the same
+curve as `reducedCurve … p` up to the definitional equality `map_eq_reducedCurve`; we transport
+across it with `Point.congr`. -/
+
+section Congr
+
+variable {F : Type*} [Field F] [DecidableEq F] {W₁ W₂ : WeierstrassCurve F}
+
+/-- Transport affine points along an equality of Weierstrass curves, as an additive
+homomorphism `W₁.toAffine.Point →+ W₂.toAffine.Point`. -/
+def Point.congr (hce : W₁ = W₂) : W₁.toAffine.Point →+ W₂.toAffine.Point where
+  toFun P := hce ▸ P
+  map_zero' := by cases hce; rfl
+  map_add' _ _ := by cases hce; rfl
+
+@[simp]
+theorem Point.congr_some (hce : W₁ = W₂) {X Y : F} (hns : W₁.toAffine.Nonsingular X Y) :
+    Point.congr hce (Affine.Point.some X Y hns) = Affine.Point.some X Y (hce ▸ hns) := by
+  cases hce; rfl
+
+end Congr
+
+/-- The reduction of the integral model mod `p` is the reduced curve `reducedCurve … p`. -/
+theorem map_eq_reducedCurve :
+    (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p)) = reducedCurve a₂ a₄ a₆ p := by
+  rw [map_curveℤ_zmod]; rfl
+
+/-- The descent character `λ_{p,θ}` presented as the composition
+`εp_finite θ ∘ (transport) ∘ red_p`, packaged as an `AddMonoidHom E(ℚ) → ZMod 2`.  This is the
+factorisation that makes additivity of `λ` free (see `lambda_map_add`). -/
+noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+    (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
+    (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
+  (εpHom h).comp ((Point.congr (map_eq_reducedCurve a₂ a₄ a₆ p)).comp (redHom a₂ a₄ a₆ p hΔ))
+
+/-- **The bridge.**  On each point, `λ_{p,θ}` agrees with the reduction composition
+`εp_finite θ ∘ red_p`.  The three cases mirror the definition of `red_p`: the origin (both `0`),
+`p ∤ x.den` (reduced affine coordinates, via `lambda_some_of_den_ne` and `red_p_of_den_ne`), and
+`p ∣ x.den` (reduces to the origin, via `lambda_some_of_den_zero` and `red_p_of_den_zero`). -/
+theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+    (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
+    lambda a₂ a₄ a₆ p θ P = redCharHom a₂ a₄ a₆ p h hΔ P := by
+  cases P with
+  | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
+  | some x y hns =>
+    rw [redCharHom, AddMonoidHom.comp_apply, AddMonoidHom.comp_apply, redHom_apply]
+    by_cases hd : (x.den : ZMod p) = 0
+    · rw [lambda_some_of_den_zero hns hd, red_p_of_den_zero a₂ a₄ a₆ p hΔ hns hd,
+        map_zero, εpHom_apply, εp_finite_zero]
+    · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd,
+        Point.congr_some, εpHom_apply, εp_finite_some]
+      simp only [xbar]
+
+/-- The bridge, spelled out with the reduction map: `λ_{p,θ} P = εp_finite θ (red_p P)` (up to the
+transport `Point.congr` across `map_eq_reducedCurve`). -/
+theorem lambda_eq_εp_finite_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+    (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
+    lambda a₂ a₄ a₆ p θ P
+      = εp_finite a₂ a₄ a₆ p θ
+          (Point.congr (map_eq_reducedCurve a₂ a₄ a₆ p) (red_p a₂ a₄ a₆ p hΔ P)) := by
+  rw [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, redCharHom, AddMonoidHom.comp_apply,
+    AddMonoidHom.comp_apply, εpHom_apply, redHom_apply]
 
 /-- **Descent character is additive.**  Under the hypotheses `p ∤ 6Δ` and `f(θ) ≡ 0`, the
-descent character `λ_{p,θ}` is a homomorphism `(E(ℚ), +) → (ZMod 2, +)`.  This is the one
-trusted mathematical input of the whole development; see the proof plan below. -/
+descent character `λ_{p,θ}` is a homomorphism `(E(ℚ), +) → (ZMod 2, +)`.  This is now immediate
+from the factorisation `λ = εp_finite ∘ red_p` (`lambda_eq_εp_red`): both factors are
+homomorphisms, so additivity is `map_add` of their composition `redCharHom`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
   haveI : Fact p.Prime := ⟨h.prime⟩
-  rcases P with _ | ⟨x₁, y₁, h₁⟩
-  · rw [← Affine.Point.zero_def, zero_add, lambda_zero, zero_add]
-  rcases Q with _ | ⟨x₂, y₂, h₂⟩
-  · rw [← Affine.Point.zero_def, add_zero, lambda_zero, add_zero]
-  by_cases hxy : x₁ = x₂ ∧ y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂
-  · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `λP + λQ = 2λP = 0`.
-    rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, lambda_zero,
-      lambda_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul,
-      show (2 : ZMod 2) = 0 from by decide, zero_mul]
-  · -- Generic case.  The secant `P + Q = some x₃ y₃` gives three collinear points `P, Q, -(P+Q)`
-    -- with `x`-coordinates `x₁, x₂, x₃ = addX x₁ x₂ (slope …)`.  When denominators survive
-    -- reduction and `X₁ ≠ X₂` mod `p`, `lambda_map_add_of_good` closes it via T1a/T1b reduced
-    -- mod `p` (including the three `2`-torsion sub-cases `Xᵢ = θ`).
-    --
-    -- Of the original five degenerate patches, two are now closed by genuine reduction content:
-    -- the `ℚ`-doubling case `x₁ = x₂` (via `reduced_doubleX` / `lambda_double_of_good`, save the
-    -- sub-case where `2P` itself reduces to `O`), and `P + Q → O` mod `p` (via `den_div_ne_zero`:
-    -- if `X₁ ≠ X₂` the reduced secant slope, hence `x(P+Q).den`, survives, so `x(P+Q).den ≡ 0`
-    -- forces `X₁ = X₂` and `λP = λQ`).  The four remaining `sorry`s all share one theme: a point
-    -- or the sum reduces to `O` "unexpectedly".  The denominator-clearing method does not reach
-    -- them because `Rat.cast xᵢ` is *junk* once `(xᵢ.den : ZMod p) = 0` (`x₁.num / x₁.den` casts
-    -- to `x₁.num · 0 = 0`).  Closing them needs a `padicValRat` argument tracking `p`-adic
-    -- valuations through the secant/tangent formulas — equivalently, the reduction homomorphism
-    -- `E(ℚ) → E(𝔽ₚ)` and the fact that its kernel is a subgroup.  See ticket T1d.
-    by_cases hne : x₁ = x₂
-    · -- ℚ-tangent/doubling: `x₁ = x₂`, hence `y₁ = y₂` (from `y₁² = y₂²` and `y₁ ≠ -y₂`), so
-      -- `P = Q` and the goal is `λ(2P) = λP + λP = 2λP = 0`, i.e. `λ(2P) = 0`.  When `P` reduces
-      -- to a non-`2`-torsion point (`X.den, Y.den` good, `Y ≠ 0`) the doubled `x`-coordinate has
-      -- good denominator (`den_dblX_ne_zero`) and `lambda_double_of_good` closes it.
-      have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
-      have hynegY : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := by
-        simp [WeierstrassCurve.Affine.negY, curve]
-      have hyne' : y₁ ≠ -y₂ := fun hcon => hxy ⟨hne, by rw [hynegY]; exact hcon⟩
-      have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
-        have e1 : y₁ ^ 2 = x₁ ^ 3 + (a₂ : ℚ) * x₁ ^ 2 + a₄ * x₁ + a₆ := by
-          have := (WeierstrassCurve.Affine.equation_iff
-            (W := (curve a₂ a₄ a₆).toAffine) x₁ y₁).mp h₁.1
-          simpa [curve] using this
-        have e2 : y₂ ^ 2 = x₂ ^ 3 + (a₂ : ℚ) * x₂ ^ 2 + a₄ * x₂ + a₆ := by
-          have := (WeierstrassCurve.Affine.equation_iff
-            (W := (curve a₂ a₄ a₆).toAffine) x₂ y₂).mp h₂.1
-          simpa [curve] using this
-        rw [e1, e2, hne]
-      have hyeq : y₁ = y₂ := by
-        rcases mul_eq_zero.mp (show (y₁ - y₂) * (y₁ + y₂) = 0 by linear_combination hy2eq) with hh | hh
-        · exact sub_eq_zero.mp hh
-        · exact absurd (by linear_combination hh : y₁ = -y₂) hyne'
-      subst hne; subst hyeq
-      rw [show (Affine.Point.some x₁ y₁ h₂ : (curve a₂ a₄ a₆).toAffine.Point)
-          = Affine.Point.some x₁ y₁ h₁ from rfl, ← two_mul,
-        show (2 : ZMod 2) = 0 from by decide, zero_mul]
-      by_cases hbad : (x₁.den : ZMod p) = 0 ∨ (y₁ : ZMod p) = 0
-      · -- `2P` reduces to `O` mod `p` (`P → O`, or `P̄` is `2`-torsion): then `λ(2P) = 0`.  This
-        -- needs `x(2P).den ≡ 0`, i.e. that the kernel of reduction is preserved by doubling — the
-        -- `padicValRat`/reduction-homomorphism content still open in T1d.
-        sorry
-      · obtain ⟨hd1, hyz⟩ := not_or.mp hbad
-        have h2 : (2 : ZMod p) ≠ 0 := by
-          rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) by push_cast; ring, Ne,
-            ZMod.natCast_eq_zero_iff]
-          intro hd; exact hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
-        have hyℚ : y₁ ≠ 0 := fun hh => hyz (by rw [hh, Rat.cast_zero])
-        have hdy : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hd1
-        exact lambda_double_of_good h h₁ hyz hd1
-          (den_dblX_ne_zero (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) hyℚ h2 hd1 hdy hyz)
-    by_cases hdx1 : (x₁.den : ZMod p) = 0
-    · -- PATCH (`P → O` mod `p`): `p ∣ w₁`, so `P` reduces to `O` of `E/𝔽ₚ` and `λP = 0`; the goal
-      -- is `λ(P+Q) = λQ`, i.e. `X₃ = X₂` (as reduction data).  Blocked: `Rat.cast x₁` is junk,
-      -- so `reduced_addX` is unavailable; `X₃ = X₂` is exactly `O + Q̄ = Q̄`, the reduction hom.
-      sorry
-    by_cases hdx2 : (x₂.den : ZMod p) = 0
-    · -- PATCH (`Q → O` mod `p`): `p ∣ w₂`.  Symmetric to the previous; goal `λ(P+Q) = λP`.
-      sorry
-    by_cases hdx3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0
-    · -- PATCH (`P + Q → O` mod `p`): `p ∣ w₃`, so `λ(P+Q) = 0`.  We show `X₁ = X₂` mod `p`
-      -- directly: if `X₁ ≠ X₂`, the reduced secant slope `(y₁ − y₂)/(x₁ − x₂)` has good
-      -- denominator (`den_div_ne_zero`), hence so does `x₃ = ℓ² − a₂ − x₁ − x₂`, contradicting
-      -- `hdx3`.  With `X₁ = X₂` we get `λP = λQ`, so `λP + λQ = 2λP = 0` in `ZMod 2`.
-      have hdy1 : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hdx1
-      have hdy2 : (y₂.den : ZMod p) ≠ 0 := ydenom_ne_zero h₂.1 hdx2
-      have hsum0 : lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂) = 0 := by
-        rw [Affine.Point.add_of_X_ne hne]; exact lambda_some_of_den_zero _ hdx3
-      rw [hsum0]
-      have hbne : (x₁ : ZMod p) = (x₂ : ZMod p) := by
-        by_contra hbne
-        have hdℓ : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
-          rw [WeierstrassCurve.Affine.slope_of_X_ne hne]
-          exact den_div_ne_zero (den_sub_ne_zero hdy1 hdy2) (den_sub_ne_zero hdx1 hdx2)
-            (by rw [Rat.cast_sub_of_ne_zero hdx1 hdx2]; exact sub_ne_zero.mpr hbne)
-        have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)
-            = (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-          simp only [WeierstrassCurve.Affine.addX, curve]; ring
-        have hgood : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by
-          rw [haddX]
-          exact den_sub_ne_zero (den_sub_ne_zero (den_sub_ne_zero
-            (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdℓ) (by simp)) hdx1) hdx2
-        exact hgood hdx3
-      rw [lambda_some_of_den_ne h₁ hdx1, lambda_some_of_den_ne h₂ hdx2]
-      simp only [xbar, hbne, ← two_mul, show (2 : ZMod 2) = 0 from by decide, zero_mul]
-    by_cases hbne : (x₁ : ZMod p) = (x₂ : ZMod p)
-    · -- PATCH (tangent mod `p`): good denominators but `X₁ = X₂` mod `p`, so the reduced points
-      -- coincide and the reduced slope is a *tangent* (doubling) slope.  Unlike the `ℚ`-doubling
-      -- case, here `P ≠ Q` over `ℚ` (a genuine secant), so `reduced_doubleX` does not apply: the
-      -- reduced tangent slope `f'(X)/(2Y)` is the `0/0` limit of the secant slope
-      -- `(y₁ − y₂)/(x₁ − x₂)`, whose value needs `v_p(y₁ − y₂)` and `v_p(x₁ − x₂)` — the
-      -- reduction-homomorphism/`padicValRat` content still open in T1d.
-      sorry
-    -- GOOD REDUCTION (denominators survive, `X₁ ≠ X₂` mod `p`): fully proven, including the three
-    -- `2`-torsion patches `Xᵢ = θ`, which are folded into `lambda_map_add_of_good`.
-    exact lambda_map_add_of_good h h₁ h₂ hne hdx1 hdx2 hdx3 hbne
+  have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
+    have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
+      rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq,
+        WeierstrassCurve.map_Δ, eq_intCast]
+    have hnum : ((curve a₂ a₄ a₆).Δ.num : ZMod p) = ((curveℤ a₂ a₄ a₆).Δ : ZMod p) := by
+      rw [hval, Rat.num_intCast]
+    rw [← hnum]; exact h.discr
+  simp only [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :

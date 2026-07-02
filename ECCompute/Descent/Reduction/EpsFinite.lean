@@ -3,7 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Descent
+import ECCompute.Descent.PsiBase
+import Mathlib.Algebra.Field.ZMod
 
 /-!
 # The finite-field descent character `εp_finite` and its additivity (T1d, chunk C4)
