@@ -7,29 +7,22 @@ import Mathlib.RingTheory.Coprime.Lemmas
 /-!
 # The denominator of an affine point is a perfect square
 
-For the integral Weierstrass curve `E : y² = x³ + a₂x² + a₄x + a₆` over `ℚ` and an affine
-point `P = (x, y)` on `E`, this file proves that `x.den` is a perfect square.  Concretely
-there is a natural number `w` with `x.den = w²` and `y.den = w³`, so `P = (u/w², v/w³)` in
-lowest terms.
+For the integral Weierstrass curve `E : y² = x³ + a₂x² + a₄x + a₆` over `ℚ` and a solution
+`(x, y)`, this file proves there is a natural number `w` with `x.den = w²` and `y.den = w³`,
+so a point is `(u/w², v/w³)` in lowest terms.
 
-This is ticket **T1a**, a prerequisite for the additivity of the descent character: it lets
-the `w²` factor be dropped from the Legendre symbol, since a square never changes a
-quadratic residue class.
+This is ticket T1a, used in the additivity of the descent character to drop the `w²` factor
+from the Legendre symbol, since a square does not change a quadratic residue class.
 
-## Proof outline
-
-Clearing denominators in `y² = f(x)` and using that `f` has integer coefficients gives the
-integer identity
-  `y.num² · x.den³ = N · y.den²`,   `N := x.num³ + a₂ x.num² x.den + a₄ x.num x.den² + a₆ x.den³`.
-Because `gcd(x.num, x.den) = 1`, the integer `N ≡ x.num³` is coprime to `x.den`, and
-likewise `gcd(y.num, y.den) = 1`.  Comparing the two sides forces `x.den³ = y.den²`.  Two
-coprime exponents then pin down the shape: `x.den` is a square and `y.den` a cube of a
-common `w`.
+Clearing denominators in `y² = f(x)` with `f` integral gives `y.num² * x.den³ = N * y.den²`
+for `N := x.num³ + a₂ x.num² x.den + a₄ x.num x.den² + a₆ x.den³`. Since `N ≡ x.num³` is
+coprime to `x.den` and `y.num` to `y.den`, comparing sides forces `x.den³ = y.den²`, and the
+coprime exponents `2, 3` yield the common witness `w`.
 
 ## Main declarations
 
-* `ECCompute.den_isSquare` — from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
-* `ECCompute.den_isSquare_of_nonsingular` — the same for the coordinates of a point `.some x y h`.
+* `ECCompute.den_isSquare`: from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
+* `ECCompute.den_isSquare_of_nonsingular`: the same for the coordinates of a point `.some x y h`.
 -/
 
 open WeierstrassCurve
@@ -38,14 +31,11 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ)
 
-/-- Adding a multiple of `b` to `a` preserves coprimality with `b`. -/
 private theorem isCoprime_add_mul_left_left {R : Type*} [CommRing R] {a b : R}
     (h : IsCoprime a b) (c : R) : IsCoprime (a + b * c) b := by
   obtain ⟨u, v, huv⟩ := h
   exact ⟨u, v - u * c, by linear_combination huv⟩
 
-/-- If `d³ = g²` for positive naturals, then `d` is a perfect square and `g` a perfect cube
-with a common witness: `∃ w, d = w² ∧ g = w³`. -/
 private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
   have hQ : (d : ℚ) ^ 3 = (g : ℚ) ^ 2 := by exact_mod_cast hdg
@@ -59,21 +49,18 @@ private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
   have := congrArg Nat.sqrt this
   rwa [Nat.sqrt_eq', Nat.sqrt_eq'] at this
 
-/-- **The denominator of an affine point is a perfect square.**  For the integral curve
+/-- **The denominator of an affine point is a perfect square.** For the integral curve
 `y² = x³ + a₂x² + a₄x + a₆` and a solution `(x, y)`, there is a natural number `w` with
 `x.den = w²` and `y.den = w³`. -/
 theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
-  -- The affine equation with `a₁ = a₃ = 0`.
   have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
     have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
     simpa [curve] using this
-  -- `num = coordinate · den`.
   have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
     (div_eq_iff (by exact_mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
   have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
     (div_eq_iff (by exact_mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
-  -- Clear denominators to an integer identity.
   have key : y.num ^ 2 * (x.den : ℤ) ^ 3
       = (x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
           + a₆ * (x.den : ℤ) ^ 3) * (y.den : ℤ) ^ 2 := by
@@ -84,18 +71,14 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     exact_mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3 with hN
-  -- Coprimality inputs.
   have hcx : IsCoprime (x.num) (x.den : ℤ) := by
     rw [Int.isCoprime_iff_nat_coprime]; simpa using x.reduced
   have hcy : IsCoprime (y.num) (y.den : ℤ) := by
     rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
   have hcN : IsCoprime N (x.den : ℤ) := by
-    rw [hN, show x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
-          + a₆ * (x.den : ℤ) ^ 3
-        = x.num ^ 3 + (x.den : ℤ) * (a₂ * x.num ^ 2 + a₄ * x.num * x.den
-          + a₆ * (x.den : ℤ) ^ 2) from by ring]
-    exact isCoprime_add_mul_left_left (hcx.pow_left) _
-  -- Two-sided divisibility `x.den³ = y.den²`.
+    have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
+        (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by rw [hN]; ring
+    rw [hNfac]; exact isCoprime_add_mul_left_left hcx.pow_left _
   have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 := by
     have hc : IsCoprime ((x.den : ℤ) ^ 3) N := (hcN.symm).pow_left
     exact hc.dvd_of_dvd_mul_left ⟨y.num ^ 2, by rw [← key]; ring⟩
