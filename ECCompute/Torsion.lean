@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
+import ECCompute.F2Invert
 import ECCompute.ModelIso
 
 /-!
@@ -45,8 +46,8 @@ and `%`, so it reduces by `decide`/`rfl` in the kernel without `native_decide`.
 
 At a witness prime `ℓ`, `hasRootMod … ℓ = false` certifies that the cubic has no integer root,
 hence (after the `u = 4x` scaling) that the 2-division cubic has no rational root. -/
-def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
-  (List.range ℓ).any fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
+noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
+  F2Invert.anyBelow ℓ fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
 
 /-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -64,9 +65,6 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
   have hr0 : 0 ≤ r := Int.emod_nonneg u (by exact_mod_cast hℓ)
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
-  -- the natural-number residue `r.toNat` is one of the tested residues
-  have hmemNat : r.toNat ∈ List.range ℓ := by
-    rw [List.mem_range]; omega
   -- `r.toNat` is congruent to `u` mod `ℓ`, and `cubicEval` at `u` is `0`, so the residue is a root
   have hcong : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
     have huv : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr0
@@ -76,9 +74,9 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
       cubicEval_modEq (ℓ : ℤ) hmod
     rw [hthis, hu, Int.zero_emod]
   -- but `hasRootMod = false` says no tested residue is a root — contradiction
-  rw [hasRootMod, List.any_eq_false] at h
-  have := h r.toNat hmemNat
-  simp only [beq_iff_eq] at this
+  rw [hasRootMod, F2Invert.anyBelow_eq_false] at h
+  have := h r.toNat (by omega)
+  rw [beq_eq_false_iff_ne] at this
   exact this hcong
 
 /-! ## The t = 0 bridge -/
