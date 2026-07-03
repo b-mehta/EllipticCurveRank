@@ -63,17 +63,12 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   have hn0 : 0 < n := by omega
   set p := n.minFac with hp
   have hpp : p.Prime := Nat.minFac_prime (by omega)
-  have hpdvd : p ∣ n := Nat.minFac_dvd n
   have hsq : p ^ 2 ≤ n := Nat.minFac_sq_le_self hn0 hnp
-  have hplt23 : p < 23 := by
-    by_contra hge
-    have h23 : (23 : ℕ) ^ 2 ≤ p ^ 2 := Nat.pow_le_pow_left (Nat.not_lt.mp hge) 2
-    norm_num at h23
-    omega
+  have hplt23 : p < 23 := lt_of_pow_lt_pow_left' 2 (by grind)
   have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := Nat.primes_below_23 p hplt23 hpp
   have hpltn : p < n := by nlinarith [hpp.two_le, hsq]
   rcases (passes_true_iff.mp hpass) p hpmem with hmod | hle
-  · exact hmod (Nat.dvd_iff_mod_eq_zero.mp hpdvd)
+  · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · omega
 
 end ECCompute
