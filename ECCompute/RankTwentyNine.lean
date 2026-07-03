@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Soundness
 import ECCompute.ModelBridge
+import ECCompute.QuickRfl
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -160,7 +161,7 @@ theorem rank29_hlabP : ∀ j, ((rank29Lab j).1).Prime := by
 theorem rank29_hlabC : ∀ j, checkLabel rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆
     (rank29Lab j).1 (rank29Lab j).2 = true := by
   intro j
-  fin_cases j <;> rfl
+  fin_cases j <;> quickRfl
 
 /-- The `(i, j)` entry of `matB` is the computed descent character `λ_{pⱼ,θⱼ}(Pᵢ)`. -/
 theorem rank29_hB : ∀ i j : Fin rank29Cert.rho,
@@ -172,13 +173,14 @@ theorem rank29_hB : ∀ i j : Fin rank29Cert.rho,
 
 /-- The supplied inverse certifies `matB` is invertible over `𝔽₂`. -/
 theorem rank29_hinv : F2Invert.checkInv rank29Cert.rho rank29Cert.matB rank29Cert.matM = true := by
-  rfl
+  quickRfl
 
 /-- The 2-division cubic has no root modulo the torsion witness prime `67` (so `t = 0`). -/
 theorem rank29_htor :
     hasRootMod (4 * rank29Cert.a₂) (16 * rank29Cert.a₄) (64 * rank29Cert.a₆)
       rank29Cert.torsionPrime = false := by
-  rfl
+  rw [← Bool.not_eq_true', ← Bool.not'_eq_not]
+  quickRfl
 
 /-- **The Elkies–Klagsbrun curve has Mordell–Weil rank at least 29.**  Fully certified: the descent
 characters of the 29 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has

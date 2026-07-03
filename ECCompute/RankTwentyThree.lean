@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Soundness
 import ECCompute.ModelBridge
+import ECCompute.QuickRfl
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -146,7 +147,7 @@ theorem rank23_hlabP : ∀ j, ((rank23Lab j).1).Prime := by
 theorem rank23_hlabC : ∀ j, checkLabel rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆
     (rank23Lab j).1 (rank23Lab j).2 = true := by
   intro j
-  fin_cases j <;> rfl
+  fin_cases j <;> quickRfl
 
 /-- The `(i, j)` entry of `matB` is the computed descent character `λ_{pⱼ,θⱼ}(Pᵢ)`. -/
 theorem rank23_hB : ∀ i j : Fin rank23Cert.rho,
@@ -158,13 +159,14 @@ theorem rank23_hB : ∀ i j : Fin rank23Cert.rho,
 
 /-- The supplied inverse certifies `matB` is invertible over `𝔽₂`. -/
 theorem rank23_hinv : F2Invert.checkInv rank23Cert.rho rank23Cert.matB rank23Cert.matM = true := by
-  rfl
+  quickRfl
 
 /-- The 2-division cubic has no root modulo the torsion witness prime `29` (so `t = 0`). -/
 theorem rank23_htor :
     hasRootMod (4 * rank23Cert.a₂) (16 * rank23Cert.a₄) (64 * rank23Cert.a₆)
       rank23Cert.torsionPrime = false := by
-  rfl
+  rw [← Bool.not_eq_true', ← Bool.not'_eq_not]
+  quickRfl
 
 /-- **The Martin–McMillen curve has Mordell–Weil rank at least 23.**  Fully certified: the descent
 characters of the 23 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
