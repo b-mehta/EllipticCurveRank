@@ -63,12 +63,60 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
     rcases Nat.mod_two_eq_zero_or_one a with h | h <;> rw [h] <;>
       cases popParity f (a / 2) <;> rfl
 
+/-- Kernel-reducible bounded `∀`: `true` iff `p m = true` for every `m < n`. Phrased directly
+with `Nat.rec` (folding with the primed `Bool.and'`) so the kernel peels one `m` at a time,
+which reduces far better than `(List.range n).all p`. `noncomputable` only because `Bool.and'`
+is; the kernel reduces it regardless. -/
+noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool :=
+  Nat.rec true (fun m r => (p m).and' r) n
+
+/-- Kernel-reducible bounded `∃`: `true` iff `p m = true` for some `m < n`, the `Bool.or'` fold
+dual to `allBelow`. -/
+noncomputable def anyBelow (n : Nat) (p : Nat → Bool) : Bool :=
+  Nat.rec false (fun m r => (p m).or' r) n
+
+/-- `allBelow (n + 1) p` peels the top index: it folds `p n` into `allBelow n p`. -/
+theorem allBelow_succ (n : Nat) (p : Nat → Bool) :
+    allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
+
+/-- `anyBelow (n + 1) p` peels the top index: it folds `p n` into `anyBelow n p`. -/
+theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
+    anyBelow (n + 1) p = (p n).or' (anyBelow n p) := rfl
+
+/-- `allBelow` computes the bounded universal quantifier over `m < n`. -/
+theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
+    allBelow n p = true ↔ ∀ m, m < n → p m = true := by
+  induction n with
+  | zero => simp [allBelow]
+  | succ k ih =>
+    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
+    constructor
+    · rintro ⟨hk, hlt⟩ m hm
+      rcases (Nat.lt_succ_iff_lt_or_eq.mp hm) with h | h
+      · exact hlt m h
+      · exact h ▸ hk
+    · exact fun h => ⟨h k (Nat.lt_succ_self k), fun m hm => h m (Nat.lt_succ_of_lt hm)⟩
+
+/-- `anyBelow` is `false` exactly when `p` fails at every `m < n`. -/
+theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
+    anyBelow n p = false ↔ ∀ m, m < n → p m = false := by
+  induction n with
+  | zero => simp [anyBelow]
+  | succ k ih =>
+    rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]
+    constructor
+    · rintro ⟨hk, hlt⟩ m hm
+      rcases (Nat.lt_succ_iff_lt_or_eq.mp hm) with h | h
+      · exact hlt m h
+      · exact h ▸ hk
+    · exact fun h => ⟨h k (Nat.lt_succ_self k), fun m hm => h m (Nat.lt_succ_of_lt hm)⟩
+
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is
 given by rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension.
 `noncomputable` because it calls `popParityK`; the kernel reduces it regardless (via `rfl`). -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  (List.range n).all fun i =>
-    (List.range n).all fun k =>
+  allBelow n fun i =>
+    allBelow n fun k =>
       popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
@@ -112,7 +160,7 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
         (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
     -- Unfold the checker to its pointwise form; `grind` reads off the `(i, k)` certificate.
-    simp only [checkInv, popParityK_eq_popParity, List.all_eq_true, List.mem_range] at h
+    simp only [checkInv, popParityK_eq_popParity, allBelow_eq_true] at h
     grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact ⟨⟨toMat B n, toMatCols M n, key, mul_eq_one_comm.mp key⟩, rfl⟩
