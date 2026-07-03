@@ -15,4 +15,5 @@ import ECCompute.Descent.Reduction.EpsFinite
 import ECCompute.Descent.Reduction.Hom
 import ECCompute.LambdaCompute
 import ECCompute.RankTwentyThree
+import ECCompute.RankTwentyNine
 import ECCompute.Soundness
