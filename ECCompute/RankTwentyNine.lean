@@ -151,12 +151,12 @@ theorem rank29_hpt : ∀ i, (curve 1 ekShortA₄ ekShortA₆).toAffine.Equation
   fin_cases i <;>
     · rw [WeierstrassCurve.Affine.equation_iff]
       simp only [rank29Pt, curve, mk'_eq_div]
-      norm_num
+      decide +kernel
 
 /-- Each label prime is prime. -/
 theorem rank29_hlabP : ∀ j, ((rank29Lab j).1).Prime := by
   intro j
-  fin_cases j <;> · rw [rank29Lab]; norm_num
+  fin_cases j <;> · rw [rank29Lab]; decide +kernel
 
 /-- Each label passes the descent column-legitimacy check. -/
 theorem rank29_hlabC : ∀ j, checkLabel rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆

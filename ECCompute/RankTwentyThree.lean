@@ -137,12 +137,12 @@ theorem rank23_hpt : ∀ i, (curve 1 sA₄ sA₆).toAffine.Equation
   fin_cases i <;>
     · rw [WeierstrassCurve.Affine.equation_iff]
       simp only [rank23Pt, curve, mk'_eq_div]
-      norm_num
+      decide +kernel
 
 /-- Each label prime is prime. -/
 theorem rank23_hlabP : ∀ j, ((rank23Lab j).1).Prime := by
   intro j
-  fin_cases j <;> · rw [rank23Lab]; norm_num
+  fin_cases j <;> · rw [rank23Lab]; decide +kernel
 
 /-- Each label passes the descent column-legitimacy check. -/
 theorem rank23_hlabC : ∀ j, checkLabel rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆
