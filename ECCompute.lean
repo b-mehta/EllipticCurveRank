@@ -7,6 +7,7 @@ import ECCompute.ModelIso
 import ECCompute.RankDeduction
 import ECCompute.Torsion
 import ECCompute.Descent
+import ECCompute.Descent.ReducedArith
 import ECCompute.Descent.DenominatorSquare
 import ECCompute.Descent.Collinearity
 import ECCompute.Descent.PsiBase
