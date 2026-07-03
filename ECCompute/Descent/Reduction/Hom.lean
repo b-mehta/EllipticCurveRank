@@ -6,6 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Descent.Reduction.Def
 import ECCompute.Descent
 import Mathlib.Algebra.Field.ZMod
+import Mathlib.NumberTheory.Padics.PadicVal.Basic
 
 /-!
 # Additivity of the reduction map
@@ -327,6 +328,236 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast] at hc
     exact hc
 
+/-- **The kernel of reduction is closed under the group law.**  If two affine points `P`, `Q`
+both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
+their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
+again has `p ∣ x₃.den`.
+
+This is the one genuinely `p`-adic corner of `red_p` additivity.  It is proved by an explicit
+single-fraction certificate: writing `x_i = A_i / w_i²`, `y_i = B_i / w_i³` (`den_isSquare`) with
+`E = w₁`, `G = w₂`, `p ∣ E`, `p ∣ G`, the group law gives the integer identity
+`x₃ = (N² − a₆E²G²K²) / (A·C·K²)` where `K = A·G² − C·E²` and `N = A·D·E − B·C·G`.  The secant
+intercept `ν = N / (E·G·K)` satisfies `N·(A·D·E + B·C·G) = K·W` with `W ≡ −A²C²` a `p`-unit
+(both integer identities follow from the two curve relations), so `v_p(N) < v_p(K)`.  Tracking
+`padicValRat` through the fraction yields `padicValRat p x₃ = 2·(v_p N − v_p K) < 0`, i.e.
+`p ∣ x₃.den`. -/
+private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
+    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
+    (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
+    (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
+  have hp : p.Prime := Fact.out
+  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
+  have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+  have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
+    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
+  have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
+  have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
+  obtain ⟨w₁, hx1d, hy1d⟩ := den_isSquare a₂ a₄ a₆ h₁
+  obtain ⟨w₂, hx2d, hy2d⟩ := den_isSquare a₂ a₄ a₆ h₂
+  have hw1ne : w₁ ≠ 0 := by intro h; apply x₁.den_ne_zero; rw [hx1d, h]; norm_num
+  have hw2ne : w₂ ≠ 0 := by intro h; apply x₂.den_ne_zero; rw [hx2d, h]; norm_num
+  set A : ℤ := x₁.num with hAdef
+  set B : ℤ := y₁.num with hBdef
+  set C : ℤ := x₂.num with hCdef
+  set D : ℤ := y₂.num with hDdef
+  set E : ℤ := (w₁ : ℤ) with hEdef
+  set G : ℤ := (w₂ : ℤ) with hGdef
+  have hEQ : (E : ℚ) ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
+  have hGQ : (G : ℚ) ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
+  have hE0 : E ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
+  have hG0 : G ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
+  -- coordinates as fractions over the square/cube denominators
+  have hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2 := by
+    have h1 : ((x₁.num : ℤ) : ℚ) = x₁ * (x₁.den : ℚ) :=
+      (div_eq_iff (by exact_mod_cast x₁.den_ne_zero)).mp (Rat.num_div_den x₁)
+    rw [hAdef, h1, hx1d, hEdef]; push_cast; ring
+  have hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3 := by
+    have h1 : ((y₁.num : ℤ) : ℚ) = y₁ * (y₁.den : ℚ) :=
+      (div_eq_iff (by exact_mod_cast y₁.den_ne_zero)).mp (Rat.num_div_den y₁)
+    rw [hBdef, h1, hy1d, hEdef]; push_cast; ring
+  have hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2 := by
+    have h1 : ((x₂.num : ℤ) : ℚ) = x₂ * (x₂.den : ℚ) :=
+      (div_eq_iff (by exact_mod_cast x₂.den_ne_zero)).mp (Rat.num_div_den x₂)
+    rw [hCdef, h1, hx2d, hGdef]; push_cast; ring
+  have hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3 := by
+    have h1 : ((y₂.num : ℤ) : ℚ) = y₂ * (y₂.den : ℚ) :=
+      (div_eq_iff (by exact_mod_cast y₂.den_ne_zero)).mp (Rat.num_div_den y₂)
+    rw [hDdef, h1, hy2d, hGdef]; push_cast; ring
+  -- integer curve relations
+  have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
+    have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
+        + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
+      rw [hA, hB]; linear_combination (E : ℚ) ^ 6 * hcv1
+    exact_mod_cast hq
+  have hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6 := by
+    have hq : (D : ℚ) ^ 2 = (C : ℚ) ^ 3 + a₂ * (C : ℚ) ^ 2 * (G : ℚ) ^ 2
+        + a₄ * (C : ℚ) * (G : ℚ) ^ 4 + a₆ * (G : ℚ) ^ 6 := by
+      rw [hC, hD]; linear_combination (G : ℚ) ^ 6 * hcv2
+    exact_mod_cast hq
+  set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
+  set N : ℤ := A * D * E - B * C * G with hNdef
+  set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+    + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
+  -- the two load-bearing integer identities
+  have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
+    rw [haddX, hKdef, hNdef]; push_cast; rw [hA, hB, hC, hD]
+    linear_combination
+      ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₁ * x₂ * (ℓ * x₁ - ℓ * x₂ + y₁ - y₂))) * hℓ
+        + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
+        + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
+  have hI2 : N * (A * D * E + B * C * G) = K * W := by
+    rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
+  -- divisibility facts
+  have hpw1 : p ∣ w₁ := by
+    have hd1' : p ∣ x₁.den := (ZMod.natCast_eq_zero_iff _ p).mp hd1
+    rw [hx1d] at hd1'; exact hp.dvd_of_dvd_pow hd1'
+  have hpw2 : p ∣ w₂ := by
+    have hd2' : p ∣ x₂.den := (ZMod.natCast_eq_zero_iff _ p).mp hd2
+    rw [hx2d] at hd2'; exact hp.dvd_of_dvd_pow hd2'
+  have hpE : (p : ℤ) ∣ E := by rw [hEdef]; exact_mod_cast hpw1
+  have hpG : (p : ℤ) ∣ G := by rw [hGdef]; exact_mod_cast hpw2
+  have hpA : ¬ (p : ℤ) ∣ A := by
+    intro hdvd
+    have hcop : IsCoprime (A : ℤ) (E ^ 2) := by
+      have hc : IsCoprime (x₁.num) ((x₁.den : ℕ) : ℤ) := by
+        rw [Int.isCoprime_iff_nat_coprime]; simpa using x₁.reduced
+      have he : (E : ℤ) ^ 2 = ((x₁.den : ℕ) : ℤ) := by rw [hEdef, hx1d]; push_cast; ring
+      rw [hAdef, he]; exact hc
+    exact absurd (Int.isUnit_iff.mp
+      (hcop.isUnit_of_dvd' hdvd (hpE.trans (dvd_pow_self E two_ne_zero))))
+      (by have := hp.two_le; omega)
+  have hpC : ¬ (p : ℤ) ∣ C := by
+    intro hdvd
+    have hcop : IsCoprime (C : ℤ) (G ^ 2) := by
+      have hc : IsCoprime (x₂.num) ((x₂.den : ℕ) : ℤ) := by
+        rw [Int.isCoprime_iff_nat_coprime]; simpa using x₂.reduced
+      have he : (G : ℤ) ^ 2 = ((x₂.den : ℕ) : ℤ) := by rw [hGdef, hx2d]; push_cast; ring
+      rw [hCdef, he]; exact hc
+    exact absurd (Int.isUnit_iff.mp
+      (hcop.isUnit_of_dvd' hdvd (hpG.trans (dvd_pow_self G two_ne_zero))))
+      (by have := hp.two_le; omega)
+  have hA0 : A ≠ 0 := fun h => hpA (h ▸ dvd_zero _)
+  have hC0 : C ≠ 0 := fun h => hpC (h ▸ dvd_zero _)
+  have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
+    dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
+  have hpW : ¬ (p : ℤ) ∣ W := by
+    intro hdvd
+    have hrest : (p : ℤ) ∣ (W + A ^ 2 * C ^ 2) := by
+      have heq : W + A ^ 2 * C ^ 2
+          = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by rw [hWdef]; ring
+      rw [heq]
+      exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
+    have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by
+      have := dvd_sub hrest hdvd; simpa using this
+    rcases hpZ.dvd_mul.mp hAC with h | h
+    · exact hpA (hpZ.dvd_of_dvd_pow h)
+    · exact hpC (hpZ.dvd_of_dvd_pow h)
+  have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
+  have hK0 : K ≠ 0 := by
+    intro h
+    apply hne
+    have hcast : (A : ℚ) * (G : ℚ) ^ 2 = (C : ℚ) * (E : ℚ) ^ 2 := by
+      have h0 : (K : ℚ) = 0 := by rw [h]; simp
+      rw [hKdef] at h0; push_cast at h0; linarith
+    rw [hA, hC] at hcast
+    have hEG : (E : ℚ) ^ 2 * (G : ℚ) ^ 2 ≠ 0 := mul_ne_zero (pow_ne_zero _ hEQ) (pow_ne_zero _ hGQ)
+    have hxx : x₁ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) = x₂ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) := by
+      linear_combination hcast
+    exact mul_right_cancel₀ hEG hxx
+  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := by rw [hI2]; exact mul_ne_zero hK0 hW0
+  have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
+  have hS0 : A * D * E + B * C * G ≠ 0 := right_ne_zero_of_mul hprodne
+  -- monotonicity of `padicValInt` under divisibility
+  have hmono : ∀ {a b : ℤ}, a ∣ b → b ≠ 0 → padicValInt p a ≤ padicValInt p b := by
+    intro a b hab hb
+    rcases eq_or_ne a 0 with rfl | ha
+    · simp [padicValInt]
+    · simp only [padicValInt]
+      have h1 : p ^ padicValNat p a.natAbs ∣ a.natAbs :=
+        (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr ha)).mpr le_rfl
+      exact (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr hb)).mp
+        (h1.trans (Int.natAbs_dvd_natAbs.mpr hab))
+  have hSval : 1 ≤ padicValInt p (A * D * E + B * C * G) := by
+    simp only [padicValInt]
+    exact one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
+      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
+  -- the crux inequality `v_p(N) < v_p(K)`
+  have hcrux : padicValInt p N < padicValInt p K := by
+    have e1 := padicValInt.mul (p := p) hN0 hS0
+    have e2 := padicValInt.mul (p := p) hK0 hW0
+    rw [hI2] at e1; rw [e2] at e1
+    have hWv : padicValInt p W = 0 := padicValInt.eq_zero_of_not_dvd hpW
+    omega
+  have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
+    rw [pow_two, padicValInt.mul hK0 hK0]; ring
+  have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
+    rw [pow_two, padicValInt.mul hN0 hN0]; ring
+  have hpvA : padicValInt p A = 0 := padicValInt.eq_zero_of_not_dvd hpA
+  have hpvC : padicValInt p C = 0 := padicValInt.eq_zero_of_not_dvd hpC
+  have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
+    rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0),
+      padicValInt.mul hA0 hC0, hpvA, hpvC, hK2]; omega
+  -- valuation of the numerator `N² − a₆E²G²K²`
+  have hNumval : padicValRat p ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)
+      = (2 * padicValInt p N : ℤ) ∧ (N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) ≠ 0 := by
+    rcases eq_or_ne (a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) 0 with h0 | h0
+    · rw [h0, sub_zero]
+      exact ⟨by rw [padicValRat.of_int, hNval2]; push_cast; ring, pow_ne_zero 2 hN0⟩
+    · have hsplit : ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)
+          = ((N ^ 2 : ℤ) : ℚ) + (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) := by push_cast; ring
+      have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
+      have hr0 : (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
+        simpa using (show ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 by exact_mod_cast h0)
+      have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
+        rw [padicValRat.of_int, hNval2]; push_cast; ring
+      have hrv : padicValRat p (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ))
+          = (padicValInt p (a₆ * E ^ 2 * G ^ 2 * K ^ 2) : ℤ) := by
+        rw [padicValRat.neg, padicValRat.of_int]
+      have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ)
+          < padicValRat p (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) := by
+        rw [hqv, hrv]
+        have hdvdK : (K ^ 2 : ℤ) ∣ (a₆ * E ^ 2 * G ^ 2 * K ^ 2) := ⟨a₆ * E ^ 2 * G ^ 2, by ring⟩
+        have hle := hmono hdvdK h0
+        rw [hK2] at hle
+        have : padicValInt p N < padicValInt p K := hcrux
+        omega
+      have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
+        intro he
+        have heq : ((N ^ 2 : ℤ) : ℚ) = ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
+          linear_combination he
+        rw [heq] at hlt
+        simp only [padicValRat.neg] at hlt
+        exact lt_irrefl _ hlt
+      refine ⟨?_, ?_⟩
+      · rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv]
+      · intro he; apply hqrne; rw [← hsplit]; exact_mod_cast he
+  obtain ⟨hNumvalQ, hNum0⟩ := hNumval
+  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
+    exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
+  have hNum3Q : ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast hNum0
+  have hx3div : x₃
+      = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
+    rw [eq_div_iff hDen3Q]; exact hMain
+  have hx3val : padicValRat p x₃ = (2 * padicValInt p N : ℤ) - (2 * padicValInt p K : ℤ) := by
+    rw [hx3div, padicValRat.div hNum3Q hDen3Q, hNumvalQ, padicValRat.of_int, hDenval]
+    push_cast; ring
+  have hx3neg : padicValRat p x₃ < 0 := by
+    rw [hx3val]
+    have : padicValInt p N < padicValInt p K := hcrux
+    omega
+  -- conclude `p ∣ x₃.den`
+  have hden0 : padicValNat p x₃.den ≠ 0 := by
+    have h' := hx3neg
+    rw [padicValRat_def] at h'
+    omega
+  have hdvd : p ∣ x₃.den := (dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0
+  exact (ZMod.natCast_eq_zero_iff _ p).mpr hdvd
+
 /-- **Additivity of `red_p` in the tangent-mod-`p` configuration (S4).**  When two affine points
 `P`, `Q` reduce to the same point of `E/𝔽ₚ` (`red_p P = red_p Q`) but are distinct over `ℚ`, the
 reduction of their rational sum equals the sum of their reductions.  This is the intrinsic content
@@ -370,10 +601,11 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
       -- the formal-group content), so `Rat.cast` reasoning gives `0 = 0`.  A rigorous proof needs
       -- the `p`-adic valuation (`padicValRat`, via `(q.den : ZMod p) = 0 ↔ padicValRat p q < 0`)
       -- together with the exact single-fraction certificate, or the elliptic-curve formal group —
-      -- neither of which is available in mathlib (there is no point-reduction map / reduction
-      -- subgroup).  This is the one genuinely `p`-adic corner of `red_p` additivity; the
-      -- tangent-mod-`p` case `S4` proper is closed above by `red_p_add_tangent`.
-      sorry
+      -- subgroup); it is closed by `den_addX_both_kernel`, the explicit single-fraction
+      -- `padicValRat` certificate that the kernel of reduction is closed under the group law.
+      rw [Affine.Point.add_of_X_ne hx12]
+      exact red_p_of_den_zero a₂ a₄ a₆ p hΔ _
+        (den_addX_both_kernel a₂ a₄ a₆ p h₁.1 h₂.1 hx12 hd1 hd2)
   · -- `P` has good reduction; then so does `Q`, and they share reduced coordinates.
     have hd2 : (x₂.den : ZMod p) ≠ 0 := by
       intro hd2
