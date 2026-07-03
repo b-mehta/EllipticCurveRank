@@ -18,13 +18,18 @@ instead of one `rfl` per matrix entry.
 
 namespace ECCompute
 
-/-- `true` iff every entry of `matB` equals the computed descent character `λ_{pⱼ,θⱼ}(ptᵢ)`. -/
-def checkB (a₂ a₄ a₆ : ℤ) (matB : List ℕ) (rho : ℕ)
+/-- `true` iff every entry of `matB` equals the computed descent character `λ_{pⱼ,θⱼ}(ptᵢ)`.
+Indexed by `Nat < rho` via the kernel-reducible `allBelow` fold (dropping into `Fin rho` in the
+valid branch), so the kernel peels one index at a time rather than materialising `List.finRange`. -/
+noncomputable def checkB (a₂ a₄ a₆ : ℤ) (matB : List ℕ) (rho : ℕ)
     (lab : Fin rho → ℕ × ℤ) (pt : Fin rho → ℚ × ℚ) : Bool :=
-  (List.finRange rho).all fun i =>
-    (List.finRange rho).all fun j =>
-      F2Invert.toMat matB rho i j ==
-        lambdaCompute a₂ a₄ a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1
+  F2Invert.allBelow rho fun i =>
+    F2Invert.allBelow rho fun j =>
+      if hi : i < rho then if hj : j < rho then
+        F2Invert.toMat matB rho ⟨i, hi⟩ ⟨j, hj⟩ ==
+          lambdaCompute a₂ a₄ a₆ (lab ⟨j, hj⟩).1 ((lab ⟨j, hj⟩).2 : ZMod (lab ⟨j, hj⟩).1)
+            (pt ⟨i, hi⟩).1
+      else true else true
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
 theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
@@ -33,7 +38,9 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
     ∀ i j, F2Invert.toMat matB rho i j =
       lambdaCompute a₂ a₄ a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1 := by
   intro i j
-  simp only [checkB, List.all_eq_true] at h
-  exact beq_iff_eq.mp (h i (List.mem_finRange i) j (List.mem_finRange j))
+  simp only [checkB, F2Invert.allBelow_eq_true] at h
+  have := h i.val i.isLt j.val j.isLt
+  rw [dif_pos i.isLt, dif_pos j.isLt, Fin.eta, Fin.eta] at this
+  exact beq_iff_eq.mp this
 
 end ECCompute
