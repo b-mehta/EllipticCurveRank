@@ -54,6 +54,14 @@ abbrev sA₄ : ℤ := -308047462538784205249055433862695067560
 /-- The `a₆` coefficient of the integral short model `curve 1 sA₄ sA₆` (`= 64·mmA₆ + 16`). -/
 abbrev sA₆ : ℤ := 2091872046573848080507094212572930834938076355606119296400
 
+/-- The Martin–McMillen elliptic curve over `ℚ` (general model)
+
+  `y² + xy + y = x³ - 19252966408674012828065964616418441723 x`
+  `              + 32685500727716376257923347071452044295907443056345614006`.
+
+Certified to have Mordell–Weil rank at least `23` in `martinMcMillen_hasRankGE_23`. -/
+def curveMartinMcMillen : WeierstrassCurve ℚ := toCurveQ 1 0 1 mmA₄ mmA₆
+
 /-- A reduced-form `Rat.mk'` equals the corresponding division of numerator by denominator.
 Used to rewrite the `Rat.mk'` `x`-coordinates back to `_ / _` form for `norm_num`. -/
 theorem mk'_eq_div (a : ℤ) (b : ℕ) (h1 h2) : (Rat.mk' a b h1 h2 : ℚ) = (a : ℚ) / (b : ℚ) := by
@@ -161,7 +169,8 @@ theorem rank23_htor :
 /-- **The Martin–McMillen curve has Mordell–Weil rank at least 23.**  Fully certified: the descent
 characters of the 23 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
 no rational 2-torsion, so its rank over `ℚ` is at least `23`. -/
-theorem martinMcMillen_hasRankGE_23 : HasRankGE (toCurveQ 1 0 1 mmA₄ mmA₆) 23 := by
+theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 := by
+  unfold curveMartinMcMillen
   have key : HasRankGE (curve rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆)
       (rank23Cert.rho - rank23Cert.t) :=
     rank_ge_of_certificate rank23Cert rank23Pt rank23Lab rank23_hpt rank23_hlabP rank23_hlabC
