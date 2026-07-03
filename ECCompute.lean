@@ -17,6 +17,8 @@ import ECCompute.Primes
 import ECCompute.QuickRfl
 import ECCompute.CheckMatrix
 import ECCompute.CurveCertificate
+import ECCompute.CertifyEval
+import ECCompute.Certify
 import ECCompute.RankTwentyThree
 import ECCompute.RankTwentyNine
 import ECCompute.Soundness

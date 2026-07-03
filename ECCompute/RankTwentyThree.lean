@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.CurveCertificate
+import ECCompute.Certify
 
 /-!
 # The Martin–McMillen curve has rank at least 23 (T10)
@@ -27,12 +27,11 @@ so a rational point `(x, y)` maps to `(4x, 8y + 4x + 4)`).
   `_ / _` would leave a well-founded `Nat.gcd` the kernel cannot reduce).
 * `rank23Lab` — the 23 descent columns `(p, θ)`, primes between `7` and `163`, following Cremona's
   worked example (§2.3 of *On the computation of Mordell–Weil and 2-Selmer groups*).
-* `rank23Cert` — the certificate bundle; `matB` is the `23 × 23` descent-character matrix over `𝔽₂`
-  and `matM` its inverse, both as `Nat` bitmasks (`F2Invert`).
-* `martinMcMillen_hasRankGE_23` — the theorem, obtained by feeding `rank23Cert` to
-  `rank_ge_of_certificate` and transporting the bound along `generalToShortEquiv`.
+* `martinMcMillen_hasRankGE_23` — the theorem.  The `certify_curve` tactic computes the `23 × 23`
+  descent-character matrix over `𝔽₂` (and its inverse) from the points and labels, assembles the
+  certificate, and transports the bound to the general model.
 
-Every referee obligation is discharged by kernel computation (`rfl`) or `norm_num`; there is no
+Every referee obligation is discharged by kernel computation (`rfl`/`decide +kernel`); there is no
 `native_decide`.
 -/
 
@@ -46,11 +45,6 @@ abbrev mmA₄ : ℤ := -19252966408674012828065964616418441723
 /-- The `a₆` coefficient of the Martin–McMillen curve (general model). -/
 abbrev mmA₆ : ℤ := 32685500727716376257923347071452044295907443056345614006
 
-/-- The `a₄` coefficient of the integral short model `curve 1 sA₄ sA₆` (`= 16·mmA₄ + 8`). -/
-abbrev sA₄ : ℤ := -308047462538784205249055433862695067560
-
-/-- The `a₆` coefficient of the integral short model `curve 1 sA₄ sA₆` (`= 64·mmA₆ + 16`). -/
-abbrev sA₆ : ℤ := 2091872046573848080507094212572930834938076355606119296400
 
 /-- The Martin–McMillen elliptic curve over `ℚ` (general model)
 
@@ -61,8 +55,8 @@ Certified to have Mordell–Weil rank at least `23` in `martinMcMillen_hasRankGE
 def curveMartinMcMillen : WeierstrassCurve ℚ := toCurveQ 1 0 1 mmA₄ mmA₆
 
 /-- The 23 rational points of the Martin–McMillen curve carried to the integral short model
-`curve 1 sA₄ sA₆` by `(x, y) ↦ (4x, 8y + 4x + 4)`.  Fractional `x`-coordinates are in reduced
-`Rat.mk'` form. -/
+`curve 1 (16·mmA₄+8) (64·mmA₆+16)` by `(x, y) ↦ (4x, 8y + 4x + 4)`.  Fractional `x`-coordinates
+are in reduced `Rat.mk'` form. -/
 def rank23Pt : Fin 23 → ℚ × ℚ := ![
   ((10038235050769704300 : ℚ), (-3336710883046427160653004720 : ℚ)),
   ((-12609224276463955620 : ℚ), (63018561028024449536788756800 : ℚ)),
@@ -99,73 +93,13 @@ def rank23Lab : Fin 23 → ℕ × ℤ := ![
   (83, 74), (89, 78), (97, 21), (109, 8), (113, 55), (127, 110), (131, 9), (131, 50), (139, 21),
   (149, 9), (151, 27), (157, 81), (163, 55)]
 
-/-- The rank-23 certificate for the Martin–McMillen curve, on the integral short model
-`curve 1 sA₄ sA₆`.  `matB` is the `23 × 23` descent-character matrix over `𝔽₂` (row bitmasks),
-`matM` its inverse (column bitmasks); `t = 0` with torsion witness prime `29`. -/
-def rank23Cert : Certificate where
-  a₁ := 0
-  a₂ := 1
-  a₃ := 0
-  a₄ := sA₄
-  a₆ := sA₆
-  rho := 23
-  points := List.ofFn rank23Pt
-  labels := List.ofFn rank23Lab
-  matB := [7473342, 7551941, 3161895, 3710394, 3287852, 4373580, 5018546, 3669779, 8185065,
-    5958582, 2607786, 4949490, 6461685, 1024421, 5071786, 3899507, 3380385, 7725498, 3045506,
-    3140458, 1063523, 4372266, 4025296]
-  matM := [2370869, 7665944, 3876357, 6048202, 5908841, 4816121, 1908375, 1476116, 1543552,
-    5414431, 5679871, 7540436, 6420779, 4964488, 6356144, 7962535, 6764200, 4753997, 1453524,
-    3753019, 8037412, 3876062, 155750]
-  t := 0
-  torsionPrime := 29
-
-/-- Each listed short-model point lies on `curve 1 sA₄ sA₆`. -/
-theorem rank23_hpt : ∀ i, (curve 1 sA₄ sA₆).toAffine.Equation
-    (rank23Pt i).1 (rank23Pt i).2 := by
-  intro i
-  fin_cases i <;>
-    · rw [WeierstrassCurve.Affine.equation_iff]
-      simp only [rank23Pt, curve, mk'_eq_div]
-      decide +kernel
-
-/-- Each label prime is prime. -/
-theorem rank23_hlabP : ∀ j, ((rank23Lab j).1).Prime := by
-  intro j
-  fin_cases j <;>
-    exact Nat.prime_of_passes _ (by decide) (by decide) (by quickRfl)
-
-/-- Each label passes the descent column-legitimacy check. -/
-theorem rank23_hlabC : ∀ j, checkLabel rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆
-    (rank23Lab j).1 (rank23Lab j).2 = true := by
-  intro j
-  fin_cases j <;> quickRfl
-
-/-- The `(i, j)` entry of `matB` is the computed descent character `λ_{pⱼ,θⱼ}(Pᵢ)`. -/
-theorem rank23_hB : ∀ i j : Fin rank23Cert.rho,
-    F2Invert.toMat rank23Cert.matB rank23Cert.rho i j =
-      lambdaCompute rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆ (rank23Lab j).1
-        ((rank23Lab j).2 : ZMod (rank23Lab j).1) (rank23Pt i).1 :=
-  checkB_true (by quickRfl)
-
-/-- The supplied inverse certifies `matB` is invertible over `𝔽₂`. -/
-theorem rank23_hinv : F2Invert.checkInv rank23Cert.rho rank23Cert.matB rank23Cert.matM = true := by
-  quickRfl
-
-/-- The 2-division cubic has no root modulo the torsion witness prime `29` (so `t = 0`). -/
-theorem rank23_htor :
-    hasRootMod (4 * rank23Cert.a₂) (16 * rank23Cert.a₄) (64 * rank23Cert.a₆)
-      rank23Cert.torsionPrime = false := by
-  rw [← Bool.not_eq_true', ← Bool.not'_eq_not]
-  quickRfl
-
-/-- **The Martin–McMillen curve has Mordell–Weil rank at least 23.**  Fully certified: the descent
-characters of the 23 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
-no rational 2-torsion, so its rank over `ℚ` is at least `23`. -/
-theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 :=
-  hasRankGE_of_certificate 1 0 1 mmA₄ mmA₆ rank23Cert rank23Pt rank23Lab
-    (by simp only [intShortModel, intShortA₂, intShortA₄, intShortA₆, rank23Cert, curve, mmA₄, mmA₆,
-      sA₄, sA₆]; norm_num)
-    rank23_hpt rank23_hlabP rank23_hlabC rank23_hB rank23_hinv rfl (by decide) rank23_htor
+/-- **The Martin–McMillen curve has Mordell–Weil rank at least 23.**  Fully certified by
+`certify_curve`, which computes the `23 × 23` descent-character matrix (and its `𝔽₂` inverse) from
+the points and labels, then discharges every referee obligation by kernel computation: the descent
+characters of the 23 points are `𝔽₂`-linearly independent and the curve has no rational 2-torsion
+(witnessed by the prime `29`), so its rank over `ℚ` is at least `23`. -/
+theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 := by
+  unfold curveMartinMcMillen
+  certify_curve coeffs 1 0 1 mmA₄ mmA₆ torsion 29 points rank23Pt labels rank23Lab
 
 end ECCompute

@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.CurveCertificate
+import ECCompute.Certify
 
 /-!
 # A second curve of rank at least 29
@@ -27,12 +27,11 @@ rational point `(x, y)` maps to `(4x, 8y + 4x)`).
   reduced `Rat.mk'` form so the kernel evaluates `lambdaCompute` on it by `rfl`.
 * `rank29Lab` — the 29 descent columns `(p, θ)`, primes between `19` and `179`, matching Cremona's
   descent-image output for this curve.
-* `rank29Cert` — the certificate bundle; `matB` is the `29 × 29` descent-character matrix over `𝔽₂`
-  and `matM` its inverse, both as `Nat` bitmasks (`F2Invert`).
-* `elkiesKlagsbrun_hasRankGE_29` — the theorem, obtained by feeding `rank29Cert` to
-  `rank_ge_of_certificate` and transporting the bound along `generalToShortEquiv`.
+* `elkiesKlagsbrun_hasRankGE_29` — the theorem.  The `certify_curve` tactic computes the `29 × 29`
+  descent-character matrix over `𝔽₂` (and its inverse) from the points and labels, assembles the
+  certificate, and transports the bound to the general model.
 
-Every referee obligation is discharged by kernel computation (`rfl`) or `norm_num`; there is no
+Every referee obligation is discharged by kernel computation (`rfl`/`decide +kernel`); there is no
 `native_decide`.
 -/
 
@@ -51,13 +50,6 @@ abbrev ekA₄ : ℤ := -27006183241630922218434652145297453784768054621836357954
 abbrev ekA₆ : ℤ :=
   55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497
 
-/-- The `a₄` coefficient of the integral short model `curve 1 ekShortA₄ ekShortA₆` (`= 16·ekA₄`). -/
-abbrev ekShortA₄ : ℤ := -432098931866094755494954434324759260556288873949381727275798160
-
-/-- The `a₆` coefficient of the integral short model `curve 1 ekShortA₄ ekShortA₆` (`= 64·ekA₆`). -/
-abbrev ekShortA₆ : ℤ :=
-  3536515747285912094447148773831564276577348290082245094935833905865562449773835099240750175808
-
 /-- The Elkies–Klagsbrun rank-29 elliptic curve over `ℚ` (general model)
 
   `y² + xy = x³ + ekA₄ x + ekA₆`.
@@ -66,7 +58,7 @@ Certified to have Mordell–Weil rank at least `29` in `elkiesKlagsbrun_hasRankG
 def curveElkiesKlagsbrun : WeierstrassCurve ℚ := toCurveQ 1 0 0 ekA₄ ekA₆
 
 /-- The 29 rational points of the second curve carried to the integral short model
-`curve 1 ekShortA₄ ekShortA₆` by `(x, y) ↦ (4x, 8y + 4x)`.  The one fractional `x`-coordinate is
+`curve 1 (16·ekA₄) (64·ekA₆)` by `(x, y) ↦ (4x, 8y + 4x)`.  The one fractional `x`-coordinate is
 in reduced `Rat.mk'` form. -/
 def rank29Pt : Fin 29 → ℚ × ℚ := ![
   ((11564781896914148757833022146536 : ℚ), (9279445984769009216460584199967307269769548800 : ℚ)),
@@ -109,76 +101,13 @@ def rank29Lab : Fin 29 → ℕ × ℤ := ![
   (109, 89), (127, 45), (127, 102), (131, 109), (151, 4), (157, 73), (163, 56), (173, 72),
   (173, 115), (179, 43)]
 
-/-- The rank-29 certificate for the second curve, on the integral short model
-`curve 1 ekShortA₄ ekShortA₆`.
-`matB` is the `29 × 29` descent-character matrix over `𝔽₂` (row bitmasks), `matM` its inverse
-(column bitmasks); `t = 0` with torsion witness prime `67`. -/
-def rank29Cert : Certificate where
-  a₁ := 0
-  a₂ := 1
-  a₃ := 0
-  a₄ := ekShortA₄
-  a₆ := ekShortA₆
-  rho := 29
-  points := List.ofFn rank29Pt
-  labels := List.ofFn rank29Lab
-  matB := [362692388, 180762173, 414259584, 483975833, 281259643, 305445451, 134953801, 523725317,
-    458987003, 134888953, 46359831, 397323421, 160633099, 150343368, 34747304, 376567236,
-    445638067, 409691202, 40918244, 6235769, 472209994, 67072530, 323393023, 321958794, 453383836,
-    88056293, 114414568, 373488813, 449764306]
-  matM := [200517310, 58058590, 336938950, 46971675, 117170164, 299595453, 215082071, 279412193,
-    45578083, 293074749, 360916341, 157592411, 116643666, 465317890, 295867323, 71135259,
-    125207482, 460997230, 280786175, 485150360, 226837813, 392096532, 444287549, 209135209,
-    148917876, 516299009, 530074807, 471509895, 373043118]
-  t := 0
-  torsionPrime := 67
-
-/-- Each listed short-model point lies on `curve 1 ekShortA₄ ekShortA₆`. -/
-theorem rank29_hpt : ∀ i, (curve 1 ekShortA₄ ekShortA₆).toAffine.Equation
-    (rank29Pt i).1 (rank29Pt i).2 := by
-  intro i
-  fin_cases i <;>
-    · rw [WeierstrassCurve.Affine.equation_iff]
-      simp only [rank29Pt, curve, mk'_eq_div]
-      decide +kernel
-
-/-- Each label prime is prime. -/
-theorem rank29_hlabP : ∀ j, ((rank29Lab j).1).Prime := by
-  intro j
-  fin_cases j <;>
-    exact Nat.prime_of_passes _ (by decide) (by decide) (by quickRfl)
-
-/-- Each label passes the descent column-legitimacy check. -/
-theorem rank29_hlabC : ∀ j, checkLabel rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆
-    (rank29Lab j).1 (rank29Lab j).2 = true := by
-  intro j
-  fin_cases j <;> quickRfl
-
-/-- The `(i, j)` entry of `matB` is the computed descent character `λ_{pⱼ,θⱼ}(Pᵢ)`. -/
-theorem rank29_hB : ∀ i j : Fin rank29Cert.rho,
-    F2Invert.toMat rank29Cert.matB rank29Cert.rho i j =
-      lambdaCompute rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆ (rank29Lab j).1
-        ((rank29Lab j).2 : ZMod (rank29Lab j).1) (rank29Pt i).1 :=
-  checkB_true (by quickRfl)
-
-/-- The supplied inverse certifies `matB` is invertible over `𝔽₂`. -/
-theorem rank29_hinv : F2Invert.checkInv rank29Cert.rho rank29Cert.matB rank29Cert.matM = true := by
-  quickRfl
-
-/-- The 2-division cubic has no root modulo the torsion witness prime `67` (so `t = 0`). -/
-theorem rank29_htor :
-    hasRootMod (4 * rank29Cert.a₂) (16 * rank29Cert.a₄) (64 * rank29Cert.a₆)
-      rank29Cert.torsionPrime = false := by
-  rw [← Bool.not_eq_true', ← Bool.not'_eq_not]
-  quickRfl
-
-/-- **The Elkies–Klagsbrun curve has Mordell–Weil rank at least 29.**  Fully certified: the descent
-characters of the 29 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
-no rational 2-torsion, so its rank over `ℚ` is at least `29`. -/
-theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 :=
-  hasRankGE_of_certificate 1 0 0 ekA₄ ekA₆ rank29Cert rank29Pt rank29Lab
-    (by simp only [intShortModel, intShortA₂, intShortA₄, intShortA₆, rank29Cert, curve, ekA₄, ekA₆,
-      ekShortA₄, ekShortA₆]; norm_num)
-    rank29_hpt rank29_hlabP rank29_hlabC rank29_hB rank29_hinv rfl (by decide) rank29_htor
+/-- **The Elkies–Klagsbrun curve has Mordell–Weil rank at least 29.**  Fully certified by
+`certify_curve`, which computes the `29 × 29` descent-character matrix (and its `𝔽₂` inverse) from
+the points and labels, then discharges every referee obligation by kernel computation: the descent
+characters of the 29 points are `𝔽₂`-linearly independent and the curve has no rational 2-torsion
+(witnessed by the prime `67`), so its rank over `ℚ` is at least `29`. -/
+theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 := by
+  unfold curveElkiesKlagsbrun
+  certify_curve coeffs 1 0 0 ekA₄ ekA₆ torsion 67 points rank29Pt labels rank29Lab
 
 end ECCompute
