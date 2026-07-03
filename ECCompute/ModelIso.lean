@@ -59,8 +59,8 @@ def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
     == xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
         + a₆ * xd ^ 3 * yd ^ 2
 
-/-- **Correctness lemma.** The kernel-reducible checker `chkZ` returns `true` if and only if the point
-`(x, y)` satisfies the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
+/-- **Correctness lemma.** The kernel-reducible checker `chkZ` returns `true` if and only if the
+point `(x, y)` satisfies the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y := by

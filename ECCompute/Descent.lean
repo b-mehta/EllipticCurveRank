@@ -338,8 +338,8 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
         Point.congr_some, εpHom_apply, εp_finite_some]
       simp only [xbar]
 
-/-- The factorisation, spelled out with the reduction map: `λ_{p,θ} P = εp_finite θ (red_p P)` (up to the
-transport `Point.congr` across `map_eq_reducedCurve`). -/
+/-- The factorisation, spelled out with the reduction map: `λ_{p,θ} P = εp_finite θ (red_p P)` (up
+to the transport `Point.congr` across `map_eq_reducedCurve`). -/
 theorem lambda_eq_εp_finite_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ P
