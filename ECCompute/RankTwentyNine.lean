@@ -7,6 +7,7 @@ import ECCompute.Soundness
 import ECCompute.ModelBridge
 import ECCompute.QuickRfl
 import ECCompute.CheckMatrix
+import ECCompute.Primes
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -156,7 +157,8 @@ theorem rank29_hpt : ∀ i, (curve 1 ekShortA₄ ekShortA₆).toAffine.Equation
 /-- Each label prime is prime. -/
 theorem rank29_hlabP : ∀ j, ((rank29Lab j).1).Prime := by
   intro j
-  fin_cases j <;> · rw [rank29Lab]; decide +kernel
+  fin_cases j <;>
+    exact Nat.prime_of_passes _ (by decide) (by decide) (by quickRfl)
 
 /-- Each label passes the descent column-legitimacy check. -/
 theorem rank29_hlabC : ∀ j, checkLabel rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆
