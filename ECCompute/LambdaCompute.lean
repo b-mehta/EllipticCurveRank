@@ -246,6 +246,41 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     · rw [if_pos hα, if_pos hα, psiCompute_eq p hp2 hfd]
     · rw [if_neg hα, if_neg hα, psiCompute_eq p hp2 hα]
 
+/-! ### `Bool`-valued mirror for fast kernel checks
+
+`lambdaComputeBool` is `lambdaCompute` with its `ZMod 2` values replaced by `Bool` (`1 ↦ true`,
+`0 ↦ false`).  Certificate matrix checks then compare `Bool`s, so the kernel never builds a
+`ZMod 2`/`Fin 2` element or runs its decidable equality; `lambdaCompute_eq_bool` reads the `Bool`
+back into `ZMod 2`, recovering the original character value. -/
+
+/-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
+residues (where `psiCompute = 0`). -/
+def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
+  if jacobiFast (a.val : ℤ) p = 1 then false else true
+
+/-- `Bool` mirror of `lambdaCompute`, with `false`/`true` in place of `0`/`1 : ZMod 2`. -/
+def lambdaComputeBool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+  if (x.den : ZMod p) = 0 then false
+  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ a₆ p θ)
+       else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
+
+/-- `psiCompute` is `psiComputeBool` read into `ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
+theorem psiCompute_eq_bool (p : ℕ) (a : ZMod p) :
+    psiCompute p a = if psiComputeBool p a then 1 else 0 := by
+  rw [psiCompute, psiComputeBool]; split <;> rfl
+
+/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`.  This lets a certificate check the
+character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
+theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+    lambdaCompute a₂ a₄ a₆ p θ x = if lambdaComputeBool a₂ a₄ a₆ p θ x then 1 else 0 := by
+  rw [lambdaCompute, lambdaComputeBool]
+  by_cases hd : (x.den : ZMod p) = 0
+  · rw [if_pos hd, if_pos hd]; rfl
+  · rw [if_neg hd, if_neg hd]
+    by_cases hα : (x.num : ZMod p) - θ * (x.den : ZMod p) = 0
+    · rw [if_pos hα, if_pos hα, psiCompute_eq_bool]
+    · rw [if_neg hα, if_neg hα, psiCompute_eq_bool]
+
 /-! ### Worked examples: kernel reduction by `rfl`
 
 Each of these closes by `rfl`, confirming the reciprocity evaluator reduces in the kernel. -/
