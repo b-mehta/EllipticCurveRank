@@ -46,25 +46,19 @@ theorem passes_true_iff {x : ℕ} {L : List ℕ} :
   | nil => simp
   | cons a t ih =>
     rw [passes_cons]
-    simp only [Bool.and'_eq_and, Bool.or'_eq_or, Bool.and_eq_true, Bool.or_eq_true, Nat.ble_eq,
-      List.mem_cons, forall_eq_or_imp, ih]
-    constructor
-    · rintro ⟨h1, h2⟩
-      exact ⟨h1.imp (fun h ↦ by omega) id, h2⟩
-    · rintro ⟨h1, h2⟩
-      exact ⟨h1.imp (fun h ↦ by omega) id, h2⟩
+    simp only [Bool.and'_eq_and, Bool.or'_eq_or, Bool.and_eq_true, Bool.or_eq_true, Nat.ble_eq]
+    grind
 
 /-- The primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`. -/
-theorem _root_.Nat.primes_below_23 (p : ℕ) (hp : p.Prime) (hlt : p < 23) :
+theorem _root_.Nat.primes_below_23 (p : ℕ) (hlt : p < 23) (hp : p.Prime) :
     p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := by
-  have h2 := hp.two_le
-  interval_cases p <;> revert hp <;> decide
+  decide +revert +kernel
 
 /-- If `2 ≤ n < 529 = 23²` and `n` survives trial division by the primes below `23`, then `n` is
 prime.  A composite `n` has a prime factor `p ≤ √n < 23`, hence `p ∈ [2,3,5,7,11,13,17,19]` and
 `p ∣ n` with `p < n`, so `passes n … = false` — contradiction. -/
 theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
-    (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19] = true) : Nat.Prime n := by
+    (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : Nat.Prime n := by
   by_contra hnp
   have hn0 : 0 < n := by omega
   set p := n.minFac with hp
@@ -76,7 +70,7 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
     have h23 : (23 : ℕ) ^ 2 ≤ p ^ 2 := Nat.pow_le_pow_left (Nat.not_lt.mp hge) 2
     norm_num at h23
     omega
-  have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := Nat.primes_below_23 p hpp hplt23
+  have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := Nat.primes_below_23 p hplt23 hpp
   have hpltn : p < n := by nlinarith [hpp.two_le, hsq]
   rcases (passes_true_iff.mp hpass) p hpmem with hmod | hle
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp hpdvd)
