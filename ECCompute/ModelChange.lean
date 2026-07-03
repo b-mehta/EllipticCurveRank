@@ -7,7 +7,7 @@ import ECCompute.Descent.Defs
 import ECCompute.ModelIso
 
 /-!
-# The general-to-integer-short-model bridge
+# The general-to-integer-short-model change of variables
 
 `ECCompute.Soundness.rank_ge_of_certificate` proves the certified rank lower bound on the
 **integer short model** `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆` with `A₂ A₄ A₆ : ℤ`), which
@@ -46,7 +46,7 @@ the facts that negation, the slope, and the sum coordinates each scale by the ap
 `v` (`negY_scale`, `slope_scale`, `addX_scale`, `addY_scale`).
 -/
 
-namespace ECCompute.ModelBridge
+namespace ECCompute.ModelChange
 
 open WeierstrassCurve WeierstrassCurve.Affine ModelIso
 
@@ -251,36 +251,36 @@ def generalToShortModelEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
         · rw [bwd_some, fwd_some]; exact pointSome_congr rfl (by ring)⟩
     (fwd_map_add a₁ a₂ a₃ a₄ a₆)
 
-/-! ## The integral short model and the bridge -/
+/-! ## The integral short model and the change of variables -/
 
 /-- The `a₂` coefficient of the integral short model: `A₂ = a₁² + 4a₂ = b₂`. -/
-def bridgeA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
+def intShortA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
 
 /-- The `a₄` coefficient of the integral short model: `A₄ = 16a₄ + 8a₁a₃ = 8·b₄`. -/
-def bridgeA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
+def intShortA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
 
 /-- The `a₆` coefficient of the integral short model: `A₆ = 64a₆ + 16a₃² = 16·b₆`. -/
-def bridgeA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
+def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
 
 /-- The integral short model `curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
 integral Weierstrass curve `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
-def bridgeCurve (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  curve (bridgeA₂ a₁ a₂) (bridgeA₄ a₁ a₃ a₄) (bridgeA₆ a₃ a₆)
+def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
+  curve (intShortA₂ a₁ a₂) (intShortA₄ a₁ a₃ a₄) (intShortA₆ a₃ a₆)
 
-/-- **The general-to-integer-short-model bridge.**  The composite change of variables
+/-- **The general-to-integer-short-model change of variables.**  The composite change of variables
 `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by `u = 1/2`) is a group isomorphism from
 the general integral model `toCurveQ a₁ a₂ a₃ a₄ a₆` to the integral short model
-`bridgeCurve a₁ a₂ a₃ a₄ a₆ = curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)`, on which the descent
+`intShortModel a₁ a₂ a₃ a₄ a₆ = curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)`, on which the descent
 character and hence `Soundness.rank_ge_of_certificate` are stated. -/
 def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (bridgeCurve a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
+    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
   (generalToShortModelEquiv a₁ a₂ a₃ a₄ a₆).trans <|
-    scaleEquiv (W := shortModel a₁ a₂ a₃ a₄ a₆) (W' := bridgeCurve a₁ a₂ a₃ a₄ a₆) (v := 2)
+    scaleEquiv (W := shortModel a₁ a₂ a₃ a₄ a₆) (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       two_ne_zero
-      (by simp only [bridgeCurve, curve, shortModel_a₁, mul_zero])
-      (by simp only [bridgeCurve, curve, bridgeA₂, shortModel_a₂]; push_cast; ring)
-      (by simp only [bridgeCurve, curve, shortModel_a₃, mul_zero])
-      (by simp only [bridgeCurve, curve, bridgeA₄, shortModel_a₄]; push_cast; ring)
-      (by simp only [bridgeCurve, curve, bridgeA₆, shortModel_a₆]; push_cast; ring)
+      (by simp only [intShortModel, curve, shortModel_a₁, mul_zero])
+      (by simp only [intShortModel, curve, intShortA₂, shortModel_a₂]; push_cast; ring)
+      (by simp only [intShortModel, curve, shortModel_a₃, mul_zero])
+      (by simp only [intShortModel, curve, intShortA₄, shortModel_a₄]; push_cast; ring)
+      (by simp only [intShortModel, curve, intShortA₆, shortModel_a₆]; push_cast; ring)
 
-end ECCompute.ModelBridge
+end ECCompute.ModelChange

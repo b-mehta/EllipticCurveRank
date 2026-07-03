@@ -3,12 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Soundness
-import ECCompute.ModelBridge
-import ECCompute.QuickRfl
-import ECCompute.CheckMatrix
-import ECCompute.Primes
-import Mathlib.Tactic.NormNum.Prime
+import ECCompute.CurveCertificate
 
 /-!
 # A second curve of rank at least 29
@@ -25,7 +20,7 @@ The proof is a descent-character certificate in the sense of `ECCompute.Soundnes
 `ECCompute.RankTwentyThree` line for line. All numeric data is produced on the **integral short
 model** `curve 1 A₄ A₆` with `A₄ = 16a₄` and `A₆ = 64a₆` (here `a₁ = 1`, `a₂ = a₃ = 0`, so the
 `b`-invariant shifts vanish), to which the general model is carried by the group isomorphism
-`ModelBridge.generalToShortEquiv` (complete the square, then scale `(x, y) ↦ (4x, 8y)`, so a
+`ModelChange.generalToShortEquiv` (complete the square, then scale `(x, y) ↦ (4x, 8y)`, so a
 rational point `(x, y)` maps to `(4x, 8y + 4x)`).
 
 * `rank29Pt` — the 29 points on the short model. The one fractional `x`-coordinate is stored in
@@ -43,7 +38,7 @@ Every referee obligation is discharged by kernel computation (`rfl`) or `norm_nu
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelBridge
+open WeierstrassCurve ModelIso ModelChange
 
 -- The `rfl` certificate checks (`checkInv`, the `matB` entries) reduce large `Nat` recursions in
 -- the elaborator, so raise the recursion limit for the whole file.
@@ -69,13 +64,6 @@ abbrev ekShortA₆ : ℤ :=
 
 Certified to have Mordell–Weil rank at least `29` in `elkiesKlagsbrun_hasRankGE_29`. -/
 def curveElkiesKlagsbrun : WeierstrassCurve ℚ := toCurveQ 1 0 0 ekA₄ ekA₆
-
-/-- A reduced-form `Rat.mk'` equals the corresponding division of numerator by denominator.
-Used to rewrite the `Rat.mk'` `x`-coordinate back to `_ / _` form for `norm_num`. -/
-private theorem mk'_eq_div (a : ℤ) (b : ℕ) (h1 h2) :
-    (Rat.mk' a b h1 h2 : ℚ) = (a : ℚ) / (b : ℚ) := by
-  have := Rat.num_div_den (Rat.mk' a b h1 h2)
-  simpa using this.symm
 
 /-- The 29 rational points of the second curve carried to the integral short model
 `curve 1 ekShortA₄ ekShortA₆` by `(x, y) ↦ (4x, 8y + 4x)`.  The one fractional `x`-coordinate is
@@ -187,18 +175,10 @@ theorem rank29_htor :
 /-- **The Elkies–Klagsbrun curve has Mordell–Weil rank at least 29.**  Fully certified: the descent
 characters of the 29 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
 no rational 2-torsion, so its rank over `ℚ` is at least `29`. -/
-theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 := by
-  unfold curveElkiesKlagsbrun
-  have key : HasRankGE (curve rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆)
-      (rank29Cert.rho - rank29Cert.t) :=
-    rank_ge_of_certificate rank29Cert rank29Pt rank29Lab rank29_hpt rank29_hlabP rank29_hlabC
-      rank29_hB rank29_hinv rfl (by decide) rank29_htor
-  have hbc : bridgeCurve 1 0 0 ekA₄ ekA₆ = curve rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆ := by
-    simp only [bridgeCurve, bridgeA₂, bridgeA₄, bridgeA₆, rank29Cert, curve, ekA₄, ekA₆, ekShortA₄,
-      ekShortA₆]
-    norm_num
-  have hbridge : HasRankGE (bridgeCurve 1 0 0 ekA₄ ekA₆) 29 := by
-    rw [hbc]; exact key
-  exact hasRankGE_of_addEquiv (generalToShortEquiv 1 0 0 ekA₄ ekA₆) hbridge
+theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 :=
+  hasRankGE_of_certificate 1 0 0 ekA₄ ekA₆ rank29Cert rank29Pt rank29Lab
+    (by simp only [intShortModel, intShortA₂, intShortA₄, intShortA₆, rank29Cert, curve, ekA₄, ekA₆,
+      ekShortA₄, ekShortA₆]; norm_num)
+    rank29_hpt rank29_hlabP rank29_hlabC rank29_hB rank29_hinv rfl (by decide) rank29_htor
 
 end ECCompute

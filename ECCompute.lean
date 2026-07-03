@@ -1,7 +1,7 @@
 import ECCompute.Certificate
 import ECCompute.ColumnCheck
 import ECCompute.F2Invert
-import ECCompute.ModelBridge
+import ECCompute.ModelChange
 import ECCompute.ModelIso
 import ECCompute.RankDeduction
 import ECCompute.Torsion
@@ -16,6 +16,7 @@ import ECCompute.LambdaCompute
 import ECCompute.Primes
 import ECCompute.QuickRfl
 import ECCompute.CheckMatrix
+import ECCompute.CurveCertificate
 import ECCompute.RankTwentyThree
 import ECCompute.RankTwentyNine
 import ECCompute.Soundness

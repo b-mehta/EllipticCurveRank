@@ -320,7 +320,7 @@ noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp ((Point.congr (map_eq_reducedCurve a₂ a₄ a₆ p)).comp (redHom a₂ a₄ a₆ p hΔ))
 
-/-- **The bridge.**  On each point, `λ_{p,θ}` agrees with the reduction composition
+/-- **The factorisation.**  On each point, `λ_{p,θ}` agrees with the reduction composition
 `εp_finite θ ∘ red_p`.  The three cases mirror the definition of `red_p`: the origin (both `0`),
 `p ∤ x.den` (reduced affine coordinates, via `lambda_some_of_den_ne` and `red_p_of_den_ne`), and
 `p ∣ x.den` (reduces to the origin, via `lambda_some_of_den_zero` and `red_p_of_den_zero`). -/
@@ -338,7 +338,7 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
         Point.congr_some, εpHom_apply, εp_finite_some]
       simp only [xbar]
 
-/-- The bridge, spelled out with the reduction map: `λ_{p,θ} P = εp_finite θ (red_p P)` (up to the
+/-- The factorisation, spelled out with the reduction map: `λ_{p,θ} P = εp_finite θ (red_p P)` (up to the
 transport `Point.congr` across `map_eq_reducedCurve`). -/
 theorem lambda_eq_εp_finite_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :

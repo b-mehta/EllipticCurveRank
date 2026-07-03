@@ -53,7 +53,7 @@ descent character lives:
 5. **T8.** `RankDeduction.rank_ge` combines linear independence with the torsion cardinality to
    conclude `ρ ≤ finrank ℤ H + t`, i.e. `finrank ℤ H ≥ ρ − t`.
 
-## Scope and the general-model bridge (documented gap)
+## Scope and the general-model transfer (documented gap)
 
 The theorem here is stated on the **short integral model** `curve a₂ a₄ a₆`, which is where the
 descent character `lambda` is defined.  A general integral Weierstrass model `toCurveQ a₁ … a₆`
@@ -61,7 +61,7 @@ is carried to a short model by completing the square (`ModelIso.nonempty_pointAd
 transfers along that isomorphism — the general helper `ECCompute.hasRankGE_of_addEquiv` performs
 exactly this transfer along any `AddEquiv` of Mordell–Weil groups.
 
-The one remaining bridge, deferred to the certificate-elaborator step (T9 part 2 / T10), is that
+The one remaining step, deferred to the certificate-elaborator step (T9 part 2 / T10), is that
 the short model produced by completing the square has *integer* coefficients so that `lambda`
 applies verbatim.  Completing the square `y ↦ y − (a₁x + a₃)/2` produces
 `shortModel` with the *rational* coefficients `a₂ + a₁²/4, a₄ + a₁a₃/2, a₆ + a₃²/4`

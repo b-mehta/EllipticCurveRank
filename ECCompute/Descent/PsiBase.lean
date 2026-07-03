@@ -16,7 +16,7 @@ shared between the two sides of the descent factorisation `λ = εp_finite ∘ r
 `ECCompute.Descent` (the rational character `λ`) and
 `ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εp_finite`).  Splitting
 them out breaks the import cycle that would otherwise arise once `ECCompute.Descent` imports the
-reduction files for the bridge.
+reduction files for the factorisation.
 
 ## Main declarations
 

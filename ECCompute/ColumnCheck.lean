@@ -18,7 +18,7 @@ hypotheses of the descent lemma packaged as `ECCompute.DescentHyp`:
 
 This file provides a **kernel-reducible** boolean check `checkLabel` that decides all three
 by `Int`/`Nat` `%` and `beq` — kernel-accelerated operations, so a concrete instance closes
-by `rfl` with no `decide` and no `native_decide` on the reduction path.  The bridge lemma
+by `rfl` with no `decide` and no `native_decide` on the reduction path.  The correctness lemma
 `descentHyp_of_checkLabel` turns `checkLabel … = true` (plus a separately supplied primality
 proof) into a `DescentHyp`.
 
@@ -30,7 +30,7 @@ compact and kernel-checkable; `example_descentHyp` shows the whole assembly.
 * `ECCompute.discrInt`               — the integer discriminant of `curve a₂ a₄ a₆`.
 * `ECCompute.curve_Δ_num`            — `(curve …).Δ.num = discrInt …`.
 * `ECCompute.checkLabel`             — the kernel-reducible boolean check.
-* `ECCompute.descentHyp_of_checkLabel` — the bridge to `DescentHyp`.
+* `ECCompute.descentHyp_of_checkLabel` — the passage to `DescentHyp`.
 -/
 
 open WeierstrassCurve
@@ -67,7 +67,7 @@ def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   (discrInt a₂ a₄ a₆ % (p : ℤ) != 0) &&
   ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆) % (p : ℤ) == 0)
 
-/-- **Bridge lemma.**  If the kernel check passes and `p` is prime, the label `(p, ↑θ)`
+/-- **Correctness lemma.**  If the kernel check passes and `p` is prime, the label `(p, ↑θ)`
 satisfies `DescentHyp`.  Primality is supplied separately (discharged by `norm_num` for the
 small label primes; see `example_descentHyp`). -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)

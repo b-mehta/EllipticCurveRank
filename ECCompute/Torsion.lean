@@ -26,7 +26,7 @@ no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
 * `ECCompute.hasRootMod c₂ c₁ c₀ ℓ` : a kernel-reducible `Bool`, `true` iff the monic cubic
   `u³ + c₂u² + c₁u + c₀` has a root modulo `ℓ` (checked over residues `0, …, ℓ-1`). No
   `native_decide`.
-* `ECCompute.no_nonzero_twoTorsion_of_hasRootMod_eq_false` : the **t = 0 bridge** — if
+* `ECCompute.no_nonzero_twoTorsion_of_hasRootMod_eq_false` : the **t = 0 lemma** — if
   `hasRootMod W.b₂ (8 * W.b₄) (16 * W.b₆) ℓ = false`, then every 2-torsion point of `W` is `0`.
 
 The correspondence used is elementary (`linear_combination`) rather than routed through mathlib's
@@ -79,10 +79,10 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
   rw [beq_eq_false_iff_ne] at this
   exact this hcong
 
-/-! ## The t = 0 bridge -/
+/-! ## The t = 0 lemma -/
 
 open Polynomial in
-/-- **t = 0 bridge.** Let `W` be the Weierstrass curve over `ℚ` with integer coefficients
+/-- **t = 0 lemma.** Let `W` be the Weierstrass curve over `ℚ` with integer coefficients
 `a₁ a₂ a₃ a₄ a₆`, and let `ℓ ≠ 0`. If the monic 2-division cubic
 `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then `W` has no nonzero rational 2-torsion:
 every point `P` with `P + P = 0` is `0`.

@@ -20,7 +20,7 @@ equation
 holds in `ℚ`. The check is performed with exact integer arithmetic: it clears the denominators of
 `x` and `y` and compares the two sides as integers, so it reduces in the kernel by `rfl` using only
 GMP-backed `Int` operations (no `Rat.add`/`Rat.mul`, which are `@[irreducible]` and do not reduce).
-`chkZ_iff` is the bridge lemma: the checker returns `true` if and only if the point satisfies
+`chkZ_iff` is the correctness lemma: the checker returns `true` if and only if the point satisfies
 `(toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y`. `checkPoints` lifts the check to a list of
 points.
 
@@ -59,7 +59,7 @@ def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
     == xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
         + a₆ * xd ^ 3 * yd ^ 2
 
-/-- **Bridge lemma.** The kernel-reducible checker `chkZ` returns `true` if and only if the point
+/-- **Correctness lemma.** The kernel-reducible checker `chkZ` returns `true` if and only if the point
 `(x, y)` satisfies the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
@@ -78,7 +78,7 @@ theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   · linear_combination h
   · linear_combination (x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2 * h
 
-/-- The bridge lemma phrased with the raw Weierstrass equation rather than `Equation`. -/
+/-- The correctness lemma phrased with the raw Weierstrass equation rather than `Equation`. -/
 theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by

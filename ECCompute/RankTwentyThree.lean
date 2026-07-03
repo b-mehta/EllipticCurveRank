@@ -3,12 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Soundness
-import ECCompute.ModelBridge
-import ECCompute.QuickRfl
-import ECCompute.CheckMatrix
-import ECCompute.Primes
-import Mathlib.Tactic.NormNum.Prime
+import ECCompute.CurveCertificate
 
 /-!
 # The Martin–McMillen curve has rank at least 23 (T10)
@@ -24,7 +19,7 @@ over `ℚ` has rank at least `23`, i.e. `ECCompute.HasRankGE (toCurveQ 1 0 1 a�
 The proof is a descent-character certificate in the sense of `ECCompute.Soundness`.  All numeric
 data is produced on the **integral short model** `curve 1 A₄ A₆` with
 `A₄ = 16a₄ + 8` and `A₆ = 64a₆ + 16`, to which the general model is carried by the group
-isomorphism `ModelBridge.generalToShortEquiv` (complete the square, then scale `(x, y) ↦ (4x, 8y)`,
+isomorphism `ModelChange.generalToShortEquiv` (complete the square, then scale `(x, y) ↦ (4x, 8y)`,
 so a rational point `(x, y)` maps to `(4x, 8y + 4x + 4)`).
 
 * `rank23Pt` — the 23 points on the short model.  Fractional `x`-coordinates are stored in reduced
@@ -43,7 +38,7 @@ Every referee obligation is discharged by kernel computation (`rfl`) or `norm_nu
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelBridge
+open WeierstrassCurve ModelIso ModelChange
 
 /-- The `a₄` coefficient of the Martin–McMillen curve (general model). -/
 abbrev mmA₄ : ℤ := -19252966408674012828065964616418441723
@@ -64,12 +59,6 @@ abbrev sA₆ : ℤ := 2091872046573848080507094212572930834938076355606119296400
 
 Certified to have Mordell–Weil rank at least `23` in `martinMcMillen_hasRankGE_23`. -/
 def curveMartinMcMillen : WeierstrassCurve ℚ := toCurveQ 1 0 1 mmA₄ mmA₆
-
-/-- A reduced-form `Rat.mk'` equals the corresponding division of numerator by denominator.
-Used to rewrite the `Rat.mk'` `x`-coordinates back to `_ / _` form for `norm_num`. -/
-theorem mk'_eq_div (a : ℤ) (b : ℕ) (h1 h2) : (Rat.mk' a b h1 h2 : ℚ) = (a : ℚ) / (b : ℚ) := by
-  have := Rat.num_div_den (Rat.mk' a b h1 h2)
-  simpa using this.symm
 
 /-- The 23 rational points of the Martin–McMillen curve carried to the integral short model
 `curve 1 sA₄ sA₆` by `(x, y) ↦ (4x, 8y + 4x + 4)`.  Fractional `x`-coordinates are in reduced
@@ -173,17 +162,10 @@ theorem rank23_htor :
 /-- **The Martin–McMillen curve has Mordell–Weil rank at least 23.**  Fully certified: the descent
 characters of the 23 points are `𝔽₂`-linearly independent (`matB` is invertible) and the curve has
 no rational 2-torsion, so its rank over `ℚ` is at least `23`. -/
-theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 := by
-  unfold curveMartinMcMillen
-  have key : HasRankGE (curve rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆)
-      (rank23Cert.rho - rank23Cert.t) :=
-    rank_ge_of_certificate rank23Cert rank23Pt rank23Lab rank23_hpt rank23_hlabP rank23_hlabC
-      rank23_hB rank23_hinv rfl (by decide) rank23_htor
-  have hbc : bridgeCurve 1 0 1 mmA₄ mmA₆ = curve rank23Cert.a₂ rank23Cert.a₄ rank23Cert.a₆ := by
-    simp only [bridgeCurve, bridgeA₂, bridgeA₄, bridgeA₆, rank23Cert, curve, mmA₄, mmA₆, sA₄, sA₆]
-    norm_num
-  have hbridge : HasRankGE (bridgeCurve 1 0 1 mmA₄ mmA₆) 23 := by
-    rw [hbc]; exact key
-  exact hasRankGE_of_addEquiv (generalToShortEquiv 1 0 1 mmA₄ mmA₆) hbridge
+theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 :=
+  hasRankGE_of_certificate 1 0 1 mmA₄ mmA₆ rank23Cert rank23Pt rank23Lab
+    (by simp only [intShortModel, intShortA₂, intShortA₄, intShortA₆, rank23Cert, curve, mmA₄, mmA₆,
+      sA₄, sA₆]; norm_num)
+    rank23_hpt rank23_hlabP rank23_hlabC rank23_hB rank23_hinv rfl (by decide) rank23_htor
 
 end ECCompute

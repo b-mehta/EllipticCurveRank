@@ -30,7 +30,7 @@ and `Bool.xor` — no `Finset.sum`, no `Decidable.decide`.
 ## Main results
 
 * `checkInv` : the `Bool` certificate checker.
-* `checkInv_isUnit` : the bridge lemma, `checkInv n B M = true → IsUnit (toMat B n)`.
+* `checkInv_isUnit` : the correctness lemma, `checkInv n B M = true → IsUnit (toMat B n)`.
 -/
 
 namespace ECCompute.F2Invert
@@ -137,7 +137,7 @@ private theorem xor_add (p q : Bool) :
     (if Bool.xor p q then (1 : ZMod 2) else 0) = (if p then 1 else 0) + (if q then 1 else 0) := by
   cases p <;> cases q <;> decide
 
-/-- Bridge between the recursive parity and the `Finset.range` sum over 𝔽₂ indicators. -/
+/-- Link between the recursive parity and the `Finset.range` sum over 𝔽₂ indicators. -/
 theorem popParity_sum (fuel a : Nat) :
     (if popParity fuel a then (1 : ZMod 2) else 0)
       = ∑ j ∈ Finset.range fuel, (if a.testBit j then (1 : ZMod 2) else 0) := by
@@ -147,7 +147,7 @@ theorem popParity_sum (fuel a : Nat) :
     rw [popParity, Finset.sum_range_succ', xor_add, add_comm, ih]
     simp [Nat.testBit_succ]
 
-/-- **Bridge lemma.** If the kernel-reducible checker `checkInv n B M` returns `true`, then the
+/-- **Correctness lemma.** If the kernel-reducible checker `checkInv n B M` returns `true`, then the
 matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
     IsUnit (toMat B n) := by
