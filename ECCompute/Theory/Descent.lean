@@ -3,14 +3,14 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Math.Descent.Defs
-import ECCompute.Math.Descent.DenominatorSquare
-import ECCompute.Math.Descent.Collinearity
-import ECCompute.Math.Descent.ReducedArith
-import ECCompute.Math.Descent.PsiBase
-import ECCompute.Math.Descent.Reduction.Def
-import ECCompute.Math.Descent.Reduction.Hom
-import ECCompute.Math.Descent.Reduction.EpsFinite
+import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.DenominatorSquare
+import ECCompute.Theory.Descent.Collinearity
+import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.Theory.Descent.PsiBase
+import ECCompute.Theory.Descent.Reduction.Def
+import ECCompute.Theory.Descent.Reduction.Hom
+import ECCompute.Theory.Descent.Reduction.EpsFinite
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod

@@ -3,8 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Math.Descent.Defs
-import ECCompute.Math.ModelIso
+import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.ModelIso
 
 /-!
 # The general-to-integer-short-model change of variables

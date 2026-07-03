@@ -1,20 +1,20 @@
 -- Foundations
 import ECCompute.Fold
-import ECCompute.Certificate
+import ECCompute.Certify.Certificate
 
 -- Pure mathematics
-import ECCompute.Math.Descent
-import ECCompute.Math.Descent.Defs
-import ECCompute.Math.Descent.ReducedArith
-import ECCompute.Math.Descent.DenominatorSquare
-import ECCompute.Math.Descent.Collinearity
-import ECCompute.Math.Descent.PsiBase
-import ECCompute.Math.Descent.Reduction.EpsFinite
-import ECCompute.Math.Descent.Reduction.Hom
-import ECCompute.Math.LambdaCompute
-import ECCompute.Math.RankDeduction
-import ECCompute.Math.ModelChange
-import ECCompute.Math.ModelIso
+import ECCompute.Theory.Descent
+import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.Theory.Descent.DenominatorSquare
+import ECCompute.Theory.Descent.Collinearity
+import ECCompute.Theory.Descent.PsiBase
+import ECCompute.Theory.Descent.Reduction.EpsFinite
+import ECCompute.Theory.Descent.Reduction.Hom
+import ECCompute.Theory.LambdaCompute
+import ECCompute.Theory.RankDeduction
+import ECCompute.Theory.ModelChange
+import ECCompute.Theory.ModelIso
 
 -- Certification checkers
 import ECCompute.Check.F2Invert
@@ -29,7 +29,7 @@ import ECCompute.Check.Points
 import ECCompute.MainTheorem
 
 -- Certificate tactic
-import ECCompute.CertifyEval
+import ECCompute.Certify.CertifyEval
 import ECCompute.Certify
 
 -- Certified curves

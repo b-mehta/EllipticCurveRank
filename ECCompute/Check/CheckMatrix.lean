@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Check.F2Invert
-import ECCompute.Math.LambdaCompute
+import ECCompute.Theory.LambdaCompute
 
 /-!
 # Aggregate descent-character matrix check

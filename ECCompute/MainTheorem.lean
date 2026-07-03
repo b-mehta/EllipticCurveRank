@@ -3,17 +3,17 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Certificate
+import ECCompute.Certify.Certificate
 import ECCompute.Check.ColumnCheck
 import ECCompute.Check.Points
 import ECCompute.Check.Primes
 import ECCompute.Check.CheckMatrix
 import ECCompute.Check.QuickRfl
 import ECCompute.Check.Torsion
-import ECCompute.Math.Descent
-import ECCompute.Math.LambdaCompute
-import ECCompute.Math.RankDeduction
-import ECCompute.Math.ModelChange
+import ECCompute.Theory.Descent
+import ECCompute.Theory.LambdaCompute
+import ECCompute.Theory.RankDeduction
+import ECCompute.Theory.ModelChange
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
 import Mathlib.Tactic.NormNum.Prime

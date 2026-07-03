@@ -3,9 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Math.Descent.Defs
-import ECCompute.Math.Descent.DenominatorSquare
-import ECCompute.Math.Descent.Collinearity
+import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.DenominatorSquare
+import ECCompute.Theory.Descent.Collinearity
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.MainTheorem
-import ECCompute.CertifyEval
+import ECCompute.Certify.CertifyEval
 
 /-!
 # The `certify_curve` tactic

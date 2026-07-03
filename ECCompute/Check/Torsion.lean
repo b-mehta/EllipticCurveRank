@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
-import ECCompute.Math.ModelIso
+import ECCompute.Theory.ModelIso
 
 /-!
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
