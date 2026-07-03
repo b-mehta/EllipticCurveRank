@@ -64,13 +64,25 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
     rcases Nat.mod_two_eq_zero_or_one a with h | h <;> rw [h] <;>
       cases popParity f (a / 2) <;> rfl
 
-/-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is
-given by rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension.
-`noncomputable` because it calls `popParityK`; the kernel reduces it regardless (via `rfl`). -/
+/-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
+structurally over the columns of `M` (running column index `k`), comparing the parity of
+`bi &&& mₖ` against the diagonal indicator `i == k`.  No positional list access. -/
+noncomputable def checkInvRow (bi i n : Nat) : Nat → List Nat → Bool
+  | _, [] => true
+  | k, m :: ms => (popParityK n (bi &&& m) == (i == k)).and' (checkInvRow bi i n (k + 1) ms)
+
+/-- Fold structurally over the rows of `B` (running row index `i`), checking each row against the
+columns of `M` with `checkInvRow`. -/
+noncomputable def checkInvGo (n : Nat) (M : List Nat) : Nat → List Nat → Bool
+  | _, [] => true
+  | i, b :: bs => (checkInvRow b i n 0 M).and' (checkInvGo n M (i + 1) bs)
+
+/-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
+rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension.  A structural double fold
+over the rows of `B` and the columns of `M` — no `allBelow` index and no `getD`.  `noncomputable`
+because it calls `popParityK`; the kernel reduces it regardless (via `rfl`). -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  allBelow n fun i =>
-    allBelow n fun k =>
-      popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)
+  checkInvGo n M 0 B
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -100,10 +112,56 @@ theorem popParity_sum (fuel a : Nat) :
     rw [popParity, Finset.sum_range_succ', xor_add, add_comm, ih]
     simp [Nat.testBit_succ]
 
-/-- **Correctness lemma.** If the kernel-reducible checker `checkInv n B M` returns `true`, then the
-matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
-theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
-    IsUnit (toMat B n) := by
+/-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
+each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
+theorem checkInvRow_true {bi i n : Nat} :
+    ∀ {k : Nat} {M : List Nat}, checkInvRow bi i n k M = true →
+      ∀ k', k' < M.length → (popParityK n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
+  intro k M
+  induction M generalizing k with
+  | nil => intro _ k' hk'; exact absurd hk' (Nat.not_lt_zero k')
+  | cons m ms ih =>
+    intro hc k' hk'
+    simp only [checkInvRow, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    obtain ⟨h0, hrec⟩ := hc
+    cases k' with
+    | zero => simpa using h0
+    | succ k'' =>
+      have hh := ih hrec k'' (by simpa using hk')
+      have hidx : k + (k'' + 1) = k + 1 + k'' := by omega
+      rw [hidx]; exact hh
+
+/-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
+column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
+theorem checkInvGo_true {n : Nat} {M : List Nat} :
+    ∀ {i : Nat} {B : List Nat}, checkInvGo n M i B = true →
+      ∀ i', i' < B.length → ∀ k', k' < M.length →
+        (popParityK n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
+  intro i B
+  induction B generalizing i with
+  | nil => intro _ i' hi'; exact absurd hi' (Nat.not_lt_zero i')
+  | cons b bs ih =>
+    intro hc i' hi' k' hk'
+    simp only [checkInvGo, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    obtain ⟨hrow, hrec⟩ := hc
+    cases i' with
+    | zero => simpa using checkInvRow_true hrow k' hk'
+    | succ i'' =>
+      have hh := ih hrec i'' (by simpa using hi') k' hk'
+      have hidx : i + (i'' + 1) = i + 1 + i'' := by omega
+      rw [hidx]; exact hh
+
+/-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
+theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
+    ∀ i k, i < B.length → k < M.length →
+      (popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
+  intro i k hi hk
+  simpa using checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
+
+/-- **Correctness lemma.** If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`,
+`M` have length `n`), then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
+theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen : M.length = n)
+    (h : checkInv n B M = true) : IsUnit (toMat B n) := by
   -- First: `B * M = 1` as matrices over `ZMod 2`.
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
@@ -112,8 +170,10 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
     rw [Fin.sum_univ_eq_sum_range
         (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
-    -- Unfold the checker to its pointwise form; `grind` reads off the `(i, k)` certificate.
-    simp only [checkInv, popParityK_eq_popParity, allBelow_eq_true] at h
+    -- Read off the `(i, k)` certificate; `grind` matches it against the diagonal.
+    have hb := checkInv_true h i.val k.val
+      (by rw [hBlen]; exact i.isLt) (by rw [hMlen]; exact k.isLt)
+    rw [popParityK_eq_popParity] at hb
     grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact ⟨⟨toMat B n, toMatCols M n, key, mul_eq_one_comm.mp key⟩, rfl⟩
@@ -129,6 +189,6 @@ example : checkInv 3 [3, 6, 4] [1, 3, 7] = true := rfl
 
 /-- Hence the interpreted matrix is invertible over `𝔽₂`, end-to-end from the `rfl` certificate. -/
 example : IsUnit (toMat [3, 6, 4] 3) :=
-  checkInv_isUnit 3 [3, 6, 4] [1, 3, 7] rfl
+  checkInv_isUnit 3 [3, 6, 4] [1, 3, 7] rfl rfl rfl
 
 end ECCompute.F2Invert

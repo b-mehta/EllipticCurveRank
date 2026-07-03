@@ -75,10 +75,12 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hlenP : c.points.length = c.rho)
     (hlenL : c.labels.length = c.rho)
+    (hlenB : c.matB.length = c.rho)
+    (hlenM : c.matM.length = c.rho)
     (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
     (hlabP : checkPrimes c.labels = true)
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
-    (hB : checkB c.a₂ c.a₄ c.a₆ c.matB c.rho c.labels c.points = true)
+    (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (ht : c.t = 0)
     (htorP : c.torsionPrime ≠ 0)
@@ -106,7 +108,8 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     fun j => checkLabels_true hlabC _ (hmemL j)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
-      (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC' (checkB_true hB) hinv ht htorP htor
+      (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
+      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP htor
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

@@ -121,6 +121,8 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hB : ∀ i j : Fin c.rho,
         F2Invert.toMat c.matB c.rho i j
           = lambdaCompute c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+    (hBlen : c.matB.length = c.rho)
+    (hMlen : c.matM.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (ht : c.t = 0)
     (htorP : c.torsionPrime ≠ 0)
@@ -161,7 +163,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     exact (hB i j).symm
   -- T3: `B` is a unit, so its rows are `𝔽₂`-linearly independent.
   have hunit : IsUnit (F2Invert.toMat c.matB c.rho) :=
-    F2Invert.checkInv_isUnit c.rho c.matB c.matM hinv
+    F2Invert.checkInv_isUnit c.rho c.matB c.matM hBlen hMlen hinv
   have hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)) := by
     rw [hrow]
     exact Matrix.linearIndependent_rows_of_isUnit hunit
