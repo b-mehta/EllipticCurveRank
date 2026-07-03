@@ -47,22 +47,22 @@ theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
 /-- Kernel `Bool`: every label's prime component passes `checkPrime`.  A structural `allList` fold
 over the label `List`, so the kernel never applies a `Fin _ → _` family nor indexes positionally. -/
 noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
-  F2Invert.allList (fun l => checkPrime l.1) labels
+  allList (fun l => checkPrime l.1) labels
 
 theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
     ∀ l ∈ labels, (l.1).Prime := by
-  rw [checkPrimes, F2Invert.allList_eq_true] at h
+  rw [checkPrimes, allList_eq_true] at h
   exact fun l hl => checkPrime_true (h l hl)
 
 /-- Kernel `Bool`: every label passes `checkLabel`.  A structural `allList` fold over the label
 `List`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
-  F2Invert.allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
+  allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
 
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels = true) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
-  rw [checkLabels, F2Invert.allList_eq_true] at h
+  rw [checkLabels, allList_eq_true] at h
   exact h
 
 /-- **The certified rank lower bound for a general integral model.**  Given a certificate `c` whose

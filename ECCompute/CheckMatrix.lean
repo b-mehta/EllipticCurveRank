@@ -25,8 +25,8 @@ by `Nat < rho` via the kernel-reducible `allBelow` fold (dropping into `Fin rho`
 branch), so the kernel peels one index at a time rather than materialising `List.finRange`. -/
 noncomputable def checkB (a₂ a₄ a₆ : ℤ) (matB : List ℕ) (rho : ℕ)
     (lab : List (ℕ × ℤ)) (pt : List (ℚ × ℚ)) : Bool :=
-  F2Invert.allBelow rho fun i =>
-    F2Invert.allBelow rho fun j =>
+  allBelow rho fun i =>
+    allBelow rho fun j =>
       (matB.getD i 0).testBit j ==
         lambdaComputeBool a₂ a₄ a₆ (lab.getD j (0, 0)).1
           ((lab.getD j (0, 0)).2 : ZMod (lab.getD j (0, 0)).1) (pt.getD i (0, 0)).1
@@ -42,7 +42,7 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
       lambdaCompute a₂ a₄ a₆ (lab.getD j.val (0, 0)).1
         ((lab.getD j.val (0, 0)).2 : ZMod (lab.getD j.val (0, 0)).1) (pt.getD i.val (0, 0)).1 := by
   intro i j
-  simp only [checkB, F2Invert.allBelow_eq_true] at h
+  simp only [checkB, allBelow_eq_true] at h
   have := h i.val i.isLt j.val j.isLt
   rw [lambdaCompute_eq_bool]
   simp only [F2Invert.toMat]

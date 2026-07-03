@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import ECCompute.Fold
 
 /-!
 # Points on the curve and the completing-the-square model isomorphism
@@ -84,15 +85,16 @@ theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
       y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
   simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff, toCurveQ]
 
-/-- Check that every point in a list lies on `toCurveQ a₁ a₂ a₃ a₄ a₆`. Kernel-reducible. -/
-def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
-  pts.all fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2
+/-- Check that every point in a list lies on `toCurveQ a₁ a₂ a₃ a₄ a₆`. Kernel-reducible: a
+structural `allList` fold, so the kernel peels one point at a time, never indexing positionally. -/
+noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
+  allList (fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
 
 /-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
 theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts = true ↔
       ∀ p ∈ pts, (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation p.1 p.2 := by
-  simp only [checkPoints, List.all_eq_true, chkZ_iff]
+  simp only [checkPoints, allList_eq_true, chkZ_iff]
 
 /-! ## The completing-the-square model isomorphism -/
 

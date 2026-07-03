@@ -47,7 +47,7 @@ and `%`, so it reduces by `decide`/`rfl` in the kernel without `native_decide`.
 At a witness prime `ℓ`, `hasRootMod … ℓ = false` certifies that the cubic has no integer root,
 hence (after the `u = 4x` scaling) that the 2-division cubic has no rational root. -/
 noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
-  F2Invert.anyBelow ℓ fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
+  anyBelow ℓ fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
 
 /-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -74,7 +74,7 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
       cubicEval_modEq (ℓ : ℤ) hmod
     rw [hthis, hu, Int.zero_emod]
   -- but `hasRootMod = false` says no tested residue is a root — contradiction
-  rw [hasRootMod, F2Invert.anyBelow_eq_false] at h
+  rw [hasRootMod, anyBelow_eq_false] at h
   have := h r.toNat (by omega)
   rw [beq_eq_false_iff_ne] at this
   exact this hcong
