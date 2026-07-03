@@ -43,12 +43,33 @@ def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
+/-- Kernel-reducible variant of `popParity`, phrased directly with `Nat.rec` and `Bool.rec`
+so the kernel peels the low bit (`a.land 1`, `a.div 2`) and flips the running result with
+`Bool.not'` when the low bit is set. Equal to `popParity` (see `popParityK_eq_popParity`);
+`noncomputable` only because `Bool.not'` is, which the kernel reduces regardless. -/
+noncomputable def popParityK : Nat → Nat → Bool :=
+  Nat.rec (fun _ ↦ false)
+    fun _ r a ↦ ((a.land 1).beq 0).rec (r (a.div 2)).not' (r (a.div 2))
+
+/-- `popParityK` computes the same bit-parity as `popParity`. -/
+theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity fuel a := by
+  induction fuel generalizing a with
+  | zero => rfl
+  | succ f ih =>
+    change ((a.land 1).beq 0).rec (popParityK f (a.div 2)).not' (popParityK f (a.div 2))
+        = Bool.xor (a.testBit 0) (popParity f (a / 2))
+    rw [ih, Bool.not'_eq_not, Nat.testBit_zero, show a.div 2 = a / 2 from rfl,
+      show a.land 1 = a % 2 from Nat.and_one_is_mod a]
+    rcases Nat.mod_two_eq_zero_or_one a with h | h <;> rw [h] <;>
+      cases popParity f (a / 2) <;> rfl
+
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is
-given by rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. -/
-def checkInv (n : Nat) (B M : List Nat) : Bool :=
+given by rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension.
+`noncomputable` because it calls `popParityK`; the kernel reduces it regardless (via `rfl`). -/
+noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
   (List.range n).all fun i =>
     (List.range n).all fun k =>
-      popParity n (B.getD i 0 &&& M.getD k 0) == (i == k)
+      popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -91,7 +112,7 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (h : checkInv n B M = true) :
         (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
     -- Unfold the checker to its pointwise form; `grind` reads off the `(i, k)` certificate.
-    simp only [checkInv, List.all_eq_true, List.mem_range] at h
+    simp only [checkInv, popParityK_eq_popParity, List.all_eq_true, List.mem_range] at h
     grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact ⟨⟨toMat B n, toMatCols M n, key, mul_eq_one_comm.mp key⟩, rfl⟩
