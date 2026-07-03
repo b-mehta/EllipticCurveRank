@@ -4,76 +4,48 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certificate
-import ECCompute.ColumnCheck
-import ECCompute.Descent
-import ECCompute.LambdaCompute
-import ECCompute.RankDeduction
-import ECCompute.Torsion
+import ECCompute.Check.ColumnCheck
+import ECCompute.Check.Points
+import ECCompute.Check.Primes
+import ECCompute.Check.CheckMatrix
+import ECCompute.Check.QuickRfl
+import ECCompute.Check.Torsion
+import ECCompute.Math.Descent
+import ECCompute.Math.LambdaCompute
+import ECCompute.Math.RankDeduction
+import ECCompute.Math.ModelChange
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
+import Mathlib.Tactic.NormNum.Prime
 
 /-!
-# The soundness theorem (T9)
+# The main theory: a rank lower bound from a certificate
 
-This file assembles all the certified pieces of ECCompute into the culminating result
-`ECCompute.rank_ge_of_certificate`: **if every referee check on a certificate passes, then the
-Mordell–Weil rank of the curve over `ℚ` is at least `ρ − t`.**
+This file is the mathematical heart of ECCompute.  It assembles every certified piece into the
+statement that a passing certificate forces a lower bound on the Mordell–Weil rank of an elliptic
+curve over `ℚ`, and it delivers that bound for a *general* integral Weierstrass model.
 
-## The rank lower bound, stated honestly
+The rank lower bound is packaged as `ECCompute.HasRankGE W n`: *there is a finitely generated
+`ℤ`-submodule `H` of `W(ℚ)` with `n ≤ finrank ℤ H`.*  Because the rank of any subgroup bounds the
+rank of the ambient group from below, this is exactly `rank W(ℚ) ≥ n`, phrased without needing the
+Mordell–Weil theorem (`W(ℚ)` is never proven finitely generated).
 
-The full Mordell–Weil group `E(ℚ)` is not known to be finitely generated inside mathlib
-(the Mordell–Weil theorem is not available), so we cannot take `Module.finrank ℤ E(ℚ)` directly.
-Following the design's **subgroup trick**, the certificate instead exhibits a *finitely generated*
-subgroup `H = ⟨P₁, …, P_ρ⟩` of `E(ℚ)` whose free rank is at least `ρ − t`.  Because the rank of
-any subgroup is a lower bound for the rank of the ambient group, this certifies
-`rank E(ℚ) ≥ ρ − t` without ever proving `E(ℚ)` finitely generated.
+Two theorems build the bound:
 
-We package this as the predicate `ECCompute.HasRankGE W n`: *there is a finitely generated
-`ℤ`-submodule `H` of `W(ℚ)` with `n ≤ finrank ℤ H`.*  This is exactly the certified statement, and
-carries no hidden rank definition.
-
-## The chain of certified pieces
-
-Working on the **short integral model** `curve a₂ a₄ a₆` (`y² = x³ + a₂x² + a₄x + a₆`), where the
-descent character lives:
-
-1. **T5 / T1.** Each label `(pⱼ, θⱼ)` passing `checkLabel` (and prime) yields a `DescentHyp`
-   (`descentHyp_of_checkLabel`), hence the descent character `λ_{pⱼ,θⱼ}` is an additive
-   homomorphism `E(ℚ) →+ ZMod 2` (`lambdaHom`).  Bundling the `ρ` columns gives
-   `φ : E(ℚ) →+ (Fin ρ → ZMod 2)`.
-2. **T4.** The `(i, j)` entry of the certificate matrix `B` equals `λ_{pⱼ,θⱼ}(Pᵢ)`, because the
-   kernel-reducible `lambdaCompute` agrees with `lambda` (`lambdaCompute_eq`).  Thus
-   `φ(Pᵢ)` is the `i`-th row of `B`.
-3. **T3.** `checkInv` passing makes `toMat B` a unit (`checkInv_isUnit`), and an invertible square
-   matrix has `𝔽₂`-linearly independent rows (`Matrix.linearIndependent_rows_of_isUnit`).  Hence
-   the `φ(Pᵢ)` are linearly independent.
-4. **T7.** The torsion witness (`hasRootMod … = false`, giving `t = 0`) shows `E(ℚ)` has no nonzero
-   rational `2`-torsion (`no_nonzero_twoTorsion_of_hasRootMod_eq_false`), so `H[2]` is trivial and
-   `Nat.card H[2] = 1 = 2⁰`.
-5. **T8.** `RankDeduction.rank_ge` combines linear independence with the torsion cardinality to
-   conclude `ρ ≤ finrank ℤ H + t`, i.e. `finrank ℤ H ≥ ρ − t`.
-
-## Scope and the general-model transfer (documented gap)
-
-The theorem here is stated on the **short integral model** `curve a₂ a₄ a₆`, which is where the
-descent character `lambda` is defined.  A general integral Weierstrass model `toCurveQ a₁ … a₆`
-is carried to a short model by completing the square (`ModelIso.nonempty_pointAddEquiv`), and rank
-transfers along that isomorphism — the general helper `ECCompute.hasRankGE_of_addEquiv` performs
-exactly this transfer along any `AddEquiv` of Mordell–Weil groups.
-
-The one remaining step, deferred to the certificate-elaborator step (T9 part 2 / T10), is that
-the short model produced by completing the square has *integer* coefficients so that `lambda`
-applies verbatim.  Completing the square `y ↦ y − (a₁x + a₃)/2` produces
-`shortModel` with the *rational* coefficients `a₂ + a₁²/4, a₄ + a₁a₃/2, a₆ + a₃²/4`
-(`ModelIso.shortModel_a₂` etc.), whereas `lambda`/`DescentHyp`/`checkLabel` are written for the
-integer model `curve a₂ a₄ a₆`.  Supplying the integral short model together with the
-`AddEquiv` to it (which `hasRankGE_of_addEquiv` consumes) closes the general case; see the
-report accompanying this file for the exact interface.
+* `rank_ge_of_certificate` proves it on the **short integral model** `curve c.a₂ c.a₄ c.a₆`, where
+  the descent character lives.  It chains the certified pieces — descent hypotheses from
+  `checkLabel`, the character matrix identity from `lambdaCompute`, `𝔽₂`-linear independence of the
+  rows of an invertible matrix, the torsion witness, and the rank deduction.
+* `hasRankGE_of_certificate` is the **front door for a general model** `toCurveQ a₁ … a₆`:
+  `ModelChange.generalToShortEquiv` carries it to the short model by completing the square and
+  scaling, and `hasRankGE_of_addEquiv` transports the bound back along that isomorphism.  Each
+  instantiation supplies only the certificate data, the referee facts, and the single equation
+  identifying the certificate's short model with the change-of-variables target.
 -/
 
-open WeierstrassCurve Module
-
 namespace ECCompute
+
+open WeierstrassCurve Module ModelIso ModelChange
 
 /-- **The certified rank lower bound.**  `HasRankGE W n` holds when the Mordell–Weil group `W(ℚ)`
 contains a finitely generated `ℤ`-submodule of free rank at least `n`.  Since the rank of any
@@ -203,5 +175,58 @@ theorem rank_ge_of_certificate (c : Certificate)
   refine ⟨H, hHfin, ?_⟩
   rw [ht, Nat.sub_zero]
   simpa using hbound
+
+/-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
+private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
+    l.getD n d ∈ l := by
+  rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem h, Option.getD_some]
+  exact List.getElem_mem h
+
+/-- **The certified rank lower bound for a general integral model.**  Given a certificate `c` whose
+short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables target of the general model
+`toCurveQ a₁ a₂ a₃ a₄ a₆` (the equation `hmodel`), and the six referee facts of
+`rank_ge_of_certificate`, the Mordell–Weil rank of `toCurveQ a₁ a₂ a₃ a₄ a₆` over `ℚ` is at least
+`c.rho - c.t`.  The bound is proven on the short model and transported along
+`generalToShortEquiv`. -/
+theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
+    (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
+    (hlenP : c.points.length = c.rho)
+    (hlenL : c.labels.length = c.rho)
+    (hlenB : c.matB.length = c.rho)
+    (hlenM : c.matM.length = c.rho)
+    (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
+    (hlabP : checkPrimes c.labels = true)
+    (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
+    (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
+    (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
+    (ht : c.t = 0)
+    (htorP : c.torsionPrime ≠ 0)
+    (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false) :
+    HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) (c.rho - c.t) := by
+  -- The point/label families the soundness theorem consumes are read from the certificate's lists
+  -- by `getD`.  Every kernel-checked hypothesis above is `List`-based, so the kernel never reduces
+  -- a `Fin c.rho → _` function; the families here appear only in the (non-computational) proof.
+  have hmemP : ∀ i : Fin c.rho, c.points.getD i.val (0, 0) ∈ c.points :=
+    fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
+  have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
+    fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
+  have hcurve : curve c.a₂ c.a₄ c.a₆ = toCurveQ 0 c.a₂ 0 c.a₄ c.a₆ := by
+    simp only [curve, toCurveQ, Int.cast_zero]
+  rw [checkPoints_iff] at hpt
+  have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation
+      (c.points.getD i.val (0, 0)).1 (c.points.getD i.val (0, 0)).2 := by
+    intro i
+    rw [hcurve]
+    exact hpt _ (hmemP i)
+  have hlabP' : ∀ j : Fin c.rho, ((c.labels.getD j.val (0, 0)).1).Prime :=
+    fun j => checkPrimes_true hlabP _ (hmemL j)
+  have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
+      (c.labels.getD j.val (0, 0)).1 (c.labels.getD j.val (0, 0)).2 = true :=
+    fun j => checkLabels_true hlabC _ (hmemL j)
+  have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
+    rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
+      (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
+      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP htor
+  exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

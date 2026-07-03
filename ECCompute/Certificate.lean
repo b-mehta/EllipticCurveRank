@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Rat.Defs
-import ECCompute.F2Invert
+import ECCompute.Check.F2Invert
 
 /-!
 # The rank-bound certificate data type

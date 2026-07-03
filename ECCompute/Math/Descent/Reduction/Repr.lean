@@ -3,8 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Descent.Reduction.IntModel
-import ECCompute.Descent.DenominatorSquare
+import ECCompute.Math.Descent.Reduction.IntModel
+import ECCompute.Math.Descent.DenominatorSquare
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 
 /-!

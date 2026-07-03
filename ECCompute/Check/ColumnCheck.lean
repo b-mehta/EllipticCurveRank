@@ -3,7 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Descent.Defs
+import ECCompute.Math.Descent.Defs
+import ECCompute.Fold
+import ECCompute.Check.Primes
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -102,5 +104,26 @@ example : checkLabel 0 (-1) 0 7 1 = true := rfl
 end-to-end pattern the certificate tactic (T9) will emit for each column. -/
 theorem example_descentHyp : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
   descentHyp_of_checkLabel 0 (-1) 0 7 1 rfl (by norm_num)
+
+/-- Kernel `Bool`: every label's prime component passes `checkPrime`.  A structural `allList` fold
+over the label `List`, so the kernel never applies a `Fin _ → _` family nor indexes positionally. -/
+noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
+  allList (fun l => checkPrime l.1) labels
+
+theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
+    ∀ l ∈ labels, (l.1).Prime := by
+  rw [checkPrimes, allList_eq_true] at h
+  exact fun l hl => checkPrime_true (h l hl)
+
+/-- Kernel `Bool`: every label passes `checkLabel`.  A structural `allList` fold over the label
+`List`. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
+  allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
+
+theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
+    (h : checkLabels a₂ a₄ a₆ labels = true) :
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
+  rw [checkLabels, allList_eq_true] at h
+  exact h
 
 end ECCompute

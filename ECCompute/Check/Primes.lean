@@ -71,4 +71,14 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · omega
 
+/-- Kernel `Bool`: `p` is a prime below `529 = 23²`, certified by trial division by the primes below
+`23` (`ECCompute.passes`).  Every descent-label prime used by the rank certificates is `< 529`. -/
+noncomputable def checkPrime (p : ℕ) : Bool :=
+  (Nat.ble 2 p).and' ((Nat.ble p 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
+
+theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
+  simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
+  obtain ⟨h2, hle, hpass⟩ := h
+  exact Nat.prime_of_passes p h2 (by omega) hpass
+
 end ECCompute

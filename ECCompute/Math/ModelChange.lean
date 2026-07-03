@@ -3,13 +3,14 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Descent.Defs
-import ECCompute.ModelIso
+import ECCompute.Math.Descent.Defs
+import ECCompute.Math.ModelIso
 
 /-!
 # The general-to-integer-short-model change of variables
 
-`ECCompute.Soundness.rank_ge_of_certificate` proves the certified rank lower bound on the
+`ECCompute.rank_ge_of_certificate` (see `ECCompute.MainTheorem`) proves the certified rank lower
+bound on the
 **integer short model** `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆` with `A₂ A₄ A₆ : ℤ`), which
 is where the descent character `lambda` lives.  A general integral Weierstrass curve
 `ModelIso.toCurveQ a₁ a₂ a₃ a₄ a₆` (`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to

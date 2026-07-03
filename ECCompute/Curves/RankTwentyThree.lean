@@ -16,7 +16,7 @@ Mordell–Weil group of the Martin–McMillen elliptic curve
 
 over `ℚ` has rank at least `23`, i.e. `ECCompute.HasRankGE (toCurveQ 1 0 1 a₄ a₆) 23`.
 
-The proof is a descent-character certificate in the sense of `ECCompute.Soundness`.  All numeric
+The proof is a descent-character certificate in the sense of `ECCompute.MainTheorem`.  All numeric
 data is produced on the **integral short model** `curve 1 A₄ A₆` with
 `A₄ = 16a₄ + 8` and `A₆ = 64a₆ + 16`, to which the general model is carried by the group
 isomorphism `ModelChange.generalToShortEquiv` (complete the square, then scale `(x, y) ↦ (4x, 8y)`,

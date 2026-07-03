@@ -16,7 +16,7 @@ Mordell–Weil group of the elliptic curve
 over `ℚ` (with the large integer coefficients `a₄`, `a₆` below) has rank at least `29`, i.e.
 `ECCompute.HasRankGE (toCurveQ 1 0 0 a₄ a₆) 29`.
 
-The proof is a descent-character certificate in the sense of `ECCompute.Soundness`, following
+The proof is a descent-character certificate in the sense of `ECCompute.MainTheorem`, following
 `ECCompute.RankTwentyThree` line for line. All numeric data is produced on the **integral short
 model** `curve 1 A₄ A₆` with `A₄ = 16a₄` and `A₆ = 64a₆` (here `a₁ = 1`, `a₂ = a₃ = 0`, so the
 `b`-invariant shifts vanish), to which the general model is carried by the group isomorphism

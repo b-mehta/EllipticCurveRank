@@ -3,8 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Descent.Defs
-import ECCompute.Descent.Collinearity
+import ECCompute.Math.Descent.Defs
+import ECCompute.Math.Descent.Collinearity
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 

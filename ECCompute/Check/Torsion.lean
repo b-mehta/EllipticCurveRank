@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.F2Invert
-import ECCompute.ModelIso
+import ECCompute.Check.F2Invert
+import ECCompute.Math.ModelIso
 
 /-!
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
