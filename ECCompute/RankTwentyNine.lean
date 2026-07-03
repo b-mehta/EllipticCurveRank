@@ -6,6 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Soundness
 import ECCompute.ModelBridge
 import ECCompute.QuickRfl
+import ECCompute.CheckMatrix
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -167,9 +168,8 @@ theorem rank29_hlabC : ∀ j, checkLabel rank29Cert.a₂ rank29Cert.a₄ rank29C
 theorem rank29_hB : ∀ i j : Fin rank29Cert.rho,
     F2Invert.toMat rank29Cert.matB rank29Cert.rho i j =
       lambdaCompute rank29Cert.a₂ rank29Cert.a₄ rank29Cert.a₆ (rank29Lab j).1
-        ((rank29Lab j).2 : ZMod (rank29Lab j).1) (rank29Pt i).1 := by
-  intro i j
-  fin_cases i <;> fin_cases j <;> rfl
+        ((rank29Lab j).2 : ZMod (rank29Lab j).1) (rank29Pt i).1 :=
+  checkB_true (by quickRfl)
 
 /-- The supplied inverse certifies `matB` is invertible over `𝔽₂`. -/
 theorem rank29_hinv : F2Invert.checkInv rank29Cert.rho rank29Cert.matB rank29Cert.matM = true := by

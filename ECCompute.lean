@@ -14,6 +14,8 @@ import ECCompute.Descent.PsiBase
 import ECCompute.Descent.Reduction.EpsFinite
 import ECCompute.Descent.Reduction.Hom
 import ECCompute.LambdaCompute
+import ECCompute.QuickRfl
+import ECCompute.CheckMatrix
 import ECCompute.RankTwentyThree
 import ECCompute.RankTwentyNine
 import ECCompute.Soundness
