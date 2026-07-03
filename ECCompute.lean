@@ -10,3 +10,4 @@ import ECCompute.Descent.Collinearity
 import ECCompute.Descent.PsiBase
 import ECCompute.Descent.Reduction.EpsFinite
 import ECCompute.Descent.Reduction.Hom
+import ECCompute.LambdaCompute
