@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Fold
+import ECCompute.Check.Fold
 import ECCompute.Check.Primes
 import Mathlib.Tactic.NormNum.Prime
 

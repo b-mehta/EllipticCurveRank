@@ -1,5 +1,5 @@
 -- Foundations
-import ECCompute.Fold
+import ECCompute.Check.Fold
 import ECCompute.Certify.Certificate
 
 -- Pure mathematics

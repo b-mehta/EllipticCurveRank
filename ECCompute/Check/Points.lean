@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.ModelIso
-import ECCompute.Fold
+import ECCompute.Check.Fold
 
 /-!
 # Point-on-curve check
