@@ -91,7 +91,7 @@ theorem rank_ge_of_certificate (c : Certificate)
   set W : WeierstrassCurve ℚ := curve c.a₂ c.a₄ c.a₆ with hW
   set E : Type := W.toAffine.Point
   -- Each label gives a `Fact` of primality and the descent hypotheses `DescentHyp`.
-  haveI factP : ∀ j, Fact ((lab j).1).Prime := fun j => ⟨hlabP j⟩
+  have factP : ∀ j, Fact ((lab j).1).Prime := fun j => ⟨hlabP j⟩
   have hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) :=
     fun j => descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 (hlabC j) (hlabP j)
   -- The bundled descent character `φ : E →+ (Fin ρ → ZMod 2)`.
@@ -102,7 +102,7 @@ theorem rank_ge_of_certificate (c : Certificate)
   · refine ⟨⊥, inferInstance, ?_⟩
     simp [hrho0]
   -- With `ρ ≥ 1`, pick a label to extract `Δ ≠ 0` (needed to turn `Equation` into `Nonsingular`).
-  haveI : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
+  have : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
   obtain ⟨j₀⟩ := (inferInstance : Nonempty (Fin c.rho))
   have hΔnum : (curve c.a₂ c.a₄ c.a₆).Δ.num ≠ 0 := by
     intro h0
@@ -127,7 +127,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     exact Matrix.linearIndependent_rows_of_isUnit hunit
   -- The finitely generated subgroup `H = ⟨P₁, …, P_ρ⟩`.
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g) with hH
-  haveI hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
+  have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   -- The points as elements of `H`, and the character restricted to `H`.
   set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩ with hgH
   set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom with hφH

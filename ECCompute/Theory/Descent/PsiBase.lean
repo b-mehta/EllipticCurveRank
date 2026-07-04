@@ -63,7 +63,7 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
   have key : IsSquare (a * b) ↔ (IsSquare a ↔ IsSquare b) := by
     have hab : a * b ≠ 0 := mul_ne_zero ha hb
@@ -94,7 +94,7 @@ theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : 
     (hroot : fval a₂ a₄ a₆ p θ = 0)
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hprod := prod_sub_theta_eq_lineSq_zmod a₂ a₄ a₆ p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
   have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
   have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂

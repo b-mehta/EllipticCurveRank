@@ -337,7 +337,7 @@ theorem lambda_eq_εp_finite_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a�
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
-  haveI : Fact p.Prime := ⟨h.prime⟩
+  have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
       rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq,

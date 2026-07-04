@@ -173,7 +173,7 @@ theorem fderiv_ne_zero (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMo
             - 3 * (9 * (a₆ : ZMod p) - (a₂ : ZMod p) * (a₄ : ZMod p)))
             * (3 * θ + (a₂ : ZMod p)))) * hd
   -- `9 ≠ 0` mod `p` (as `p ≠ 3`), so `disc(f) = 0`
-  haveI : NeZero p := ⟨h.prime.pos.ne'⟩
+  have : NeZero p := ⟨h.prime.pos.ne'⟩
   have h3 : (3 : ZMod p) ≠ 0 := by
     have hnd : ¬ p ∣ 3 :=
       fun hdvd => hp3 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_three).mp hdvd)
@@ -213,7 +213,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ a₆ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
-  haveI : Fact p.Prime := ⟨hyp.prime⟩
+  have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero a₂ a₄ a₆ p hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =

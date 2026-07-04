@@ -49,8 +49,8 @@ namespace RankDeduction
 /-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
 lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  haveI := Fintype.ofFinite V
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have := Fintype.ofFinite V
   rw [Nat.card_eq_fintype_card, Module.card_eq_pow_finrank (K := ZMod 2), ZMod.card]
 
 variable {H : Type*} [AddCommGroup H]
@@ -246,8 +246,8 @@ end Prod
 /-- A finite `ℤ`-module has free rank zero. -/
 lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ D = 0 := by
-  haveI : Module.Finite ℤ D := Module.Finite.of_finite
-  haveI : Nonempty D := ⟨0⟩
+  have : Module.Finite ℤ D := Module.Finite.of_finite
+  have : Nonempty D := ⟨0⟩
   rw [Module.finrank_eq_zero_iff_isTorsion]
   intro x
   refine ⟨⟨(Nat.card D : ℤ), ?_⟩, ?_⟩
@@ -301,12 +301,12 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
   obtain ⟨n, ι, fι, p, hp, ee, ⟨iso⟩⟩ := Module.equiv_free_prod_directSum ℤ H
   set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i) with hDdef
-  haveI : ∀ i, NeZero (p i ^ ee i) := fun i => ⟨pow_ne_zero _ (hp i).ne_zero⟩
-  haveI : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i =>
+  have : ∀ i, NeZero (p i ^ ee i) := fun i => ⟨pow_ne_zero _ (hp i).ne_zero⟩
+  have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i =>
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
-  haveI : Finite D := by
+  have : Finite D := by
     classical
-    haveI : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i => Fintype.ofFinite _
+    have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i => Fintype.ofFinite _
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
     rw [iso.finrank_eq]; exact finrank_prod_finite _ _
@@ -323,10 +323,10 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
 /-- For a finitely generated abelian group `H`, `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`, where
 the 2-torsion carries its `ZMod 2`-module structure. -/
 theorem finrank_modN_two [Module.Finite ℤ H] :
-    letI : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
+    let : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
     finrank (ZMod 2) (ModN H 2) =
       finrank ℤ H + finrank (ZMod 2) (Submodule.torsionBy ℤ H 2) := by
-  letI : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
+  let : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
   have key := natCard_modN_two (H := H)
   rw [natCard_eq_two_pow_finrank (ModN H 2),
     natCard_eq_two_pow_finrank (Submodule.torsionBy ℤ H 2), ← pow_add] at key
