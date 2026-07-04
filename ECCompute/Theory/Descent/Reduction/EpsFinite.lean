@@ -108,7 +108,6 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     (hne : x₁ ≠ x₂) :
     εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
-  have hp2 : p ≠ 2 := h.ne_two
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne]
   simp only [εp_finite_some]
   set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
@@ -146,18 +145,18 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
   · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
     have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; ring)
     rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
-      psi_mul h.prime hp2 (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
+      psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c2 : x₂ = θ
   · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; ring)
     rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
-      psi_mul h.prime hp2 (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
+      psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c3 : X₃ = θ
   · rw [if_pos c3, if_neg c1, if_neg c2, hfd3 c3,
-      psi_mul h.prime hp2 (sub_ne_zero.mpr c1) (sub_ne_zero.mpr c2)]
+      psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr c2)]
   · rw [if_neg c3, if_neg c1, if_neg c2]
-    have := psi_collinear h.prime hp2 hσ₁ hσ₂ hσ₃ h.root c1 c2 c3
+    have := psi_collinear h.prime hσ₁ hσ₂ hσ₃ h.root c1 c2 c3
     grind
 
 /-- Additivity of `εp_finite` in the doubling case: `εp_finite` vanishes on `2P` for a point
@@ -211,7 +210,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
     have hpm : psi p ((x - θ) * (x - θ) * (X₃ - θ)) = 0 := by
       rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
-    rw [psi_mul h.prime hp2 (mul_ne_zero hs hs) hs3, psi_mul h.prime hp2 hs hs,
+    rw [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
       CharTwo.add_self_eq_zero, zero_add] at hpm
     exact hpm
 
