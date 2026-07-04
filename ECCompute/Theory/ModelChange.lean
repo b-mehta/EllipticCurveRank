@@ -33,8 +33,7 @@ open WeierstrassCurve WeierstrassCurve.Affine ModelIso
 private theorem pointSome_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
-    (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
-  subst hx; subst hy; rfl
+    (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by subst hx hy; rfl
 
 /-! ## The scaling isomorphism `(x, y) ↦ (v²x, v³y)`
 
@@ -110,9 +109,8 @@ theorem slope_scale (hv : v ≠ 0)
   by_cases hx : x₁ = x₂
   · subst hx
     by_cases hy : y₁ = W.toAffine.negY x₁ y₂
-    · have hy' : v ^ 3 * y₁ = W'.toAffine.negY (v ^ 2 * x₁) (v ^ 3 * y₂) := by
-        rw [negY_scale h1 h3, hy]
-      rw [slope_of_Y_eq rfl hy', slope_of_Y_eq rfl hy, mul_zero]
+    · rw [slope_of_Y_eq rfl (by rw [negY_scale h1 h3, hy] : v ^ 3 * y₁ = _),
+        slope_of_Y_eq rfl hy, mul_zero]
     · have hy' : v ^ 3 * y₁ ≠ W'.toAffine.negY (v ^ 2 * x₁) (v ^ 3 * y₂) := by
         rw [negY_scale h1 h3]
         exact fun hc => hy (mul_left_cancel₀ (pow_ne_zero 3 hv) hc)
@@ -168,10 +166,8 @@ theorem scaleFwd_map_add (hv : v ≠ 0) (h1 : W'.a₁ = v * W.a₁) (h2 : W'.a�
   any_goals rfl
   by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
   · obtain ⟨hx, hy⟩ := hxy
-    have hycond : v ^ 3 * y₁ = W'.toAffine.negY (v ^ 2 * x₂) (v ^ 3 * y₂) := by
-      rw [negY_scale h1 h3, ← hy]
     rw [Point.add_of_Y_eq hx hy, scaleFwd_some, scaleFwd_some,
-      Point.add_of_Y_eq (by rw [hx]) hycond]
+      Point.add_of_Y_eq (by rw [hx]) (by rw [negY_scale h1 h3, ← hy])]
     rfl
   · have hxy' : ¬(v ^ 2 * x₁ = v ^ 2 * x₂ ∧
         v ^ 3 * y₁ = W'.toAffine.negY (v ^ 2 * x₂) (v ^ 3 * y₂)) := by
@@ -183,9 +179,7 @@ theorem scaleFwd_map_add (hv : v ≠ 0) (h1 : W'.a₁ = v * W.a₁) (h2 : W'.a�
     rw [Point.add_some hxy]
     simp only [scaleFwd_some]
     rw [Point.add_some hxy']
-    refine pointSome_congr ?_ ?_
-    · rw [hℓ, addX_scale h1 h2]
-    · rw [hℓ, addY_scale h1 h2 h3]
+    exact pointSome_congr (by rw [hℓ, addX_scale h1 h2]) (by rw [hℓ, addY_scale h1 h2 h3])
 
 /-- If `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, then `(x, y) ↦ (v²x, v³y)` is a group isomorphism
 `W.Point ≃+ W'.Point`. -/
