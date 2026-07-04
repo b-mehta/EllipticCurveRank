@@ -121,6 +121,17 @@ theorem toAffine_g_Trep {x y : ℚ} {w : ℕ} (h : (curve a₂ a₄ a₆).toAffi
     Projective.Point.toAffine_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.Point.toAffine_some ((Projective.nonsingular_some x y).mpr h)]
 
+/-- An integer projective representative whose rational affine point is a `some` is nonsingular
+over `ℚ` (the affine point of a singular representative is the origin). -/
+theorem nonsingular_of_toAffine_some {U : Fin 3 → ℤ} {X Y : ℚ}
+    {hR : (curve a₂ a₄ a₆).toAffine.Nonsingular X Y}
+    (hU : Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ U)
+      = .some X Y hR) :
+    (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ U) := by
+  by_contra hns
+  rw [Projective.Point.toAffine_of_singular hns] at hU
+  exact Affine.Point.some_ne_zero _ hU.symm
+
 /-- If two integer projective representatives have the same (rational) affine point, then they are
 proportional over `ℤ`, with the cross scalars given by each other's `Z`-coordinate. -/
 theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
@@ -140,10 +151,8 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
       intro h0
       rw [Projective.Point.toAffine_of_Z_eq_zero h0] at hU
       exact Affine.Point.some_ne_zero _ hU.symm
-    have hns : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ U) := by
-      by_contra hns
-      rw [Projective.Point.toAffine_of_singular hns] at hU
-      exact Affine.Point.some_ne_zero _ hU.symm
+    have hns : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ U) :=
+      nonsingular_of_toAffine_some a₂ a₄ a₆ hU
     rw [Projective.Point.toAffine_of_Z_ne_zero hns hUz, Affine.Point.some.injEq] at hU
     rw [hg] at hUz
     refine ⟨?_, ?_⟩
@@ -306,6 +315,11 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast] at hc
     exact hc
 
+/-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
+private theorem cast_num_eq {q : ℚ} {w : ℕ} {k : ℕ} (hd : q.den = w ^ k) :
+    (q.num : ℚ) = q * (w : ℚ) ^ k := by
+  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; push_cast; ring
+
 /-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
@@ -350,22 +364,10 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hE0 : E ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
   have hG0 : G ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
   -- coordinates as fractions over the square/cube denominators
-  have hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2 := by
-    have h1 : ((x₁.num : ℤ) : ℚ) = x₁ * (x₁.den : ℚ) :=
-      (div_eq_iff (by exact_mod_cast x₁.den_ne_zero)).mp (Rat.num_div_den x₁)
-    rw [hAdef, h1, hx1d, hEdef]; push_cast; ring
-  have hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3 := by
-    have h1 : ((y₁.num : ℤ) : ℚ) = y₁ * (y₁.den : ℚ) :=
-      (div_eq_iff (by exact_mod_cast y₁.den_ne_zero)).mp (Rat.num_div_den y₁)
-    rw [hBdef, h1, hy1d, hEdef]; push_cast; ring
-  have hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2 := by
-    have h1 : ((x₂.num : ℤ) : ℚ) = x₂ * (x₂.den : ℚ) :=
-      (div_eq_iff (by exact_mod_cast x₂.den_ne_zero)).mp (Rat.num_div_den x₂)
-    rw [hCdef, h1, hx2d, hGdef]; push_cast; ring
-  have hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3 := by
-    have h1 : ((y₂.num : ℤ) : ℚ) = y₂ * (y₂.den : ℚ) :=
-      (div_eq_iff (by exact_mod_cast y₂.den_ne_zero)).mp (Rat.num_div_den y₂)
-    rw [hDdef, h1, hy2d, hGdef]; push_cast; ring
+  have hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2 := cast_num_eq hx1d
+  have hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3 := cast_num_eq hy1d
+  have hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2 := cast_num_eq hx2d
+  have hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3 := cast_num_eq hy2d
   -- integer curve relations
   have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
     have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
@@ -777,14 +779,10 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       (repr_nonsingular a₂ a₄ a₆ p hΔ _)]
   refine Projective.Point.toAffine_of_equiv ?_
   -- Rational nonsingularity of the two integer representatives.
-  have hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ Trep x₁ y₁ w₁) := by
-    have hP := toAffine_g_Trep a₂ a₄ a₆ h₁ hden1 hden1'
-    by_contra hns; rw [Projective.Point.toAffine_of_singular hns] at hP
-    exact Affine.Point.some_ne_zero _ hP.symm
-  have hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ Trep x₂ y₂ w₂) := by
-    have hP := toAffine_g_Trep a₂ a₄ a₆ h₂ hden2 hden2'
-    by_contra hns; rw [Projective.Point.toAffine_of_singular hns] at hP
-    exact Affine.Point.some_ne_zero _ hP.symm
+  have hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ Trep x₁ y₁ w₁) :=
+    nonsingular_of_toAffine_some a₂ a₄ a₆ (toAffine_g_Trep a₂ a₄ a₆ h₁ hden1 hden1')
+  have hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ Trep x₂ y₂ w₂) :=
+    nonsingular_of_toAffine_some a₂ a₄ a₆ (toAffine_g_Trep a₂ a₄ a₆ h₂ hden2 hden2')
   -- Map lemmas over `ℚ`.
   have hgaddXYZ : (curve a₂ a₄ a₆).toProjective.addXYZ ((Int.castRingHom ℚ) ∘ Trep x₁ y₁ w₁)
         ((Int.castRingHom ℚ) ∘ Trep x₂ y₂ w₂)
