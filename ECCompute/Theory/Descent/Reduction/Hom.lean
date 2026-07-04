@@ -360,6 +360,168 @@ private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
     (by have := (Fact.out : p.Prime).two_le; omega)
 
+/-- `padicValInt p` is monotone under divisibility for a nonzero target. -/
+private theorem padicValInt_mono {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
+    padicValInt p a ≤ padicValInt p b := by
+  have hp : p.Prime := Fact.out
+  rcases eq_or_ne a 0 with rfl | ha
+  · simp [padicValInt]
+  · simp only [padicValInt]
+    have h1 : p ^ padicValNat p a.natAbs ∣ a.natAbs :=
+      (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr ha)).mpr le_rfl
+    exact (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr hb)).mp
+      (h1.trans (Int.natAbs_dvd_natAbs.mpr hab))
+
+/-- The crux valuation inequality of the kernel-closure certificate: from the integer identity
+`N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and all factors nonzero, conclude `v_p(N) < v_p(K)`. -/
+private theorem padicValInt_lt_of_mul_eq {N S K W : ℤ} (hid : N * S = K * W)
+    (hpS : (p : ℤ) ∣ S) (hpW : ¬ (p : ℤ) ∣ W)
+    (hN0 : N ≠ 0) (hS0 : S ≠ 0) (hK0 : K ≠ 0) (hW0 : W ≠ 0) :
+    padicValInt p N < padicValInt p K := by
+  have hSval : 1 ≤ padicValInt p S :=
+    one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
+      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
+  have e1 := padicValInt.mul (p := p) hN0 hS0
+  rw [hid, padicValInt.mul (p := p) hK0 hW0, padicValInt.eq_zero_of_not_dvd hpW] at e1
+  omega
+
+/-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
+`N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation
+(`K²` alone already dominates `N²`). -/
+private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValInt p K)
+    (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
+    padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
+      ∧ (N ^ 2 - M * K ^ 2 : ℤ) ≠ 0 := by
+  have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
+    rw [pow_two, padicValInt.mul hK0 hK0]; ring
+  have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
+    rw [pow_two, padicValInt.mul hN0 hN0]; ring
+  have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
+    rw [padicValRat.of_int, hNval2]; push_cast; ring
+  rcases eq_or_ne (M * K ^ 2 : ℤ) 0 with h0 | h0
+  · rw [h0, sub_zero]; exact ⟨hqv, pow_ne_zero 2 hN0⟩
+  · have hsplit : ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ)
+        = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by push_cast; ring
+    have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
+    have hr0 : (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
+      have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
+      simpa using this
+    have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ)
+        < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
+      rw [hqv, padicValRat.neg, padicValRat.of_int]
+      have hle := padicValInt_mono p (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
+      rw [hK2] at hle; omega
+    have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
+      have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by linear_combination he
+      rw [heq, padicValRat.neg] at hlt
+      exact lt_irrefl _ hlt
+    refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
+    intro he; apply hqrne; rw [← hsplit]; exact_mod_cast he
+
+/-- Coordinate data for a kernel point.  If `(x, y)` satisfies the curve equation and reduces to
+the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
+`w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
+private theorem kernel_point_data {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
+    ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
+      ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
+  have hp : p.Prime := Fact.out
+  obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
+  have hpw : (p : ℤ) ∣ (w : ℤ) := by
+    exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
+  have hwne : (w : ℤ) ≠ 0 := by
+    intro hc; apply x.den_ne_zero; rw [hxd]; exact_mod_cast pow_eq_zero_iff (by norm_num) |>.mpr hc
+  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
+    not_dvd_num p (by rw [hxd]; push_cast; ring) hpw, hwne⟩
+
+/-- Integer form of the curve relation for a point `(A/E², B/E³)`: clearing denominators of
+`y² = x³ + a₂x² + a₄x + a₆` gives `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
+private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
+    (hcv : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ))
+    (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
+    B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
+  have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
+      + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
+    rw [hA, hB]; linear_combination (E : ℚ) ^ 6 * hcv
+  exact_mod_cast hq
+
+omit [Fact p.Prime] in
+/-- The certificate scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit: it is
+`≡ -A²C²` mod `p` (the other terms carry the factor `E`), and `A`, `C` are `p`-units. -/
+private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C) (hpE : (p : ℤ) ∣ E) :
+    ¬ (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+      + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2)) := by
+  intro hdvd
+  have hrest : (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+      + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2) := by
+    have heq : -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+          + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2
+        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by ring
+    rw [heq]
+    exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
+  have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
+  rcases hpZ.dvd_mul.mp hAC with h | h
+  · exact hpA (hpZ.dvd_of_dvd_pow h)
+  · exact hpC (hpZ.dvd_of_dvd_pow h)
+
+/-- The certificate scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`: `K = 0` forces
+`x₁·E²G² = x₂·E²G²` and hence `x₁ = x₂`. -/
+private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
+    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
+    A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h => hne <| by
+  have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
+  push_cast at h0; rw [hA, hC] at h0
+  have hEG : (E : ℚ) ^ 2 * (G : ℚ) ^ 2 ≠ 0 := mul_ne_zero (pow_ne_zero 2 hEQ) (pow_ne_zero 2 hGQ)
+  have hxx : x₁ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) = x₂ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) := by
+    linear_combination h0
+  exact mul_right_cancel₀ hEG hxx
+
+/-- Final valuation step of the kernel-closure certificate.  Given the single-fraction
+`x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and the crux `v_p(N) < v_p(K)`, the `p`-adic
+valuation of `x₃` is `2·(v_p N - v_p K) < 0`, hence `p ∣ x₃.den`. -/
+private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
+    (hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ))
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
+    (hcrux : padicValInt p N < padicValInt p K)
+    (hA0 : A ≠ 0) (hC0 : C ≠ 0) (hK0 : K ≠ 0) (hN0 : N ≠ 0) :
+    (x₃.den : ZMod p) = 0 := by
+  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) p hcrux hN0 hK0
+  have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
+    rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
+      padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
+      pow_two, padicValInt.mul hK0 hK0]; ring
+  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
+    exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
+  have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
+    rw [eq_div_iff hDen3Q]; exact hMain
+  have hx3neg : padicValRat p x₃ < 0 := by
+    rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
+      hDenval]
+    push_cast; omega
+  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; omega
+  exact (ZMod.natCast_eq_zero_iff _ p).mpr
+    ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
+
+/-- The single-fraction identity `x₃·(A·C·K²) = N² - a₆E²G²K²` for the doubled `x`-coordinate,
+where `K = AG² - CE²`, `N = ADE - BCG`.  It follows from the slope relation `hℓ` and the two
+curve relations by clearing denominators. -/
+private theorem hMain_cert {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C D E G : ℤ}
+    (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂)
+    (hcv1 : y₁ ^ 2 = x₁ ^ 3 + (a₂ : ℚ) * x₁ ^ 2 + (a₄ : ℚ) * x₁ + (a₆ : ℚ))
+    (hcv2 : y₂ ^ 2 = x₂ ^ 3 + (a₂ : ℚ) * x₂ ^ 2 + (a₄ : ℚ) * x₂ + (a₆ : ℚ))
+    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3)
+    (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2) (hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3) :
+    x₃ * ((A * C * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ)
+      = (((A * D * E - B * C * G) ^ 2
+        - a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ) := by
+  rw [haddX]; push_cast; rw [hA, hB, hC, hD]
+  linear_combination
+    ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₁ * x₂ * (ℓ * x₁ - ℓ * x₂ + y₁ - y₂))) * hℓ
+      + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
+      + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
+
 /-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
@@ -379,8 +541,7 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
     (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
-  have hp : p.Prime := Fact.out
-  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
+  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
@@ -389,171 +550,39 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
   have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
-  obtain ⟨w₁, hx1d, hy1d⟩ := den_isSquare a₂ a₄ a₆ h₁
-  obtain ⟨w₂, hx2d, hy2d⟩ := den_isSquare a₂ a₄ a₆ h₂
-  have hw1ne : w₁ ≠ 0 := by intro h; apply x₁.den_ne_zero; rw [hx1d, h]; norm_num
-  have hw2ne : w₂ ≠ 0 := by intro h; apply x₂.den_ne_zero; rw [hx2d, h]; norm_num
+  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data a₂ a₄ a₆ p h₁ hd1
+  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data a₂ a₄ a₆ p h₂ hd2
   set A : ℤ := x₁.num
   set B : ℤ := y₁.num
   set C : ℤ := x₂.num
   set D : ℤ := y₂.num
-  set E : ℤ := (w₁ : ℤ) with hEdef
-  set G : ℤ := (w₂ : ℤ) with hGdef
-  have hEQ : (E : ℚ) ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
-  have hGQ : (G : ℚ) ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
-  -- coordinates as fractions over the square/cube denominators
-  have hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2 := cast_num_eq hx1d
-  have hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3 := cast_num_eq hy1d
-  have hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2 := cast_num_eq hx2d
-  have hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3 := cast_num_eq hy2d
   -- integer curve relations
-  have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
-    have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
-        + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
-      rw [hA, hB]; linear_combination (E : ℚ) ^ 6 * hcv1
-    exact_mod_cast hq
-  have hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6 := by
-    have hq : (D : ℚ) ^ 2 = (C : ℚ) ^ 3 + a₂ * (C : ℚ) ^ 2 * (G : ℚ) ^ 2
-        + a₄ * (C : ℚ) * (G : ℚ) ^ 4 + a₆ * (G : ℚ) ^ 6 := by
-      rw [hC, hD]; linear_combination (G : ℚ) ^ 6 * hcv2
-    exact_mod_cast hq
+  have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 :=
+    int_curve_relation a₂ a₄ a₆ hcv1 hA hB
+  have hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6 :=
+    int_curve_relation a₂ a₄ a₆ hcv2 hC hD
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
   set N : ℤ := A * D * E - B * C * G with hNdef
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
     + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
   -- the two load-bearing integer identities
   have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
-    rw [haddX, hKdef, hNdef]; push_cast; rw [hA, hB, hC, hD]
-    linear_combination
-      ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₁ * x₂ * (ℓ * x₁ - ℓ * x₂ + y₁ - y₂))) * hℓ
-        + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
-        + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
+    rw [hKdef, hNdef]; exact hMain_cert a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
   have hI2 : N * (A * D * E + B * C * G) = K * W := by
     rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
   -- divisibility facts
-  have hpE : (p : ℤ) ∣ E := by
-    rw [hEdef]; exact_mod_cast hp.dvd_of_dvd_pow (hx1d ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd1)
-  have hpG : (p : ℤ) ∣ G := by
-    rw [hGdef]; exact_mod_cast hp.dvd_of_dvd_pow (hx2d ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd2)
-  have hpA : ¬ (p : ℤ) ∣ A := not_dvd_num p (by rw [hEdef, hx1d]; push_cast; ring) hpE
-  have hpC : ¬ (p : ℤ) ∣ C := not_dvd_num p (by rw [hGdef, hx2d]; push_cast; ring) hpG
-  have hA0 : A ≠ 0 := fun h => hpA (h ▸ dvd_zero _)
-  have hC0 : C ≠ 0 := fun h => hpC (h ▸ dvd_zero _)
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
-  have hpW : ¬ (p : ℤ) ∣ W := by
-    intro hdvd
-    have hrest : (p : ℤ) ∣ (W + A ^ 2 * C ^ 2) := by
-      have heq : W + A ^ 2 * C ^ 2
-          = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by rw [hWdef]; ring
-      rw [heq]
-      exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
-    have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by
-      have := dvd_sub hrest hdvd; simpa using this
-    rcases hpZ.dvd_mul.mp hAC with h | h
-    · exact hpA (hpZ.dvd_of_dvd_pow h)
-    · exact hpC (hpZ.dvd_of_dvd_pow h)
+  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
   have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
-  have hK0 : K ≠ 0 := by
-    intro h
-    apply hne
-    have hcast : (A : ℚ) * (G : ℚ) ^ 2 = (C : ℚ) * (E : ℚ) ^ 2 := by
-      have h0 : (K : ℚ) = 0 := by rw [h]; simp
-      rw [hKdef] at h0; push_cast at h0; linarith
-    rw [hA, hC] at hcast
-    have hEG : (E : ℚ) ^ 2 * (G : ℚ) ^ 2 ≠ 0 := mul_ne_zero (pow_ne_zero _ hEQ) (pow_ne_zero _ hGQ)
-    have hxx : x₁ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) = x₂ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) := by
-      linear_combination hcast
-    exact mul_right_cancel₀ hEG hxx
-  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := by rw [hI2]; exact mul_ne_zero hK0 hW0
+  have hK0 : K ≠ 0 :=
+    hKdef ▸ K_ne_zero hne hA hC (by exact_mod_cast hEne) (by exact_mod_cast hGne)
+  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
   have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
-  have hS0 : A * D * E + B * C * G ≠ 0 := right_ne_zero_of_mul hprodne
-  -- monotonicity of `padicValInt` under divisibility
-  have hmono : ∀ {a b : ℤ}, a ∣ b → b ≠ 0 → padicValInt p a ≤ padicValInt p b := by
-    intro a b hab hb
-    rcases eq_or_ne a 0 with rfl | ha
-    · simp [padicValInt]
-    · simp only [padicValInt]
-      have h1 : p ^ padicValNat p a.natAbs ∣ a.natAbs :=
-        (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr ha)).mpr le_rfl
-      exact (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr hb)).mp
-        (h1.trans (Int.natAbs_dvd_natAbs.mpr hab))
-  have hSval : 1 ≤ padicValInt p (A * D * E + B * C * G) := by
-    simp only [padicValInt]
-    exact one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
-      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
-  -- the crux inequality `v_p(N) < v_p(K)`
-  have hcrux : padicValInt p N < padicValInt p K := by
-    have e1 := padicValInt.mul (p := p) hN0 hS0
-    have e2 := padicValInt.mul (p := p) hK0 hW0
-    rw [hI2] at e1; rw [e2] at e1
-    have hWv : padicValInt p W = 0 := padicValInt.eq_zero_of_not_dvd hpW
-    omega
-  have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
-    rw [pow_two, padicValInt.mul hK0 hK0]; ring
-  have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
-    rw [pow_two, padicValInt.mul hN0 hN0]; ring
-  have hpvA : padicValInt p A = 0 := padicValInt.eq_zero_of_not_dvd hpA
-  have hpvC : padicValInt p C = 0 := padicValInt.eq_zero_of_not_dvd hpC
-  have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
-    rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0),
-      padicValInt.mul hA0 hC0, hpvA, hpvC, hK2]; omega
-  -- valuation of the numerator `N² - a₆E²G²K²`
-  have hNumval : padicValRat p ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)
-      = (2 * padicValInt p N : ℤ) ∧ (N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) ≠ 0 := by
-    rcases eq_or_ne (a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) 0 with h0 | h0
-    · rw [h0, sub_zero]
-      exact ⟨by rw [padicValRat.of_int, hNval2]; push_cast; ring, pow_ne_zero 2 hN0⟩
-    · have hsplit : ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)
-          = ((N ^ 2 : ℤ) : ℚ) + (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) := by push_cast; ring
-      have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
-      have hr0 : (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
-        have : ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
-        simpa using this
-      have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
-        rw [padicValRat.of_int, hNval2]; push_cast; ring
-      have hrv : padicValRat p (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ))
-          = (padicValInt p (a₆ * E ^ 2 * G ^ 2 * K ^ 2) : ℤ) := by
-        rw [padicValRat.neg, padicValRat.of_int]
-      have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ)
-          < padicValRat p (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) := by
-        rw [hqv, hrv]
-        have hdvdK : (K ^ 2 : ℤ) ∣ (a₆ * E ^ 2 * G ^ 2 * K ^ 2) := ⟨a₆ * E ^ 2 * G ^ 2, by ring⟩
-        have hle := hmono hdvdK h0
-        rw [hK2] at hle
-        have : padicValInt p N < padicValInt p K := hcrux
-        omega
-      have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
-        intro he
-        have heq : ((N ^ 2 : ℤ) : ℚ) = ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
-          linear_combination he
-        rw [heq] at hlt
-        simp only [padicValRat.neg] at hlt
-        exact lt_irrefl _ hlt
-      refine ⟨?_, ?_⟩
-      · rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv]
-      · intro he; apply hqrne; rw [← hsplit]; exact_mod_cast he
-  obtain ⟨hNumvalQ, hNum0⟩ := hNumval
-  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
-    exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
-  have hNum3Q : ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast hNum0
-  have hx3div : x₃
-      = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
-    rw [eq_div_iff hDen3Q]; exact hMain
-  have hx3val : padicValRat p x₃ = (2 * padicValInt p N : ℤ) - (2 * padicValInt p K : ℤ) := by
-    rw [hx3div, padicValRat.div hNum3Q hDen3Q, hNumvalQ, padicValRat.of_int, hDenval]
-    push_cast; ring
-  have hx3neg : padicValRat p x₃ < 0 := by
-    rw [hx3val]
-    have : padicValInt p N < padicValInt p K := hcrux
-    omega
-  -- conclude `p ∣ x₃.den`
-  have hden0 : padicValNat p x₃.den ≠ 0 := by
-    have h' := hx3neg
-    rw [padicValRat_def] at h'
-    omega
-  have hdvd : p ∣ x₃.den := (dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0
-  exact (ZMod.natCast_eq_zero_iff _ p).mpr hdvd
+  -- the crux inequality `v_p(N) < v_p(K)` feeds the final valuation certificate
+  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC
+    (padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0)
+    (fun h => hpA (h ▸ dvd_zero _)) (fun h => hpC (h ▸ dvd_zero _)) hK0 hN0
 
 /-- Distinct points sharing an `x`-coordinate are mutually negative: if `x₁ = x₂` but
 `(x₁, y₁) ≠ (x₂, y₂)`, then `y₁ = negY x₂ y₂` (so `P + Q = O`). -/
