@@ -87,6 +87,11 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
     θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
   simpa [fval] using h.root
 
+/-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
+private theorem reducedCurve_negY (x y : ZMod p) :
+    (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y := by
+  simp [WeierstrassCurve.Affine.negY, reducedCurve]
+
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁}
@@ -163,8 +168,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rw [ZMod.ringChar_zmod_n]; exact hp2)
   have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
-  have hneg : (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y := by
-    simp [WeierstrassCurve.Affine.negY, reducedCurve]
+  have hneg := reducedCurve_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
   have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by
     rw [hneg]; grind
   have hcurve : y ^ 2
@@ -197,11 +201,10 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
       hσ₁ hσ₂ hσ₃ hθroot
   by_cases c3 : X₃ = θ
   · rw [if_pos c3]
-    have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) := by
-      have := fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
+    have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
+      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
         (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
         hθroot c3
-      simpa [fderiv] using this
     rw [hfd]; exact psi_of_isSquare ⟨x - θ, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
@@ -228,9 +231,8 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · by_cases hne : x₁ = x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
-      have hynegY : (reducedCurve a₂ a₄ a₆ p).toAffine.negY x₂ y₂ = -y₂ := by
-        simp [WeierstrassCurve.Affine.negY, reducedCurve]
-      have hyne' : y₁ ≠ -y₂ := fun hcon => hxy ⟨hne, by rw [hynegY]; exact hcon⟩
+      have hyne' : y₁ ≠ -y₂ := fun hcon =>
+        hxy ⟨hne, by rw [reducedCurve_negY]; exact hcon⟩
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
         rw [reducedCurve_equation h₁, reducedCurve_equation h₂, hne]
       have hyeq : y₁ = y₂ := by grind
