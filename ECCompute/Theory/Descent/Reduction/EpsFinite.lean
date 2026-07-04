@@ -237,7 +237,7 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
         rw [reducedCurve_equation h₁, reducedCurve_equation h₂, hne]
       have hyeq : y₁ = y₂ := by grind
       have hy1ne0 : y₁ ≠ 0 := by grind
-      subst hne; subst hyeq
+      subst hne hyeq
       have hpt : (Affine.Point.some x₁ y₁ h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Point)
           = Affine.Point.some x₁ y₁ h₁ := rfl
       rw [hpt, CharTwo.add_self_eq_zero]
