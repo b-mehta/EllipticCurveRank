@@ -161,25 +161,17 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     (hP : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
-  have h2 : (2 : ZMod p) ≠ 0 := by
-    have hc : (2 : ZMod p) = ((2 : ℕ) : ZMod p) := by push_cast; ring
-    rw [hc, Ne, ZMod.natCast_eq_zero_iff]
-    exact fun hd => hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
+  have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rw [ZMod.ringChar_zmod_n]; exact hp2)
   have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
   have hneg : (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y := by
     simp [WeierstrassCurve.Affine.negY, reducedCurve]
   have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by
-    rw [hneg]; intro hh
-    have h2yz : (2 : ZMod p) * y = 0 := by linear_combination hh
-    exact hy0 ((mul_eq_zero.mp h2yz).resolve_left h2)
+    rw [hneg]; grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
     reducedCurve_equation hP
   have hθroot := h.root'
-  have hXθ : x ≠ θ := by
-    intro hc; apply hy0
-    have hYsq : y ^ 2 = 0 := by rw [hcurve, hc]; exact hθroot
-    exact pow_eq_zero_iff (by norm_num) |>.mp hYsq
+  have hXθ : x ≠ θ := by grind
   rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne]
   simp only [εp_finite_some]
   set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
@@ -241,17 +233,8 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       have hyne' : y₁ ≠ -y₂ := fun hcon => hxy ⟨hne, by rw [hynegY]; exact hcon⟩
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
         rw [reducedCurve_equation h₁, reducedCurve_equation h₂, hne]
-      have hy1ne0 : y₁ ≠ 0 := by
-        intro h0
-        have hy2z : y₂ = 0 := by
-          have : y₂ ^ 2 = 0 := by rw [← hy2eq, h0]; ring
-          exact pow_eq_zero_iff (by norm_num) |>.mp this
-        exact hyne' (by rw [h0, hy2z, neg_zero])
-      have hyeq : y₁ = y₂ := by
-        have hfac : (y₁ - y₂) * (y₁ + y₂) = 0 := by linear_combination hy2eq
-        rcases mul_eq_zero.mp hfac with hh | hh
-        · exact sub_eq_zero.mp hh
-        · exact absurd (by linear_combination hh : y₁ = -y₂) hyne'
+      have hyeq : y₁ = y₂ := by grind
+      have hy1ne0 : y₁ ≠ 0 := by grind
       subst hne; subst hyeq
       have hpt : (Affine.Point.some x₁ y₁ h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Point)
           = Affine.Point.some x₁ y₁ h₁ := rfl
