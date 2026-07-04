@@ -272,7 +272,7 @@ lemma natCard_modN_two_of_free_prod_finite
 theorem natCard_modN_two [Module.Finite ℤ H] :
     Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
   obtain ⟨n, ι, fι, p, hp, ee, ⟨iso⟩⟩ := Module.equiv_free_prod_directSum ℤ H
-  set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i) with hDdef
+  set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i)
   have : ∀ i, NeZero (p i ^ ee i) := fun i => ⟨pow_ne_zero _ (hp i).ne_zero⟩
   have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i =>
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
@@ -281,7 +281,8 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i => Fintype.ofFinite _
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
-    rw [iso.finrank_eq]; exact finrank_prod_finite _ _
+    rw [iso.finrank_eq]
+    exact finrank_prod_finite _ _
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
@@ -317,11 +318,10 @@ theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     ρ ≤ finrank (ZMod 2) (ModN H 2) := by
   have hφ : ∀ h, (2 : ℕ) • φ h = 0 := fun h => by
     rw [← Nat.cast_smul_eq_nsmul (ZMod 2), ZMod.natCast_self, zero_smul]
-  set ψ : ModN H 2 →ₗ[ZMod 2] (Fin ρ → ZMod 2) := ModN.liftEquiv'.symm ⟨φ, hφ⟩ with hψdef
+  set ψ : ModN H 2 →ₗ[ZMod 2] (Fin ρ → ZMod 2) := ModN.liftEquiv'.symm ⟨φ, hφ⟩
   have hψ : ∀ x, ψ (ModN.mkQ 2 x) = φ x := fun x => rfl
-  have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) := by
-    apply LinearIndependent.of_comp ψ
-    simpa only [Function.comp_def, hψ] using hindep
+  have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) :=
+    LinearIndependent.of_comp ψ (by simpa only [Function.comp_def, hψ] using hindep)
   simpa using hmk.fintype_card_le_finrank
 
 /-- If `ρ` group elements have `𝔽₂`-linearly independent images under a descent-character tuple
