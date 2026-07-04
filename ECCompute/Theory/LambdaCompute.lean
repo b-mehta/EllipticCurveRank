@@ -28,8 +28,6 @@ replacement. The heart is `jOdd`, a fuel-recursive evaluator for the Jacobi symb
 
 namespace ECCompute
 
-open scoped Classical
-
 /-! ### The fuel-recursive Jacobi evaluator -/
 
 /-- Fuel-recursive evaluator for the Jacobi symbol `J(a | b)`, valid when `b` is odd. One
@@ -127,22 +125,22 @@ def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
 `psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
+  classical
   have hp : p.Prime := Fact.out
   have hodd : p % 2 = 1 := (hp.eq_two_or_odd).resolve_left hp2
   have hpos : 0 < p := hp.pos
   -- the natural-number value `a.val` casts back to `a`, and is nonzero mod `p`
   have hval : ((a.val : ℤ) : ZMod p) = a := by
     rw [Int.cast_natCast, ZMod.natCast_zmod_val]
-  have hval0 : ((a.val : ℤ) : ZMod p) ≠ 0 := by rw [hval]; exact ha
   -- `jacobiFast = jacobiSym = legendreSym`
   have hjf : jacobiFast (a.val : ℤ) p = legendreSym p (a.val : ℤ) := by
     rw [jacobiFast_eq _ _ hpos hodd, jacobiSym.legendreSym.to_jacobiSym]
+  have hiff : legendreSym p (a.val : ℤ) = 1 ↔ IsSquare a := by
+    rw [legendreSym.eq_one_iff p (hval.symm ▸ ha), hval]
   rw [psiCompute, psi, hjf]
   by_cases hsq : IsSquare a
-  · rw [if_pos hsq, if_pos]
-    rw [legendreSym.eq_one_iff p hval0, hval]; exact hsq
-  · rw [if_neg hsq, if_neg]
-    rw [legendreSym.eq_one_iff p hval0, hval]; exact hsq
+  · rw [if_pos hsq, if_pos (hiff.mpr hsq)]
+  · rw [if_neg hsq, if_neg (hiff.not.mpr hsq)]
 
 /-! ### Kernel-reducible evaluation of `λ` on an affine point -/
 
