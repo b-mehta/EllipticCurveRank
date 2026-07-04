@@ -5,24 +5,20 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.DenominatorSquare
-import ECCompute.Theory.Descent.Collinearity
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Theory.Descent.Reduction.Def
 import ECCompute.Theory.Descent.Reduction.Hom
 import ECCompute.Theory.Descent.Reduction.EpsFinite
-import Mathlib.Data.Rat.Cast.Defs
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.Algebra.Field.ZMod
-import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
 # The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`, using the denominator-is-a-square lemma
-(`ECCompute.Descent.DenominatorSquare`) and the collinearity identity
-(`ECCompute.Descent.Collinearity`).
+`ECCompute.Descent.Defs`.  Additivity is obtained by factoring `λ` through the reduction map
+`red_p : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εp_finite`, both of which are
+additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
+`ECCompute.Descent.Reduction.EpsFinite`).
 
 ## Main declarations
 
@@ -41,22 +37,15 @@ open scoped Classical
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
-/-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate
-
-For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
-`w` with `x.den = w²`.  Then `α = x.num - θ·x.den = w²·(X - θ)`, so `ψ_p(α) = ψ_p(X - θ)`,
-and the tangent branch `α = 0` is exactly `X = θ`. -/
+/-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate -/
 
 variable {a₂ a₄ a₆ p}
 
-/-- `α = w² (X - θ)` where `x.den = w²`, hence `α` and `X - θ` differ by a nonzero square. -/
-theorem alpha_eq [Fact p.Prime] {x : ℚ} {θ : ZMod p} {w : ℕ} (hden : x.den = w ^ 2)
-    (hd : (x.den : ZMod p) ≠ 0) :
-    (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
-  have hw : ((w : ZMod p)) ^ 2 = (x.den : ZMod p) := by rw [hden]; push_cast; ring
-  rw [num_eq_xbar_mul_den hd, ← hw]; ring
+/-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate.
 
-/-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate. -/
+Writing `x.den = w²` (a square, from `den_isSquare_of_nonsingular`), the descent value
+`α = x.num - θ·x.den = w²·(X - θ)`, so `ψ_p(α) = ψ_p(X - θ)` and the tangent branch `α = 0`
+is exactly `X = θ`. -/
 theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     lambda a₂ a₄ a₆ p θ (.some x y h)
@@ -64,11 +53,9 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
   obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := by
     intro h0; apply hd; rw [hxden]; push_cast; rw [h0]; ring
-  have halpha := alpha_eq (θ := θ) hxden hd
-  change (if (x.den : ZMod p) = 0 then (0 : ZMod 2)
-        else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
-             else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p))) = _
-  rw [if_neg hd, halpha]
+  have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
+    rw [num_eq_xbar_mul_den hd, hxden]; push_cast; ring
+  simp only [lambda, if_neg hd, halpha]
   by_cases hxt : xbar p x = θ
   · have hz : (w : ZMod p) ^ 2 * (xbar p x - θ) = 0 := by rw [hxt]; ring
     rw [if_pos hz, if_pos hxt]
@@ -80,10 +67,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
 theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
-  change (if (x.den : ZMod p) = 0 then (0 : ZMod 2)
-      else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
-           else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p))) = _
-  rw [if_pos hd]
+  simp only [lambda, if_pos hd]
 
 end ECCompute
 
