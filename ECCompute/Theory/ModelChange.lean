@@ -116,17 +116,17 @@ theorem slope_scale (hv : v ≠ 0)
     · have hy' : v ^ 3 * y₁ ≠ W'.toAffine.negY (v ^ 2 * x₁) (v ^ 3 * y₂) := by
         rw [negY_scale h1 h3]
         exact fun hc => hy (mul_left_cancel₀ (pow_ne_zero 3 hv) hc)
-      rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, negY_scale h1 h3,
-        show 3 * (v ^ 2 * x₁) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x₁) + W'.a₄ - W'.a₁ * (v ^ 3 * y₁)
-            = v ^ 3 * (v * (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)) from by
-          rw [h1, h2, h4]; ring,
-        show v ^ 3 * y₁ - v ^ 3 * W.toAffine.negY x₁ y₁ = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) from
-          by ring,
+      have enum : 3 * (v ^ 2 * x₁) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x₁) + W'.a₄ - W'.a₁ * (v ^ 3 * y₁)
+          = v ^ 3 * (v * (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)) := by
+        rw [h1, h2, h4]; ring
+      have eden : v ^ 3 * y₁ - v ^ 3 * W.toAffine.negY x₁ y₁
+          = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by ring
+      rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, negY_scale h1 h3, enum, eden,
         mul_div_mul_left _ _ (pow_ne_zero 3 hv), mul_div_assoc]
   · have hx' : v ^ 2 * x₁ ≠ v ^ 2 * x₂ := fun hc => hx (mul_left_cancel₀ (pow_ne_zero 2 hv) hc)
-    rw [slope_of_X_ne hx', slope_of_X_ne hx,
-      show v ^ 3 * y₁ - v ^ 3 * y₂ = v ^ 2 * (v * (y₁ - y₂)) from by ring,
-      show v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) from by ring,
+    have enum : v ^ 3 * y₁ - v ^ 3 * y₂ = v ^ 2 * (v * (y₁ - y₂)) := by ring
+    have eden : v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) := by ring
+    rw [slope_of_X_ne hx', slope_of_X_ne hx, enum, eden,
       mul_div_mul_left _ _ (pow_ne_zero 2 hv), mul_div_assoc]
 
 /-- The forward coordinate map `(x, y) ↦ (v²x, v³y)` on Mordell-Weil groups. -/

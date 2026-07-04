@@ -490,7 +490,8 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
           = ((N ^ 2 : ℤ) : ℚ) + (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) := by push_cast; ring
       have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
       have hr0 : (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
-        simpa using (show ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 by exact_mod_cast h0)
+        have : ((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
+        simpa using this
       have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
         rw [padicValRat.of_int, hNval2]; push_cast; ring
       have hrv : padicValRat p (-((a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ))

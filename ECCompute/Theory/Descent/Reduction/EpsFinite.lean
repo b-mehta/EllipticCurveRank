@@ -162,7 +162,8 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
   have h2 : (2 : ZMod p) ≠ 0 := by
-    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) by push_cast; ring, Ne, ZMod.natCast_eq_zero_iff]
+    have hc : (2 : ZMod p) = ((2 : ℕ) : ZMod p) := by push_cast; ring
+    rw [hc, Ne, ZMod.natCast_eq_zero_iff]
     intro hd; exact hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
   have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
   have hneg : (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y := by
@@ -187,7 +188,8 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set X₃ := (reducedCurve a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, show y - -y = 2 * y by ring]
+    have hsub : y - -y = 2 * y := by ring
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp only [reducedCurve]
     rw [div_mul_cancel₀ _ h2y]; ring
   set m : ZMod p := y - ℓ * x with hmb
@@ -233,9 +235,9 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
   · rw [← Affine.Point.zero_def, add_zero, εp_finite_zero, add_zero]
   by_cases hxy : x₁ = x₂ ∧ y₁ = (reducedCurve a₂ a₄ a₆ p).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
+    have h20 : (2 : ZMod 2) = 0 := by decide
     rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, εp_finite_zero,
-      εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul, show (2 : ZMod 2) = 0 from by decide,
-      zero_mul]
+      εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, ← two_mul, h20, zero_mul]
   · by_cases hne : x₁ = x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
       have hynegY : (reducedCurve a₂ a₄ a₆ p).toAffine.negY x₂ y₂ = -y₂ := by
@@ -265,9 +267,10 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
         · exact sub_eq_zero.mp hh
         · exact absurd (by linear_combination hh : y₁ = -y₂) hyne'
       subst hne; subst hyeq
-      rw [show (Affine.Point.some x₁ y₁ h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Point)
-          = Affine.Point.some x₁ y₁ h₁ from rfl, ← two_mul,
-        show (2 : ZMod 2) = 0 from by decide, zero_mul]
+      have hpt : (Affine.Point.some x₁ y₁ h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Point)
+          = Affine.Point.some x₁ y₁ h₁ := rfl
+      have h20 : (2 : ZMod 2) = 0 := by decide
+      rw [hpt, ← two_mul, h20, zero_mul]
       exact εp_finite_double h h₁ hy1ne0
     · -- Secant: `x₁ ≠ x₂`.
       exact εp_finite_map_add_of_X_ne h h₁ h₂ hne
@@ -289,6 +292,7 @@ theorem εpHom_apply (h : DescentHyp a₂ a₄ a₆ p θ)
 theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (reducedCurve a₂ a₄ a₆ p).toAffine.Point) :
     εpHom h (2 • P) = 0 := by
-  rw [two_nsmul, map_add, ← two_mul, show (2 : ZMod 2) = 0 from by decide, zero_mul]
+  have h20 : (2 : ZMod 2) = 0 := by decide
+  rw [two_nsmul, map_add, ← two_mul, h20, zero_mul]
 
 end ECCompute

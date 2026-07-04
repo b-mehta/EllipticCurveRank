@@ -116,8 +116,8 @@ theorem rank_ge_of_certificate (c : Certificate)
   have hrow : (fun i => φ (g i)) = (F2Invert.toMat c.matB c.rho).row := by
     funext i
     ext j
-    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg]
-    rw [← lambdaCompute_eq c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j) (pt i).1 (pt i).2 (hns i)]
+    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
+      ← lambdaCompute_eq c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j) (pt i).1 (pt i).2 (hns i)]
     exact (hB i j).symm
   -- `B` is a unit, so its rows are `𝔽₂`-linearly independent.
   have hunit : IsUnit (F2Invert.toMat c.matB c.rho) :=
@@ -148,9 +148,11 @@ theorem rank_ge_of_certificate (c : Certificate)
       no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 c.a₂ 0 c.a₄ c.a₆ htorP W
         (by simp [hW, curve]) (by simp [hW, curve]) (by simp [hW, curve])
         (by simp [hW, curve]) (by simp [hW, curve])
-        (by rw [show (0 : ℤ) ^ 2 + 4 * c.a₂ = 4 * c.a₂ by ring,
-            show 8 * (2 * c.a₄ + 0 * 0) = 16 * c.a₄ by ring,
-            show 16 * ((0 : ℤ) ^ 2 + 4 * c.a₆) = 64 * c.a₆ by ring]; exact htor)
+        (by
+          have e1 : (0 : ℤ) ^ 2 + 4 * c.a₂ = 4 * c.a₂ := by ring
+          have e2 : 8 * (2 * c.a₄ + 0 * 0) = 16 * c.a₄ := by ring
+          have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * c.a₆) = 64 * c.a₆ := by ring
+          rw [e1, e2, e3]; exact htor)
         (x : E) hxE
     exact Subtype.ext hx0
   have htcard : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ 0 := by

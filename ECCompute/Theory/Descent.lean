@@ -70,7 +70,8 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
              else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p))) = _
   rw [if_neg hd, halpha]
   by_cases hxt : xbar p x = θ
-  · rw [if_pos (show (w : ZMod p) ^ 2 * (xbar p x - θ) = 0 by rw [hxt]; ring), if_pos hxt]
+  · have hz : (w : ZMod p) ^ 2 * (xbar p x - θ) = 0 := by rw [hxt]; ring
+    rw [if_pos hz, if_pos hxt]
   · have hne : (w : ZMod p) ^ 2 * (xbar p x - θ) ≠ 0 :=
       mul_ne_zero (pow_ne_zero 2 hw) (sub_ne_zero.mpr hxt)
     rw [if_neg hne, if_neg hxt, psi_mul_sq hw]
@@ -198,12 +199,13 @@ theorem lambda_double_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ 
   have hp2 : p ≠ 2 := fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
   have hyℚ : y ≠ 0 := fun hh => hy0 (by rw [hh, Rat.cast_zero])
   have hdy : (y.den : ZMod p) ≠ 0 := ydenom_ne_zero hP.1 hdx
+  have hnegY : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
+    simp [WeierstrassCurve.Affine.negY, curve]
   have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-    rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
-      simp [WeierstrassCurve.Affine.negY, curve]]
-    intro hh; apply hyℚ; linarith
+    rw [hnegY]; intro hh; apply hyℚ; linarith
   have h2 : (2 : ZMod p) ≠ 0 := by
-    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) by push_cast; ring, Ne, ZMod.natCast_eq_zero_iff]
+    have hc : (2 : ZMod p) = ((2 : ℕ) : ZMod p) := by push_cast; ring
+    rw [hc, Ne, ZMod.natCast_eq_zero_iff]
     intro hd; exact hp2 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_two).mp hd)
   have hdbl := reduced_doubleX hyℚ hdx hdy hdx3
   have hcurve := reduced_on_curve hP.1 hdx hdy
@@ -364,7 +366,8 @@ theorem lambdaHom_apply {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  rw [two_nsmul, map_add, ← two_mul, show (2 : ZMod 2) = 0 from by decide, zero_mul]
+  have h2 : (2 : ZMod 2) = 0 := by decide
+  rw [two_nsmul, map_add, ← two_mul, h2, zero_mul]
 
 /-- Restated: `λ_{p,θ}` kills every element of the image of doubling. -/
 theorem lambdaHom_apply_eq_zero_of_mem_range_two_nsmul {θ : ZMod p}
