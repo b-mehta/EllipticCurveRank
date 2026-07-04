@@ -522,6 +522,34 @@ private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C
       + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
       + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
 
+/-- The crux valuation inequality of the kernel-closure certificate, isolated from the integer
+curve relations.  With `K = AG² - CE²`, `N = ADE - BCG` and the `p`-unit `W = -A²C² + …`, the
+identity `N·(ADE + BCG) = K·W` (from the two curve relations) together with `p ∣ E`, `p ∣ G` and
+`p`-unit `A`, `C` gives `N ≠ 0`, `K ≠ 0` and `v_p(N) < v_p(K)`. -/
+private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
+    (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hEne : (E : ℚ) ≠ 0) (hGne : (G : ℚ) ≠ 0) (hpE : (p : ℤ) ∣ E) (hpG : (p : ℤ) ∣ G)
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
+    (hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6)
+    (hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6) :
+    padicValInt p (A * D * E - B * C * G) < padicValInt p (A * G ^ 2 - C * E ^ 2)
+      ∧ A * D * E - B * C * G ≠ 0 ∧ A * G ^ 2 - C * E ^ 2 ≠ 0 := by
+  set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
+  set N : ℤ := A * D * E - B * C * G with hNdef
+  set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+    + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
+  have hI2 : N * (A * D * E + B * C * G) = K * W := by
+    rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
+  have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
+    dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
+  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
+  have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
+  have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
+  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
+  have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
+  exact ⟨padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
+    hN0, hK0⟩
+
 /-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
@@ -563,25 +591,13 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     int_curve_relation a₂ a₄ a₆ hcv2 hC hD
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
   set N : ℤ := A * D * E - B * C * G with hNdef
-  set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
-    + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
-  -- the two load-bearing integer identities
+  -- the single-fraction identity feeds the final valuation certificate
   have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
     rw [hKdef, hNdef]; exact addX_single_fraction a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
-  have hI2 : N * (A * D * E + B * C * G) = K * W := by
-    rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
-  -- divisibility facts
-  have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
-    dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
-  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
-  have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
-  have hK0 : K ≠ 0 :=
-    hKdef ▸ K_ne_zero hne hA hC (by exact_mod_cast hEne) (by exact_mod_cast hGne)
-  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
-  have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
-  -- the crux inequality `v_p(N) < v_p(K)` feeds the final valuation certificate
-  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC
-    (padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0)
+  -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
+  obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations a₂ a₄ a₆ p hpZ hne hA hC
+    (by exact_mod_cast hEne) (by exact_mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
+  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC hcrux
     (fun h => hpA (h ▸ dvd_zero _)) (fun h => hpC (h ▸ dvd_zero _)) hK0 hN0
 
 /-- Distinct points sharing an `x`-coordinate are mutually negative: if `x₁ = x₂` but
@@ -690,6 +706,23 @@ private theorem reduced_addX_eq (X L : ZMod p) :
       = L ^ 2 - (a₂ : ZMod p) - X - X := by
   simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; ring
 
+/-- The cast of the rational `addY` matches the reduced `addY` form when the slope, `x`-coordinates
+and `y`-coordinate all survive reduction: the denominators of each summand are nonzero mod `p`, so
+`Rat.cast` distributes over the `-(ℓ·(addX - x₁) + y₁)` expression. -/
+private theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
+    (hd1 : (x₁.den : ZMod p) ≠ 0) (hdy1 : (y₁.den : ZMod p) ≠ 0)
+    (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :
+    ((curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
+      = -((ℓ : ZMod p) * (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p) - (x₁ : ZMod p))
+        + (y₁ : ZMod p)) := by
+  have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
+      = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
+    simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
+      WeierstrassCurve.Affine.negAddY, curve]; ring
+  rw [haddY, Rat.cast_neg,
+    Rat.cast_add_of_ne_zero (den_mul_ne_zero hℓden (den_sub_ne_zero hd3 hd1)) hdy1,
+    Rat.cast_mul_of_ne_zero hℓden (den_sub_ne_zero hd3 hd1), Rat.cast_sub_of_ne_zero hd3 hd1]
+
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
 `red_p (P + Q)` is the tangent doubling of the common reduced point `P̄`.  Both reduced `x`- and
 `y`-coordinates are matched against the doubling formulas via the reduced tangent identities. -/
@@ -726,16 +759,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
       = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
     linear_combination -hS2 + hXbar
-  have hy3cast : ((curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
-      = -((ℓ : ZMod p) * (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p) - (x₁ : ZMod p))
-        + (y₁ : ZMod p)) := by
-    have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
-        = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-      simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
-        WeierstrassCurve.Affine.negAddY, curve]; ring
-    rw [haddY, Rat.cast_neg,
-      Rat.cast_add_of_ne_zero (den_mul_ne_zero hℓden (den_sub_ne_zero hd3 hd1)) hdy1,
-      Rat.cast_mul_of_ne_zero hℓden (den_sub_ne_zero hd3 hd1), Rat.cast_sub_of_ne_zero hd3 hd1]
+  have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
   rw [Affine.Point.add_of_X_ne hne,
     red_p_of_den_ne a₂ a₄ a₆ p hΔ
       (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy => hne hxy.left)) hd3_s,
