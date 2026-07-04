@@ -77,6 +77,11 @@ theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   den_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
+/-- Good denominators are closed under powers. -/
+theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
+    ((x ^ n).den : ZMod p) ≠ 0 := by
+  rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero n hx
+
 /-- Good denominators are closed under division by a rational whose reduction is nonzero: if
 `b.den`, `a.den` reduce nonzero and `(a : ZMod p) ≠ 0`, then `(b / a).den` reduces nonzero.
 This is the denominator half of "the reduced slope `(y₁ - y₂)/(x₁ - x₂)` is well-defined mod `p`
@@ -87,12 +92,9 @@ theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
   have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
   have hnum : (a.num : ZMod p) ≠ 0 := by
     rw [num_eq_xbar_mul_den ha]; exact mul_ne_zero ha0 ha
-  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := by
-    rw [Ne, ZMod.natCast_eq_zero_iff]
-    intro hdvd
-    apply hnum
-    rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
-    exact Int.dvd_natAbs.mp (Int.natCast_dvd_natCast.mpr hdvd)
+  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h => hnum <| by
+    rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
+    exact (ZMod.natCast_eq_zero_iff _ _).mp h
   rw [div_eq_mul_inv]
   refine den_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
   rw [Nat.cast_mul, Rat.den_inv_of_ne_zero ha']
@@ -152,9 +154,9 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
     rw [haddX]; linear_combination (ℓ * (x₁ - x₂) + (y₁ - y₂)) * hℓ
   have hcast : (((x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 : ℚ) : ZMod p)
       = (((y₁ - y₂) ^ 2 : ℚ) : ZMod p) := by rw [REL]
-  rw [Rat.cast_mul_of_ne_zero (den_add_ne_zero (den_add_ne_zero
-        (den_add_ne_zero hdx3 (by simp)) hdx1) hdx2) (by
-        rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero _ (den_sub_ne_zero hdx1 hdx2)),
+  rw [Rat.cast_mul_of_ne_zero
+        (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hdx3 (by simp)) hdx1) hdx2)
+        (den_pow_ne_zero (den_sub_ne_zero hdx1 hdx2) 2),
       Rat.cast_pow, Rat.cast_pow,
       Rat.cast_sub_of_ne_zero hdx1 hdx2,
       Rat.cast_sub_of_ne_zero hdy1 hdy2] at hcast
@@ -168,8 +170,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
 theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) :
     (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) : ℚ)) : ZMod p)
       = 3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p) := by
-  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := by
-    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdx
+  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := den_pow_ne_zero hdx 2
   have h3x2 : (((3 : ℚ) * x ^ 2).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) hx2
   have h2a2 : (((2 : ℚ) * (a₂ : ℚ)).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) (by simp)
   have h2a2x : (((2 : ℚ) * (a₂ : ℚ) * x).den : ZMod p) ≠ 0 := den_mul_ne_zero h2a2 hdx
@@ -180,6 +181,16 @@ theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) 
       Rat.cast_mul_of_ne_zero (by simp) (by simp)]
   push_cast
   ring
+
+/-- On `curve a₂ a₄ a₆`, `negY x y = -y` (the curve has `a₁ = a₃ = 0`). -/
+theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
+  simp [WeierstrassCurve.Affine.negY, curve]
+
+/-- On `curve a₂ a₄ a₆`, `y ≠ negY x y` whenever `y ≠ 0`. -/
+theorem y_ne_negY {x y : ℚ} (hy0 : y ≠ 0) : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
+  rw [negY_curve]
+  intro h
+  exact hy0 (by linarith)
 
 /-- Doubling analogue of `reduced_addX`: for a point `(x, y)` with `y ≠ 0` and good denominators
 (including the doubled `x`-coordinate `x₃ = dblX`), the `ℓ`-free tangent identity
@@ -194,12 +205,8 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x x y y with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
-  have hnegY : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
-    simp [WeierstrassCurve.Affine.negY, curve]
-  have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-    rw [hnegY]; intro h; apply hy0; linarith
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hnegY]
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
     simp only [curve]; field_simp; ring
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
@@ -211,7 +218,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
       = ((x₃ : ZMod p) + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2 := by
     rw [Rat.cast_mul_of_ne_zero
           (den_add_ne_zero (den_add_ne_zero hdx3 (by simp)) (den_mul_ne_zero (by simp) hdx))
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 (den_mul_ne_zero (by simp) hdy)),
+          (den_pow_ne_zero (den_mul_ne_zero (by simp) hdy) 2),
         Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) hdy,
         Rat.cast_add_of_ne_zero (den_add_ne_zero hdx3 (by simp)) (den_mul_ne_zero (by simp) hdx),
         Rat.cast_add_of_ne_zero hdx3 (by simp),
@@ -232,16 +239,11 @@ theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 :
         ((curve a₂ a₄ a₆).toAffine.slope x x y y)).den : ZMod p) ≠ 0 := by
   have hslopeval : (curve a₂ a₄ a₆).toAffine.slope x x y y
       = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) / (2 * y) := by
-    have hnegY : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
-      simp [WeierstrassCurve.Affine.negY, curve]
-    have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-      rw [hnegY]; intro hh; apply hyℚ; linarith
-    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hnegY]
+    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hyℚ), negY_curve]
     simp only [curve]
-    have hsub : y - -y = 2 * y := by ring
-    rw [hsub]; congr 1; ring
-  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := by
-    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdx
+    rw [div_eq_div_iff (by simpa using hyℚ) (by simpa using hyℚ)]
+    ring
+  have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := den_pow_ne_zero hdx 2
   have hdnum : ((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
     den_add_ne_zero (den_add_ne_zero (den_mul_ne_zero (by simp) hx2)
       (den_mul_ne_zero (den_mul_ne_zero (by simp) (by simp)) hdx)) (by simp)
@@ -255,7 +257,7 @@ theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 :
     simp only [WeierstrassCurve.Affine.addX, curve]; ring
   rw [haddX]
   exact den_sub_ne_zero (den_sub_ne_zero (den_sub_ne_zero
-    (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdℓ) (by simp)) hdx) hdx
+    (den_pow_ne_zero hdℓ 2) (by simp)) hdx) hdx
 
 /-- The `y`-denominator reduces well whenever the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
