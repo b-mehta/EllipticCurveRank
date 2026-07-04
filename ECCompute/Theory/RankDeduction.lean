@@ -61,12 +61,7 @@ local notation3 M "⟦2⟧" => Submodule.torsionBy ℤ M 2
 
 /-- The 2-torsion `H[2]` is the kernel of the doubling map `x ↦ 2 • x`. -/
 lemma torsionBy_two_eq_ker :
-    (Submodule.torsionBy ℤ H 2) = LinearMap.ker (LinearMap.lsmul ℤ H 2) := by
-  ext x
-  simp [Submodule.mem_torsionBy_iff, LinearMap.lsmul_apply, LinearMap.mem_ker]
-
-/-- `ModN H 2` is by definition the quotient by the range of the doubling map. -/
-lemma modN_two_def : ModN H 2 = (H ⧸ LinearMap.range (LinearMap.lsmul ℤ H 2)) := rfl
+    (Submodule.torsionBy ℤ H 2) = LinearMap.ker (LinearMap.lsmul ℤ H 2) := rfl
 
 /-! ### Finiteness of `H ⧸ 2H` -/
 
