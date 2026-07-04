@@ -19,24 +19,24 @@ import Mathlib.Algebra.Field.ZMod
 /-!
 # The rank-bound deduction (abstract core)
 
-This file develops, as pure finitely-generated-abelian-group theory, the algebraic core of the
-descent argument used to certify lower bounds on the rank of an elliptic curve. It is deliberately
-decoupled from the elliptic curve and from the concrete `𝔽₂`-invertibility check: everything is
-phrased for a finitely generated additive abelian group `H`, viewed as a `ℤ`-module.
+This file develops, as pure finitely-generated-abelian-group theory, the group-theoretic part of
+the descent argument used to certify lower bounds on the rank of an elliptic curve. It mentions
+neither the elliptic curve nor the concrete `𝔽₂`-invertibility check: everything is phrased for a
+finitely generated additive abelian group `H`, viewed as a `ℤ`-module.
 
 Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-vector space) and
 `H[2] = Submodule.torsionBy ℤ H 2` for the 2-torsion.
 
 ## Main results
 
-* `RankDeduction.natCard_modN_two`: the master cardinality identity
+* `RankDeduction.natCard_modN_two`: the cardinality identity
   `Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card H[2]`.
 * `RankDeduction.finrank_modN_two`: the dimension formula
   `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`.
 * `RankDeduction.rho_le_finrank_modN_two`: if `ρ` elements have `𝔽₂`-linearly independent images
   under some additive hom `φ : H →+ (Fin ρ → ZMod 2)`, then `ρ ≤ dim_{𝔽₂}(H ⧸ 2H)`.
 * `RankDeduction.rank_ge`: the packaged deduction, `ρ ≤ rank H + t` whenever `Nat.card H[2] = 2 ^ t`
-  and there are `ρ` independent descent-character values — i.e. `rank H ≥ ρ - t`.
+  and there are `ρ` independent descent-character values, i.e. `rank H ≥ ρ - t`.
 
 The hypothesis "the images are linearly independent" is exactly what an invertible `ρ × ρ` matrix
 over `𝔽₂` supplies, so this is the interface the certificate checker instantiates.
@@ -46,9 +46,7 @@ open Module
 
 namespace RankDeduction
 
-/-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. (Stated before the section
-variables: an ambient `[AddCommGroup H]` assumption interferes with `DivisionRing (ZMod 2)`
-synthesis.) -/
+/-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
 lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
@@ -86,14 +84,6 @@ instance instFiniteModN [Module.Finite ℤ H] : Finite (ModN H 2) := by
 
 instance instFiniteDimModN [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
-
-/-- The 2-torsion is a `ZMod 2`-module (it is annihilated by `2`). This is deliberately not an
-instance: `AddCommGroup.zmodModule` is a non-instance, and registering it globally breaks
-`DivisionRing (ZMod 2)` synthesis elsewhere. -/
-@[implicit_reducible]
-def zmod2TorsionByModule : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) :=
-  AddCommGroup.zmodModule fun x => by
-    rw [← Nat.cast_smul_eq_nsmul ℤ, Nat.cast_ofNat]; exact Submodule.smul_torsionBy 2 x
 
 instance instFiniteTorsionBy [Module.Finite ℤ H] :
     Finite (Submodule.torsionBy ℤ H 2) := by
@@ -251,7 +241,7 @@ lemma natCard_torsionBy_two_prod :
 
 end Prod
 
-/-! ### The master cardinality identity -/
+/-! ### The cardinality identity for finitely generated groups -/
 
 /-- A finite `ℤ`-module has free rank zero. -/
 lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
@@ -306,8 +296,7 @@ lemma natCard_modN_two_of_free_prod_finite
   rw [natCard_modN_two_prod, natCard_torsionBy_two_prod, ModN.natCard_eq F 2,
     natCard_modN_two_of_finite D, natCard_torsionBy_two_eq_one_of_noZeroSMul F, one_mul]
 
-/-- **The dimension identity, cardinality form.** For a finitely generated abelian group `H`,
-`|H ⧸ 2H| = 2 ^ rank H · |H[2]|`. -/
+/-- For a finitely generated abelian group `H`, `|H ⧸ 2H| = 2 ^ rank H · |H[2]|`. -/
 theorem natCard_modN_two [Module.Finite ℤ H] :
     Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
   obtain ⟨n, ι, fι, p, hp, ee, ⟨iso⟩⟩ := Module.equiv_free_prod_directSum ℤ H
@@ -331,14 +320,13 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
 
 /-! ### The dimension identity -/
 
-/-- **The dimension identity.** For a finitely generated abelian group `H`,
-`dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`, where the 2-torsion carries its `ZMod 2`-module
-structure. -/
+/-- For a finitely generated abelian group `H`, `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`, where
+the 2-torsion carries its `ZMod 2`-module structure. -/
 theorem finrank_modN_two [Module.Finite ℤ H] :
-    letI := zmod2TorsionByModule (H := H)
+    letI : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
     finrank (ZMod 2) (ModN H 2) =
       finrank ℤ H + finrank (ZMod 2) (Submodule.torsionBy ℤ H 2) := by
-  letI := zmod2TorsionByModule (H := H)
+  letI : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
   have key := natCard_modN_two (H := H)
   rw [natCard_eq_two_pow_finrank (ModN H 2),
     natCard_eq_two_pow_finrank (Submodule.torsionBy ℤ H 2), ← pow_add] at key
@@ -348,10 +336,9 @@ theorem finrank_modN_two [Module.Finite ℤ H] :
 
 variable {ρ : ℕ}
 
-/-- **The descent deduction, dimension form.** If `ρ` group elements have `𝔽₂`-linearly
-independent images under an additive hom `φ : H →+ (Fin ρ → ZMod 2)`, then `H ⧸ 2H` has
-dimension at least `ρ`. (The hom automatically factors through `H ⧸ 2H`, since the target has
-characteristic 2.) -/
+/-- If `ρ` group elements have `𝔽₂`-linearly independent images under an additive hom
+`φ : H →+ (Fin ρ → ZMod 2)`, then `H ⧸ 2H` has dimension at least `ρ`. (The hom automatically
+factors through `H ⧸ 2H`, since the target has characteristic 2.) -/
 theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i))) :
@@ -365,9 +352,9 @@ theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     simpa only [Function.comp_def, hψ] using hindep
   simpa using hmk.fintype_card_le_finrank
 
-/-- **The descent deduction, rank form.** If `ρ` group elements have `𝔽₂`-linearly independent
-images under a descent-character tuple `φ`, and the 2-torsion has cardinality `2 ^ t`, then
-`rank H ≥ ρ - t` (stated as `ρ ≤ rank H + t`). -/
+/-- If `ρ` group elements have `𝔽₂`-linearly independent images under a descent-character tuple
+`φ`, and the 2-torsion has cardinality `2 ^ t`, then `rank H ≥ ρ - t` (stated as
+`ρ ≤ rank H + t`). -/
 theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ t) :
