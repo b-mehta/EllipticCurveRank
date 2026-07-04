@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.PsiBase
 import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 /-!
@@ -144,59 +144,6 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
   · rw [if_neg hsq, if_neg]
     rw [legendreSym.eq_one_iff p hval0, hval]; exact hsq
 
-/-! ### The derivative does not vanish at a simple root
-
-Under `DescentHyp` the root `θ` is simple: `p ∤ Δ` forces `f'(θ) ≠ 0`, via the Bézout identity
-`9·disc(f) = -A(θ)·f(θ) - B(θ)·f'(θ)` with `Δ = 16·disc(f)` and `p ∤ 6`. -/
-
-/-- Under the descent hypotheses, the root `θ` is simple, so `f'(θ) ≠ 0`. -/
-theorem fderiv_ne_zero (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv a₂ a₄ a₆ p θ ≠ 0 := by
-  intro hfd
-  have hp3 : p ≠ 3 := fun hp => h.ne_six (hp ▸ ⟨2, rfl⟩)
-  -- polynomial forms of `f(θ) = 0` and `f'(θ) = 0`
-  have hf : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := h.root
-  have hd : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := hfd
-  -- Bézout: `9 · disc(f)` is a combination of `f(θ)` and `f'(θ)`, hence `0`.  With
-  -- `s = 6a₄ - 2a₂²`, `t = 9a₆ - a₂a₄` and `L = 3sθ + 2a₂s - 3t` the cofactors are `9L` and
-  -- `-(s² + L(3θ + a₂))`.
-  have h9D : (9 : ZMod p) * (18 * (a₂ : ZMod p) * (a₄ : ZMod p) * (a₆ : ZMod p)
-      - 4 * (a₂ : ZMod p) ^ 3 * (a₆ : ZMod p) + (a₂ : ZMod p) ^ 2 * (a₄ : ZMod p) ^ 2
-      - 4 * (a₄ : ZMod p) ^ 3 - 27 * (a₆ : ZMod p) ^ 2) = 0 := by
-    linear_combination
-      (9 * (3 * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) * θ
-          + 2 * (a₂ : ZMod p) * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2)
-          - 3 * (9 * (a₆ : ZMod p) - (a₂ : ZMod p) * (a₄ : ZMod p)))) * hf
-      + (-((6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) ^ 2
-          + (3 * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) * θ
-            + 2 * (a₂ : ZMod p) * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2)
-            - 3 * (9 * (a₆ : ZMod p) - (a₂ : ZMod p) * (a₄ : ZMod p)))
-            * (3 * θ + (a₂ : ZMod p)))) * hd
-  -- `9 ≠ 0` mod `p` (as `p ≠ 3`), so `disc(f) = 0`
-  have : NeZero p := ⟨h.prime.pos.ne'⟩
-  have h3 : (3 : ZMod p) ≠ 0 := by
-    have hnd : ¬ p ∣ 3 :=
-      fun hdvd => hp3 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_three).mp hdvd)
-    simpa using (ZMod.natCast_eq_zero_iff 3 p).not.mpr hnd
-  have h9 : (9 : ZMod p) ≠ 0 := by
-    have : (9 : ZMod p) = 3 * 3 := by norm_num
-    rw [this]; exact mul_ne_zero h3 h3
-  have hDzero := (mul_eq_zero.mp h9D).resolve_left h9
-  -- but `Δ.num = 16 · disc(f)`, which is a unit mod `p`, contradiction
-  have hΔ : (curve a₂ a₄ a₆).Δ.num =
-      16 * (18 * a₂ * a₄ * a₆ - 4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2) := by
-    have : (curve a₂ a₄ a₆).Δ =
-        ((16 * (18 * a₂ * a₄ * a₆ - 4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3
-          - 27 * a₆ ^ 2) : ℤ) : ℚ) := by
-      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-      push_cast; ring
-    rw [this, Rat.num_intCast]
-  apply h.discr
-  rw [hΔ]
-  push_cast
-  linear_combination (16 : ZMod p) * hDzero
-
 /-! ### Kernel-reducible evaluation of `λ` on an affine point -/
 
 /-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
@@ -215,7 +162,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     lambdaCompute a₂ a₄ a₆ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero a₂ a₄ a₆ p hyp
+  have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
       if (x.den : ZMod p) = 0 then 0
       else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
