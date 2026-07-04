@@ -59,9 +59,8 @@ theorem equation_scale (x y : ℚ) :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff,
     s.a1, s.a2, s.a3, s.a4, s.a6]
-  constructor
-  · intro h; linear_combination v ^ 6 * h
-  · intro h; apply mul_left_cancel₀ (pow_ne_zero 6 s.ne); linear_combination h
+  exact ⟨fun h => by linear_combination v ^ 6 * h,
+    fun h => mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by linear_combination h)⟩
 
 /-- Nonsingularity transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem nonsingular_scale (x y : ℚ) :
