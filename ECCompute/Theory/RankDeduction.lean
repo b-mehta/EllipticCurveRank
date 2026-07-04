@@ -116,13 +116,12 @@ lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
     (LinearMap.range (LinearMap.lsmul ℤ H 2)).map (e : H →ₗ[ℤ] K) =
       LinearMap.range (LinearMap.lsmul ℤ K 2) := by
   ext z
-  simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply,
-    LinearEquiv.coe_coe]
+  simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply, LinearEquiv.coe_coe]
   constructor
   · rintro ⟨_, ⟨y, rfl⟩, rfl⟩
     exact ⟨e y, by rw [map_smul]⟩
   · rintro ⟨w, rfl⟩
-    exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul]; simp⟩
+    exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
 
 /-- A linear equivalence carries 2-torsion to 2-torsion. -/
 lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
@@ -134,8 +133,7 @@ lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
     rw [← map_smul, hy, map_zero]
   · intro hz
     refine ⟨e.symm z, ?_, by simp⟩
-    have : e.symm ((2 : ℤ) • z) = 0 := by rw [hz, map_zero]
-    rwa [map_smul] at this
+    rw [← map_smul, hz, map_zero]
 
 /-- `Nat.card (H ⧸ 2H)` is invariant under linear equivalences. -/
 lemma natCard_modN_two_congr (e : H ≃ₗ[ℤ] K) :
@@ -166,32 +164,22 @@ def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
       (P.liftQ ((P.prod Q).mkQ.comp (LinearMap.inl R M N)) ?_)
       (Q.liftQ ((P.prod Q).mkQ.comp (LinearMap.inr R M N)) ?_)) ?_ ?_
   · intro z hz
-    rw [Submodule.mem_prod] at hz
-    rw [LinearMap.mem_ker, LinearMap.prodMap_apply, Prod.mk_eq_zero, Submodule.mkQ_apply,
-      Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero, Submodule.Quotient.mk_eq_zero]
-    exact hz
+    simpa [LinearMap.mem_ker, Prod.mk_eq_zero, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
+      using hz
   · intro x hx
-    rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearMap.inl_apply, Submodule.mkQ_apply,
-      Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
-    exact ⟨hx, Q.zero_mem⟩
+    simp [LinearMap.mem_ker, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod, hx]
   · intro y hy
-    rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearMap.inr_apply, Submodule.mkQ_apply,
-      Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
-    exact ⟨P.zero_mem, hy⟩
+    simp [LinearMap.mem_ker, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod, hy]
   · apply LinearMap.ext
     rintro ⟨a, b⟩
     induction a using Submodule.Quotient.induction_on with | H x =>
     induction b using Submodule.Quotient.induction_on with | H y =>
-    simp only [LinearMap.comp_apply, LinearMap.coprod_apply, Submodule.liftQ_apply,
-      LinearMap.inl_apply, LinearMap.inr_apply, Submodule.mkQ_apply, LinearMap.prodMap_apply,
-      LinearMap.id_coe, id_eq, ← Submodule.Quotient.mk_add, Prod.mk_add_mk, add_zero, zero_add]
+    simp [← Submodule.Quotient.mk_add]
   · apply LinearMap.ext
     intro z
     induction z using Submodule.Quotient.induction_on with | H xy =>
     obtain ⟨x, y⟩ := xy
-    simp only [LinearMap.comp_apply, LinearMap.coprod_apply, Submodule.liftQ_apply,
-      LinearMap.inl_apply, LinearMap.inr_apply, Submodule.mkQ_apply, LinearMap.prodMap_apply,
-      LinearMap.id_coe, id_eq, ← Submodule.Quotient.mk_add, Prod.mk_add_mk, add_zero, zero_add]
+    simp [← Submodule.Quotient.mk_add]
 
 end ProdQuot
 
