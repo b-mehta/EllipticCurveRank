@@ -99,36 +99,19 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- Additivity of `εp_finite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
-distinct `x`-coordinates over `𝔽ₚ`. -/
-theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
-    {x₁ y₁ x₂ y₂ : ZMod p}
-    (h₁ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂)
-    (hne : x₁ ≠ x₂) :
-    εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      = εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
-  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne]
-  simp only [εp_finite_some]
-  set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  set X₃ := (reducedCurve a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hX3def
-  have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
-  have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
-  set m : ZMod p := y₁ - ℓ * x₁ with hmb
-  have hm1 : ℓ * x₁ + m = y₁ := by rw [hmb]; ring
-  have hm2 : ℓ * x₂ + m = y₂ := by rw [hmb]; linear_combination -hℓmul
-  have hpt1 : (ℓ * x₁ + m) ^ 2
-      = x₁ ^ 3 + (a₂ : ZMod p) * x₁ ^ 2 + (a₄ : ZMod p) * x₁ + (a₆ : ZMod p) := by
-    rw [hm1]; exact reducedCurve_equation h₁
-  have hpt2 : (ℓ * x₂ + m) ^ 2
-      = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
-    rw [hm2]; exact reducedCurve_equation h₂
-  have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
-    rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
+/-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
+whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
+`X₃` equals the sum of the values at `x₁` and `x₂`.  The `𝔽ₚ`-arithmetic core of the secant
+additivity, split off from the group-law setup in `εp_finite_map_add_of_X_ne`. -/
+private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
+    (hne : x₁ ≠ x₂)
+    (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
+    (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - (a₆ : ZMod p)) :
+    (if X₃ = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (X₃ - θ))
+      = (if x₁ = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (x₁ - θ))
+        + (if x₂ = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (x₂ - θ)) := by
   have hθroot := h.root'
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
-    x₁ x₂ X₃ hne hx3 hpt1 hpt2
   have hfd_ne : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero h
   have hfd1 : x₁ = θ → fderiv a₂ a₄ a₆ p θ = (x₂ - θ) * (X₃ - θ) := fun hc =>
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ
@@ -158,6 +141,67 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
   · rw [if_neg c3, if_neg c1, if_neg c2]
     have := psi_collinear h.prime hσ₁ hσ₂ hσ₃ h.root c1 c2 c3
     grind
+
+/-- Additivity of `εp_finite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
+distinct `x`-coordinates over `𝔽ₚ`. -/
+theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
+    {x₁ y₁ x₂ y₂ : ZMod p}
+    (h₁ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂)
+    (hne : x₁ ≠ x₂) :
+    εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
+      = εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
+  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne]
+  simp only [εp_finite_some]
+  set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set X₃ := (reducedCurve a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hX3def
+  have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
+  have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
+  set m : ZMod p := y₁ - ℓ * x₁ with hmb
+  have hm1 : ℓ * x₁ + m = y₁ := by rw [hmb]; ring
+  have hm2 : ℓ * x₂ + m = y₂ := by rw [hmb]; linear_combination -hℓmul
+  have hpt1 : (ℓ * x₁ + m) ^ 2
+      = x₁ ^ 3 + (a₂ : ZMod p) * x₁ ^ 2 + (a₄ : ZMod p) * x₁ + (a₆ : ZMod p) := by
+    rw [hm1]; exact reducedCurve_equation h₁
+  have hpt2 : (ℓ * x₂ + m) ^ 2
+      = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
+    rw [hm2]; exact reducedCurve_equation h₂
+  have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
+    rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
+    x₁ x₂ X₃ hne hx3 hpt1 hpt2
+  exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
+
+/-- The descent character vanishes at the double point of a tangent line: given the Vieta
+relations for the double-root triple `x, x, X₃` at a root `θ ≠ x`, the value at `X₃` is `0`.
+The `𝔽ₚ`-arithmetic core of the doubling case, split off from the group-law setup in
+`εp_finite_double`. -/
+private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
+    (hXθ : x ≠ θ)
+    (hσ₁ : x + x + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
+    (hσ₂ : x * x + x * X₃ + x * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
+    (hσ₃ : x * x * X₃ = m ^ 2 - (a₆ : ZMod p)) :
+    (if X₃ = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (X₃ - θ)) = 0 := by
+  have hθroot := h.root'
+  have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
+    prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x x X₃ θ
+      hσ₁ hσ₂ hσ₃ hθroot
+  by_cases c3 : X₃ = θ
+  · rw [if_pos c3]
+    have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
+      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
+        (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+        hθroot c3
+    rw [hfd]; exact psi_of_isSquare ⟨x - θ, by ring⟩
+  · rw [if_neg c3]
+    have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
+    have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
+    have hpm : psi p ((x - θ) * (x - θ) * (X₃ - θ)) = 0 := by
+      rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
+    rw [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
+      CharTwo.add_self_eq_zero, zero_add] at hpm
+    exact hpm
 
 /-- Additivity of `εp_finite` in the doubling case: `εp_finite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
@@ -195,24 +239,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
     ℓ m x X₃ hpt htan hx3
-  have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
-    prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x x X₃ θ
-      hσ₁ hσ₂ hσ₃ hθroot
-  by_cases c3 : X₃ = θ
-  · rw [if_pos c3]
-    have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
-      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
-        (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
-        hθroot c3
-    rw [hfd]; exact psi_of_isSquare ⟨x - θ, by ring⟩
-  · rw [if_neg c3]
-    have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
-    have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
-    have hpm : psi p ((x - θ) * (x - θ) * (X₃ - θ)) = 0 := by
-      rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
-    rw [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
-      CharTwo.add_self_eq_zero, zero_add] at hpm
-    exact hpm
+  exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
 /-- Additivity of `εp_finite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
