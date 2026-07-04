@@ -393,16 +393,14 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   obtain ⟨w₂, hx2d, hy2d⟩ := den_isSquare a₂ a₄ a₆ h₂
   have hw1ne : w₁ ≠ 0 := by intro h; apply x₁.den_ne_zero; rw [hx1d, h]; norm_num
   have hw2ne : w₂ ≠ 0 := by intro h; apply x₂.den_ne_zero; rw [hx2d, h]; norm_num
-  set A : ℤ := x₁.num with hAdef
-  set B : ℤ := y₁.num with hBdef
-  set C : ℤ := x₂.num with hCdef
-  set D : ℤ := y₂.num with hDdef
+  set A : ℤ := x₁.num
+  set B : ℤ := y₁.num
+  set C : ℤ := x₂.num
+  set D : ℤ := y₂.num
   set E : ℤ := (w₁ : ℤ) with hEdef
   set G : ℤ := (w₂ : ℤ) with hGdef
   have hEQ : (E : ℚ) ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
   have hGQ : (G : ℚ) ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
-  have hE0 : E ≠ 0 := by rw [hEdef]; exact_mod_cast hw1ne
-  have hG0 : G ≠ 0 := by rw [hGdef]; exact_mod_cast hw2ne
   -- coordinates as fractions over the square/cube denominators
   have hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2 := cast_num_eq hx1d
   have hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3 := cast_num_eq hy1d
@@ -433,14 +431,10 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hI2 : N * (A * D * E + B * C * G) = K * W := by
     rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
   -- divisibility facts
-  have hpw1 : p ∣ w₁ := by
-    have hd1' : p ∣ x₁.den := (ZMod.natCast_eq_zero_iff _ p).mp hd1
-    rw [hx1d] at hd1'; exact hp.dvd_of_dvd_pow hd1'
-  have hpw2 : p ∣ w₂ := by
-    have hd2' : p ∣ x₂.den := (ZMod.natCast_eq_zero_iff _ p).mp hd2
-    rw [hx2d] at hd2'; exact hp.dvd_of_dvd_pow hd2'
-  have hpE : (p : ℤ) ∣ E := by rw [hEdef]; exact_mod_cast hpw1
-  have hpG : (p : ℤ) ∣ G := by rw [hGdef]; exact_mod_cast hpw2
+  have hpE : (p : ℤ) ∣ E := by
+    rw [hEdef]; exact_mod_cast hp.dvd_of_dvd_pow (hx1d ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd1)
+  have hpG : (p : ℤ) ∣ G := by
+    rw [hGdef]; exact_mod_cast hp.dvd_of_dvd_pow (hx2d ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd2)
   have hpA : ¬ (p : ℤ) ∣ A := not_dvd_num p (by rw [hEdef, hx1d]; push_cast; ring) hpE
   have hpC : ¬ (p : ℤ) ∣ C := not_dvd_num p (by rw [hGdef, hx2d]; push_cast; ring) hpG
   have hA0 : A ≠ 0 := fun h => hpA (h ▸ dvd_zero _)
