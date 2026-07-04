@@ -133,8 +133,7 @@ theorem red_p_of_den_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     red_p a₂ a₄ a₆ p hΔ (.some x y h) = 0 := by
   set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose with hw
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
-  have hsq : (w : ZMod p) ^ 2 = 0 := by
-    have := hd; rw [hden] at this; push_cast at this; exact this
+  have hsq : (w : ZMod p) ^ 2 = 0 := by rw [hden] at hd; push_cast at hd; exact hd
   have hwz : (w : ZMod p) = 0 := (pow_eq_zero_iff (by norm_num)).mp hsq
   have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
     rw [Trep_map_two, hwz]; ring
