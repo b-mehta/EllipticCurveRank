@@ -12,7 +12,7 @@ import ECCompute.Theory.ModelIso
 The certified rank bound (`ECCompute.rank_ge_of_certificate`) lives on the integer short model
 `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character `lambda`
 is defined. A general integral Weierstrass curve `ModelIso.toCurveQ a₁ a₂ a₃ a₄ a₆`
-(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.nonempty_pointAddEquiv`
+(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.pointAddEquiv`
 completes the square but only to a *rational*-coefficient short model; this file adds the integral
 scaling step.
 
@@ -28,12 +28,6 @@ to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invarian
 namespace ECCompute.ModelChange
 
 open WeierstrassCurve WeierstrassCurve.Affine ModelIso
-
-/-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-private theorem pointSome_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
-    {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) (hy : y₁ = y₂) :
-    (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by subst hx hy; rfl
 
 /-! ## The scaling isomorphism `(x, y) ↦ (v²x, v³y)`
 
@@ -165,7 +159,7 @@ theorem scaleFwd_map_add (P Q : W.toAffine.Point) :
     rw [Point.add_some hxy]
     simp only [scaleFwd_some]
     rw [Point.add_some hxy']
-    exact pointSome_congr (by rw [hℓ, addX_scale s]) (by rw [hℓ, addY_scale s])
+    exact point_some_congr (by rw [hℓ, addX_scale s]) (by rw [hℓ, addY_scale s])
 
 /-- If `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, then `(x, y) ↦ (v²x, v³y)` is a group isomorphism
 `W.Point ≃+ W'.Point`. -/
@@ -176,37 +170,17 @@ def scaleEquiv : W.toAffine.Point ≃+ W'.toAffine.Point :=
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [scaleFwd_some, scaleBwd_some]
-          exact pointSome_congr (mul_div_cancel_left₀ _ (pow_ne_zero 2 s.ne))
+          exact point_some_congr (mul_div_cancel_left₀ _ (pow_ne_zero 2 s.ne))
             (mul_div_cancel_left₀ _ (pow_ne_zero 3 s.ne)),
       fun P => by
         rcases P with _ | ⟨X, Y, h⟩
         · rfl
         · rw [scaleBwd_some, scaleFwd_some]
-          exact pointSome_congr (mul_div_cancel₀ _ (pow_ne_zero 2 s.ne))
+          exact point_some_congr (mul_div_cancel₀ _ (pow_ne_zero 2 s.ne))
             (mul_div_cancel₀ _ (pow_ne_zero 3 s.ne))⟩
     (scaleFwd_map_add s)
 
 end Scaling
-
-/-! ## The completing-the-square isomorphism as an `AddEquiv`
-
-`ModelIso` proves only `Nonempty` of the completing-the-square equivalence; we rebuild the actual
-`AddEquiv` from its public forward/backward maps and additivity lemma. -/
-
-/-- The completing-the-square group isomorphism `toCurveQ … ≃+ shortModel …`. -/
-def generalToShortModelEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
-  AddEquiv.mk'
-    ⟨fwd a₁ a₂ a₃ a₄ a₆, bwd a₁ a₂ a₃ a₄ a₆,
-      fun P => by
-        rcases P with _ | ⟨x, y, h⟩
-        · rfl
-        · rw [fwd_some, bwd_some]; exact pointSome_congr rfl (by ring),
-      fun P => by
-        rcases P with _ | ⟨x, y, h⟩
-        · rfl
-        · rw [bwd_some, fwd_some]; exact pointSome_congr rfl (by ring)⟩
-    (fwd_map_add a₁ a₂ a₃ a₄ a₆)
 
 /-! ## The integral short model and the change of variables -/
 
@@ -229,7 +203,7 @@ def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
 def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
-  (generalToShortModelEquiv a₁ a₂ a₃ a₄ a₆).trans <|
+  (pointAddEquiv a₁ a₂ a₃ a₄ a₆).trans <|
     scaleEquiv (W := shortModel a₁ a₂ a₃ a₄ a₆) (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       ⟨two_ne_zero,
         by simp only [intShortModel, curve, shortModel_a₁, mul_zero],

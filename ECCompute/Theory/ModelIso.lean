@@ -12,7 +12,7 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 Over `ℚ` (characteristic `≠ 2`) the substitution `y ↦ y - (a₁x + a₃)/2` (the change of variables
 `⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩`) carries a general Weierstrass model to a short model
 `y² = x³ + a₂'x² + a₄'x + a₆'`, on which the descent character is stated. Rank is an isomorphism
-invariant, so a rank lower bound on the short model transfers back; see `nonempty_pointAddEquiv`.
+invariant, so a rank lower bound on the short model transfers back; see `pointAddEquiv`.
 
 The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism lives in
 `ECCompute.Check.Points`.
@@ -96,7 +96,7 @@ private theorem or_ne_zero_sub_iff (A B σ : ℚ) :
   by_cases hB : B = 0 <;> simp [hB]
 
 /-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-private theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
+theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
@@ -247,10 +247,10 @@ theorem fwd_map_add (P Q : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point) :
 isomorphism between the Mordell-Weil groups of the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` and the
 short model `shortModel a₁ a₂ a₃ a₄ a₆`, so any rank lower bound on the short model transfers
 back. -/
-theorem nonempty_pointAddEquiv :
-    Nonempty ((toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+
-      (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point) :=
-  ⟨AddEquiv.mk'
+def pointAddEquiv :
+    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+
+      (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
+  AddEquiv.mk'
     ⟨fwd a₁ a₂ a₃ a₄ a₆, bwd a₁ a₂ a₃ a₄ a₆,
       fun P => by
         rcases P with _ | ⟨x, y, h⟩
@@ -260,7 +260,7 @@ theorem nonempty_pointAddEquiv :
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by ring)⟩
-    (fwd_map_add a₁ a₂ a₃ a₄ a₆)⟩
+    (fwd_map_add a₁ a₂ a₃ a₄ a₆)
 
 end GroupIso
 
