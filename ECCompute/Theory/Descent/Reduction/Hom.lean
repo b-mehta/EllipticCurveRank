@@ -536,6 +536,17 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hdvd : p ∣ x₃.den := (dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0
   exact (ZMod.natCast_eq_zero_iff _ p).mpr hdvd
 
+/-- Distinct points sharing an `x`-coordinate are mutually negative: if `x₁ = x₂` but
+`(x₁, y₁) ≠ (x₂, y₂)`, then `y₁ = negY x₂ y₂` (so `P + Q = O`). -/
+private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
+    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
+    y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
+  rcases WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12 with h | h
+  · exact absurd (by rw [Affine.Point.some.injEq]; exact ⟨hx12, h⟩) hPQ
+  · exact h
+
 /-- Additivity of `red_p` in the tangent-mod-`p` configuration (S4): when two affine points
 `P`, `Q` reduce to the same point of `E/𝔽ₚ` (`red_p P = red_p Q`) but are distinct over `ℚ`, the
 reduction of their rational sum equals the sum of their reductions. -/
@@ -561,11 +572,7 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
     rw [red_p_of_den_zero a₂ a₄ a₆ p hΔ h₁ hd1, hQ0, add_zero]
     by_cases hx12 : x₁ = x₂
     · -- `Q = -P`, so `P + Q = 0`.
-      have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
-        rcases WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12 with h | h
-        · exact absurd (by rw [Affine.Point.some.injEq]; exact ⟨hx12, h⟩) hPQ
-        · exact h
-      rw [Affine.Point.add_of_Y_eq hx12 hy, red_p_zero]
+      rw [Affine.Point.add_of_Y_eq hx12 (y_eq_negY_of_X_eq a₂ a₄ a₆ h₁ h₂ hx12 hPQ), red_p_zero]
     · -- Both summands lie in the kernel of reduction (`p ∣ x₁.den`, `p ∣ x₂.den`) while
       -- `x₁ ≠ x₂` over `ℚ`.  The goal is `red_p (P + Q) = 0`, i.e. `(x₃.den : ZMod p) = 0` for the
       -- rational sum's `x`-coordinate `x₃ = addX x₁ x₂ (slope …)`.  This is exactly the statement
@@ -596,10 +603,8 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
     obtain ⟨hXbar, hYbar⟩ := hred
     by_cases hx12 : x₁ = x₂
     · -- `Q = -P`, so `P + Q = 0`, and the reduced points are mutually negative.
-      have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
-        rcases WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12 with h | h
-        · exact absurd (by rw [Affine.Point.some.injEq]; exact ⟨hx12, h⟩) hPQ
-        · exact h
+      have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ :=
+        y_eq_negY_of_X_eq a₂ a₄ a₆ h₁ h₂ hx12 hPQ
       rw [Affine.Point.add_of_Y_eq hx12 hy, red_p_zero,
         red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1, red_p_of_den_ne a₂ a₄ a₆ p hΔ h₂ hd2]
       have hyneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
@@ -626,12 +631,6 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
       · -- The common reduced point is `2`-torsion mod `p`; both sides reduce to `O`.
         -- Right-hand side: `P̄ + P̄ = O`.
         rw [red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1, Affine.Point.add_of_Y_eq rfl hYneg]
-        have hne : x₁ ≠ x₂ := hx12
-        have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
-          WeierstrassCurve.Affine.slope_of_X_ne hne
-        set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
-        have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-          simp only [WeierstrassCurve.Affine.addX, curve]; ring
         -- Left-hand side reduces to `O`: the doubled `x`-coordinate has vanishing denominator.
         rw [Affine.Point.add_of_X_ne hne]
         apply red_p_of_den_zero a₂ a₄ a₆ p hΔ
