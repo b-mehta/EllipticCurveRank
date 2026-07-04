@@ -78,17 +78,16 @@ lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
 
 instance instFiniteModN [Module.Finite ℤ H] : Finite (ModN H 2) := by
   have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
-  refine Module.finite_of_fg_torsion (ModN H 2) (fun x => ⟨⟨2, ?_⟩, two_zsmul_modN x⟩)
-  rw [mem_nonZeroDivisors_iff_ne_zero]; norm_num
+  exact Module.finite_of_fg_torsion (ModN H 2)
+    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
 
 instance instFiniteDimModN [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
 
 instance instFiniteTorsionBy [Module.Finite ℤ H] :
-    Finite (Submodule.torsionBy ℤ H 2) := by
-  refine Module.finite_of_fg_torsion _ (fun x => ⟨⟨2, ?_⟩, ?_⟩)
-  · rw [mem_nonZeroDivisors_iff_ne_zero]; norm_num
-  · exact Submodule.smul_torsionBy 2 x
+    Finite (Submodule.torsionBy ℤ H 2) :=
+  Module.finite_of_fg_torsion _
+    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
 
 /-! ### The cardinality identity for finite groups -/
 
@@ -261,16 +260,15 @@ lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
 lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
     (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ (F × D) = finrank ℤ F := by
-  have hsurj : Function.Surjective (LinearMap.fst ℤ F D) := fun a => ⟨(a, 0), rfl⟩
   have hkerD : finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
-    have hinj : Function.Injective (LinearMap.inr ℤ F D) := fun a b h => by simpa using h
     have hrange :
         LinearMap.range (LinearMap.inr ℤ F D) = LinearMap.ker (LinearMap.fst ℤ F D) := by
       ext ⟨a, b⟩; simp [LinearMap.mem_ker, LinearMap.mem_range, eq_comm]
-    rw [← hrange, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D) hinj).finrank_eq,
-      finrank_int_zero_of_finite]
+    rw [← hrange, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)
+      (LinearMap.inr_injective)).finrank_eq, finrank_int_zero_of_finite]
   have key := Submodule.finrank_quotient_add_finrank (LinearMap.ker (LinearMap.fst ℤ F D))
-  rw [hkerD, add_zero, (LinearMap.quotKerEquivOfSurjective _ hsurj).finrank_eq] at key
+  rw [hkerD, add_zero,
+    (LinearMap.quotKerEquivOfSurjective _ LinearMap.fst_surjective).finrank_eq] at key
   exact key.symm
 
 /-- The identity for a free-times-finite decomposition. -/
