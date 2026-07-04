@@ -221,6 +221,32 @@ private theorem curve_equation_iff {x y : ℚ} (h : (curve a₂ a₄ a₆).toAff
   have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
   simpa [curve] using this
 
+/-- The secant numerator `x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄` has good denominator, and its
+reduction is the corresponding polynomial in `X̄₁, X̄₂`. -/
+private theorem cast_secant_num {x₁ x₂ : ℚ} (hd1 : (x₁.den : ZMod p) ≠ 0)
+    (hd2 : (x₂.den : ZMod p) ≠ 0) :
+    ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)).den : ZMod p) ≠ 0
+      ∧ ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) : ℚ) : ZMod p)
+        = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
+          + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
+  have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1
+  have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2
+  have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero hd1 hd2
+  have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
+    den_add_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp)
+  refine ⟨hd, ?_⟩
+  rw [Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+        (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp),
+    Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2)),
+    Rat.cast_add_of_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq,
+    Rat.cast_add_of_ne_zero hx1sq hprod, Rat.cast_pow, Rat.cast_mul_of_ne_zero hd1 hd2,
+    Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) (den_add_ne_zero hd1 hd2),
+    Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast]
+
 /-- The reduced secant slope is well-defined.  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
 reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ - y₂)/(x₁ - x₂)` (a
 `0/0` mod `p`) equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose
@@ -246,13 +272,7 @@ private theorem reduced_slope_den (hne : x₁ ≠ x₂)
     linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
   have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by
     rw [Rat.cast_add_of_ne_zero hdy1 hdy2]; exact hy2
-  have hNden : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) : ℚ).den : ZMod p)
-      ≠ 0 :=
-    den_add_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero
-      (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1)
-      (den_mul_ne_zero hd1 hd2))
-      (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2))
-      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp)
+  have hNden := (cast_secant_num a₂ a₄ p hd1 hd2).1
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
 
@@ -296,23 +316,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
     rw [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
-      Rat.cast_add_of_ne_zero hdy1 hdy2,
-      Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1) (den_mul_ne_zero hd1 hd2))
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2))
-        (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp),
-      Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1) (den_mul_ne_zero hd1 hd2))
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2))
-        (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2)),
-      Rat.cast_add_of_ne_zero (den_add_ne_zero
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1) (den_mul_ne_zero hd1 hd2))
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2),
-      Rat.cast_add_of_ne_zero
-          (by rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1) (den_mul_ne_zero hd1 hd2),
-      Rat.cast_pow, Rat.cast_mul_of_ne_zero hd1 hd2, Rat.cast_pow,
-      Rat.cast_mul_of_ne_zero (by simp) (den_add_ne_zero hd1 hd2),
-      Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast] at hc
+      Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
     exact hc
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
