@@ -320,6 +320,17 @@ private theorem cast_num_eq {q : ℚ} {w : ℕ} {k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
   rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; push_cast; ring
 
+/-- The numerator of a rational with square denominator `w²` is prime to any `p ∣ w`: since
+`num`, `den` are coprime and `w² = den`, a prime dividing both `num` and `w` would be a unit. -/
+private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
+    ¬ (p : ℤ) ∣ q.num := by
+  intro hdvd
+  have hcop : IsCoprime q.num (w ^ 2) := by
+    rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
+  exact absurd (Int.isUnit_iff.mp
+    (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
+    (by have := (Fact.out : p.Prime).two_le; omega)
+
 /-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
@@ -401,26 +412,8 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     rw [hx2d] at hd2'; exact hp.dvd_of_dvd_pow hd2'
   have hpE : (p : ℤ) ∣ E := by rw [hEdef]; exact_mod_cast hpw1
   have hpG : (p : ℤ) ∣ G := by rw [hGdef]; exact_mod_cast hpw2
-  have hpA : ¬ (p : ℤ) ∣ A := by
-    intro hdvd
-    have hcop : IsCoprime (A : ℤ) (E ^ 2) := by
-      have hc : IsCoprime (x₁.num) ((x₁.den : ℕ) : ℤ) := by
-        rw [Int.isCoprime_iff_nat_coprime]; simpa using x₁.reduced
-      have he : (E : ℤ) ^ 2 = ((x₁.den : ℕ) : ℤ) := by rw [hEdef, hx1d]; push_cast; ring
-      rw [hAdef, he]; exact hc
-    exact absurd (Int.isUnit_iff.mp
-      (hcop.isUnit_of_dvd' hdvd (hpE.trans (dvd_pow_self E two_ne_zero))))
-      (by have := hp.two_le; omega)
-  have hpC : ¬ (p : ℤ) ∣ C := by
-    intro hdvd
-    have hcop : IsCoprime (C : ℤ) (G ^ 2) := by
-      have hc : IsCoprime (x₂.num) ((x₂.den : ℕ) : ℤ) := by
-        rw [Int.isCoprime_iff_nat_coprime]; simpa using x₂.reduced
-      have he : (G : ℤ) ^ 2 = ((x₂.den : ℕ) : ℤ) := by rw [hGdef, hx2d]; push_cast; ring
-      rw [hCdef, he]; exact hc
-    exact absurd (Int.isUnit_iff.mp
-      (hcop.isUnit_of_dvd' hdvd (hpG.trans (dvd_pow_self G two_ne_zero))))
-      (by have := hp.two_le; omega)
+  have hpA : ¬ (p : ℤ) ∣ A := not_dvd_num p (by rw [hEdef, hx1d]; push_cast; ring) hpE
+  have hpC : ¬ (p : ℤ) ∣ C := not_dvd_num p (by rw [hGdef, hx2d]; push_cast; ring) hpG
   have hA0 : A ≠ 0 := fun h => hpA (h ▸ dvd_zero _)
   have hC0 : C ≠ 0 := fun h => hpC (h ▸ dvd_zero _)
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
