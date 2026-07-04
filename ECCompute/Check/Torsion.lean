@@ -10,27 +10,17 @@ import ECCompute.Theory.ModelIso
 /-!
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
 
-For a Weierstrass curve `W` over `ℚ`, a nonzero rational 2-torsion point `P` (`P + P = 0`, `P ≠ 0`)
-is an affine point `(x, y)` with `P = -P`, i.e. `y = W.negY x y`. Its `x`-coordinate is a rational
-root of the 2-division cubic `4x³ + b₂x² + 2b₄x + b₆`. Scaling by `u = 4x` turns this into the
-**monic** integer cubic
-
-  `g(u) = u³ + b₂ u² + 8 b₄ u + 16 b₆`,
-
-so `u` is a rational root of a monic integer polynomial, hence an **integer** (integral root
-theorem). Therefore, if `g` has no root modulo some prime `ℓ`, it has no integer root, so `W` has
-no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
+For a Weierstrass curve `W` over `ℚ`, the `x`-coordinate of a nonzero rational 2-torsion point
+scales (`u = 4x`) to an integer root of the monic cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. So if this
+cubic has no root modulo some prime `ℓ`, then `W` has no nonzero rational 2-torsion and
+`dim_𝔽₂ E(ℚ)[2] = 0`.
 
 ## Main definitions and results
 
 * `ECCompute.hasRootMod c₂ c₁ c₀ ℓ` : a kernel-reducible `Bool`, `true` iff the monic cubic
-  `u³ + c₂u² + c₁u + c₀` has a root modulo `ℓ` (checked over residues `0, …, ℓ-1`). No
-  `native_decide`.
-* `ECCompute.no_nonzero_twoTorsion_of_hasRootMod_eq_false` : the **t = 0 lemma** — if
+  `u³ + c₂u² + c₁u + c₀` has a root modulo `ℓ` (checked over residues `0, …, ℓ-1`).
+* `ECCompute.no_nonzero_twoTorsion_of_hasRootMod_eq_false` : the t = 0 lemma. If
   `hasRootMod W.b₂ (8 * W.b₄) (16 * W.b₆) ℓ = false`, then every 2-torsion point of `W` is `0`.
-
-The correspondence used is elementary (`linear_combination`) rather than routed through mathlib's
-`twoTorsionPolynomial`, whose root statement lives over a splitting field.
 -/
 
 namespace ECCompute
@@ -41,11 +31,7 @@ open WeierstrassCurve
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
-modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1`. This uses only `Int`/`Nat` arithmetic
-and `%`, so it reduces by `decide`/`rfl` in the kernel without `native_decide`.
-
-At a witness prime `ℓ`, `hasRootMod … ℓ = false` certifies that the cubic has no integer root,
-hence (after the `u = 4x` scaling) that the 2-division cubic has no rational root. -/
+modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1`. -/
 noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
   anyBelow ℓ fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
 
@@ -73,7 +59,7 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
     have hthis : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = cubicEval c₂ c₁ c₀ u % (ℓ : ℤ) :=
       cubicEval_modEq (ℓ : ℤ) hmod
     rw [hthis, hu, Int.zero_emod]
-  -- but `hasRootMod = false` says no tested residue is a root — contradiction
+  -- but `hasRootMod = false` says no tested residue is a root, a contradiction
   rw [hasRootMod, anyBelow_eq_false] at h
   have := h r.toNat (by omega)
   rw [beq_eq_false_iff_ne] at this
@@ -82,14 +68,9 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
 /-! ## The t = 0 lemma -/
 
 open Polynomial in
-/-- **t = 0 lemma.** Let `W` be the Weierstrass curve over `ℚ` with integer coefficients
-`a₁ a₂ a₃ a₄ a₆`, and let `ℓ ≠ 0`. If the monic 2-division cubic
-`u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then `W` has no nonzero rational 2-torsion:
-every point `P` with `P + P = 0` is `0`.
-
-A nonzero 2-torsion point `some x y` forces `y = W.negY x y`, so `u = 4x` is a rational root of the
-monic integer cubic above; the integral root theorem makes `u` an integer, contradicting the
-hypothesis via `no_int_root_of_hasRootMod_eq_false`. -/
+/-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
+`ℓ ≠ 0`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
+`W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
 theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
     (a₁ a₂ a₃ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (W : WeierstrassCurve ℚ)

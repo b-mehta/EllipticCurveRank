@@ -7,33 +7,25 @@ import ECCompute.Theory.Descent.PsiBase
 import Mathlib.Algebra.Field.ZMod
 
 /-!
-# The finite-field descent character `εp_finite` and its additivity (T1d, chunk C4)
+# The finite-field descent character `εp_finite` and its additivity
 
 For a good prime `p` and a root `θ ∈ 𝔽ₚ` of `f = x³ + a₂x² + a₄x + a₆`, Cremona's descent
 character on the reduced curve `E/𝔽ₚ` is
 
   `εp_finite θ : E(𝔽ₚ) → ZMod 2`,   `εp_finite θ O = 0`,
-  `εp_finite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X − θ)`   otherwise,
+  `εp_finite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X - θ)`   otherwise,
 
 where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`.  This file proves that
-`εp_finite θ` is **additive**, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`.  Vanishing on `2·E(𝔽ₚ)`
-is then automatic (the target is `ZMod 2`).
-
-The proof is the pure-`𝔽ₚ` analogue of `ECCompute.lambda_map_add_of_good` and
-`ECCompute.lambda_double_of_good`, with the affine coordinates `X, Y` used *directly* (no
-`Rat.cast`, no denominator side conditions), so it is strictly shorter than the `ℚ` versions.
-The generic secant uses `vieta_of_roots` + `prod_sub_theta_eq_lineSq` and the arithmetic of
-`ψ_p` on the nonzero factors, with the three `Xᵢ = θ` sub-cases handled by `fderiv_eq_prod`
-and `fderiv_ne_zero`; doubling uses `vieta_of_double_root`; the trivial cases (`P = −Q`, a
-summand `O`) come from the affine group law over `ZMod p`.
+`εp_finite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
+is then automatic.
 
 ## Main declarations
 
-* `ECCompute.reducedCurve` — the reduced Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over
+* `ECCompute.reducedCurve`: the reduced Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over
   `ZMod p`.
-* `ECCompute.εp_finite` — the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
-* `ECCompute.εp_finite_map_add` — additivity of `εp_finite`.
-* `ECCompute.εpHom` — `εp_finite` packaged as an `AddMonoidHom`.
+* `ECCompute.εp_finite`: the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
+* `ECCompute.εp_finite_map_add`: additivity of `εp_finite`.
+* `ECCompute.εpHom`: `εp_finite` packaged as an `AddMonoidHom`.
 -/
 
 open WeierstrassCurve
@@ -57,7 +49,7 @@ def reducedCurve : WeierstrassCurve (ZMod p) where
 variable [Fact p.Prime]
 
 /-- The finite-field descent character.  On `O` it is `0`; on an affine point `(X, Y)` it is
-`ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X − θ)` otherwise. -/
+`ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
 noncomputable def εp_finite (θ : ZMod p) :
     (reducedCurve a₂ a₄ a₆ p).toAffine.Point → ZMod 2
   | .zero => 0
@@ -77,18 +69,15 @@ theorem εp_finite_some (θ : ZMod p) {X Y : ZMod p}
 variable {a₂ a₄ a₆ p}
 variable {θ : ZMod p}
 
-/-- `εp_finite` on an affine point depends only on its `x`-coordinate: two points with equal `x`
-have equal `εp_finite`. -/
+/-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁}
     {h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂} (hx : x₁ = x₂) :
     εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- **Additivity of `εp_finite`, secant case.**  When `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
-distinct `x`-coordinates over `𝔽ₚ`, the collinearity square `(x₁ − θ)(x₂ − θ)(x₃ − θ)` is a
-square, so `ψ_p` is additive on the nonzero factors; the three `2`-torsion sub-cases `xᵢ = θ`
-replace the vanishing factor by `f'(θ) ≠ 0` via `fderiv_eq_prod`. -/
+/-- Additivity of `εp_finite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
+distinct `x`-coordinates over `𝔽ₚ`. -/
 theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ZMod p}
     (h₁ : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
@@ -166,9 +155,8 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     rw [if_neg c3, if_neg c1, if_neg c2]
     exact hzero _ _ _ hpm
 
-/-- **Additivity of `εp_finite`, doubling case.**  If `P = (x, y)` is not `2`-torsion (`y ≠ 0`),
-then `εp_finite` vanishes on `2P`: the collinear triple is `x, x, x₃` with the tangent slope
-`ℓ = f'(x)/(2y)`, so the double-root Vieta relations make `(x − θ)²(x₃ − θ)` a square. -/
+/-- Additivity of `εp_finite` in the doubling case: `εp_finite` vanishes on `2P` for a point
+`P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
 theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     (hP : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
@@ -233,10 +221,8 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     have hfin : ∀ a b : ZMod 2, a + a + b = 0 → b = 0 := by decide
     exact hfin _ _ hpm
 
-/-- **Additivity of `εp_finite`.**  The finite-field descent character is a homomorphism
-`(E(𝔽ₚ), +) → (ZMod 2, +)`.  The trivial cases (`P = O`, `Q = O`, `P = −Q`) use the affine
-group law; the `x₁ = x₂` case reduces to doubling (`εp_finite_double`), and `x₁ ≠ x₂` to the
-secant case (`εp_finite_map_add_of_X_ne`). -/
+/-- Additivity of `εp_finite`: the finite-field descent character is a homomorphism
+`(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
 theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (reducedCurve a₂ a₄ a₆ p).toAffine.Point) :
     εp_finite a₂ a₄ a₆ p θ (P + Q)
@@ -299,7 +285,7 @@ theorem εpHom_apply (h : DescentHyp a₂ a₄ a₆ p θ)
     εpHom h P = εp_finite a₂ a₄ a₆ p θ P :=
   rfl
 
-/-- **`εp_finite` vanishes on `2·E(𝔽ₚ)`.**  Immediate from being a homomorphism into `ZMod 2`. -/
+/-- `εp_finite` vanishes on `2·E(𝔽ₚ)`, immediate from being a homomorphism into `ZMod 2`. -/
 theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (reducedCurve a₂ a₄ a₆ p).toAffine.Point) :
     εpHom h (2 • P) = 0 := by

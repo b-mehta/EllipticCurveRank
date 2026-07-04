@@ -13,20 +13,19 @@ import ECCompute.Check.Fold
 /-!
 # Kernel-reducible 𝔽₂ matrix invertibility certificates
 
-We certify that a square matrix `B` over `𝔽₂ = ZMod 2` is invertible by *supplying*
-a claimed inverse `M` and checking `B * M = I` with a kernel-reducible `Bool` function.
+We certify that a square matrix `B` over `𝔽₂ = ZMod 2` is invertible by supplying a claimed
+inverse `M` and checking `B * M = I` with a kernel-reducible `Bool` function.
 
 ## Representation
 
-An `n × n` matrix over `𝔽₂` is given as a `List Nat` of length `n`, one `Nat` bitmask
-per line, where bit `j` of the `i`-th entry is the `(i, j)` matrix entry.
+An `n × n` matrix over `𝔽₂` is given as a `List Nat` of length `n`, one `Nat` bitmask per line,
+where bit `j` of the `i`-th entry is the `(i, j)` matrix entry.
 
-* `B` is supplied **by rows**: bit `j` of `B.getD i 0` is `B i j`.
-* `M` is supplied **by columns**: bit `j` of `M.getD k 0` is `M j k`.
+* `B` is supplied by rows: bit `j` of `B.getD i 0` is `B i j`.
+* `M` is supplied by columns: bit `j` of `M.getD k 0` is `M j k`.
 
-With this layout the `(i, k)` entry of `B * M` over `𝔽₂` is the parity of the popcount of
-`B.getD i 0 &&& M.getD k 0`, computed with the kernel's GMP-backed `Nat.testBit` / `/ 2`
-and `Bool.xor` — no `Finset.sum`, no `Decidable.decide`.
+With this layout the `(i, k)` entry of `B * M` is the parity of the popcount of
+`B.getD i 0 &&& M.getD k 0`.
 
 ## Main results
 
@@ -38,16 +37,14 @@ namespace ECCompute.F2Invert
 
 open Matrix Finset
 
-/-- Parity of the popcount of `a`, reading the low `fuel` bits. Structurally recursive on
-`fuel` so the kernel reduces it via `Nat.rec`, using GMP-backed `Nat.testBit` and `/ 2`. -/
+/-- Parity of the popcount of `a`, reading the low `fuel` bits. -/
 def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
-/-- Kernel-reducible variant of `popParity`, phrased directly with `Nat.rec` and `Bool.rec`
-so the kernel peels the low bit (`a.land 1`, `a.div 2`) and flips the running result with
-`Bool.not'` when the low bit is set. Equal to `popParity` (see `popParityK_eq_popParity`);
-`noncomputable` only because `Bool.not'` is, which the kernel reduces regardless. -/
+/-- Kernel-reducible variant of `popParity`, phrased with `Nat.rec` and `Bool.rec` so the kernel
+peels the low bit and flips the running result. Equal to `popParity` (see
+`popParityK_eq_popParity`). -/
 noncomputable def popParityK : Nat → Nat → Bool :=
   Nat.rec (fun _ ↦ false)
     fun _ r a ↦ ((a.land 1).beq 0).rec (r (a.div 2)).not' (r (a.div 2))
@@ -65,22 +62,19 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
       cases popParity f (a / 2) <;> rfl
 
 /-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-structurally over the columns of `M` (running column index `k`), comparing the parity of
-`bi &&& mₖ` against the diagonal indicator `i == k`.  No positional list access. -/
+over the columns of `M`, comparing the parity of `bi &&& mₖ` against the diagonal indicator
+`i == k`. -/
 noncomputable def checkInvRow (bi i n : Nat) : Nat → List Nat → Bool
   | _, [] => true
   | k, m :: ms => (popParityK n (bi &&& m) == (i == k)).and' (checkInvRow bi i n (k + 1) ms)
 
-/-- Fold structurally over the rows of `B` (running row index `i`), checking each row against the
-columns of `M` with `checkInvRow`. -/
+/-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
 noncomputable def checkInvGo (n : Nat) (M : List Nat) : Nat → List Nat → Bool
   | _, [] => true
   | i, b :: bs => (checkInvRow b i n 0 M).and' (checkInvGo n M (i + 1) bs)
 
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
-rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension.  A structural double fold
-over the rows of `B` and the columns of `M` — no `allBelow` index and no `getD`.  `noncomputable`
-because it calls `popParityK`; the kernel reduces it regardless (via `rfl`). -/
+rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
   checkInvGo n M 0 B
 
@@ -158,8 +152,8 @@ theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
   intro i k hi hk
   simpa using checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
 
-/-- **Correctness lemma.** If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`,
-`M` have length `n`), then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
+/-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
+then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen : M.length = n)
     (h : checkInv n B M = true) : IsUnit (toMat B n) := by
   -- First: `B * M = 1` as matrices over `ZMod 2`.

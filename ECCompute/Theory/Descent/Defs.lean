@@ -7,44 +7,24 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.Data.ZMod.Basic
 
 /-!
-# The descent character: basic definitions (T1)
+# The descent character: basic definitions
 
-For an elliptic curve `E : y² = f(x)` with `f = x³ + a₂x² + a₄x + a₆` a monic integral
-cubic of non-zero discriminant, a prime `p ∤ 6Δ`, and a root `θ ∈ 𝔽ₚ` of `f`, this file
-defines the *descent character*
+For an elliptic curve `E : y² = f(x)` with `f = x³ + a₂x² + a₄x + a₆` a monic integral cubic
+of non-zero discriminant, a prime `p ∤ 6Δ`, and a root `θ ∈ 𝔽ₚ` of `f`, this file defines the
+*descent character* `λ_{p,θ} : E(ℚ) → ZMod 2` as a raw function, together with the arithmetic
+hypotheses `DescentHyp`.
 
-  `λ_{p,θ} : E(ℚ) → ZMod 2`
-
-as a raw function, together with the arithmetic hypotheses `DescentHyp`.  The additivity
-theorem `lambda_map_add` and the `AddMonoidHom` packaging live in `ECCompute.Descent`, which
-imports this file together with the two supporting lemmas T1a (`DenominatorSquare`) and T1b
-(`Collinearity`).  Splitting the definitions here breaks the import cycle those two files
-would otherwise create with `ECCompute.Descent`.
-
-## Mathematical definition
-
-Write a rational `x` in lowest terms.  Mathlib gives `x.num : ℤ` and `x.den : ℕ` with
-`gcd(num, den) = 1`.  For a point `P = (x, y)` on `E` the standard theory shows
-`x.den = w²` is a perfect square (and `x.num = u`), so the point is `(u/w², v/w³)`.  We
-never need that fact to *define* `λ`, because dividing by the square `w²` does not change a
-Legendre symbol.  Concretely, modulo `p` (when `p ∤ w`, i.e. `(x.den : ZMod p) ≠ 0`):
-
-  `α := u − θ·w² = x.num − θ·x.den   (in ZMod p)`.
-
-Then
-* `λ(O) = 0`;
-* `λ(P) = 0`                          if `p ∣ w`   (i.e. `(x.den : ZMod p) = 0`);
-* `λ(P) = ψ_p(f'(θ))`                 if `α = 0`   (`u ≡ θw²`, the tangent case);
-* `λ(P) = ψ_p(α)`                     otherwise,
-where `ψ_p : ZMod p → ZMod 2` sends squares (and `0`) to `0` and non-squares to `1` — the
-Legendre symbol pushed into `(ZMod 2, +)`.
+For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num - θ·x.den` in
+`ZMod p` (when `p ∤ w`, i.e. `(x.den : ZMod p) ≠ 0`).  Then `λ(O) = 0`; `λ(P) = 0` if `p ∣ w`;
+`λ(P) = ψ_p(f'(θ))` if `α = 0` (the tangent case); and `λ(P) = ψ_p(α)` otherwise, where
+`ψ_p : ZMod p → ZMod 2` is the Legendre symbol (`0` on squares, `1` on non-squares).
 
 ## Main declarations
 
-* `ECCompute.psi`        — the Legendre symbol into `ZMod 2`.
-* `ECCompute.curve`      — the Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
-* `ECCompute.lambda`     — the raw function `E(ℚ) → ZMod 2`.
-* `ECCompute.DescentHyp` — the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
+* `ECCompute.psi`: the Legendre symbol into `ZMod 2`.
+* `ECCompute.curve`: the Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
+* `ECCompute.lambda`: the raw function `E(ℚ) → ZMod 2`.
+* `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
 
 open WeierstrassCurve
@@ -54,7 +34,7 @@ namespace ECCompute
 open scoped Classical
 
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
-non-squares.  For a prime `p ∤ a`, this is `0` iff `a` is a quadratic residue mod `p`. -/
+non-squares. -/
 noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
   if IsSquare a then 0 else 1
 
@@ -93,10 +73,8 @@ theorem lambda_zero (θ : ZMod p) :
 
 /-! ### The hypotheses of the descent lemma
 
-We package the arithmetic hypotheses as a structure so downstream tickets can pass them
-around uniformly.  `p ∤ 6Δ` is expressed as: `p` prime, `p ∤ 6` (so `p ≠ 2, 3`), and the
-integer discriminant is a unit mod `p`.  Since the coefficients are integers, `Δ` is an
-integer, so `(curve …).Δ.num` is that integer and `(curve …).Δ.den = 1`. -/
+`p ∤ 6Δ` is expressed as `p` prime, `p ∤ 6` (so `p ≠ 2, 3`), and the integer discriminant a
+unit mod `p` (the coefficients being integers, `Δ` is an integer, so `(curve …).Δ.num` is it). -/
 
 /-- Arithmetic hypotheses of the descent lemma for the label `(p, θ)`. -/
 structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where

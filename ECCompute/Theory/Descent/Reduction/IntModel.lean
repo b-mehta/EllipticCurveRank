@@ -9,20 +9,15 @@ import Mathlib.Data.ZMod.Basic
 /-!
 # The integral model of the descent curve
 
-The descent character is built for the curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ` whose
-coefficients are genuine integers.  This file records the corresponding curve over `ℤ`,
-
-  `curveℤ a₂ a₄ a₆ : WeierstrassCurve ℤ`,
-
-together with the two structural facts used to build the reduction map: its base change to
-`ℚ` is the original curve, and its reduction modulo `p` (mapping the coefficients through
-`ℤ → ZMod p`) is the curve with the coefficients cast into `ZMod p`.
+The descent character works with the curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ` whose
+coefficients are integers.  This file records the corresponding curve over `ℤ`,
+`curveℤ a₂ a₄ a₆`, together with the two structural facts used to build the reduction map.
 
 ## Main declarations
 
-* `ECCompute.curveℤ`            — the integral Weierstrass curve.
-* `ECCompute.baseChange_curveℤ_ℚ` — `(curveℤ …).baseChange ℚ = curve …`.
-* `ECCompute.map_curveℤ_zmod`   — `(curveℤ …).map (Int.castRingHom (ZMod p))` has coefficients
+* `ECCompute.curveℤ`: the integral Weierstrass curve.
+* `ECCompute.baseChange_curveℤ_ℚ`: `(curveℤ …).baseChange ℚ = curve …`.
+* `ECCompute.map_curveℤ_zmod`: `(curveℤ …).map (Int.castRingHom (ZMod p))` has coefficients
   the images of `a₂, a₄, a₆` in `ZMod p`.
 -/
 

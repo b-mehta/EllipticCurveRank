@@ -12,32 +12,13 @@ import Mathlib.NumberTheory.Padics.PadicVal.Basic
 # Additivity of the reduction map
 
 For an integral curve `y² = x³ + a₂x² + a₄x + a₆` of good reduction at a prime `p`, this file
-proves that the reduction map on affine points
-
-  `red_p : (curve …).toAffine.Point → E𝔽.toAffine.Point`
-
-(where `E𝔽 := (curveℤ …).map (ℤ → ZMod p)`) is additive, and bundles it as an `AddMonoidHom`
-`redHom`.
-
-## Strategy
-
-Every affine point `P` is sent by `red_p` to `toAffine E𝔽 (repr P)`, where `repr P` is a fixed
-`ZMod p`-projective representative: `![0, 1, 0]` for the origin and `ℤ → ZMod p` applied to the
-integer representative `Trep` otherwise.  Using `Projective.Point.toAffine_add`, additivity of
-`red_p` reduces to the projective-class equality
-
-  `repr (P + Q) ≈ E𝔽.add (repr P) (repr Q)`.
-
-The right-hand `E𝔽.add` is `dblXYZ` or `addXYZ` according to whether `repr P ≈ repr Q` in `ZMod p`;
-in either case `map_dblXYZ` / `map_addXYZ` rewrite it as `ℤ → ZMod p` applied to the corresponding
-integer formula on `Trep`.  The two representatives are then compared via their (rational) affine
-coordinates: over `ℚ` both reduce to `P + Q`, which produces exact integer cross-multiplication
-identities that survive reduction whenever the relevant `z`-coordinates stay nonzero mod `p`.
+proves that the reduction map `red_p` on affine points is additive, and bundles it as an
+`AddMonoidHom` `redHom`.
 
 ## Main declarations
 
-* `ECCompute.red_p_map_add` — additivity of `red_p`.
-* `ECCompute.redHom`        — `red_p` bundled as an `AddMonoidHom`.
+* `ECCompute.red_p_map_add`: additivity of `red_p`.
+* `ECCompute.redHom`: `red_p` bundled as an `AddMonoidHom`.
 -/
 
 open WeierstrassCurve
@@ -45,10 +26,9 @@ open scoped WeierstrassCurve.Projective
 
 namespace ECCompute
 
-/-- Two nonsingular projective representatives over a field that are proportional with the
-"cross" scalars given by each other's `Z`-coordinate are equivalent.  Concretely, if
-`(V z) • U = (U z) • V`, then `U ≈ V`: either both have vanishing `Z` (and reduce to the point at
-infinity) or both are finite and the identity exhibits the unit scalar relating them. -/
+/-- Two nonsingular projective representatives over a field that are proportional with cross
+scalars given by each other's `Z`-coordinate are equivalent: if `(V z) • U = (U z) • V`, then
+`U ≈ V`. -/
 theorem Projective.equiv_of_proportional {F : Type*} [Field F] {W : Projective F}
     {U V : Fin 3 → F} (hU : W.Nonsingular U) (hV : W.Nonsingular V)
     (hprop : (V 2) • U = (U 2) • V) : U ≈ V := by
@@ -82,8 +62,7 @@ theorem Projective.equiv_of_proportional {F : Type*} [Field F] {W : Projective F
       (by linear_combination hcU0) (by linear_combination hcU1)
 
 /-- Two nonsingular projective representatives over a field are equivalent as soon as they have the
-same underlying affine point.  This is the converse of `toAffine_of_equiv`, obtained from the
-injectivity of the projective-to-affine equivalence `toAffineAddEquiv`. -/
+same underlying affine point (the converse of `toAffine_of_equiv`). -/
 theorem Projective.equiv_of_toAffine_eq {F : Type*} [Field F] {W : Projective F}
     {U V : Fin 3 → F} (hU : W.Nonsingular U) (hV : W.Nonsingular V)
     (h : Projective.Point.toAffine W U = Projective.Point.toAffine W V) : U ≈ V := by
@@ -182,8 +161,8 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
     exact_mod_cast this
   · exact mul_comm _ _
 
-/-- **Reduction is well-defined on classes.**  Any integer projective representative `T` whose
-rational affine point is `R` reduces (mod `p`) to a representative equivalent to `repr R`. -/
+/-- Reduction is well-defined on classes: any integer projective representative `T` whose
+rational affine point is `R` reduces mod `p` to a representative equivalent to `repr R`. -/
 theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (R : (curve a₂ a₄ a₆).toAffine.Point) {T : Fin 3 → ℤ}
     (hnsp : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Nonsingular
@@ -233,10 +212,10 @@ private theorem curve_equation_iff {x y : ℚ} (h : (curve a₂ a₄ a₆).toAff
   have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
   simpa [curve] using this
 
-/-- **Alternate secant-slope denominator.**  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the reduced
-point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ − y₂)/(x₁ − x₂)` (a `0/0` mod `p`)
-equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose denominator
-survives reduction.  Hence the reduced secant slope is well-defined. -/
+/-- The reduced secant slope is well-defined.  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
+reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ - y₂)/(x₁ - x₂)` (a
+`0/0` mod `p`) equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose
+denominator survives reduction. -/
 private theorem reduced_slope_den (hne : x₁ ≠ x₂)
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
@@ -268,10 +247,9 @@ private theorem reduced_slope_den (hne : x₁ ≠ x₂)
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
 
-/-- **Reduced tangent equations.**  With `x₁ ≠ x₂` over `ℚ`, good denominators, and the reduced
-secant slope `S = (slope …)` well-defined (`hℓden`) with `x₃ = addX …` also of good denominator
-(`hd3`), the reduced coordinates satisfy the reduced `addX` relation `S² = X̄₃ + a₂ + X̄₁ + X̄₂` and
-the alternate-slope identity `S·(Ȳ₁ + Ȳ₂) = X̄₁² + X̄₁X̄₂ + X̄₂² + a₂(X̄₁ + X̄₂) + a₄`. -/
+/-- The reduced coordinates satisfy the reduced `addX` relation `S² = X̄₃ + a₂ + X̄₁ + X̄₂` and the
+alternate-slope identity `S·(Ȳ₁ + Ȳ₂) = X̄₁² + X̄₁X̄₂ + X̄₂² + a₂(X̄₁ + X̄₂) + a₄`, for the reduced
+secant slope `S = (slope …)`. -/
 private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
@@ -328,7 +306,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast] at hc
     exact hc
 
-/-- **The kernel of reduction is closed under the group law.**  If two affine points `P`, `Q`
+/-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
 again has `p ∣ x₃.den`.
@@ -336,10 +314,10 @@ again has `p ∣ x₃.den`.
 This is the one genuinely `p`-adic corner of `red_p` additivity.  It is proved by an explicit
 single-fraction certificate: writing `x_i = A_i / w_i²`, `y_i = B_i / w_i³` (`den_isSquare`) with
 `E = w₁`, `G = w₂`, `p ∣ E`, `p ∣ G`, the group law gives the integer identity
-`x₃ = (N² − a₆E²G²K²) / (A·C·K²)` where `K = A·G² − C·E²` and `N = A·D·E − B·C·G`.  The secant
-intercept `ν = N / (E·G·K)` satisfies `N·(A·D·E + B·C·G) = K·W` with `W ≡ −A²C²` a `p`-unit
+`x₃ = (N² - a₆E²G²K²) / (A·C·K²)` where `K = A·G² - C·E²` and `N = A·D·E - B·C·G`.  The secant
+intercept `ν = N / (E·G·K)` satisfies `N·(A·D·E + B·C·G) = K·W` with `W ≡ -A²C²` a `p`-unit
 (both integer identities follow from the two curve relations), so `v_p(N) < v_p(K)`.  Tracking
-`padicValRat` through the fraction yields `padicValRat p x₃ = 2·(v_p N − v_p K) < 0`, i.e.
+`padicValRat` through the fraction yields `padicValRat p x₃ = 2·(v_p N - v_p K) < 0`, i.e.
 `p ∣ x₃.den`. -/
 private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
@@ -502,7 +480,7 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0),
       padicValInt.mul hA0 hC0, hpvA, hpvC, hK2]; omega
-  -- valuation of the numerator `N² − a₆E²G²K²`
+  -- valuation of the numerator `N² - a₆E²G²K²`
   have hNumval : padicValRat p ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ)
       = (2 * padicValInt p N : ℤ) ∧ (N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) ≠ 0 := by
     rcases eq_or_ne (a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) 0 with h0 | h0
@@ -558,10 +536,9 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hdvd : p ∣ x₃.den := (dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0
   exact (ZMod.natCast_eq_zero_iff _ p).mpr hdvd
 
-/-- **Additivity of `red_p` in the tangent-mod-`p` configuration (S4).**  When two affine points
+/-- Additivity of `red_p` in the tangent-mod-`p` configuration (S4): when two affine points
 `P`, `Q` reduce to the same point of `E/𝔽ₚ` (`red_p P = red_p Q`) but are distinct over `ℚ`, the
-reduction of their rational sum equals the sum of their reductions.  This is the intrinsic content
-of additivity that the projective branch-jump cannot supply for free. -/
+reduction of their rational sum equals the sum of their reductions. -/
 private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
@@ -589,18 +566,18 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
         · exact absurd (by rw [Affine.Point.some.injEq]; exact ⟨hx12, h⟩) hPQ
         · exact h
       rw [Affine.Point.add_of_Y_eq hx12 hy, red_p_zero]
-    · -- **Both summands lie in the kernel of reduction** (`p ∣ x₁.den`, `p ∣ x₂.den`) while
+    · -- Both summands lie in the kernel of reduction (`p ∣ x₁.den`, `p ∣ x₂.den`) while
       -- `x₁ ≠ x₂` over `ℚ`.  The goal is `red_p (P + Q) = 0`, i.e. `(x₃.den : ZMod p) = 0` for the
       -- rational sum's `x`-coordinate `x₃ = addX x₁ x₂ (slope …)`.  This is exactly the statement
       -- that the kernel of reduction is closed under addition.  Writing `x_i = A_i / w_i²`,
       -- `y_i = B_i / w_i³` with `p ∣ w_i`, sympy confirms the exact identity (via the two integer
-      -- curve relations) `x₃ = num / (w₁² w₂² (A₁ w₂² − A₂ w₁²)²)` has `p`-adic valuation
-      -- `v_p(x₃) = −2·min(v_p w₁, v_p w₂) < 0`, so `p ∣ x₃.den`.  Unlike the tangent-mod-`p` case
+      -- curve relations) `x₃ = num / (w₁² w₂² (A₁ w₂² - A₂ w₁²)²)` has `p`-adic valuation
+      -- `v_p(x₃) = -2·min(v_p w₁, v_p w₂) < 0`, so `p ∣ x₃.den`.  Unlike the tangent-mod-`p` case
       -- above, this cannot be shown by the reduced affine identities (`reduced_addX` etc.): both
-      -- the numerator and denominator of `x₃` vanish mod `p` (the leading terms cancel — this is
+      -- the numerator and denominator of `x₃` vanish mod `p` (the leading terms cancel; this is
       -- the formal-group content), so `Rat.cast` reasoning gives `0 = 0`.  A rigorous proof needs
       -- the `p`-adic valuation (`padicValRat`, via `(q.den : ZMod p) = 0 ↔ padicValRat p q < 0`)
-      -- together with the exact single-fraction certificate, or the elliptic-curve formal group —
+      -- together with the exact single-fraction certificate (or the elliptic-curve formal-group
       -- subgroup); it is closed by `den_addX_both_kernel`, the explicit single-fraction
       -- `padicValRat` certificate that the kernel of reduction is closed under the group law.
       rw [Affine.Point.add_of_X_ne hx12]
@@ -767,7 +744,7 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
             linear_combination -hS2 + hXbar
           rw [hxeq]
 
-/-- **Additivity of the reduction map.** -/
+/-- Additivity of the reduction map. -/
 theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     red_p a₂ a₄ a₆ p hΔ (P + Q) = red_p a₂ a₄ a₆ p hΔ P + red_p a₂ a₄ a₆ p hΔ Q := by
@@ -847,7 +824,7 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
         rw [hgadd, Projective.Point.toAffine_add hns1 hns1,
           toAffine_g_Trep a₂ a₄ a₆ h₁ hden1 hden1', ← hPQ]
       exact repr_equiv_of_toAffine a₂ a₄ a₆ p hΔ _ hnsp hnsq hTℚ
-    · -- **S4 — tangent mod `p`.**  Here `repr P ≈ repr Q` in `ZMod p` (the reduced points coincide)
+    · -- S4: tangent mod `p`.  Here `repr P ≈ repr Q` in `ZMod p` (the reduced points coincide)
       -- but `P ≠ Q` over `ℚ`.  We reduce the projective-class goal to the affine additivity
       -- `red_p (P + Q) = red_p P + red_p Q`, which is supplied by `red_p_add_tangent`.
       have hred : red_p a₂ a₄ a₆ p hΔ (.some x₁ y₁ h₁)

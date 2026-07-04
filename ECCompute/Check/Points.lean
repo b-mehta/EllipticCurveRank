@@ -10,15 +10,9 @@ import ECCompute.Check.Fold
 # Point-on-curve check
 
 `chkZ` is a kernel-reducible `Bool` function that decides, for integer Weierstrass coefficients
-`a₁ a₂ a₃ a₄ a₆ : ℤ` and a rational point `(x, y) : ℚ × ℚ`, whether the general Weierstrass
-equation
-`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`
-holds in `ℚ`. The check is performed with exact integer arithmetic: it clears the denominators of
-`x` and `y` and compares the two sides as integers, so it reduces in the kernel by `rfl` using only
-GMP-backed `Int` operations (no `Rat.add`/`Rat.mul`, which are `@[irreducible]` and do not reduce).
-`chkZ_iff` is the correctness lemma: the checker returns `true` if and only if the point satisfies
-`(toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y`. `checkPoints` lifts the check to a list of
-points.
+`a₁ a₂ a₃ a₄ a₆ : ℤ` and a rational point `(x, y) : ℚ × ℚ`, whether the Weierstrass equation
+`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` holds in `ℚ`. `chkZ_iff` is the correctness lemma;
+`checkPoints` lifts the check to a list of points.
 -/
 
 namespace ECCompute.ModelIso
@@ -26,17 +20,16 @@ namespace ECCompute.ModelIso
 open WeierstrassCurve
 
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
-Weierstrass equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` is equivalent, after clearing the
-denominator `xd³·yd²`, to an identity between integers; `chkZ` tests that identity with GMP-backed
-`Int` arithmetic, so it reduces in the kernel by `rfl`. -/
+Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
+integers, which `chkZ` tests. -/
 def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
   let xn := x.num; let xd := (x.den : ℤ); let yn := y.num; let yd := (y.den : ℤ)
   yn ^ 2 * xd ^ 3 + a₁ * xn * yn * xd ^ 2 * yd + a₃ * yn * xd ^ 3 * yd
     == xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
         + a₆ * xd ^ 3 * yd ^ 2
 
-/-- **Correctness lemma.** The kernel-reducible checker `chkZ` returns `true` if and only if the
-point `(x, y)` satisfies the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
+/-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
+the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y := by
@@ -60,8 +53,7 @@ theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
       y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
   simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff, toCurveQ]
 
-/-- Check that every point in a list lies on `toCurveQ a₁ a₂ a₃ a₄ a₆`. Kernel-reducible: a
-structural `allList` fold, so the kernel peels one point at a time, never indexing positionally. -/
+/-- Check that every point in a list lies on `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
   allList (fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
 

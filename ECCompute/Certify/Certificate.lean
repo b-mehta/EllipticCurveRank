@@ -9,13 +9,9 @@ import ECCompute.Check.F2Invert
 /-!
 # The rank-bound certificate data type
 
-This file defines `ECCompute.Certificate`, the bundle of data a referee audits to accept a
-lower bound on the Mordell–Weil rank of an elliptic curve over `ℚ`,
-`rank E(ℚ) ≥ ρ − t`.
-
-It is pure data: a plain `structure` with no `Prop` fields and no proofs. Downstream code supplies
-the checkers that audit each field, the deduction that combines them, and the tactic that turns a
-value of this type into a verified bound. The intended witness is the general Weierstrass model
+`ECCompute.Certificate` bundles the data a referee audits to accept a lower bound on the
+Mordell-Weil rank of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. It is pure data; downstream
+checkers audit each field. The intended witness is the general Weierstrass model
 `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` over `ℤ`.
 
 ## Fields
@@ -29,23 +25,20 @@ value of this type into a verified bound. The intended witness is the general We
   `M`, in the `List Nat` bitmask layout of `ECCompute.F2Invert` (`matB` by rows, `matM` by
   columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
 * `t : ℕ` is the 2-torsion dimension `dim_{𝔽₂} E(ℚ)[2]`, and `torsionPrime : ℕ` carries its
-  witness — for the running example `t = 0`, a prime at which the 2-torsion cubic
+  witness: for the running example `t = 0`, a prime at which the 2-torsion cubic
   `4x³ + b₂x² + 2b₄x + b₆` has no root.
 
 ## Layout conventions
 
-The four lists `points`, `labels`, `matB`, and `matM` are all expected to have length `rho`, but no
-length or well-formedness constraints are imposed here; the auditing checkers enforce them.
+The four lists `points`, `labels`, `matB`, and `matM` all have length `rho`; the auditing checkers
+enforce this.
 -/
 
 namespace ECCompute
 
-/-- A certificate for the Mordell–Weil rank bound `rank E(ℚ) ≥ ρ − t`, over the integral
-Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
-
-This is pure data; the fields are audited by downstream checkers rather than by `Prop` fields
-carried here. See the module docstring for the field-by-field description and the expected
-length conventions. -/
+/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the integral
+Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`. See the module docstring for the
+field-by-field description. -/
 structure Certificate where
   /-- The `x y` coefficient of the Weierstrass model. -/
   a₁ : ℤ
@@ -57,7 +50,7 @@ structure Certificate where
   a₄ : ℤ
   /-- The constant coefficient of the Weierstrass model. -/
   a₆ : ℤ
-  /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ − t`. -/
+  /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   rho : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
   points : List (ℚ × ℚ)

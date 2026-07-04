@@ -9,21 +9,13 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 /-!
 # The completing-the-square model isomorphism
 
-The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism when auditing a rank
-certificate lives in `ECCompute.Check.Points`.
+Over `ℚ` (characteristic `≠ 2`) the substitution `y ↦ y - (a₁x + a₃)/2` (the change of variables
+`⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩`) carries a general Weierstrass model to a short model
+`y² = x³ + a₂'x² + a₄'x + a₆'`, on which the descent character is stated. Rank is an isomorphism
+invariant, so a rank lower bound on the short model transfers back; see `nonempty_pointAddEquiv`.
 
-## The completing-the-square isomorphism
-
-The running example is a general Weierstrass model (`a₁ = a₃ = 1`), but the descent character is
-stated for a short model `y² = x³ + a₂'x² + a₄'x + a₆'`. Over `ℚ` (characteristic `≠ 2`) the
-substitution `y ↦ y − (a₁x + a₃)/2` — the change of variables `⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩`
-of `WeierstrassCurve.VariableChange` — carries the general model to a short one. `shortModel` is
-that short model, `shortModel_a₁`/`shortModel_a₃` confirm its linear coefficients vanish, and
-`equation_completeSquare` is the isomorphism at the level of the defining equations: `(x, y)` lies
-on the general model iff `(x, y + (a₁x + a₃)/2)` lies on the short model.
-
-Rank is an isomorphism invariant of the Mordell–Weil group, so a rank lower bound proven on the
-short model transfers back to the general model; see `nonempty_pointAddEquiv`.
+The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism lives in
+`ECCompute.Check.Points`.
 -/
 
 namespace ECCompute.ModelIso
@@ -38,7 +30,7 @@ def toCurveQ (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 /-! ## The completing-the-square model isomorphism -/
 
 /-- The change of variables `⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩` completing the square: the
-substitution `y ↦ y − (a₁x + a₃)/2` (over `ℚ`, where `2` is invertible) that clears the `a₁` and
+substitution `y ↦ y - (a₁x + a₃)/2` (over `ℚ`, where `2` is invertible) that clears the `a₁` and
 `a₃` coefficients. -/
 def completeSquare (a₁ a₃ : ℤ) : VariableChange ℚ :=
   ⟨1, 0, -(a₁ : ℚ) / 2, -(a₃ : ℚ) / 2⟩
@@ -81,10 +73,8 @@ theorem shortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     Units.val_one, one_pow]
   ring
 
-/-- **The completing-the-square isomorphism, on the defining equations.** A rational point `(x, y)`
-lies on the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` if and only if `(x, y + (a₁x + a₃)/2)` lies on
-the short model `shortModel a₁ a₂ a₃ a₄ a₆`. This is the bijection of affine solution loci
-underlying the model isomorphism. -/
+/-- A point `(x, y)` lies on the general model iff `(x, y + (a₁x + a₃)/2)` lies on the short
+model. -/
 theorem equation_completeSquare (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y ↔
       (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Equation x (y + ((a₁ : ℚ) * x + a₃) / 2) := by
@@ -112,8 +102,8 @@ private theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
   subst hx; subst hy; rfl
 
-/-- **Nonsingularity transfers along the completing-the-square substitution.** A point `(x, y)` is
-nonsingular on the general model iff `(x, y + (a₁x + a₃)/2)` is nonsingular on the short model. -/
+/-- A point `(x, y)` is nonsingular on the general model iff `(x, y + (a₁x + a₃)/2)` is nonsingular
+on the short model. -/
 theorem nonsingular_completeSquare (x y : ℚ) :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x y ↔
       (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Nonsingular x (y + ((a₁ : ℚ) * x + a₃) / 2) := by
@@ -196,7 +186,7 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       div_eq_div_iff (sub_ne_zero.mpr hx) (sub_ne_zero.mpr hx)]
     ring
 
-/-- Forward coordinate map on Mordell–Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
+/-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
 def fwd :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point → (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point
   | .zero => .zero
@@ -253,16 +243,10 @@ theorem fwd_map_add (P Q : (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point) :
     · rw [hℓ, addX_completeSquare]
     · rw [hℓ, addY_completeSquare]
 
-/-- **Rank is an isomorphism invariant.** The completing-the-square change of variables `y ↦
-y + (a₁x + a₃)/2` induces a group isomorphism between the Mordell–Weil groups of the general model
-`toCurveQ a₁ a₂ a₃ a₄ a₆` and the short model `shortModel a₁ a₂ a₃ a₄ a₆`, so any rank lower bound
-proven on the short model transfers back to the general model.
-
-The bijection of affine loci is `equation_completeSquare`/`nonsingular_completeSquare`; the
-group-law compatibility (`fwd_map_add`) is the substantive content: it reduces, on unfolding the
-affine addition, to the facts that negation (`negY_completeSquare`), the slope
-(`slope_completeSquare`), and the sum coordinates (`addX_completeSquare`, `addY_completeSquare`) all
-commute with the shift. -/
+/-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
+isomorphism between the Mordell-Weil groups of the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` and the
+short model `shortModel a₁ a₂ a₃ a₄ a₆`, so any rank lower bound on the short model transfers
+back. -/
 theorem nonempty_pointAddEquiv :
     Nonempty ((toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+
       (shortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point) :=

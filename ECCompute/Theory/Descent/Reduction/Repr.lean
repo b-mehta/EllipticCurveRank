@@ -11,22 +11,17 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 # The integer projective representative of an affine point
 
 For a point `P = (x, y)` on the rational curve `y² = x³ + a₂x² + a₄x + a₆`, the
-denominator-is-a-square lemma (T1a) gives `w : ℕ` with `x.den = w²` and `y.den = w³`, so that
-
-  `T(P) := ![x.num · w, y.num, w³] : Fin 3 → ℤ`
-
-is an integer projective representative of `P`: over `ℚ` it equals `w³ • [x : y : 1]`.  This
-file records `T(P)` (as `Trep x y w`) together with the facts used to reduce it modulo `p`:
-it lies on the integral curve, it is nonsingular there, and its `y`- and `z`-coordinates are
-coprime (so the representative is primitive, and stays nonzero modulo any prime dividing `w`).
+denominator-is-a-square lemma gives `w : ℕ` with `x.den = w²` and `y.den = w³`, so that
+`![x.num · w, y.num, w³] : Fin 3 → ℤ` is an integer projective representative of `P`.  This
+file records it as `Trep x y w` together with the facts used to reduce it modulo `p`.
 
 ## Main declarations
 
-* `ECCompute.Trep`            — the integer representative `![x.num·w, y.num, w³]`.
-* `ECCompute.Trep_map_ℚ`      — over `ℚ`, `Trep x y w = w³ • [x : y : 1]`.
-* `ECCompute.Trep_equation`   — `Trep x y w` satisfies the projective equation of `curveℤ`.
-* `ECCompute.Trep_nonsingular`— `Trep x y w` is a nonsingular projective point of `curveℤ`.
-* `ECCompute.Trep_primitive`  — `y.num` and `w³` are coprime.
+* `ECCompute.Trep`: the integer representative `![x.num·w, y.num, w³]`.
+* `ECCompute.Trep_map_ℚ`: over `ℚ`, `Trep x y w = w³ • [x : y : 1]`.
+* `ECCompute.Trep_equation`: `Trep x y w` satisfies the projective equation of `curveℤ`.
+* `ECCompute.Trep_nonsingular`: `Trep x y w` is a nonsingular projective point of `curveℤ`.
+* `ECCompute.Trep_primitive`: `y.num` and `w³` are coprime.
 -/
 
 open WeierstrassCurve

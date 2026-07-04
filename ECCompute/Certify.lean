@@ -10,20 +10,13 @@ import ECCompute.Certify.CertifyEval
 # The `certify_curve` tactic
 
 `certify_curve` closes a goal `HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) ρ`.  It reads the coefficients
-`a₁…a₆` and the rank `ρ` out of the goal (so the curve and its coefficient abbreviations must be
-`unfold`ed to literals first), takes a torsion witness prime, and reads the generating points and
-descent labels from two data files.  From these it computes the descent-character matrix `matB` and
-its `𝔽₂` inverse `matM` with the fast helpers in `ECCompute.CertifyEval`, assembles the
-`Certificate`, and discharges the referee obligations of `hasRankGE_of_certificate` in one proof
-term.
+and rank from the goal (so the curve must be `unfold`ed to literals first) and the generating points
+and descent labels from two data files, computes the descent-character matrix and its `𝔽₂` inverse,
+and discharges the referee obligations of `hasRankGE_of_certificate`.
 
 Each data file has one entry per line.  A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
 of the 2-division cubic mod `p`.
-
-Nothing in `CertifyEval` is trusted: the assembled certificate's obligations (`hB`, `hinv`, …) are
-kernel-checked exactly as a hand-written certificate would be, so a wrong matrix only makes the
-tactic *fail to close the goal*, never certify a false bound.
 
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
@@ -36,8 +29,8 @@ open Lean Elab Tactic Meta
 
 namespace ECCompute
 
-/-- Extract the `Nat` value of a numeral `Expr` (trying the raw expression first — for `0`/`1` and
-`OfNat` numerals — then its `whnf`, which unfolds abbreviations and projections). -/
+/-- Extract the `Nat` value of a numeral `Expr` (trying the raw expression first, for `0`/`1` and
+`OfNat` numerals, then its `whnf`, which unfolds abbreviations and projections). -/
 private def getNatE (e : Expr) : MetaM Nat := do
   if let some n := (← whnfR e).nat? then return n     -- reducible: coeff abbrevs, `0`/`1`
   let e ← whnf e                                        -- full: unfold the point/label `def`s
@@ -132,7 +125,7 @@ def evalCertifyCurve : Tactic := fun stx => do
       | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
     -- generate the parsed points and labels as plain `List` literals, spliced into the proof term.
     -- Every referee obligation is a kernel-reducible `Bool` check over these lists (closed by
-    -- `quickRfl`), so the kernel never applies a `Fin ρ → _` family.
+    -- `quickRfl`).
     let ptStxs ← pts.toArray.mapM fun (xn, xd, yn, yd) => do
       let xc ← coordStx xn xd
       let yc ← coordStx yn yd

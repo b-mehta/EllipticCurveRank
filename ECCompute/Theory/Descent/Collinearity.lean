@@ -7,41 +7,26 @@ import ECCompute.Theory.Descent.Defs
 import Mathlib.Tactic.LinearCombination
 
 /-!
-# The collinearity identity (T1b)
+# The collinearity identity
 
-A line `y = ℓx + m` that meets `E : y² = x³ + a₂x² + a₄x + a₆` in three points with
-`x`-coordinates `x₁, x₂, x₃` gives the polynomial factorisation
+A line `y = ℓx + m` meeting `E : y² = x³ + a₂x² + a₄x + a₆` in three points with
+`x`-coordinates `x₁, x₂, x₃` gives `x³ + a₂x² + a₄x + a₆ - (ℓx + m)² = (x - x₁)(x - x₂)(x - x₃)`.
+Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` yields
+`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square; this feeds the descent-character
+additivity proof.
 
-  `x³ + a₂x² + a₄x + a₆ − (ℓx + m)² = (x − x₁)(x − x₂)(x − x₃)`,
-
-since the cubic minus the squared line is monic of degree `3` with exactly those roots.
-Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` and using `f(θ) = 0` turns the
-left side into `−(ℓθ + m)²`, so
-
-  `(x₁ − θ)(x₂ − θ)(x₃ − θ) = (ℓθ + m)²`
-
-is a perfect square.  This corollary is what ticket T1c feeds into the descent-character
-additivity proof (the class of `x − θ` modulo squares is multiplicative along collinear
-triples).
-
-## Design
-
-The factorisation is stated as an equation of values `∀ x, …` rather than of polynomials;
-over an infinite field the two are equivalent, and the value form is exactly what the
-`θ`-corollary needs.  Its content is the three Vieta relations between `(ℓ, m)` and the
-symmetric functions of `x₁, x₂, x₃`, so both the identity and the corollary reduce to
-`linear_combination`.  For the group-law application one only knows that two of the points
-lie on the curve and the line and have distinct `x`-coordinates; `cubic_sub_lineSq_eq_prod_of_roots`
-recovers the Vieta relations from that data over a field.
+The factorisation is stated as an equation of values `∀ x, …` rather than of polynomials, which
+is what the `θ`-corollary needs.  Its content is the three Vieta relations between `(ℓ, m)` and
+the symmetric functions of `x₁, x₂, x₃`, so everything reduces to `linear_combination`.
 
 ## Main declarations
 
-* `ECCompute.cubic_sub_lineSq_eq_prod` — the collinearity identity from the Vieta relations.
-* `ECCompute.prod_sub_theta_eq_lineSq` — the `θ`-evaluation corollary (perfect square).
-* `ECCompute.cubic_sub_lineSq_eq_prod_of_roots` — the identity over a field from two points
+* `ECCompute.cubic_sub_lineSq_eq_prod`: the collinearity identity from the Vieta relations.
+* `ECCompute.prod_sub_theta_eq_lineSq`: the `θ`-evaluation corollary (perfect square).
+* `ECCompute.cubic_sub_lineSq_eq_prod_of_roots`: the identity over a field from two points
   on the curve and line with distinct `x`-coordinates.
-* `ECCompute.prod_sub_theta_eq_lineSq_of_roots` — the corollary from the same field data.
-* `ECCompute.prod_sub_theta_eq_lineSq_zmod` — the corollary phrased with `fval` for the
+* `ECCompute.prod_sub_theta_eq_lineSq_of_roots`: the corollary from the same field data.
+* `ECCompute.prod_sub_theta_eq_lineSq_zmod`: the corollary phrased with `fval` for the
   mod-`p` descent application.
 -/
 
@@ -51,9 +36,8 @@ section CommRing
 
 variable {R : Type*} [CommRing R] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R)
 
-/-- **Collinearity identity.**  If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the three
-Vieta relations forced by `x³ + a₂x² + a₄x + a₆ − (ℓx + m)²` being the monic cubic with
-roots `x₁, x₂, x₃`, then that cubic factors as `(x − x₁)(x − x₂)(x − x₃)` at every `x`. -/
+/-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the three Vieta relations, the cubic
+`x³ + a₂x² + a₄x + a₆ - (ℓx + m)²` factors as `(x - x₁)(x - x₂)(x - x₃)` at every `x`. -/
 theorem cubic_sub_lineSq_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
@@ -62,8 +46,8 @@ theorem cubic_sub_lineSq_eq_prod
       = (x - x₁) * (x - x₂) * (x - x₃) := by
   linear_combination x ^ 2 * hσ₁ - x * hσ₂ + hσ₃
 
-/-- **The collinear triple meets `θ` in a square.**  Evaluating the collinearity identity at
-a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives `(x₁ − θ)(x₂ − θ)(x₃ − θ) = (ℓθ + m)²`. -/
+/-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
+`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
 theorem prod_sub_theta_eq_lineSq
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
@@ -73,11 +57,10 @@ theorem prod_sub_theta_eq_lineSq
   have key := cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ θ
   linear_combination key - hθ
 
-/-- **Vieta relations for a tangent (double root).**  If the line `y = ℓx + m` is tangent to
-`E` at `(x₁, ℓx₁ + m)` — the point lies on the curve (`hpt`) and the tangent-slope condition
-`f'(x₁) = 2ℓ(ℓx₁ + m)` holds (`htan`) — then `x₁` is a double root of `f − (ℓx + m)²` and the
-third root is `x₃ = ℓ² − a₂ − 2x₁`, so the three Vieta relations hold for the collinear triple
-`x₁, x₁, x₃`.  This is the doubling analogue of `vieta_of_roots`. -/
+/-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
+slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
+relations hold for the triple `x₁, x₁, x₃` with `x₃ = ℓ² - a₂ - 2x₁`.  Doubling analogue of
+`vieta_of_roots`. -/
 theorem vieta_of_double_root
     (hpt : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (htan : 3 * x₁ ^ 2 + 2 * a₂ * x₁ + a₄ = 2 * ℓ * (ℓ * x₁ + m))
@@ -96,7 +79,7 @@ variable {F : Type*} [Field F] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F)
 
 /-- The Vieta relations for the line `y = ℓx + m` meeting `E` at `x₁, x₂, x₃`, recovered from
 the two points `(x₁, ℓx₁ + m)` and `(x₂, ℓx₂ + m)` lying on the curve (with `x₁ ≠ x₂`) and the
-group-law value `x₃ = ℓ² − a₂ − x₁ − x₂` for the third `x`-coordinate. -/
+group-law value `x₃ = ℓ² - a₂ - x₁ - x₂` for the third `x`-coordinate. -/
 theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
@@ -114,9 +97,9 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
   refine ⟨by rw [hx₃]; ring, by rw [hx₃]; linear_combination -hQ,
     by rw [hx₃]; linear_combination -h₁ - x₁ * hQ⟩
 
-/-- **Collinearity identity over a field.**  Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on
-`E` with `x₁ ≠ x₂` and the group-law third coordinate `x₃ = ℓ² − a₂ − x₁ − x₂` factor the
-cubic-minus-line-squared as `(x − x₁)(x − x₂)(x − x₃)`. -/
+/-- Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on `E` with `x₁ ≠ x₂` and the group-law third
+coordinate `x₃ = ℓ² - a₂ - x₁ - x₂` factor the cubic-minus-line-squared as
+`(x - x₁)(x - x₂)(x - x₃)`. -/
 theorem cubic_sub_lineSq_eq_prod_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
@@ -126,9 +109,8 @@ theorem cubic_sub_lineSq_eq_prod_of_roots (hne : x₁ ≠ x₂)
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hne hx₃ h₁ h₂
   exact cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ x
 
-/-- **The collinear triple meets `θ` in a square, over a field.**  From two points on `E` and
-the line (distinct `x`), together with `f(θ) = 0`, the third value `x₃ = ℓ² − a₂ − x₁ − x₂`
-gives `(x₁ − θ)(x₂ − θ)(x₃ − θ) = (ℓθ + m)²`. -/
+/-- From two points on `E` and the line (distinct `x`), together with `f(θ) = 0`, the third
+value `x₃ = ℓ² - a₂ - x₁ - x₂` gives `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
 theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
@@ -138,11 +120,9 @@ theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hne hx₃ h₁ h₂
   exact prod_sub_theta_eq_lineSq a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ hσ₁ hσ₂ hσ₃ hθ
 
-/-- **The derivative at a root equals the product of the other two factors.**  If `θ` is a root
-of `f` and one of the three collinear `x`-coordinates equals `θ` (here `x₁ = θ`), then the line
-passes through `(θ, 0)` and `f'(θ) = (x₂ − θ)(x₃ − θ)`.  This is the analogue of
-`prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion mod `p`) branch of the descent character,
-where the factor `X_i − θ` in the collinearity product is replaced by `f'(θ)`. -/
+/-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
+`f'(θ) = (x₂ - θ)(x₃ - θ)`.  Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
+mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
 theorem fderiv_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
@@ -159,10 +139,9 @@ theorem fderiv_eq_prod
 
 end Field
 
-/-- **The `θ`-corollary for the mod-`p` descent.**  Phrased with `fval` so that the root
-hypothesis is exactly `DescentHyp.root`: at a root `θ` of `f` mod `p`, a collinear triple
-`x₁, x₂, x₃` on the line `y = ℓx + m` satisfies `(x₁ − θ)(x₂ − θ)(x₃ − θ) = (ℓθ + m)²`, a
-square in `ZMod p`. -/
+/-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
+at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
+`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
 theorem prod_sub_theta_eq_lineSq_zmod (a₂ a₄ a₆ : ℤ) (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = (a₄ : ZMod p) - 2 * ℓ * m)

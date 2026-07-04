@@ -11,28 +11,16 @@ import Mathlib.Algebra.Field.ZMod
 /-!
 # The reduction map on affine points
 
-For an integral curve `y² = x³ + a₂x² + a₄x + a₆` of good reduction at a prime `p` (i.e. the
-integer discriminant is a unit mod `p`), this file defines the reduction map on affine points
-
-  `red_p : (curve …).toAffine.Point → E𝔽.toAffine.Point`,
-
-where `E𝔽 := (curveℤ …).map (ℤ → ZMod p)` is the reduced curve.  A point `P = (x, y)` is sent
-to the affine point underlying the class of `ℤ → ZMod p` applied to its integer representative
-`Trep x y w` (Repr).  Concretely:
-
-* `p ∤ w` (equivalently `(x.den : ZMod p) ≠ 0`): the representative has nonzero `z`-coordinate,
-  and `red_p P = (x̄, ȳ)` are the reduced affine coordinates (`red_p_of_den_ne`);
-* `p ∣ w` (equivalently `(x.den : ZMod p) = 0`): the `z`-coordinate vanishes, the point reduces
-  to the origin, and `red_p P = 0` (`red_p_of_den_zero`).
-
-Additivity of `red_p` (packaging it as an `AddMonoidHom`) is a later chunk.
+For an integral curve `y² = x³ + a₂x² + a₄x + a₆` of good reduction at a prime `p`, this file
+defines the reduction map `red_p` on affine points, sending `P = (x, y)` to the affine point
+underlying `ℤ → ZMod p` applied to its integer representative `Trep x y w`.
 
 ## Main declarations
 
-* `ECCompute.red_p`              — the reduction map.
-* `ECCompute.red_p_zero`         — `red_p 0 = 0`.
-* `ECCompute.red_p_of_den_zero`  — `red_p (x, y) = 0` when `p ∣ x.den`.
-* `ECCompute.red_p_of_den_ne`    — `red_p (x, y) = (x̄, ȳ)` when `p ∤ x.den`.
+* `ECCompute.red_p`: the reduction map.
+* `ECCompute.red_p_zero`: `red_p 0 = 0`.
+* `ECCompute.red_p_of_den_zero`: `red_p (x, y) = 0` when `p ∣ x.den`.
+* `ECCompute.red_p_of_den_ne`: `red_p (x, y) = (x̄, ȳ)` when `p ∤ x.den`.
 -/
 
 open WeierstrassCurve
@@ -81,9 +69,7 @@ private theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) 
 
 /-! ### Nonsingularity of the reduced representative -/
 
-/-- The reduced integer representative is a nonsingular projective point of the reduced curve.
-When `z ≠ 0` this uses good reduction (every point of an elliptic curve is nonsingular); when
-`z = 0` the point reduces to the origin, which is nonsingular thanks to primitivity. -/
+/-- The reduced integer representative is a nonsingular projective point of the reduced curve. -/
 theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :

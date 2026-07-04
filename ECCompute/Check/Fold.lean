@@ -8,19 +8,14 @@ import Mathlib.Data.List.Basic
 /-!
 # Kernel-reducible bounded and structural `Bool` folds
 
-`anyBelow` folds a `Bool` predicate over `{m | m < n}` with the primed `Bool.or'` (via `Nat.rec`);
-`allList` folds a predicate over the members of a `List` (via `List.rec`).  Phrasing the folds with
-`Nat.rec`/`List.rec` and the primed connectives makes the kernel peel one index/element at a time —
-which reduces far better than `(List.range n).all` / `List.all`, and never indexes a list
-positionally.  These are the building blocks the certificate checkers (`checkB`, `checkInv`,
-`checkPoints`, …) fold over.
+`anyBelow` folds a `Bool` predicate over `{m | m < n}` (via `Nat.rec`); `allList` folds a predicate
+over the members of a `List` (via `List.rec`). These are the building blocks the certificate
+checkers (`checkB`, `checkInv`, `checkPoints`, …) fold over.
 -/
 
 namespace ECCompute
 
-/-- Kernel-reducible bounded `∃`: `true` iff `p m = true` for some `m < n`, phrased with `Nat.rec`
-and the primed `Bool.or'` so the kernel peels one `m` at a time. `noncomputable` only because
-`Bool.or'` is; the kernel reduces it regardless. -/
+/-- Kernel-reducible bounded `∃`: `true` iff `p m = true` for some `m < n`. -/
 noncomputable def anyBelow (n : Nat) (p : Nat → Bool) : Bool :=
   Nat.rec false (fun m r => (p m).or' r) n
 
@@ -42,9 +37,7 @@ theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
       · exact h ▸ hk
     · exact fun h => ⟨h k (Nat.lt_succ_self k), fun m hm => h m (Nat.lt_succ_of_lt hm)⟩
 
-/-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. Folds with the
-primed `Bool.and'` via `List.rec`, so the kernel peels one element at a time and never indexes the
-list positionally. `noncomputable` only because `Bool.and'` is; the kernel reduces it regardless. -/
+/-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type*} (p : α → Bool) : List α → Bool :=
   List.rec true (fun a _ r => (p a).and' r)
 

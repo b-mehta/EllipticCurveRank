@@ -9,42 +9,20 @@ import ECCompute.Theory.ModelIso
 /-!
 # The general-to-integer-short-model change of variables
 
-`ECCompute.rank_ge_of_certificate` (see `ECCompute.MainTheorem`) proves the certified rank lower
-bound on the
-**integer short model** `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆` with `A₂ A₄ A₆ : ℤ`), which
-is where the descent character `lambda` lives.  A general integral Weierstrass curve
-`ModelIso.toCurveQ a₁ a₂ a₃ a₄ a₆` (`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to
-such a model to apply that theorem.
+The certified rank bound (`ECCompute.rank_ge_of_certificate`) lives on the integer short model
+`curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character `lambda`
+is defined. A general integral Weierstrass curve `ModelIso.toCurveQ a₁ a₂ a₃ a₄ a₆`
+(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.nonempty_pointAddEquiv`
+completes the square but only to a *rational*-coefficient short model; this file adds the integral
+scaling step.
 
-`ModelIso.nonempty_pointAddEquiv` already carries `toCurveQ …` to `ModelIso.shortModel …` by
-completing the square, but that short model has *rational* coefficients
-`a₂ + a₁²/4, a₄ + a₁a₃/2, a₆ + a₃²/4`, which `lambda`/`checkLabel`/`Certificate` (all stated for
-integer coefficients) cannot consume.  This file supplies the missing scaling step: the standard
-`b`-invariant integral short model together with a group isomorphism from the general curve to it.
-
-## The integral model
-
-With the `b`-invariants `b₂ = a₁² + 4a₂`, `b₄ = 2a₄ + a₁a₃`, `b₆ = a₃² + 4a₆`
-(mathlib's `WeierstrassCurve.b₂/b₄/b₆`), the change of variables `⟨u, r, s, t⟩ = ⟨1/2, 0, -a₁/2,
--a₃/2⟩` carries `toCurveQ a₁ a₂ a₃ a₄ a₆` to the integral short model
-`curve b₂ (8·b₄) (16·b₆)`, i.e.
+The change of variables `⟨u, r, s, t⟩ = ⟨1/2, 0, -a₁/2, -a₃/2⟩` carries `toCurveQ a₁ a₂ a₃ a₄ a₆`
+to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invariants `b₂ = a₁² + 4a₂`,
+`b₄ = 2a₄ + a₁a₃`, `b₆ = a₃² + 4a₆`:
 
 * `A₂ = a₁² + 4a₂`  (`= b₂`),
 * `A₄ = 16a₄ + 8a₁a₃`  (`= 8·b₄`),
 * `A₆ = 64a₆ + 16a₃²`  (`= 16·b₆`).
-
-Completing the square (`u = 1`) reaches `ModelIso.shortModel`, whose coefficients are `b₂/4, b₄/2,
-b₆/4`; the residual pure scaling `u = 1/2` clears the denominators, sending `(x, y) ↦ (4x, 8y)` and
-scaling the coefficients by `4, 16, 64`.  The two steps compose to `generalToShortEquiv`.
-
-## The scaling isomorphism
-
-`scaleEquiv` is the general statement: if two Weierstrass curves `W`, `W'` over `ℚ` have
-coefficients related by `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero scalar `v`, then `(x, y) ↦ (v²x, v³y)` is
-a group
-isomorphism `W.Point ≃+ W'.Point`.  Its additivity reduces, after unfolding the affine addition, to
-the facts that negation, the slope, and the sum coordinates each scale by the appropriate power of
-`v` (`negY_scale`, `slope_scale`, `addX_scale`, `addY_scale`).
 -/
 
 namespace ECCompute.ModelChange
@@ -151,7 +129,7 @@ theorem slope_scale (hv : v ≠ 0)
       show v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) from by ring,
       mul_div_mul_left _ _ (pow_ne_zero 2 hv), mul_div_assoc]
 
-/-- The forward coordinate map `(x, y) ↦ (v²x, v³y)` on Mordell–Weil groups. -/
+/-- The forward coordinate map `(x, y) ↦ (v²x, v³y)` on Mordell-Weil groups. -/
 def scaleFwd (hv : v ≠ 0) (h1 : W'.a₁ = v * W.a₁) (h2 : W'.a₂ = v ^ 2 * W.a₂)
     (h3 : W'.a₃ = v ^ 3 * W.a₃) (h4 : W'.a₄ = v ^ 4 * W.a₄) (h6 : W'.a₆ = v ^ 6 * W.a₆) :
     W.toAffine.Point → W'.toAffine.Point
@@ -209,8 +187,8 @@ theorem scaleFwd_map_add (hv : v ≠ 0) (h1 : W'.a₁ = v * W.a₁) (h2 : W'.a�
     · rw [hℓ, addX_scale h1 h2]
     · rw [hℓ, addY_scale h1 h2 h3]
 
-/-- **The scaling isomorphism.** If `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, then
-`(x, y) ↦ (v²x, v³y)` is a group isomorphism of Mordell–Weil groups `W.Point ≃+ W'.Point`. -/
+/-- If `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, then `(x, y) ↦ (v²x, v³y)` is a group isomorphism
+`W.Point ≃+ W'.Point`. -/
 def scaleEquiv (hv : v ≠ 0) (h1 : W'.a₁ = v * W.a₁) (h2 : W'.a₂ = v ^ 2 * W.a₂)
     (h3 : W'.a₃ = v ^ 3 * W.a₃) (h4 : W'.a₄ = v ^ 4 * W.a₄) (h6 : W'.a₆ = v ^ 6 * W.a₆) :
     W.toAffine.Point ≃+ W'.toAffine.Point :=
@@ -268,11 +246,9 @@ integral Weierstrass curve `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
 def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   curve (intShortA₂ a₁ a₂) (intShortA₄ a₁ a₃ a₄) (intShortA₆ a₃ a₆)
 
-/-- **The general-to-integer-short-model change of variables.**  The composite change of variables
-`⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by `u = 1/2`) is a group isomorphism from
-the general integral model `toCurveQ a₁ a₂ a₃ a₄ a₆` to the integral short model
-`intShortModel a₁ a₂ a₃ a₄ a₆ = curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)`, on which the descent
-character and hence `Soundness.rank_ge_of_certificate` are stated. -/
+/-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
+`u = 1/2`) is a group isomorphism from the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` to the integral
+short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
 def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
   (generalToShortModelEquiv a₁ a₂ a₃ a₄ a₆).trans <|

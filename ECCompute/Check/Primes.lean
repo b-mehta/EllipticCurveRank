@@ -11,25 +11,21 @@ import Mathlib.Tactic.NormNum
 /-!
 # A cheap kernel-reducible primality test for small numbers
 
-This file provides `passes`, a trial-division fold, and a bound theorem certifying that if
-`n < 23² = 529` survives trial division by the primes below `23`, then `n` is prime.  The point
-is that `passes n [2,3,5,7,11,13,17,19]` reduces cheaply in the kernel (a short fold over
-`Nat.mod`/`Nat.ble`), giving a fast primality certificate for the small label primes used by the
-rank certificates.
+`passes` is a trial-division fold, and `Nat.prime_of_passes` certifies that if `n < 23² = 529`
+survives trial division by the primes below `23`, then `n` is prime. This gives a fast primality
+certificate for the small label primes used by the rank certificates.
 
 ## Main statements
 
-* `Nat.primes_below_23` — the primes below `23` are exactly `[2,3,5,7,11,13,17,19]`.
-* `Nat.prime_of_passes` — if `2 ≤ n < 529` and `passes n [2,3,5,7,11,13,17,19] = true`, then
+* `Nat.primes_below_23`: the primes below `23` are exactly `[2,3,5,7,11,13,17,19]`.
+* `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2,3,5,7,11,13,17,19] = true`, then
   `Nat.Prime n`.
 -/
 
 namespace ECCompute
 
 /-- Trial division as a `Bool`-valued fold: `passes x L = true` iff no `i ∈ L` with `i < x`
-divides `x`.  For each `i`, `Nat.ble 1 (x.mod i)` says `x % i ≠ 0` (i.e. `i ∤ x`) and `x.ble i`
-says `x ≤ i`; the whole fold is the conjunction over `L` of these disjunctions.  It is
-`noncomputable` on purpose: the kernel reduces the primed `Bool` operations directly. -/
+divides `x`. -/
 noncomputable def passes (x : ℕ) : List ℕ → Bool :=
   List.rec true (fun i _ r ↦ ((Nat.ble 1 (x.mod i)).or' (x.ble i)).and' r)
 
@@ -55,8 +51,7 @@ theorem _root_.Nat.primes_below_23 (p : ℕ) (hlt : p < 23) (hp : p.Prime) :
   decide +revert +kernel
 
 /-- If `2 ≤ n < 529 = 23²` and `n` survives trial division by the primes below `23`, then `n` is
-prime.  A composite `n` has a prime factor `p ≤ √n < 23`, hence `p ∈ [2,3,5,7,11,13,17,19]` and
-`p ∣ n` with `p < n`, so `passes n … = false` — contradiction. -/
+prime. -/
 theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
     (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : Nat.Prime n := by
   by_contra hnp
@@ -72,7 +67,7 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   · omega
 
 /-- Kernel `Bool`: `p` is a prime below `529 = 23²`, certified by trial division by the primes below
-`23` (`ECCompute.passes`).  Every descent-label prime used by the rank certificates is `< 529`. -/
+`23` (`ECCompute.passes`). -/
 noncomputable def checkPrime (p : ℕ) : Bool :=
   (Nat.ble 2 p).and' ((Nat.ble p 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
 

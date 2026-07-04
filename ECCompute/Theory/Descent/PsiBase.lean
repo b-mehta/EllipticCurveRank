@@ -11,20 +11,17 @@ import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 /-!
 # The Legendre character `ψ_p` and the simple-root fact (shared base)
 
-This file collects the `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero` that are
-shared between the two sides of the descent factorisation `λ = εp_finite ∘ red_p`:
-`ECCompute.Descent` (the rational character `λ`) and
-`ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εp_finite`).  Splitting
-them out breaks the import cycle that would otherwise arise once `ECCompute.Descent` imports the
-reduction files for the factorisation.
+The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, shared between the two sides of
+the descent factorisation `λ = εp_finite ∘ red_p`: `ECCompute.Descent` (the rational character
+`λ`) and `ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εp_finite`).
 
 ## Main declarations
 
-* `ECCompute.psi_of_isSquare` — `ψ_p` vanishes on squares.
-* `ECCompute.psi_mul_sq`      — multiplying by a nonzero square does not change `ψ_p`.
-* `ECCompute.psi_mul`         — `ψ_p` turns products into sums on nonzero elements.
-* `ECCompute.psi_collinear`   — the `𝔽ₚ`-arithmetic heart: `ψ_p` sums to zero on a collinear triple.
-* `ECCompute.fderiv_ne_zero`  — `f'(θ) ≠ 0` (the root `θ` is simple, from `p ∤ 6Δ`).
+* `ECCompute.psi_of_isSquare`: `ψ_p` vanishes on squares.
+* `ECCompute.psi_mul_sq`: multiplying by a nonzero square does not change `ψ_p`.
+* `ECCompute.psi_mul`: `ψ_p` turns products into sums on nonzero elements.
+* `ECCompute.psi_collinear`: the `𝔽ₚ`-arithmetic heart: `ψ_p` sums to zero on a collinear triple.
+* `ECCompute.fderiv_ne_zero`: `f'(θ) ≠ 0` (the root `θ` is simple, from `p ∤ 6Δ`).
 -/
 
 open WeierstrassCurve
@@ -37,10 +34,9 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
-`ψ_p` sends squares to `0` and non-squares to `1` in `ZMod 2`.  On the nonzero elements of the
-field `ZMod p` (`p` an odd prime) it is the quadratic-residue character transported along the
-group isomorphism `{±1} ≅ ZMod 2`, hence multiplicative-to-additive: `ψ_p(ab) = ψ_p a + ψ_p b`.
-We prove this via `quadraticChar`. -/
+On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-residue character
+transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`.  Proved via
+`quadraticChar`. -/
 
 section Psi
 
@@ -64,7 +60,7 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
   rw [hiff]
 
 /-- On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` turns products into sums:
-`ψ_p(ab) = ψ_p a + ψ_p b`.  Proved by transporting the multiplicativity of `quadraticChar`. -/
+`ψ_p(ab) = ψ_p a + ψ_p b`. -/
 theorem psi_mul (hp : p.Prime) (_hodd : p ≠ 2) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
   haveI : Fact p.Prime := ⟨hp⟩
@@ -87,11 +83,10 @@ end Psi
 
 variable {a₂ a₄ a₆ p}
 
-/-- **Collinear triple, character version.**  If `X₁, X₂, X₃` are the reduced `x`-coordinates
-of three collinear points on `E` (encoded by the Vieta relations of the line `y = ℓx + m`),
-all distinct from the root `θ`, then the `ψ_p`-values sum to zero.  This is the `𝔽ₚ`-arithmetic
-heart of additivity: T1b makes `(X₁−θ)(X₂−θ)(X₃−θ)` a square, and `ψ_p` is additive on the
-nonzero factors. -/
+/-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
+Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then the `ψ_p`-values sum to
+zero: collinearity makes `(X₁-θ)(X₂-θ)(X₃-θ)` a square, and `ψ_p` is additive on the nonzero
+factors.  The `𝔽ₚ`-arithmetic heart of additivity. -/
 theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
@@ -108,9 +103,9 @@ theorem psi_collinear (hp : p.Prime) (hp2 : p ≠ 2) {θ ℓ m X₁ X₂ X₃ : 
     rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
   rwa [psi_mul hp hp2 (mul_ne_zero h1 h2) h3, psi_mul hp hp2 h1 h2] at hpm
 
-/-- **The descent derivative `f'(θ)` is nonzero.**  Since `p ∤ 6Δ` and `θ` is a root of `f`,
-`θ` is a *simple* root: `disc(f) = f'(θ)² · (B² − 4C)` for the complementary quadratic factor
-`x² + Bx + C = f(x)/(x − θ)`, and `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
+/-- Since `p ∤ 6Δ` and `θ` is a root of `f`, `θ` is a *simple* root, so `f'(θ) ≠ 0`:
+`disc(f) = f'(θ)² · (B² - 4C)` for the complementary factor `x² + Bx + C = f(x)/(x - θ)`, and
+`Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
 theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ a₆ p θ ≠ 0 := by
   have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by

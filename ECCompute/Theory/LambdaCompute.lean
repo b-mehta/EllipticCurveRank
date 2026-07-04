@@ -7,32 +7,23 @@ import ECCompute.Theory.Descent.Defs
 import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 /-!
-# A kernel-reducible descent character (T4)
+# A kernel-reducible descent character
 
-The descent character `λ_{p,θ}` of `ECCompute.Descent.Defs` is defined through the *Legendre
-symbol into `ZMod 2`*, `ECCompute.psi`, which is `noncomputable` (it decides `IsSquare` with
-classical logic).  To evaluate `λ` inside a certificate we need a function that the **kernel**
-can reduce to a value by `rfl`, without `native_decide`.
-
-This file provides that function.  The heart is `jOdd`, a fuel-recursive evaluator for the
-Jacobi symbol `J(a | b)` (`b` odd) using the **gcd-style reciprocity algorithm**: strip powers
-of two (tracking the sign from `b mod 8`) and swap via quadratic reciprocity (sign from the
-residues mod 4).  Every step is a *shrinking* `Nat` operation (`%`, `/ 2`), so no huge
-intermediate integers ever appear — unlike Euler's criterion `a ^ ((p-1)/2) mod p`, whose naive
-`Nat.pow` would build an astronomically large number before reducing.  The recursion is
-structural on the fuel argument (like `popParity` in `ECCompute.F2Invert`), so the kernel
-reduces it via `Nat.rec`, and worked examples close by `rfl`.
+The descent character `λ_{p,θ}` (`ECCompute.Descent.Defs`) is `noncomputable`, as `ECCompute.psi`
+decides `IsSquare` classically. To evaluate `λ` inside a certificate we need a `rfl`-reducible
+replacement. The heart is `jOdd`, a fuel-recursive evaluator for the Jacobi symbol `J(a | b)`
+(`b` odd) by the gcd-style reciprocity algorithm; the fuel recursion reduces in the kernel.
 
 ## Main declarations
 
-* `ECCompute.jOdd`         — fuel-recursive Jacobi evaluator for odd `b`.
-* `ECCompute.jacobiFast`   — the top-level kernel-reducible Jacobi symbol `ℤ → ℕ → ℤ`.
-* `ECCompute.jOdd_eq`      — `jOdd fuel a b = jacobiSym a b` (enough fuel, `b` odd).
-* `ECCompute.jacobiFast_eq` — `jacobiFast a p = jacobiSym a p` (`p` odd positive).
-* `ECCompute.psiCompute`   — kernel-reducible replacement for `psi`.
-* `ECCompute.psiCompute_eq` — `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
-* `ECCompute.lambdaCompute` — kernel-reducible evaluation of `λ` on an affine point.
-* `ECCompute.lambdaCompute_eq` — it agrees with the abstract `lambda`.
+* `ECCompute.jOdd`: fuel-recursive Jacobi evaluator for odd `b`.
+* `ECCompute.jacobiFast`: the top-level kernel-reducible Jacobi symbol `ℤ → ℕ → ℤ`.
+* `ECCompute.jOdd_eq`: `jOdd fuel a b = jacobiSym a b` (enough fuel, `b` odd).
+* `ECCompute.jacobiFast_eq`: `jacobiFast a p = jacobiSym a p` (`p` odd positive).
+* `ECCompute.psiCompute`: kernel-reducible replacement for `psi`.
+* `ECCompute.psiCompute_eq`: `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
+* `ECCompute.lambdaCompute`: kernel-reducible evaluation of `λ` on an affine point.
+* `ECCompute.lambdaCompute_eq`: it agrees with the abstract `lambda`.
 -/
 
 namespace ECCompute
@@ -41,17 +32,13 @@ open scoped Classical
 
 /-! ### The fuel-recursive Jacobi evaluator -/
 
-/-- Fuel-recursive evaluator for the Jacobi symbol `J(a | b)`, valid when `b` is odd.
+/-- Fuel-recursive evaluator for the Jacobi symbol `J(a | b)`, valid when `b` is odd. One
+reciprocity step per fuel unit:
+* `b = 1`: `1`.  `a = 0` (with `b > 1`): `0`.  `a = 1`: `1`.
+* `a` even: `J(a | b) = ±J(a/2 | b)`, sign `-1` when `b % 8 ∈ {3, 5}`.
+* `a` odd (`a ≥ 3`): reciprocity `J(a | b) = ±J(b % a | a)`, sign `-1` when `a ≡ b ≡ 3 (mod 4)`.
 
-Reciprocity algorithm, one step per fuel unit:
-* `b = 1`: value `1`.  `a = 0` (with `b > 1`): value `0`.  `a = 1`: value `1`.
-* `a` even: strip one factor of two, `J(a | b) = ±J(a/2 | b)`, sign `-1` when `b % 8 ∈ {3, 5}`.
-* `a` odd (`a ≥ 3`): quadratic reciprocity `J(a | b) = ±J(b % a | a)`, sign `-1` when both
-  `a ≡ 3` and `b ≡ 3 (mod 4)`.
-
-The first argument (`a`, then `b % a`) strictly decreases at every recursive call, so any
-`fuel > a` suffices; `jacobiFast` supplies `fuel = p`.  Structural recursion on `fuel` makes the
-kernel reduce it by `Nat.rec` using GMP-backed `Nat` arithmetic. -/
+The first argument strictly decreases, so any `fuel > a` suffices (`jacobiFast` uses `fuel = p`). -/
 def jOdd : Nat → Nat → Nat → Int
   | 0, _, _ => 0
   | fuel + 1, a, b =>
@@ -70,8 +57,7 @@ def jacobiFast (a : ℤ) (p : ℕ) : Int :=
 
 /-! ### Correctness: `jOdd` computes the Jacobi symbol -/
 
-/-- **Correctness of `jOdd`.**  For odd `b` and enough fuel, `jOdd` returns the Jacobi symbol.
-Proved by induction on the fuel, mirroring the reciprocity lemmas of mathlib's `jacobiSym`. -/
+/-- For odd `b` and enough fuel, `jOdd` computes the Jacobi symbol. -/
 theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     jOdd fuel a b = jacobiSym (a : ℤ) b := by
   intro fuel
@@ -120,7 +106,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
       rw [hIH, hml, ← hqr]
       split_ifs <;> ring
 
-/-- **Correctness of `jacobiFast`.**  For `p` odd and positive, `jacobiFast a p = J(a | p)`. -/
+/-- For `p` odd and positive, `jacobiFast a p = J(a | p)`. -/
 theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
     jacobiFast a p = jacobiSym a p := by
   have hred : ((a % (p : ℤ)).toNat : ℤ) = a % (p : ℤ) :=
@@ -137,8 +123,8 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
 def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
   if jacobiFast (a.val : ℤ) p = 1 then 0 else 1
 
-/-- **`psiCompute` computes `psi`.**  For `p` an odd prime and `a ≠ 0` in `ZMod p`, the
-kernel-reducible `psiCompute` agrees with the abstract Legendre character `psi`. -/
+/-- For `p` an odd prime and `a ≠ 0`, `psiCompute` agrees with the abstract Legendre character
+`psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
   have hp : p.Prime := Fact.out
@@ -160,12 +146,10 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
 
 /-! ### The derivative does not vanish at a simple root
 
-Under `DescentHyp` the root `θ` of `f` mod `p` is *simple*: `p ∤ Δ` forces `f'(θ) ≠ 0`.  This is
-the Bézout identity `9·disc(f) = -A(θ)·f(θ) - B(θ)·f'(θ)` (`disc(f)` the cubic discriminant, with
-`Δ = 16·disc(f)`), together with `p ∤ 6` (so `9` and `16` are units mod `p`). -/
+Under `DescentHyp` the root `θ` is simple: `p ∤ Δ` forces `f'(θ) ≠ 0`, via the Bézout identity
+`9·disc(f) = -A(θ)·f(θ) - B(θ)·f'(θ)` with `Δ = 16·disc(f)` and `p ∤ 6`. -/
 
-/-- **The derivative is nonzero at the root.**  Under the descent hypotheses (`p ∤ 6Δ`,
-`f(θ) ≡ 0`), the root `θ` is simple, so `f'(θ) ≠ 0`. -/
+/-- Under the descent hypotheses, the root `θ` is simple, so `f'(θ) ≠ 0`. -/
 theorem fderiv_ne_zero (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMod p}
     (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv a₂ a₄ a₆ p θ ≠ 0 := by
   intro hfd
@@ -223,10 +207,8 @@ def lambdaCompute (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMo
   else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiCompute p (fderiv a₂ a₄ a₆ p θ)
        else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
-/-- **`lambdaCompute` computes `lambda`.**  Under the descent hypotheses `DescentHyp` (`p ∤ 6Δ`,
-`f(θ) ≡ 0`), the kernel-reducible `lambdaCompute` agrees with the abstract character `lambda` on
-an affine point `some x y h`.  The tangent branch (`x.num ≡ θ·x.den`) evaluates `psiCompute` at
-the derivative `f'(θ)`, nonzero by `fderiv_ne_zero` since `θ` is a simple root. -/
+/-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
+an affine point. -/
 theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
@@ -249,9 +231,8 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
 /-! ### `Bool`-valued mirror for fast kernel checks
 
 `lambdaComputeBool` is `lambdaCompute` with its `ZMod 2` values replaced by `Bool` (`1 ↦ true`,
-`0 ↦ false`).  Certificate matrix checks then compare `Bool`s, so the kernel never builds a
-`ZMod 2`/`Fin 2` element or runs its decidable equality; `lambdaCompute_eq_bool` reads the `Bool`
-back into `ZMod 2`, recovering the original character value. -/
+`0 ↦ false`), so certificate matrix checks compare `Bool`s; `lambdaCompute_eq_bool` reads the
+result back into `ZMod 2`. -/
 
 /-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
 residues (where `psiCompute = 0`). -/

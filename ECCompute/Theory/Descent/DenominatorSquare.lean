@@ -16,7 +16,7 @@ For the integral Weierstrass curve `E : y² = x³ + a₂x² + a₄x + a₆` over
 `(x, y)`, this file proves there is a natural number `w` with `x.den = w²` and `y.den = w³`,
 so a point is `(u/w², v/w³)` in lowest terms.
 
-This is ticket T1a, used in the additivity of the descent character to drop the `w²` factor
+This is used in the additivity of the descent character to drop the `w²` factor
 from the Legendre symbol, since a square does not change a quadratic residue class.
 
 Clearing denominators in `y² = f(x)` with `f` integral gives `y.num² * x.den³ = N * y.den²`
@@ -54,9 +54,8 @@ private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
   have := congrArg Nat.sqrt this
   rwa [Nat.sqrt_eq', Nat.sqrt_eq'] at this
 
-/-- **The denominator of an affine point is a perfect square.** For the integral curve
-`y² = x³ + a₂x² + a₄x + a₆` and a solution `(x, y)`, there is a natural number `w` with
-`x.den = w²` and `y.den = w³`. -/
+/-- For a solution `(x, y)` of the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is a
+natural number `w` with `x.den = w²` and `y.den = w³`. -/
 theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
   have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
@@ -96,9 +95,8 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     exact Nat.dvd_antisymm d1 d2
   exact exists_sq_cube_of_cube_eq_sq hcube
 
-/-- **The denominator of an affine point is a perfect square** (point form).  For a point
-`.some x y h` on the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is `w` with
-`x.den = w²` and `y.den = w³`. -/
+/-- Point form of `den_isSquare`: for a point `.some x y h` on the integral curve, there is
+`w` with `x.den = w²` and `y.den = w³`. -/
 theorem den_isSquare_of_nonsingular {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 :=

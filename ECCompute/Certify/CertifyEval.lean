@@ -7,16 +7,12 @@ Authors: Bhavik Mehta
 /-!
 # Evaluator-side helpers for the `certify_curve` command
 
-These functions reproduce the value of the descent character and the `𝔽₂` matrix inverse using
-plain `Int`/`Nat`/`Rat` arithmetic, written for the **compiler/interpreter** (fast modular
-exponentiation, no fuel recursion, no `ZMod`).  They are used only by the `certify_curve`
-elaborator to *produce* a certificate's character matrix `matB` and its inverse `matM`; nothing
-here is trusted.  The emitted certificate's `hB` obligation is still kernel-checked against the
-real `ECCompute.lambdaCompute`, and `hinv` against the real `F2Invert.checkInv`, so a bug in these
-helpers can only make the generated proof fail to compile, never certify a false statement.
+These functions reproduce the descent character and the `𝔽₂` matrix inverse using plain
+`Int`/`Nat`/`Rat` arithmetic (fast modular exponentiation), written for the compiler/interpreter.
+The `certify_curve` elaborator uses them to produce a certificate's character matrix `matB` and its
+inverse `matM`.
 
-This module deliberately imports nothing (`ℚ` is the core type `Rat`), so it stays cheap to build
-and does not drag in mathlib.
+This module imports nothing (`ℚ` is the core type `Rat`), so it stays cheap to build.
 -/
 
 namespace ECCompute.CertifyEval

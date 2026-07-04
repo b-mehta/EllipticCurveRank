@@ -17,20 +17,20 @@ import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
-# The descent character: additivity (T1)
+# The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`, using the denominator-is-a-square lemma (T1a,
-`ECCompute.Descent.DenominatorSquare`) and the collinearity identity (T1b,
-`ECCompute.Descent.Collinearity`).
+`ECCompute.Descent.Defs`, using the denominator-is-a-square lemma
+(`ECCompute.Descent.DenominatorSquare`) and the collinearity identity
+(`ECCompute.Descent.Collinearity`).
 
 ## Main declarations
 
-* `ECCompute.psi_mul` — `ψ_p` is multiplicative-to-additive on nonzero elements.
-* `ECCompute.lambda_some_of_den_ne` — reduction of `λ` on an affine point to `ψ_p(X − θ)`.
-* `ECCompute.lambda_map_add` — **the trusted theorem**: `λ` is additive.
-* `ECCompute.lambdaHom`  — `λ` packaged as an `AddMonoidHom`.
-* `ECCompute.lambdaHom_two_nsmul` — `λ` vanishes on `2·E(ℚ)` (follows for free from `ZMod 2`).
+* `ECCompute.psi_mul`: `ψ_p` is multiplicative-to-additive on nonzero elements.
+* `ECCompute.lambda_some_of_den_ne`: reduction of `λ` on an affine point to `ψ_p(X - θ)`.
+* `ECCompute.lambda_map_add`: the trusted theorem, `λ` is additive.
+* `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
+* `ECCompute.lambdaHom_two_nsmul`: `λ` vanishes on `2·E(ℚ)` (follows for free from `ZMod 2`).
 -/
 
 open WeierstrassCurve
@@ -44,20 +44,19 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate
 
 For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
-`w` with `x.den = w²` (T1a).  Then `α = x.num − θ·x.den = w²·(X − θ)`, so `ψ_p(α) = ψ_p(X − θ)`,
+`w` with `x.den = w²`.  Then `α = x.num - θ·x.den = w²·(X - θ)`, so `ψ_p(α) = ψ_p(X - θ)`,
 and the tangent branch `α = 0` is exactly `X = θ`. -/
 
 variable {a₂ a₄ a₆ p}
 
-/-- `α = w² (X − θ)` where `x.den = w²`, hence `α` and `X − θ` differ by a nonzero square. -/
+/-- `α = w² (X - θ)` where `x.den = w²`, hence `α` and `X - θ` differ by a nonzero square. -/
 theorem alpha_eq [Fact p.Prime] {x : ℚ} {θ : ZMod p} {w : ℕ} (hden : x.den = w ^ 2)
     (hd : (x.den : ZMod p) ≠ 0) :
     (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
   have hw : ((w : ZMod p)) ^ 2 = (x.den : ZMod p) := by rw [hden]; push_cast; ring
   rw [num_eq_xbar_mul_den hd, ← hw]; ring
 
-/-- **Reduction of `λ`.**  For a point `some x y h` with `p ∤ x.den`, writing `X = (x : ZMod p)`,
-the descent character is `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X − θ)` otherwise. -/
+/-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate. -/
 theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     lambda a₂ a₄ a₆ p θ (.some x y h)
@@ -76,8 +75,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
       mul_ne_zero (pow_ne_zero 2 hw) (sub_ne_zero.mpr hxt)
     rw [if_neg hne, if_neg hxt, psi_mul_sq hw]
 
-/-- **Reduction of `λ` to `O`.**  When `p ∣ x.den` the point `some x y h` reduces to `O` of
-`E/𝔽ₚ`, and `λ` vanishes on it by definition. -/
+/-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
@@ -94,14 +92,8 @@ theorem lambda_x_indep {θ : ZMod p} {x₁ y₁ x₂ y₂ : ℚ}
     lambda a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = lambda a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- **Additivity of `λ`, good-reduction case.**  When `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
-distinct `x`-coordinates over `ℚ`, all of `x₁, x₂` and the sum's `x`-coordinate reduce (good
-denominators), and the reduced `x`-coordinates `X₁, X₂` are distinct mod `p`, then
-`λ(P + Q) = λ P + λ Q`.  This covers the generic (non-`2`-torsion) case together with the three
-`2`-torsion patches `Xᵢ = θ`: the collinearity square `(X₁ − θ)(X₂ − θ)(X₃ − θ) = (ℓ̄θ + m̄)²`
-(T1b via `reduced_on_curve`/`reduced_addX`) gives additivity of `ψ_p` on the nonzero factors,
-while at a factor `Xᵢ = θ` the identity `f'(θ) = (Xⱼ − θ)(Xₖ − θ)` (`fderiv_eq_prod`) replaces
-that factor by `f'(θ)`, which is nonzero by `fderiv_ne_zero`. -/
+/-- Additivity of `λ` when `P`, `Q` have distinct reduced `x`-coordinates and good denominators
+(including the sum's). Covers the generic case and the three `2`-torsion patches `Xᵢ = θ`. -/
 theorem lambda_map_add_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
@@ -195,12 +187,8 @@ theorem lambda_map_add_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂
     rw [if_neg c3, if_neg c1, if_neg c2]
     exact hzero _ _ _ hpm
 
-/-- **Additivity of `λ`, good doubling case.**  If `P = (x, y)` reduces to a non-`2`-torsion
-point (`Y ≠ 0`) with good denominators — including the doubled `x`-coordinate — then the descent
-character vanishes on `2P`.  This is the doubling analogue of `lambda_map_add_of_good`: the
-collinear triple is `X, X, X₃` with `X₃ = ℓ̄² − a₂ − 2X` for the reduced tangent slope
-`ℓ̄ = f'(X)/(2Y)` (`reduced_doubleX`), so the double-root Vieta relations make
-`(X − θ)²(X₃ − θ)` a square and `ψ_p(X₃ − θ) = 0`. -/
+/-- Additivity of `λ` in the doubling case: if `P` reduces to a non-`2`-torsion point (`Y ≠ 0`)
+with good denominators (including the doubled `x`-coordinate), then `λ` vanishes on `2P`. -/
 theorem lambda_double_of_good [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     {x y : ℚ} (hP : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hy0 : (y : ZMod p) ≠ 0) (hdx : (x.den : ZMod p) ≠ 0)
@@ -320,10 +308,7 @@ noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp ((Point.congr (map_eq_reducedCurve a₂ a₄ a₆ p)).comp (redHom a₂ a₄ a₆ p hΔ))
 
-/-- **The factorisation.**  On each point, `λ_{p,θ}` agrees with the reduction composition
-`εp_finite θ ∘ red_p`.  The three cases mirror the definition of `red_p`: the origin (both `0`),
-`p ∤ x.den` (reduced affine coordinates, via `lambda_some_of_den_ne` and `red_p_of_den_ne`), and
-`p ∣ x.den` (reduces to the origin, via `lambda_some_of_den_zero` and `red_p_of_den_zero`). -/
+/-- On each point, `λ_{p,θ}` agrees with the reduction composition `εp_finite θ ∘ red_p`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ P = redCharHom a₂ a₄ a₆ p h hΔ P := by
@@ -348,10 +333,7 @@ theorem lambda_eq_εp_finite_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a�
   rw [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, redCharHom, AddMonoidHom.comp_apply,
     AddMonoidHom.comp_apply, εpHom_apply, redHom_apply]
 
-/-- **Descent character is additive.**  Under the hypotheses `p ∤ 6Δ` and `f(θ) ≡ 0`, the
-descent character `λ_{p,θ}` is a homomorphism `(E(ℚ), +) → (ZMod 2, +)`.  This is now immediate
-from the factorisation `λ = εp_finite ∘ red_p` (`lambda_eq_εp_red`): both factors are
-homomorphisms, so additivity is `map_add` of their composition `redCharHom`. -/
+/-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
@@ -378,9 +360,7 @@ theorem lambdaHom_apply {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     lambdaHom a₂ a₄ a₆ p h P = lambda a₂ a₄ a₆ p θ P :=
   rfl
 
-/-- **The descent character vanishes on `2·E(ℚ)`.**  Immediate from being a homomorphism
-into `ZMod 2`, where `x + x = 0` for every `x`.  Hence `λ_{p,θ}` factors through
-`E(ℚ)/2E(ℚ)`. -/
+/-- The descent character vanishes on `2·E(ℚ)`, hence factors through `E(ℚ)/2E(ℚ)`. -/
 theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by

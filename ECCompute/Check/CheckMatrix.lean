@@ -10,27 +10,22 @@ import ECCompute.Theory.LambdaCompute
 # Aggregate descent-character matrix check
 
 `checkB` is a single `Bool` that tests every entry of the certificate matrix `matB` against the
-computed descent character `lambdaCompute`, and `checkB_true` recovers the individual entry
-equalities from `checkB … = true`.  This lets the `hB` obligation of
-`ECCompute.rank_ge_of_certificate` be discharged by one aggregate check (closeable by `quickRfl`)
-instead of one `rfl` per matrix entry.
+computed descent character `lambdaCompute`; `checkB_true` recovers the individual entry equalities
+from `checkB … = true`.
 -/
 
 namespace ECCompute
 
-/-- One row of the descent-matrix check.  For the row bitmask `b` (bit `j` is the `(i, j)` entry of
-`matB`) and the `x`-coordinate `x` of point `i`, fold structurally over the labels, consuming `b`
-one bit at a time (`b >>> 1`) so bit `0` of the running mask is the `(i, j)` entry.  No positional
-list access: the kernel peels one label at a time. -/
+/-- One row of the descent-matrix check: for the row bitmask `b` and the `x`-coordinate of point
+`i`, fold over the labels, consuming `b` one bit at a time (`b >>> 1`). -/
 noncomputable def checkBRow (a₂ a₄ a₆ : ℤ) (x : ℚ) : ℕ → List (ℕ × ℤ) → Bool
   | _, [] => true
   | b, l :: ls =>
       (b.testBit 0 == lambdaComputeBool a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) x).and'
         (checkBRow a₂ a₄ a₆ x (b >>> 1) ls)
 
-/-- The aggregate descent-matrix check: fold structurally over the rows, pairing each row bitmask of
-`matB` with its point in `pt` (in lockstep), and check each row with `checkBRow`.  No `allBelow`
-index and no `getD` — the kernel peels one row and one label at a time. -/
+/-- The aggregate descent-matrix check: fold over the rows, pairing each row bitmask of `matB` with
+its point in `pt`, and check each row with `checkBRow`. -/
 noncomputable def checkB (a₂ a₄ a₆ : ℤ) (lab : List (ℕ × ℤ)) : List ℕ → List (ℚ × ℚ) → Bool
   | b :: bs, p :: ps => (checkBRow a₂ a₄ a₆ p.1 b lab).and' (checkB a₂ a₄ a₆ lab bs ps)
   | _, _ => true
@@ -73,10 +68,7 @@ theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
       | zero => exact hrow
       | succ i' => exact ih hrec i' (by simpa using hi) (by simpa using hip)
 
-/-- If the aggregate check passes, every matrix entry equals the computed descent character.  The
-`Bool` equality of `checkB` is read back into `ZMod 2` through `lambdaCompute_eq_bool`.  The point
-and label families are read from the lists by `List.getD`, so the kernel never applies a
-`Fin rho → _` function. -/
+/-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
 theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
     {lab : List (ℕ × ℤ)} {pt : List (ℚ × ℚ)}
     (hBlen : matB.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
