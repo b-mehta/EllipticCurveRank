@@ -55,7 +55,63 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
   · -- The image of `H` under the inverse equivalence is isomorphic to `H`, hence f.g.
     have : Module.Finite ℤ H := hfin
     exact Module.Finite.equiv eq
-  · rw [← eq.finrank_eq]; exact hle
+  · rw [← eq.finrank_eq]
+    exact hle
+
+/-- A descent hypothesis for `curve a₂ a₄ a₆` witnesses that its discriminant is nonzero. -/
+private theorem discr_ne_zero_of_descentHyp {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+    (h : DescentHyp a₂ a₄ a₆ p θ) : (curve a₂ a₄ a₆).Δ ≠ 0 := by
+  intro hΔ
+  exact h.discr (by rw [hΔ]; simp)
+
+/-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
+`B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
+private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho → ℕ × ℤ}
+    (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1))
+    (pt : Fin c.rho → ℚ × ℚ)
+    (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
+    (hB : ∀ i j, F2Invert.toMat c.matB c.rho i j
+        = lambdaCompute c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+    (hBlen : c.matB.length = c.rho) (hMlen : c.matM.length = c.rho)
+    (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
+    (φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2))
+    (hφ : φ = AddMonoidHom.pi (fun j => lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)))
+    (g : Fin c.rho → (curve c.a₂ c.a₄ c.a₆).toAffine.Point)
+    (hg : g = fun i => .some (pt i).1 (pt i).2 (hns i)) :
+    LinearIndependent (ZMod 2) (fun i => φ (g i)) := by
+  have hrow : (fun i => φ (g i)) = (F2Invert.toMat c.matB c.rho).row := by
+    funext i
+    ext j
+    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
+      ← lambdaCompute_eq c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j) (pt i).1 (pt i).2 (hns i)]
+    exact (hB i j).symm
+  rw [hrow]
+  exact Matrix.linearIndependent_rows_of_isUnit
+    (F2Invert.checkInv_isUnit c.rho c.matB c.matM hBlen hMlen hinv)
+
+/-- No nonzero rational `2`-torsion, so the span `H` of the certified points has trivial
+`2`-torsion. -/
+private theorem torsionBy_two_eq_bot {c : Certificate}
+    (htorP : c.torsionPrime ≠ 0)
+    (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false)
+    (H : Submodule ℤ (curve c.a₂ c.a₄ c.a₆).toAffine.Point) :
+    Submodule.torsionBy ℤ H 2 = ⊥ := by
+  rw [eq_bot_iff]
+  intro x hx
+  rw [Submodule.mem_torsionBy_iff] at hx
+  rw [Submodule.mem_bot]
+  have hxE : (x : (curve c.a₂ c.a₄ c.a₆).toAffine.Point) + x = 0 := by
+    have h2 : (2 : ℤ) • (x : (curve c.a₂ c.a₄ c.a₆).toAffine.Point) = 0 := by
+      rw [← Submodule.coe_smul, hx, Submodule.coe_zero]
+    rwa [two_zsmul] at h2
+  refine Subtype.ext ?_
+  refine no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 c.a₂ 0 c.a₄ c.a₆ htorP _
+    rfl rfl rfl rfl rfl ?_ _ hxE
+  have e1 : (0 : ℤ) ^ 2 + 4 * c.a₂ = 4 * c.a₂ := by ring
+  have e2 : 8 * (2 * c.a₄ + 0 * 0) = 16 * c.a₄ := by ring
+  have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * c.a₆) = 64 * c.a₆ := by ring
+  rw [e1, e2, e3]
+  exact htor
 
 /-- The soundness theorem on the short integral model.  Let `c` be a certificate whose curve is the
 short integral model `curve c.a₂ c.a₄ c.a₆` (i.e. `a₁ = a₃ = 0`), and suppose every referee check
@@ -87,11 +143,8 @@ theorem rank_ge_of_certificate (c : Certificate)
     (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false) :
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
-  -- Abbreviations for the curve and its Mordell-Weil group.
-  set W : WeierstrassCurve ℚ := curve c.a₂ c.a₄ c.a₆ with hW
-  set E : Type := W.toAffine.Point
-  -- Each label gives a `Fact` of primality and the descent hypotheses `DescentHyp`.
-  have factP : ∀ j, Fact ((lab j).1).Prime := fun j => ⟨hlabP j⟩
+  set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
+  -- Each label gives the descent hypotheses `DescentHyp`.
   have hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) :=
     fun j => descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 (hlabC j) (hlabP j)
   -- The bundled descent character `φ : E →+ (Fin ρ → ZMod 2)`.
@@ -99,67 +152,27 @@ theorem rank_ge_of_certificate (c : Certificate)
     AddMonoidHom.pi (fun j => lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)) with hφ
   -- Handle `ρ = 0` (empty certificate) separately: the bound `0 ≤ finrank` is trivial.
   rcases Nat.eq_zero_or_pos c.rho with hrho0 | hrhopos
-  · refine ⟨⊥, inferInstance, ?_⟩
-    simp [hrho0]
-  -- With `ρ ≥ 1`, pick a label to extract `Δ ≠ 0` (needed to turn `Equation` into `Nonsingular`).
-  have : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
-  obtain ⟨j₀⟩ := (inferInstance : Nonempty (Fin c.rho))
-  have hΔnum : (curve c.a₂ c.a₄ c.a₆).Δ.num ≠ 0 := by
-    intro h0
-    exact (hyp j₀).discr (by rw [h0]; simp)
-  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun h => hΔnum (by rw [h]; simp)
+  · exact ⟨⊥, inferInstance, by simp [hrho0]⟩
+  -- With `ρ ≥ 1`, pick a label to extract `Δ ≠ 0` (turns `Equation` into `Nonsingular`).
+  obtain ⟨j₀⟩ : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
+  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
   -- Turn each on-curve point into an actual Mordell-Weil group element.
-  have hns : ∀ i, W.toAffine.Nonsingular (pt i).1 (pt i).2 := fun i =>
+  have hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 := fun i =>
     (WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   set g : Fin c.rho → E := fun i => .some (pt i).1 (pt i).2 (hns i) with hg
-  -- Key computation: `φ(Pᵢ)` is the `i`-th row of the certificate matrix `B`.
-  have hrow : (fun i => φ (g i)) = (F2Invert.toMat c.matB c.rho).row := by
-    funext i
-    ext j
-    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
-      ← lambdaCompute_eq c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j) (pt i).1 (pt i).2 (hns i)]
-    exact (hB i j).symm
-  -- `B` is a unit, so its rows are `𝔽₂`-linearly independent.
-  have hunit : IsUnit (F2Invert.toMat c.matB c.rho) :=
-    F2Invert.checkInv_isUnit c.rho c.matB c.matM hBlen hMlen hinv
-  have hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)) := by
-    rw [hrow]
-    exact Matrix.linearIndependent_rows_of_isUnit hunit
-  -- The finitely generated subgroup `H = ⟨P₁, …, P_ρ⟩`.
+  -- The certified points are `𝔽₂`-independent under `φ` (they are the rows of the unit matrix `B`).
+  have hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)) :=
+    linearIndependent_descent hyp pt hns hB hBlen hMlen hinv φ hφ g hg
+  -- The finitely generated subgroup `H = ⟨P₁, …, P_ρ⟩` and the restricted data.
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g) with hH
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  -- The points as elements of `H`, and the character restricted to `H`.
   set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩ with hgH
   set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom with hφH
-  have hindepH : LinearIndependent (ZMod 2) (fun i => φH (gH i)) := hindep
-  -- no nonzero rational `2`-torsion, so `H[2]` is trivial.
-  have htorsion : Submodule.torsionBy ℤ H 2 = ⊥ := by
-    rw [eq_bot_iff]
-    intro x hx
-    rw [Submodule.mem_torsionBy_iff] at hx
-    rw [Submodule.mem_bot]
-    -- `(2 : ℤ) • x = 0` in `H` means the underlying point is `2`-torsion in `E`.
-    have hxE : (x : E) + (x : E) = 0 := by
-      have : ((2 : ℤ) • x : H) = 0 := hx
-      have h2 : (2 : ℤ) • (x : E) = 0 := by
-        rw [← Submodule.coe_smul, this, Submodule.coe_zero]
-      rwa [two_zsmul] at h2
-    have hx0 : (x : E) = 0 :=
-      no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 c.a₂ 0 c.a₄ c.a₆ htorP W
-        (by simp [hW, curve]) (by simp [hW, curve]) (by simp [hW, curve])
-        (by simp [hW, curve]) (by simp [hW, curve])
-        (by
-          have e1 : (0 : ℤ) ^ 2 + 4 * c.a₂ = 4 * c.a₂ := by ring
-          have e2 : 8 * (2 * c.a₄ + 0 * 0) = 16 * c.a₄ := by ring
-          have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * c.a₆) = 64 * c.a₆ := by ring
-          rw [e1, e2, e3]; exact htor)
-        (x : E) hxE
-    exact Subtype.ext hx0
   have htcard : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ 0 := by
-    rw [htorsion, pow_zero]; exact Nat.card_unique
-  -- assemble the deduction.
-  have hbound : c.rho ≤ Module.finrank ℤ H + 0 :=
-    RankDeduction.rank_ge (H := H) gH φH hindepH htcard
+    rw [torsionBy_two_eq_bot htorP htor H, pow_zero]
+    exact Nat.card_unique
+  -- Assemble the deduction: `ρ ≤ finrank H`, and `t = 0`.
+  have hbound : c.rho ≤ Module.finrank ℤ H + 0 := RankDeduction.rank_ge gH φH hindep htcard
   refine ⟨H, hHfin, ?_⟩
   rw [ht, Nat.sub_zero]
   simpa using hbound
