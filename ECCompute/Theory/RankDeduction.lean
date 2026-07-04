@@ -90,7 +90,7 @@ instance instFiniteTorsionBy [Module.Finite ℤ H] :
 `Nat.card (D ⧸ 2D) = Nat.card D[2]`. -/
 lemma natCard_modN_two_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     Nat.card (ModN D 2) = Nat.card (Submodule.torsionBy ℤ D 2) := by
-  set f := LinearMap.lsmul ℤ D 2 with hf
+  set f := LinearMap.lsmul ℤ D 2
   have hquot : Nat.card (D ⧸ LinearMap.ker f) = Nat.card (LinearMap.range f) :=
     Nat.card_congr f.quotKerEquivRange.toEquiv
   have h1 : Nat.card D = Nat.card (D ⧸ LinearMap.ker f) * Nat.card (LinearMap.ker f) :=
