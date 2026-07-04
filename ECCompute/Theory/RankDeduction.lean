@@ -49,9 +49,8 @@ namespace RankDeduction
 /-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
 lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
-  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  have := Fintype.ofFinite V
-  rw [Nat.card_eq_fintype_card, Module.card_eq_pow_finrank (K := ZMod 2), ZMod.card]
+  have := Module.Finite.of_finite (R := ZMod 2) (M := V)
+  rw [Module.natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
 
 variable {H : Type*} [AddCommGroup H]
 
@@ -247,27 +246,14 @@ end Prod
 lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ D = 0 := by
   have : Module.Finite ℤ D := Module.Finite.of_finite
-  have : Nonempty D := ⟨0⟩
-  rw [Module.finrank_eq_zero_iff_isTorsion]
-  intro x
-  refine ⟨⟨(Nat.card D : ℤ), ?_⟩, ?_⟩
-  · rw [mem_nonZeroDivisors_iff_ne_zero, Int.natCast_ne_zero]
-    exact Nat.card_pos.ne'
-  · change (Nat.card D : ℤ) • x = 0
-    rw [natCast_zsmul]
-    exact card_nsmul_eq_zero'
+  rw [Module.finrank_eq_zero_iff_isTorsion, ← AddMonoid.isTorsion_iff_isTorsion_int]
+  exact is_add_torsion_of_finite
 
 /-- A torsion-free module has trivial 2-torsion. -/
 lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
     [NoZeroSMulDivisors ℤ F] : Nat.card (Submodule.torsionBy ℤ F 2) = 1 := by
-  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ := by
-    rw [eq_bot_iff]
-    intro x hx
-    rw [Submodule.mem_torsionBy_iff] at hx
-    rw [Submodule.mem_bot]
-    rcases smul_eq_zero.1 hx with h | h
-    · exact absurd h (by norm_num)
-    · exact h
+  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ :=
+    (isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)
   rw [hbot]
   exact Nat.card_unique
 
