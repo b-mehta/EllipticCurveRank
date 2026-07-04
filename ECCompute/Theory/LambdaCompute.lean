@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.PsiBase
 import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 /-!
@@ -27,8 +27,6 @@ replacement. The heart is `jOdd`, a fuel-recursive evaluator for the Jacobi symb
 -/
 
 namespace ECCompute
-
-open scoped Classical
 
 /-! ### The fuel-recursive Jacobi evaluator -/
 
@@ -62,7 +60,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     jOdd fuel a b = jacobiSym (a : ℤ) b := by
   intro fuel
   induction fuel with
-  | zero => intro a b _ ha; exact absurd ha (Nat.not_lt_zero a)
+  | zero => omega
   | succ fuel ih =>
     intro a b hb ha
     rw [jOdd]
@@ -82,28 +80,19 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     by_cases hae : a % 2 = 0
     · -- even: strip one factor of two
       rw [if_pos hae]
-      have hlt : a / 2 < fuel := by omega
-      have hIH := ih (a / 2) b hb hlt
-      have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by
-        rw [Int.natCast_ediv]; norm_num
-      have hae' : (a : ℤ) % 2 = 0 := by
-        have : ((a % 2 : ℕ) : ℤ) = ((a : ℤ)) % 2 := by rw [Int.natCast_emod]; norm_num
-        rw [hae] at this; simpa using this.symm
-      have he := jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb
-      rw [hIH, hcast, ← he]
+      have hIH := ih (a / 2) b hb (by omega)
+      have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by rw [Int.natCast_ediv]; norm_num
+      have hae' : (a : ℤ) % 2 = 0 := by omega
+      rw [hIH, hcast, ← jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb]
       split_ifs <;> ring
     · -- odd: quadratic reciprocity
       rw [if_neg hae]
       have ha2 : a % 2 = 1 := by omega
-      have hapos : 0 < a := by omega
-      have hmod_lt : b % a < a := Nat.mod_lt _ hapos
-      have hlt : b % a < fuel := by omega
-      have hIH := ih (b % a) a ha2 hlt
-      have hcast : ((b % a : ℕ) : ℤ) = (b : ℤ) % a := by rw [Int.natCast_emod]
+      have hmod_lt : b % a < a := Nat.mod_lt _ (by omega)
+      have hIH := ih (b % a) a ha2 (by omega)
       have hml : jacobiSym ((b % a : ℕ) : ℤ) a = jacobiSym (b : ℤ) a := by
-        rw [hcast, ← jacobiSym.mod_left]
-      have hqr := jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb
-      rw [hIH, hml, ← hqr]
+        rw [Int.natCast_emod, ← jacobiSym.mod_left]
+      rw [hIH, hml, ← jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb]
       split_ifs <;> ring
 
 /-- For `p` odd and positive, `jacobiFast a p = J(a | p)`. -/
@@ -112,8 +101,7 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
   have hred : ((a % (p : ℤ)).toNat : ℤ) = a % (p : ℤ) :=
     Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast hp.ne'))
   have hlt : (a % (p : ℤ)).toNat < p := by
-    have h1 : a % (p : ℤ) < p := Int.emod_lt_of_pos _ (by exact_mod_cast hp)
-    omega
+    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); omega
   rw [jacobiFast, jOdd_eq p _ p hodd hlt, hred, ← jacobiSym.mod_left]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
@@ -127,75 +115,21 @@ def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
 `psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
+  classical
   have hp : p.Prime := Fact.out
-  have hodd : p % 2 = 1 := (hp.eq_two_or_odd).resolve_left hp2
-  have hpos : 0 < p := hp.pos
   -- the natural-number value `a.val` casts back to `a`, and is nonzero mod `p`
   have hval : ((a.val : ℤ) : ZMod p) = a := by
     rw [Int.cast_natCast, ZMod.natCast_zmod_val]
-  have hval0 : ((a.val : ℤ) : ZMod p) ≠ 0 := by rw [hval]; exact ha
   -- `jacobiFast = jacobiSym = legendreSym`
   have hjf : jacobiFast (a.val : ℤ) p = legendreSym p (a.val : ℤ) := by
-    rw [jacobiFast_eq _ _ hpos hodd, jacobiSym.legendreSym.to_jacobiSym]
+    rw [jacobiFast_eq _ _ hp.pos (hp.eq_two_or_odd.resolve_left hp2),
+      jacobiSym.legendreSym.to_jacobiSym]
+  have hiff : legendreSym p (a.val : ℤ) = 1 ↔ IsSquare a := by
+    rw [legendreSym.eq_one_iff p (hval.symm ▸ ha), hval]
   rw [psiCompute, psi, hjf]
   by_cases hsq : IsSquare a
-  · rw [if_pos hsq, if_pos]
-    rw [legendreSym.eq_one_iff p hval0, hval]; exact hsq
-  · rw [if_neg hsq, if_neg]
-    rw [legendreSym.eq_one_iff p hval0, hval]; exact hsq
-
-/-! ### The derivative does not vanish at a simple root
-
-Under `DescentHyp` the root `θ` is simple: `p ∤ Δ` forces `f'(θ) ≠ 0`, via the Bézout identity
-`9·disc(f) = -A(θ)·f(θ) - B(θ)·f'(θ)` with `Δ = 16·disc(f)` and `p ∤ 6`. -/
-
-/-- Under the descent hypotheses, the root `θ` is simple, so `f'(θ) ≠ 0`. -/
-theorem fderiv_ne_zero (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv a₂ a₄ a₆ p θ ≠ 0 := by
-  intro hfd
-  have hp3 : p ≠ 3 := fun hp => h.ne_six (hp ▸ ⟨2, rfl⟩)
-  -- polynomial forms of `f(θ) = 0` and `f'(θ) = 0`
-  have hf : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := h.root
-  have hd : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := hfd
-  -- Bézout: `9 · disc(f)` is a combination of `f(θ)` and `f'(θ)`, hence `0`.  With
-  -- `s = 6a₄ - 2a₂²`, `t = 9a₆ - a₂a₄` and `L = 3sθ + 2a₂s - 3t` the cofactors are `9L` and
-  -- `-(s² + L(3θ + a₂))`.
-  have h9D : (9 : ZMod p) * (18 * (a₂ : ZMod p) * (a₄ : ZMod p) * (a₆ : ZMod p)
-      - 4 * (a₂ : ZMod p) ^ 3 * (a₆ : ZMod p) + (a₂ : ZMod p) ^ 2 * (a₄ : ZMod p) ^ 2
-      - 4 * (a₄ : ZMod p) ^ 3 - 27 * (a₆ : ZMod p) ^ 2) = 0 := by
-    linear_combination
-      (9 * (3 * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) * θ
-          + 2 * (a₂ : ZMod p) * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2)
-          - 3 * (9 * (a₆ : ZMod p) - (a₂ : ZMod p) * (a₄ : ZMod p)))) * hf
-      + (-((6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) ^ 2
-          + (3 * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2) * θ
-            + 2 * (a₂ : ZMod p) * (6 * (a₄ : ZMod p) - 2 * (a₂ : ZMod p) ^ 2)
-            - 3 * (9 * (a₆ : ZMod p) - (a₂ : ZMod p) * (a₄ : ZMod p)))
-            * (3 * θ + (a₂ : ZMod p)))) * hd
-  -- `9 ≠ 0` mod `p` (as `p ≠ 3`), so `disc(f) = 0`
-  have : NeZero p := ⟨h.prime.pos.ne'⟩
-  have h3 : (3 : ZMod p) ≠ 0 := by
-    have hnd : ¬ p ∣ 3 :=
-      fun hdvd => hp3 ((Nat.prime_dvd_prime_iff_eq h.prime Nat.prime_three).mp hdvd)
-    simpa using (ZMod.natCast_eq_zero_iff 3 p).not.mpr hnd
-  have h9 : (9 : ZMod p) ≠ 0 := by
-    have : (9 : ZMod p) = 3 * 3 := by norm_num
-    rw [this]; exact mul_ne_zero h3 h3
-  have hDzero := (mul_eq_zero.mp h9D).resolve_left h9
-  -- but `Δ.num = 16 · disc(f)`, which is a unit mod `p`, contradiction
-  have hΔ : (curve a₂ a₄ a₆).Δ.num =
-      16 * (18 * a₂ * a₄ * a₆ - 4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2) := by
-    have : (curve a₂ a₄ a₆).Δ =
-        ((16 * (18 * a₂ * a₄ * a₆ - 4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3
-          - 27 * a₆ ^ 2) : ℤ) : ℚ) := by
-      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-      push_cast; ring
-    rw [this, Rat.num_intCast]
-  apply h.discr
-  rw [hΔ]
-  push_cast
-  linear_combination (16 : ZMod p) * hDzero
+  · rw [if_pos hsq, if_pos (hiff.mpr hsq)]
+  · rw [if_neg hsq, if_neg (hiff.not.mpr hsq)]
 
 /-! ### Kernel-reducible evaluation of `λ` on an affine point -/
 
@@ -215,18 +149,16 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     lambdaCompute a₂ a₄ a₆ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero a₂ a₄ a₆ p hyp
+  have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
       if (x.den : ZMod p) = 0 then 0
       else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
            else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p)) := rfl
   rw [lambdaCompute, hlam]
-  by_cases hd : (x.den : ZMod p) = 0
-  · rw [if_pos hd, if_pos hd]
-  · rw [if_neg hd, if_neg hd]
-    by_cases hα : (x.num : ZMod p) - θ * (x.den : ZMod p) = 0
-    · rw [if_pos hα, if_pos hα, psiCompute_eq p hp2 hfd]
-    · rw [if_neg hα, if_neg hα, psiCompute_eq p hp2 hα]
+  split_ifs with hd hα
+  · rfl
+  · exact psiCompute_eq p hp2 hfd
+  · exact psiCompute_eq p hp2 hα
 
 /-! ### `Bool`-valued mirror for fast kernel checks
 
