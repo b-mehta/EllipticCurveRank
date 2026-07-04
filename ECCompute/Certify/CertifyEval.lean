@@ -8,7 +8,8 @@ Authors: Bhavik Mehta
 # Evaluator-side helpers for the `certify_curve` command
 
 These functions reproduce the descent character and the `𝔽₂` matrix inverse using plain
-`Int`/`Nat`/`Rat` arithmetic (fast modular exponentiation), written for the compiler/interpreter.
+`Int`/`Nat`/`Rat` arithmetic (the Legendre symbol via quadratic reciprocity), written for the
+compiler/interpreter.
 The `certify_curve` elaborator uses them to produce a certificate's character matrix `matB` and its
 inverse `matM`.
 
@@ -17,19 +18,20 @@ This module imports nothing (`ℚ` is the core type `Rat`), so it stays cheap to
 
 namespace ECCompute.CertifyEval
 
-/-- Fast modular exponentiation `b ^ e mod m`, by repeated squaring. -/
-partial def powMod (b e m : Nat) : Nat :=
-  if e == 0 then 1 % m
-  else
-    let h := powMod b (e / 2) m
-    let h2 := (h * h) % m
-    if e % 2 == 0 then h2 else (h2 * b) % m
-
-/-- The Legendre symbol `(a | p)` for an odd prime `p`, by Euler's criterion
-`a ^ ((p-1)/2) mod p ∈ {0, 1, p-1}`.  Returns `0`, `1`, or `-1`. -/
-def legendre (a : Int) (p : Nat) : Int :=
-  let a' := (((a % (p : Int)) + p) % (p : Int)).toNat
-  if a' == 0 then 0 else if powMod a' ((p - 1) / 2) p == 1 then 1 else -1
+/-- The Jacobi symbol `(a | n)` for odd `n`, by quadratic reciprocity.  For prime `n` this is
+the Legendre symbol.  Returns `0`, `1`, or `-1`. -/
+partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
+  let mut a := ((a % (n : Int)) + n).toNat % n
+  let mut n := n
+  let mut acc : Int := 1
+  while a != 0 do
+    while a % 2 == 0 do
+      a := a / 2
+      if n % 8 == 3 || n % 8 == 5 then acc := -acc
+    let t := a; a := n; n := t
+    if a % 4 == 3 && n % 4 == 3 then acc := -acc
+    a := a % n
+  return if n == 1 then acc else 0
 
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
 `xnum / xden`, mirroring `ECCompute.lambdaComputeBool` (`true` = nontrivial).  `a₂ a₄` are the
@@ -40,7 +42,7 @@ def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :
     let α := (xnum - θ * (xden : Int)) % (p : Int)
     -- tangent case `x.num ≡ θ·x.den`: evaluate at the derivative `3θ² + 2a₂θ + a₄`
     let a := if α == 0 then 3 * θ ^ 2 + 2 * a₂ * θ + a₄ else α
-    legendre a p != 1
+    jacobi a p != 1
 
 /-- The descent-character matrix `matB` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `labs[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
