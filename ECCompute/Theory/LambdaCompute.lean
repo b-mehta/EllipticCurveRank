@@ -60,7 +60,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     jOdd fuel a b = jacobiSym (a : ℤ) b := by
   intro fuel
   induction fuel with
-  | zero => intro a b _ ha; exact absurd ha (Nat.not_lt_zero a)
+  | zero => omega
   | succ fuel ih =>
     intro a b hb ha
     rw [jOdd]
@@ -80,28 +80,19 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     by_cases hae : a % 2 = 0
     · -- even: strip one factor of two
       rw [if_pos hae]
-      have hlt : a / 2 < fuel := by omega
-      have hIH := ih (a / 2) b hb hlt
-      have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by
-        rw [Int.natCast_ediv]; norm_num
-      have hae' : (a : ℤ) % 2 = 0 := by
-        have : ((a % 2 : ℕ) : ℤ) = ((a : ℤ)) % 2 := by rw [Int.natCast_emod]; norm_num
-        rw [hae] at this; simpa using this.symm
-      have he := jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb
-      rw [hIH, hcast, ← he]
+      have hIH := ih (a / 2) b hb (by omega)
+      have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by rw [Int.natCast_ediv]; norm_num
+      have hae' : (a : ℤ) % 2 = 0 := by omega
+      rw [hIH, hcast, ← jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb]
       split_ifs <;> ring
     · -- odd: quadratic reciprocity
       rw [if_neg hae]
       have ha2 : a % 2 = 1 := by omega
-      have hapos : 0 < a := by omega
-      have hmod_lt : b % a < a := Nat.mod_lt _ hapos
-      have hlt : b % a < fuel := by omega
-      have hIH := ih (b % a) a ha2 hlt
-      have hcast : ((b % a : ℕ) : ℤ) = (b : ℤ) % a := by rw [Int.natCast_emod]
+      have hmod_lt : b % a < a := Nat.mod_lt _ (by omega)
+      have hIH := ih (b % a) a ha2 (by omega)
       have hml : jacobiSym ((b % a : ℕ) : ℤ) a = jacobiSym (b : ℤ) a := by
-        rw [hcast, ← jacobiSym.mod_left]
-      have hqr := jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb
-      rw [hIH, hml, ← hqr]
+        rw [Int.natCast_emod, ← jacobiSym.mod_left]
+      rw [hIH, hml, ← jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb]
       split_ifs <;> ring
 
 /-- For `p` odd and positive, `jacobiFast a p = J(a | p)`. -/
@@ -110,8 +101,7 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
   have hred : ((a % (p : ℤ)).toNat : ℤ) = a % (p : ℤ) :=
     Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast hp.ne'))
   have hlt : (a % (p : ℤ)).toNat < p := by
-    have h1 : a % (p : ℤ) < p := Int.emod_lt_of_pos _ (by exact_mod_cast hp)
-    omega
+    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); omega
   rw [jacobiFast, jOdd_eq p _ p hodd hlt, hred, ← jacobiSym.mod_left]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
@@ -166,12 +156,10 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
       else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
            else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p)) := rfl
   rw [lambdaCompute, hlam]
-  by_cases hd : (x.den : ZMod p) = 0
-  · rw [if_pos hd, if_pos hd]
-  · rw [if_neg hd, if_neg hd]
-    by_cases hα : (x.num : ZMod p) - θ * (x.den : ZMod p) = 0
-    · rw [if_pos hα, if_pos hα, psiCompute_eq p hp2 hfd]
-    · rw [if_neg hα, if_neg hα, psiCompute_eq p hp2 hα]
+  split_ifs with hd hα
+  · rfl
+  · exact psiCompute_eq p hp2 hfd
+  · exact psiCompute_eq p hp2 hα
 
 /-! ### `Bool`-valued mirror for fast kernel checks
 
