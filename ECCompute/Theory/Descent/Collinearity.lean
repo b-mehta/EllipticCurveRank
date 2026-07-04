@@ -87,15 +87,13 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
     x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧
         x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
+  subst hx₃
   have hQ : x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ - ℓ ^ 2) * (x₁ + x₂) + (a₄ - 2 * ℓ * m) = 0 := by
     have hprod : (x₁ - x₂) *
         (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ - ℓ ^ 2) * (x₁ + x₂) + (a₄ - 2 * ℓ * m)) = 0 := by
       linear_combination h₂ - h₁
-    rcases mul_eq_zero.mp hprod with h | h
-    · exact absurd (sub_eq_zero.mp h) hne
-    · exact h
-  refine ⟨by rw [hx₃]; ring, by rw [hx₃]; linear_combination -hQ,
-    by rw [hx₃]; linear_combination -h₁ - x₁ * hQ⟩
+    exact (mul_eq_zero.mp hprod).resolve_left (sub_ne_zero.mpr hne)
+  exact ⟨by ring, by linear_combination -hQ, by linear_combination -h₁ - x₁ * hQ⟩
 
 /-- Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on `E` with `x₁ ≠ x₂` and the group-law third
 coordinate `x₃ = ℓ² - a₂ - x₁ - x₂` factor the cubic-minus-line-squared as
