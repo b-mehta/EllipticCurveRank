@@ -49,9 +49,8 @@ namespace RankDeduction
 /-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
 lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
-  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  have := Fintype.ofFinite V
-  rw [Nat.card_eq_fintype_card, Module.card_eq_pow_finrank (K := ZMod 2), ZMod.card]
+  have := Module.Finite.of_finite (R := ZMod 2) (M := V)
+  rw [Module.natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
 
 variable {H : Type*} [AddCommGroup H]
 
@@ -62,12 +61,7 @@ local notation3 M "⟦2⟧" => Submodule.torsionBy ℤ M 2
 
 /-- The 2-torsion `H[2]` is the kernel of the doubling map `x ↦ 2 • x`. -/
 lemma torsionBy_two_eq_ker :
-    (Submodule.torsionBy ℤ H 2) = LinearMap.ker (LinearMap.lsmul ℤ H 2) := by
-  ext x
-  simp [Submodule.mem_torsionBy_iff, LinearMap.lsmul_apply, LinearMap.mem_ker]
-
-/-- `ModN H 2` is by definition the quotient by the range of the doubling map. -/
-lemma modN_two_def : ModN H 2 = (H ⧸ LinearMap.range (LinearMap.lsmul ℤ H 2)) := rfl
+    (Submodule.torsionBy ℤ H 2) = LinearMap.ker (LinearMap.lsmul ℤ H 2) := rfl
 
 /-! ### Finiteness of `H ⧸ 2H` -/
 
@@ -79,17 +73,16 @@ lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
 
 instance instFiniteModN [Module.Finite ℤ H] : Finite (ModN H 2) := by
   have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
-  refine Module.finite_of_fg_torsion (ModN H 2) (fun x => ⟨⟨2, ?_⟩, two_zsmul_modN x⟩)
-  rw [mem_nonZeroDivisors_iff_ne_zero]; norm_num
+  exact Module.finite_of_fg_torsion (ModN H 2)
+    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
 
 instance instFiniteDimModN [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
 
 instance instFiniteTorsionBy [Module.Finite ℤ H] :
-    Finite (Submodule.torsionBy ℤ H 2) := by
-  refine Module.finite_of_fg_torsion _ (fun x => ⟨⟨2, ?_⟩, ?_⟩)
-  · rw [mem_nonZeroDivisors_iff_ne_zero]; norm_num
-  · exact Submodule.smul_torsionBy 2 x
+    Finite (Submodule.torsionBy ℤ H 2) :=
+  Module.finite_of_fg_torsion _
+    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
 
 /-! ### The cardinality identity for finite groups -/
 
@@ -97,7 +90,7 @@ instance instFiniteTorsionBy [Module.Finite ℤ H] :
 `Nat.card (D ⧸ 2D) = Nat.card D[2]`. -/
 lemma natCard_modN_two_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     Nat.card (ModN D 2) = Nat.card (Submodule.torsionBy ℤ D 2) := by
-  set f := LinearMap.lsmul ℤ D 2 with hf
+  set f := LinearMap.lsmul ℤ D 2
   have hquot : Nat.card (D ⧸ LinearMap.ker f) = Nat.card (LinearMap.range f) :=
     Nat.card_congr f.quotKerEquivRange.toEquiv
   have h1 : Nat.card D = Nat.card (D ⧸ LinearMap.ker f) * Nat.card (LinearMap.ker f) :=
@@ -118,13 +111,12 @@ lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
     (LinearMap.range (LinearMap.lsmul ℤ H 2)).map (e : H →ₗ[ℤ] K) =
       LinearMap.range (LinearMap.lsmul ℤ K 2) := by
   ext z
-  simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply,
-    LinearEquiv.coe_coe]
+  simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply, LinearEquiv.coe_coe]
   constructor
   · rintro ⟨_, ⟨y, rfl⟩, rfl⟩
     exact ⟨e y, by rw [map_smul]⟩
   · rintro ⟨w, rfl⟩
-    exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul]; simp⟩
+    exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
 
 /-- A linear equivalence carries 2-torsion to 2-torsion. -/
 lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
@@ -136,8 +128,7 @@ lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
     rw [← map_smul, hy, map_zero]
   · intro hz
     refine ⟨e.symm z, ?_, by simp⟩
-    have : e.symm ((2 : ℤ) • z) = 0 := by rw [hz, map_zero]
-    rwa [map_smul] at this
+    rw [← map_smul, hz, map_zero]
 
 /-- `Nat.card (H ⧸ 2H)` is invariant under linear equivalences. -/
 lemma natCard_modN_two_congr (e : H ≃ₗ[ℤ] K) :
@@ -168,32 +159,22 @@ def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
       (P.liftQ ((P.prod Q).mkQ.comp (LinearMap.inl R M N)) ?_)
       (Q.liftQ ((P.prod Q).mkQ.comp (LinearMap.inr R M N)) ?_)) ?_ ?_
   · intro z hz
-    rw [Submodule.mem_prod] at hz
-    rw [LinearMap.mem_ker, LinearMap.prodMap_apply, Prod.mk_eq_zero, Submodule.mkQ_apply,
-      Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero, Submodule.Quotient.mk_eq_zero]
-    exact hz
+    simpa [LinearMap.mem_ker, Prod.mk_eq_zero, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
+      using hz
   · intro x hx
-    rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearMap.inl_apply, Submodule.mkQ_apply,
-      Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
-    exact ⟨hx, Q.zero_mem⟩
+    simp [LinearMap.mem_ker, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod, hx]
   · intro y hy
-    rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearMap.inr_apply, Submodule.mkQ_apply,
-      Submodule.Quotient.mk_eq_zero, Submodule.mem_prod]
-    exact ⟨P.zero_mem, hy⟩
+    simp [LinearMap.mem_ker, Submodule.Quotient.mk_eq_zero, Submodule.mem_prod, hy]
   · apply LinearMap.ext
     rintro ⟨a, b⟩
     induction a using Submodule.Quotient.induction_on with | H x =>
     induction b using Submodule.Quotient.induction_on with | H y =>
-    simp only [LinearMap.comp_apply, LinearMap.coprod_apply, Submodule.liftQ_apply,
-      LinearMap.inl_apply, LinearMap.inr_apply, Submodule.mkQ_apply, LinearMap.prodMap_apply,
-      LinearMap.id_coe, id_eq, ← Submodule.Quotient.mk_add, Prod.mk_add_mk, add_zero, zero_add]
+    simp [← Submodule.Quotient.mk_add]
   · apply LinearMap.ext
     intro z
     induction z using Submodule.Quotient.induction_on with | H xy =>
     obtain ⟨x, y⟩ := xy
-    simp only [LinearMap.comp_apply, LinearMap.coprod_apply, Submodule.liftQ_apply,
-      LinearMap.inl_apply, LinearMap.inr_apply, Submodule.mkQ_apply, LinearMap.prodMap_apply,
-      LinearMap.id_coe, id_eq, ← Submodule.Quotient.mk_add, Prod.mk_add_mk, add_zero, zero_add]
+    simp [← Submodule.Quotient.mk_add]
 
 end ProdQuot
 
@@ -247,27 +228,14 @@ end Prod
 lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ D = 0 := by
   have : Module.Finite ℤ D := Module.Finite.of_finite
-  have : Nonempty D := ⟨0⟩
-  rw [Module.finrank_eq_zero_iff_isTorsion]
-  intro x
-  refine ⟨⟨(Nat.card D : ℤ), ?_⟩, ?_⟩
-  · rw [mem_nonZeroDivisors_iff_ne_zero, Int.natCast_ne_zero]
-    exact Nat.card_pos.ne'
-  · change (Nat.card D : ℤ) • x = 0
-    rw [natCast_zsmul]
-    exact card_nsmul_eq_zero'
+  rw [Module.finrank_eq_zero_iff_isTorsion, ← AddMonoid.isTorsion_iff_isTorsion_int]
+  exact is_add_torsion_of_finite
 
 /-- A torsion-free module has trivial 2-torsion. -/
 lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
     [NoZeroSMulDivisors ℤ F] : Nat.card (Submodule.torsionBy ℤ F 2) = 1 := by
-  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ := by
-    rw [eq_bot_iff]
-    intro x hx
-    rw [Submodule.mem_torsionBy_iff] at hx
-    rw [Submodule.mem_bot]
-    rcases smul_eq_zero.1 hx with h | h
-    · exact absurd h (by norm_num)
-    · exact h
+  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ :=
+    (isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)
   rw [hbot]
   exact Nat.card_unique
 
@@ -275,16 +243,12 @@ lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
 lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
     (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ (F × D) = finrank ℤ F := by
-  have hsurj : Function.Surjective (LinearMap.fst ℤ F D) := fun a => ⟨(a, 0), rfl⟩
   have hkerD : finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
-    have hinj : Function.Injective (LinearMap.inr ℤ F D) := fun a b h => by simpa using h
-    have hrange :
-        LinearMap.range (LinearMap.inr ℤ F D) = LinearMap.ker (LinearMap.fst ℤ F D) := by
-      ext ⟨a, b⟩; simp [LinearMap.mem_ker, LinearMap.mem_range, eq_comm]
-    rw [← hrange, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D) hinj).finrank_eq,
-      finrank_int_zero_of_finite]
+    rw [LinearMap.ker_fst, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)
+      LinearMap.inr_injective).finrank_eq, finrank_int_zero_of_finite]
   have key := Submodule.finrank_quotient_add_finrank (LinearMap.ker (LinearMap.fst ℤ F D))
-  rw [hkerD, add_zero, (LinearMap.quotKerEquivOfSurjective _ hsurj).finrank_eq] at key
+  rw [hkerD, add_zero,
+    (LinearMap.quotKerEquivOfSurjective _ LinearMap.fst_surjective).finrank_eq] at key
   exact key.symm
 
 /-- The identity for a free-times-finite decomposition. -/
@@ -300,7 +264,7 @@ lemma natCard_modN_two_of_free_prod_finite
 theorem natCard_modN_two [Module.Finite ℤ H] :
     Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
   obtain ⟨n, ι, fι, p, hp, ee, ⟨iso⟩⟩ := Module.equiv_free_prod_directSum ℤ H
-  set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i) with hDdef
+  set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i)
   have : ∀ i, NeZero (p i ^ ee i) := fun i => ⟨pow_ne_zero _ (hp i).ne_zero⟩
   have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i =>
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
@@ -309,7 +273,8 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i => Fintype.ofFinite _
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
-    rw [iso.finrank_eq]; exact finrank_prod_finite _ _
+    rw [iso.finrank_eq]
+    exact finrank_prod_finite _ _
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
@@ -345,11 +310,10 @@ theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     ρ ≤ finrank (ZMod 2) (ModN H 2) := by
   have hφ : ∀ h, (2 : ℕ) • φ h = 0 := fun h => by
     rw [← Nat.cast_smul_eq_nsmul (ZMod 2), ZMod.natCast_self, zero_smul]
-  set ψ : ModN H 2 →ₗ[ZMod 2] (Fin ρ → ZMod 2) := ModN.liftEquiv'.symm ⟨φ, hφ⟩ with hψdef
+  set ψ : ModN H 2 →ₗ[ZMod 2] (Fin ρ → ZMod 2) := ModN.liftEquiv'.symm ⟨φ, hφ⟩
   have hψ : ∀ x, ψ (ModN.mkQ 2 x) = φ x := fun x => rfl
-  have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) := by
-    apply LinearIndependent.of_comp ψ
-    simpa only [Function.comp_def, hψ] using hindep
+  have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) :=
+    LinearIndependent.of_comp ψ (by simpa only [Function.comp_def, hψ] using hindep)
   simpa using hmk.fintype_card_le_finrank
 
 /-- If `ρ` group elements have `𝔽₂`-linearly independent images under a descent-character tuple
