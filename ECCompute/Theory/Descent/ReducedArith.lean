@@ -161,8 +161,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   rw [Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hdx3 (by simp)) hdx1) hdx2,
       Rat.cast_add_of_ne_zero (den_add_ne_zero hdx3 (by simp)) hdx1,
       Rat.cast_add_of_ne_zero hdx3 (by simp)] at hcast
-  rw [Rat.cast_intCast] at hcast
-  exact hcast
+  rwa [Rat.cast_intCast] at hcast
 
 /-- Casting the derivative polynomial `f'(x) = 3x² + 2a₂x + a₄` commutes with reduction when
 `p ∤ x.den`.  Used by `reduced_doubleX`. -/
@@ -195,14 +194,12 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x x y y with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
+  have hnegY : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
+    simp [WeierstrassCurve.Affine.negY, curve]
   have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-    rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
-      simp [WeierstrassCurve.Affine.negY, curve]]
-    intro h; apply hy0; linarith
+    rw [hnegY]; intro h; apply hy0; linarith
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne,
-        show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
-          simp [WeierstrassCurve.Affine.negY, curve]]
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hnegY]
     simp only [curve]; field_simp; ring
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
@@ -235,15 +232,14 @@ theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 :
         ((curve a₂ a₄ a₆).toAffine.slope x x y y)).den : ZMod p) ≠ 0 := by
   have hslopeval : (curve a₂ a₄ a₆).toAffine.slope x x y y
       = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) / (2 * y) := by
+    have hnegY : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
+      simp [WeierstrassCurve.Affine.negY, curve]
     have hyne : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-      rw [show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
-        simp [WeierstrassCurve.Affine.negY, curve]]
-      intro hh; apply hyℚ; linarith
-    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne,
-        show (curve a₂ a₄ a₆).toAffine.negY x y = -y by
-          simp [WeierstrassCurve.Affine.negY, curve]]
+      rw [hnegY]; intro hh; apply hyℚ; linarith
+    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hnegY]
     simp only [curve]
-    rw [show y - -y = 2 * y by ring]; congr 1; ring
+    have hsub : y - -y = 2 * y := by ring
+    rw [hsub]; congr 1; ring
   have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := by
     rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hdx
   have hdnum : ((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=

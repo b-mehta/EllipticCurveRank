@@ -68,12 +68,10 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨⟨h6, hΔ⟩, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rw [bne_iff_ne, ne_eq, ← Nat.dvd_iff_mod_eq_zero] at h6
-    exact h6
+    rwa [bne_iff_ne, ne_eq, ← Nat.dvd_iff_mod_eq_zero] at h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    rw [bne_iff_ne, ne_eq, ← Int.dvd_iff_emod_eq_zero] at hΔ
-    exact hΔ
+    rwa [bne_iff_ne, ne_eq, ← Int.dvd_iff_emod_eq_zero] at hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     rw [beq_iff_eq, ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
     rw [fval]
@@ -109,7 +107,6 @@ noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels = true) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
-  rw [checkLabels, allList_eq_true] at h
-  exact h
+  rwa [checkLabels, allList_eq_true] at h
 
 end ECCompute

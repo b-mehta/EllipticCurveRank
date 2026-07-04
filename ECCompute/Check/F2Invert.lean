@@ -56,8 +56,9 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
   | succ f ih =>
     change ((a.land 1).beq 0).rec (popParityK f (a.div 2)).not' (popParityK f (a.div 2))
         = Bool.xor (a.testBit 0) (popParity f (a / 2))
-    rw [ih, Bool.not'_eq_not, Nat.testBit_zero, show a.div 2 = a / 2 from rfl,
-      show a.land 1 = a % 2 from Nat.and_one_is_mod a]
+    have hdiv : a.div 2 = a / 2 := rfl
+    have hland : a.land 1 = a % 2 := Nat.and_one_is_mod a
+    rw [ih, Bool.not'_eq_not, Nat.testBit_zero, hdiv, hland]
     rcases Nat.mod_two_eq_zero_or_one a with h | h <;> rw [h] <;>
       cases popParity f (a / 2) <;> rfl
 
