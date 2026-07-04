@@ -244,11 +244,8 @@ lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
     (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ (F × D) = finrank ℤ F := by
   have hkerD : finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
-    have hrange :
-        LinearMap.range (LinearMap.inr ℤ F D) = LinearMap.ker (LinearMap.fst ℤ F D) := by
-      ext ⟨a, b⟩; simp [LinearMap.mem_ker, LinearMap.mem_range, eq_comm]
-    rw [← hrange, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)
-      (LinearMap.inr_injective)).finrank_eq, finrank_int_zero_of_finite]
+    rw [LinearMap.ker_fst, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)
+      LinearMap.inr_injective).finrank_eq, finrank_int_zero_of_finite]
   have key := Submodule.finrank_quotient_add_finrank (LinearMap.ker (LinearMap.fst ℤ F D))
   rw [hkerD, add_zero,
     (LinearMap.quotKerEquivOfSurjective _ LinearMap.fst_surjective).finrank_eq] at key
