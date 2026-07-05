@@ -207,9 +207,18 @@ def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     scaleEquiv (W := shortModel a₁ a₂ a₃ a₄ a₆) (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       ⟨two_ne_zero,
         by simp only [intShortModel, curve, shortModel_a₁, mul_zero],
-        by simp only [intShortModel, curve, intShortA₂, shortModel_a₂]; push_cast; ring,
+        by
+          simp only [intShortModel, curve, intShortA₂, shortModel_a₂]
+          push_cast
+          ring,
         by simp only [intShortModel, curve, shortModel_a₃, mul_zero],
-        by simp only [intShortModel, curve, intShortA₄, shortModel_a₄]; push_cast; ring,
-        by simp only [intShortModel, curve, intShortA₆, shortModel_a₆]; push_cast; ring⟩
+        by
+          simp only [intShortModel, curve, intShortA₄, shortModel_a₄]
+          push_cast
+          ring,
+        by
+          simp only [intShortModel, curve, intShortA₆, shortModel_a₆]
+          push_cast
+          ring⟩
 
 end ECCompute.ModelChange

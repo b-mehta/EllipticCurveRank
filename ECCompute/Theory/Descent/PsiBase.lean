@@ -118,7 +118,8 @@ theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a�
             + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
       simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
         WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-      push_cast; ring
+      push_cast
+      ring
     rw [hval, Rat.num_intCast]
   intro hfd
   apply h.discr

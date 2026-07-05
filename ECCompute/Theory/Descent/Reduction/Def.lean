@@ -36,7 +36,9 @@ variable {x y : ℚ} {w : ℕ}
 private theorem Trep_map_zero :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
   simp only [Function.comp_apply, Trep, Matrix.cons_val_zero]
-  rw [eq_intCast]; push_cast; ring
+  rw [eq_intCast]
+  push_cast
+  ring
 
 private theorem Trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 = (y.num : ZMod p) := by
@@ -45,7 +47,9 @@ private theorem Trep_map_one :
 private theorem Trep_map_two :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = (w : ZMod p) ^ 3 := by
   simp only [Function.comp_apply, Trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
-  rw [eq_intCast]; push_cast; ring
+  rw [eq_intCast]
+  push_cast
+  ring
 
 private theorem Trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2

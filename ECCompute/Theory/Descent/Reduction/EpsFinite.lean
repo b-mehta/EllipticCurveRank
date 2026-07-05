@@ -193,7 +193,8 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
       fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
         (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
         hθroot c3
-    rw [hfd]; exact psi_of_isSquare ⟨x - θ, by ring⟩
+    rw [hfd]
+    exact psi_of_isSquare ⟨x - θ, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
     have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
@@ -227,7 +228,8 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     have hsub : y - -y = 2 * y := by ring
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp only [reducedCurve]
-    rw [div_mul_cancel₀ _ h2y]; ring
+    rw [div_mul_cancel₀ _ h2y]
+    ring
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by rw [hmb]; ring
   have hpt : (ℓ * x + m) ^ 2

@@ -207,7 +207,9 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
-    simp only [curve]; field_simp; ring
+    simp only [curve]
+    field_simp
+    ring
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
   have REL : (x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2
@@ -223,7 +225,8 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
         Rat.cast_add_of_ne_zero (den_add_ne_zero hdx3 (by simp)) (den_mul_ne_zero (by simp) hdx),
         Rat.cast_add_of_ne_zero hdx3 (by simp),
         Rat.cast_mul_of_ne_zero (by simp) hdx, Rat.cast_intCast]
-    push_cast; ring
+    push_cast
+    ring
   have hR : (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 : ℚ) : ZMod p)
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
     rw [Rat.cast_pow, cast_fderivPoly hdx]
@@ -267,6 +270,8 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := by
     intro h0; apply hdx; rw [hxw]; push_cast; rw [h0]; ring
-  rw [hyw]; push_cast; exact pow_ne_zero 3 hw
+  rw [hyw]
+  push_cast
+  exact pow_ne_zero 3 hw
 
 end ECCompute

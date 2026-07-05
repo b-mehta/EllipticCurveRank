@@ -141,7 +141,8 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
       rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq,
         WeierstrassCurve.map_Δ, eq_intCast]
-    rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ, ← hval]; exact h.discr
+    rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ, ← hval]
+    exact h.discr
   simp only [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/

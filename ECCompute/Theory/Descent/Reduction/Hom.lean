@@ -187,7 +187,8 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
       exact Affine.Point.some_ne_zero _ hTℚ
     have hTz' : T 2 = 0 := by
       have h2 : ((Int.castRingHom ℚ) ∘ T) 2 = (T 2 : ℚ) := by simp [Function.comp_apply]
-      rw [h2] at hTz; exact_mod_cast hTz
+      rw [h2] at hTz
+      exact_mod_cast hTz
     have hfTz : ((Int.castRingHom (ZMod p)) ∘ T) 2 = 0 := by
       simp [Function.comp_apply, hTz']
     exact Setoid.symm (Projective.equiv_zero_of_Z_eq_zero hnsp hfTz)
@@ -410,13 +411,17 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
         < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
       have hle := padicValInt_mono p (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
-      rw [hK2] at hle; omega
+      rw [hK2] at hle
+      omega
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by linear_combination he
       rw [heq, padicValRat.neg] at hlt
       exact lt_irrefl _ hlt
     refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
-    intro he; apply hqrne; rw [← hsplit]; exact_mod_cast he
+    intro he
+    apply hqrne
+    rw [← hsplit]
+    exact_mod_cast he
 
 /-- Coordinate data for a kernel point.  If `(x, y)` satisfies the curve equation and reduces to
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
@@ -472,7 +477,8 @@ private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂
     (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
     A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h => hne <| by
   have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
-  push_cast at h0; rw [hA, hC] at h0
+  push_cast at h0
+  rw [hA, hC] at h0
   have hEG : (E : ℚ) ^ 2 * (G : ℚ) ^ 2 ≠ 0 := mul_ne_zero (pow_ne_zero 2 hEQ) (pow_ne_zero 2 hGQ)
   have hxx : x₁ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) = x₂ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) := by
     linear_combination h0
@@ -491,7 +497,8 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
-      pow_two, padicValInt.mul hK0 hK0]; ring
+      pow_two, padicValInt.mul hK0 hK0]
+    ring
   have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
     exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
@@ -499,7 +506,8 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   have hx3neg : padicValRat p x₃ < 0 := by
     rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
-    push_cast; omega
+    push_cast
+    omega
   have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; omega
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
@@ -516,7 +524,9 @@ private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C
     x₃ * ((A * C * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ)
       = (((A * D * E - B * C * G) ^ 2
         - a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ) := by
-  rw [haddX]; push_cast; rw [hA, hB, hC, hD]
+  rw [haddX]
+  push_cast
+  rw [hA, hB, hC, hD]
   linear_combination
     ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₁ * x₂ * (ℓ * x₁ - ℓ * x₂ + y₁ - y₂))) * hℓ
       + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
@@ -663,8 +673,13 @@ private theorem red_p_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).
     red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁
       (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1
       (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.2
-      (by intro h0; apply hd1
-          rw [(den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1]; push_cast; rw [h0]; ring)
+      (by
+        intro h0
+        apply hd1
+        rw [(den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1]
+        push_cast
+        rw [h0]
+        ring)
   rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
   exact hns.2.elim (fun hfd_ne => (Ne.symm hfd_ne) hfd) (fun hyne2 => hyne2 hYeq)
@@ -798,7 +813,8 @@ private theorem red_p_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := by
       simp [WeierstrassCurve.Affine.negY, curve]
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
-    rw [reduced_negY]; linear_combination hcast + hYbar
+    rw [reduced_negY]
+    linear_combination hcast + hYbar
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
 /-- Additivity of `red_p` in the tangent-mod-`p` configuration (S4): when two affine points
