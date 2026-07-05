@@ -54,8 +54,7 @@ theorem prod_sub_theta_eq_lineSq
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
-  have key := cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ θ
-  linear_combination key - hθ
+  grind [cubic_sub_lineSq_eq_prod]
 
 /-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
 slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
@@ -68,8 +67,7 @@ theorem vieta_of_double_root
     x₁ + x₁ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₁ + x₁ * x₃ + x₁ * x₃ = a₄ - 2 * ℓ * m ∧
         x₁ * x₁ * x₃ = m ^ 2 - a₆ :=
-  ⟨by linear_combination hx₃, by linear_combination 2 * x₁ * hx₃ - htan,
-    by linear_combination x₁ ^ 2 * hx₃ - hpt - x₁ * htan⟩
+  by grind
 
 end CommRing
 
@@ -87,13 +85,7 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
     x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧
         x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
-  subst hx₃
-  have hQ : x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ - ℓ ^ 2) * (x₁ + x₂) + (a₄ - 2 * ℓ * m) = 0 := by
-    have hprod : (x₁ - x₂) *
-        (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ - ℓ ^ 2) * (x₁ + x₂) + (a₄ - 2 * ℓ * m)) = 0 := by
-      linear_combination h₂ - h₁
-    exact (mul_eq_zero.mp hprod).resolve_left (sub_ne_zero.mpr hne)
-  exact ⟨by ring, by linear_combination -hQ, by linear_combination -h₁ - x₁ * hQ⟩
+  grind
 
 /-- Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on `E` with `x₁ ≠ x₂` and the group-law third
 coordinate `x₃ = ℓ² - a₂ - x₁ - x₂` factor the cubic-minus-line-squared as
@@ -104,8 +96,7 @@ theorem cubic_sub_lineSq_eq_prod_of_roots (hne : x₁ ≠ x₂)
     (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆) (x : F) :
     x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2
       = (x - x₁) * (x - x₂) * (x - x₃) := by
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hne hx₃ h₁ h₂
-  exact cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ x
+  grind [vieta_of_roots, cubic_sub_lineSq_eq_prod]
 
 /-- From two points on `E` and the line (distinct `x`), together with `f(θ) = 0`, the third
 value `x₃ = ℓ² - a₂ - x₁ - x₂` gives `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
@@ -115,8 +106,7 @@ theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
     (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆)
     (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hne hx₃ h₁ h₂
-  exact prod_sub_theta_eq_lineSq a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ hσ₁ hσ₂ hσ₃ hθ
+  grind [vieta_of_roots, prod_sub_theta_eq_lineSq]
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`.  Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
@@ -127,13 +117,7 @@ theorem fderiv_eq_prod
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) (h1 : x₁ = θ) :
     3 * θ ^ 2 + 2 * a₂ * θ + a₄ = (x₂ - θ) * (x₃ - θ) := by
-  have hlm : ℓ * θ + m = 0 := by
-    have hg := cubic_sub_lineSq_eq_prod a₂ a₄ a₆ ℓ m x₁ x₂ x₃ hσ₁ hσ₂ hσ₃ θ
-    rw [h1] at hg
-    have h0 : (ℓ * θ + m) ^ 2 = 0 := by linear_combination hθ - hg
-    exact pow_eq_zero_iff (by norm_num) |>.mp h0
-  subst h1
-  linear_combination 2 * x₁ * hσ₁ - hσ₂ + 2 * ℓ * hlm
+  grind [cubic_sub_lineSq_eq_prod]
 
 end Field
 
