@@ -91,63 +91,78 @@ private def labelStx (p : Nat) (θ : Int) : MetaM Term := do
 syntax (name := certifyCurve) "certify_curve" " torsion " term:max " points " str
   " labels " str : tactic
 
+/-- Read `HasRankGE (toCurveQ a₁…a₆) ρ` off `goal`: rank `ρ` and the five coefficient `Expr`s. -/
+private def readGoal (goal : MVarId) : MetaM (Nat × Expr × Expr × Expr × Expr × Expr) := do
+  let (``HasRankGE, #[curveE, rhoE]) := (← goal.getType).getAppFnArgs
+    | throwError "certify_curve: goal must be `HasRankGE _ _`"
+  let (``ModelIso.toCurveQ, #[a1E, a2E, a3E, a4E, a6E]) := curveE.getAppFnArgs
+    | throwError "certify_curve: the curve must be `toCurveQ …`; `unfold` your curve definition \
+        and its coefficient abbreviations first"
+  return (← getNatE rhoE, a1E, a2E, a3E, a4E, a6E)
+
+/-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
+`rho` entries. -/
+private def readData (path lpath : String) (rho : Nat) :
+    MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
+  let pts := ((← IO.FS.readFile path).splitOn "\n").filterMap fun l =>
+    if (strTrim l).isEmpty then none else some (parseLine l)
+  let lbls := ((← IO.FS.readFile lpath).splitOn "\n").filterMap fun l =>
+    if (strTrim l).isEmpty then none else some (parseLabel l)
+  if pts.length ≠ rho then
+    throwError "certify_curve: points file has {pts.length} points but the goal rank is {rho}"
+  if lbls.length ≠ rho then
+    throwError "certify_curve: labels file has {lbls.length} labels but the goal rank is {rho}"
+  return (pts.toArray, lbls.toArray)
+
+/-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
+private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (rho : Nat) :
+    MetaM (List Nat × List Nat) := do
+  let matB := CertifyEval.computeMatB sA2 sA4 xs ls
+  let some matM := CertifyEval.invF2 matB.toArray rho
+    | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
+  return (matB, matM)
+
+/-- Assemble the `hasRankGE_of_certificate` proof term.  The parsed points and labels become plain
+`List` literals, so every referee obligation is a kernel-reducible `Bool` check closed by
+`quickRfl`. -/
+private def mkCertTerm (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
+    (matB matM : List Nat) (tp : Term) (a1E a2E a3E a4E a6E : Expr) : MetaM Term := do
+  let ptStxs ← pts.mapM fun (xn, xd, yn, yd) => do `(($(← coordStx xn xd), $(← coordStx yn yd)))
+  let labStxs ← ls.mapM fun (p, θ) => labelStx p θ
+  let a1S ← Lean.PrettyPrinter.delab a1E
+  let a2S ← Lean.PrettyPrinter.delab a2E
+  let a3S ← Lean.PrettyPrinter.delab a3E
+  let a4S ← Lean.PrettyPrinter.delab a4E
+  let a6S ← Lean.PrettyPrinter.delab a6E
+  `(
+      let c : Certificate :=
+        { a₁ := 0, a₂ := ModelChange.intShortA₂ $a1S $a2S, a₃ := 0,
+          a₄ := ModelChange.intShortA₄ $a1S $a3S $a4S, a₆ := ModelChange.intShortA₆ $a3S $a6S,
+          rho := $(quote rho), «points» := [$ptStxs,*], «labels» := [$labStxs,*],
+          matB := $(quote matB), matM := $(quote matM), t := 0, torsionPrime := $tp }
+      hasRankGE_of_certificate $a1S $a2S $a3S $a4S $a6S c
+        rfl rfl rfl rfl rfl
+        (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl)
+        rfl (by decide)
+        (by rw [← Bool.not_eq_true', ← Bool.not'_eq_not]; quickRfl))
+
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do
   match stx with
   | `(tactic| certify_curve torsion $tp points $path:str labels $lpath:str) => do
-    -- read the coefficients `a₁…a₆` and the rank `ρ` out of the goal
-    -- `HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) ρ` (so the curve and its coefficient abbreviations must
-    -- already be `unfold`ed to literals)
+    -- read the coefficients `a₁…a₆` and rank `ρ` from the goal (so the curve and its coefficient
+    -- abbreviations must already be `unfold`ed to literals), then parse the two data files
     let goal ← getMainGoal
-    let (``HasRankGE, #[curveE, rhoE]) := (← goal.getType).getAppFnArgs
-      | throwError "certify_curve: goal must be `HasRankGE _ _`"
-    let rho ← getNatE rhoE
-    let (``ModelIso.toCurveQ, #[a1E, a2E, a3E, a4E, a6E]) := curveE.getAppFnArgs
-      | throwError "certify_curve: the curve must be `toCurveQ …`; `unfold` your curve definition \
-          and its coefficient abbreviations first"
-    let v1 ← getIntE a1E; let v2 ← getIntE a2E; let v3 ← getIntE a3E; let v4 ← getIntE a4E
-    let sA2 := v1 ^ 2 + 4 * v2
-    let sA4 := 16 * v4 + 8 * v1 * v3
-    -- read and parse the points file (one `x y` per line, coordinates as `a/b`)
-    let pts := ((← IO.FS.readFile path.getString).splitOn "\n").filterMap fun l =>
-      if (strTrim l).isEmpty then none else some (parseLine l)
-    let lbls := ((← IO.FS.readFile lpath.getString).splitOn "\n").filterMap fun l =>
-      if (strTrim l).isEmpty then none else some (parseLabel l)
-    if pts.length ≠ rho then
-      throwError "certify_curve: points file has {pts.length} points but the goal rank is {rho}"
-    if lbls.length ≠ rho then
-      throwError "certify_curve: labels file has {lbls.length} labels but the goal rank is {rho}"
-    let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toArray
-    let ls := lbls.toArray
-    -- the character matrix and its 𝔽₂ inverse (a pure, compiled computation)
-    let matB := CertifyEval.computeMatB sA2 sA4 xs.toList ls.toList
-    let some matM := CertifyEval.invF2 matB.toArray rho
-      | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
-    -- generate the parsed points and labels as plain `List` literals, spliced into the proof term.
-    -- Every referee obligation is a kernel-reducible `Bool` check over these lists (closed by
-    -- `quickRfl`).
-    let ptStxs ← pts.toArray.mapM fun (xn, xd, yn, yd) => do
-      let xc ← coordStx xn xd
-      let yc ← coordStx yn yd
-      `(($xc, $yc))
-    let labStxs ← ls.mapM fun (p, θ) => labelStx p θ
-    let rhoStx : Term := quote rho
-    let matBStx : Term := quote matB
-    let matMStx : Term := quote matM
-    let a1S ← Lean.PrettyPrinter.delab a1E; let a2S ← Lean.PrettyPrinter.delab a2E
-    let a3S ← Lean.PrettyPrinter.delab a3E; let a4S ← Lean.PrettyPrinter.delab a4E
-    let a6S ← Lean.PrettyPrinter.delab a6E
-    let term ← `(
-        let c : Certificate :=
-          { a₁ := 0, a₂ := ModelChange.intShortA₂ $a1S $a2S, a₃ := 0,
-            a₄ := ModelChange.intShortA₄ $a1S $a3S $a4S, a₆ := ModelChange.intShortA₆ $a3S $a6S,
-            rho := $rhoStx, «points» := [$ptStxs,*], «labels» := [$labStxs,*],
-            matB := $matBStx, matM := $matMStx, t := 0, torsionPrime := $tp }
-        hasRankGE_of_certificate $a1S $a2S $a3S $a4S $a6S c
-          rfl rfl rfl rfl rfl
-          (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl)
-          rfl (by decide)
-          (by rw [← Bool.not_eq_true', ← Bool.not'_eq_not]; quickRfl))
+    let (rho, a1E, a2E, a3E, a4E, a6E) ← readGoal goal
+    let v1 ← getIntE a1E
+    let v2 ← getIntE a2E
+    let v3 ← getIntE a3E
+    let v4 ← getIntE a4E
+    let (pts, lbls) ← readData path.getString lpath.getString rho
+    let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
+    -- compute the character matrix and its 𝔽₂ inverse, then splice everything into the proof term
+    let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
+    let term ← mkCertTerm rho pts lbls matB matM tp a1E a2E a3E a4E a6E
     let e ← elabTermEnsuringType term (← goal.getType)
     Term.synthesizeSyntheticMVarsNoPostponing
     goal.assign (← instantiateMVars e)
