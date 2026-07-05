@@ -41,26 +41,14 @@ theorem Projective.equiv_of_proportional {F : Type*} [Field F] {W : Projective F
   by_cases hUz : U 2 = 0
   · -- `U z = 0`; deduce `V z = 0`, then both reduce to the point at infinity.
     have hVz : V 2 = 0 := by
-      by_contra hVz
-      rw [hUz, zero_mul] at hcU0 hcU1
-      have hU0 : U 0 = 0 := (mul_eq_zero.mp hcU0).resolve_left hVz
-      have hU1 : U 1 = 0 := (mul_eq_zero.mp hcU1).resolve_left hVz
       rw [WeierstrassCurve.Projective.nonsingular_of_Z_eq_zero hUz] at hU
-      rcases hU.2 with h | h
-      · exact h (by rw [hU0]; ring)
-      · exact h (by rw [hU0, hU1]; ring)
+      grind [mul_eq_zero]
     exact Setoid.trans (WeierstrassCurve.Projective.equiv_zero_of_Z_eq_zero hU hUz)
       (Setoid.symm (WeierstrassCurve.Projective.equiv_zero_of_Z_eq_zero hV hVz))
   · -- `U z ≠ 0`; deduce `V z ≠ 0` and use `equiv_of_X_eq_of_Y_eq`.
-    have hVz : V 2 ≠ 0 := by
-      intro hVz
-      rw [hVz, zero_mul] at hcU0 hcU1
-      have hV0 : V 0 = 0 := (mul_eq_zero.mp hcU0.symm).resolve_left hUz
-      have hV1 : V 1 = 0 := (mul_eq_zero.mp hcU1.symm).resolve_left hUz
+    have hVz : V 2 ≠ 0 := fun hVz => by
       rw [WeierstrassCurve.Projective.nonsingular_of_Z_eq_zero hVz] at hV
-      rcases hV.2 with h | h
-      · exact h (by rw [hV0]; ring)
-      · exact h (by rw [hV0, hV1]; ring)
+      grind [mul_eq_zero]
     exact WeierstrassCurve.Projective.equiv_of_X_eq_of_Y_eq hUz hVz
       (by linear_combination hcU0) (by linear_combination hcU1)
 
@@ -130,9 +118,7 @@ theorem nonsingular_of_toAffine_some {U : Fin 3 → ℤ} {X Y : ℚ}
     (hU : Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ U)
       = .some X Y hR) :
     (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ U) := by
-  by_contra hns
-  rw [Projective.Point.toAffine_of_singular hns] at hU
-  exact Affine.Point.some_ne_zero _ hU.symm
+  grind [Projective.Point.toAffine_of_singular, Affine.Point.some_ne_zero]
 
 /-- If two integer projective representatives have the same (rational) affine point, then they are
 proportional over `ℤ`, with the cross scalars given by each other's `Z`-coordinate. -/
@@ -150,9 +136,7 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
     have hg : ∀ i, ((Int.castRingHom ℚ) ∘ U) i = (U i : ℚ) := fun i => by
       simp [Function.comp_apply]
     have hUz : ((Int.castRingHom ℚ) ∘ U) 2 ≠ 0 := by
-      intro h0
-      rw [Projective.Point.toAffine_of_Z_eq_zero h0] at hU
-      exact Affine.Point.some_ne_zero _ hU.symm
+      grind [Projective.Point.toAffine_of_Z_eq_zero, Affine.Point.some_ne_zero]
     have hns : (curve a₂ a₄ a₆).toProjective.Nonsingular ((Int.castRingHom ℚ) ∘ U) :=
       nonsingular_of_toAffine_some a₂ a₄ a₆ hU
     rw [Projective.Point.toAffine_of_Z_ne_zero hns hUz, Affine.Point.some.injEq] at hU
@@ -180,9 +164,7 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
   cases R with
   | zero =>
     have hTz : ((Int.castRingHom ℚ) ∘ T) 2 = 0 := by
-      by_contra hTz
-      rw [Projective.Point.toAffine_of_Z_ne_zero hnsq hTz] at hTℚ
-      exact Affine.Point.some_ne_zero _ hTℚ
+      grind [Projective.Point.toAffine_of_Z_ne_zero, Affine.Point.some_ne_zero]
     have hTz' : T 2 = 0 := by simpa [Function.comp_apply] using hTz
     have hfTz : ((Int.castRingHom (ZMod p)) ∘ T) 2 = 0 := by simp [Function.comp_apply, hTz']
     exact Setoid.symm (Projective.equiv_zero_of_Z_eq_zero hnsp hfTz)
@@ -238,8 +220,7 @@ private theorem map_curveℤ_ℚ :
 /-- The rational curve equation in cleared form `y² = x³ + a₂x² + a₄x + a₆`. -/
 private theorem curve_equation_iff {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
-  have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
-  simpa [curve] using this
+  grind [WeierstrassCurve.Affine.equation_iff, curve]
 
 /-- The secant numerator `x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄` has good denominator, and its
 reduction is the corresponding polynomial in `X̄₁, X̄₂`. -/
@@ -437,9 +418,7 @@ private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
     rw [heq]
     exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
   have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
-  rcases hpZ.dvd_mul.mp hAC with h | h
-  · exact hpA (hpZ.dvd_of_dvd_pow h)
-  · exact hpC (hpZ.dvd_of_dvd_pow h)
+  grind [Prime.dvd_of_dvd_pow, Prime.dvd_mul]
 
 /-- The certificate scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`: `K = 0` forces
 `x₁·E²G² = x₂·E²G²` and hence `x₁ = x₂`. -/
@@ -450,10 +429,7 @@ private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂
   have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
   push_cast at h0
   rw [hA, hC] at h0
-  have hEG : (E : ℚ) ^ 2 * (G : ℚ) ^ 2 ≠ 0 := mul_ne_zero (pow_ne_zero 2 hEQ) (pow_ne_zero 2 hGQ)
-  have hxx : x₁ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) = x₂ * ((E : ℚ) ^ 2 * (G : ℚ) ^ 2) := by
-    linear_combination h0
-  exact mul_right_cancel₀ hEG hxx
+  grind [mul_right_cancel₀, pow_ne_zero]
 
 /-- Final valuation step of the kernel-closure certificate.  Given the single-fraction
 `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and the crux `v_p(N) < v_p(K)`, the `p`-adic
@@ -588,9 +564,8 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
     y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
-  rcases WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12 with h | h
-  · exact absurd (by rw [Affine.Point.some.injEq]; exact ⟨hx12, h⟩) hPQ
-  · exact h
+  have := WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
+  grind [Affine.Point.some.injEq]
 
 /-- Reduced-curve negation is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
 private theorem reduced_negY (X Y : ZMod p) :
@@ -803,17 +778,12 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
     have hQ0 : red_p a₂ a₄ a₆ p hΔ (.some x₂ y₂ h₂) = 0 := by
       rw [← hred]; exact red_p_of_den_zero a₂ a₄ a₆ p hΔ h₁ hd1
     have hd2 : (x₂.den : ZMod p) = 0 := by
-      by_contra hd2
-      rw [red_p_of_den_ne a₂ a₄ a₆ p hΔ h₂ hd2] at hQ0
-      exact Affine.Point.some_ne_zero _ hQ0
+      grind [red_p_of_den_ne, Affine.Point.some_ne_zero]
     rw [red_p_of_den_zero a₂ a₄ a₆ p hΔ h₁ hd1, hQ0, add_zero]
     exact red_p_add_kernel a₂ a₄ a₆ p hΔ h₁ h₂ hPQ hd1 hd2
   · -- `P` has good reduction; then so does `Q`, and they share reduced coordinates.
     have hd2 : (x₂.den : ZMod p) ≠ 0 := by
-      intro hd2
-      have hP := red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1
-      rw [hred, red_p_of_den_zero a₂ a₄ a₆ p hΔ h₂ hd2] at hP
-      exact Affine.Point.some_ne_zero _ hP.symm
+      grind [red_p_of_den_ne, red_p_of_den_zero, Affine.Point.some_ne_zero]
     have hdy1 : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hd1
     have hdy2 : (y₂.den : ZMod p) ≠ 0 := ydenom_ne_zero h₂.1 hd2
     rw [red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1, red_p_of_den_ne a₂ a₄ a₆ p hΔ h₂ hd2,
