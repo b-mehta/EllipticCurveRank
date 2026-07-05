@@ -42,9 +42,7 @@ def shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 
 @[simp]
 theorem shortModel_a₁ (a₁ a₂ a₃ a₄ a₆ : ℤ) : (shortModel a₁ a₂ a₃ a₄ a₆).a₁ = 0 := by
-  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₁, inv_one,
-    Units.val_one]
-  ring
+  grind [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₁]
 
 @[simp]
 theorem shortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
@@ -55,9 +53,7 @@ theorem shortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
 
 @[simp]
 theorem shortModel_a₃ (a₁ a₂ a₃ a₄ a₆ : ℤ) : (shortModel a₁ a₂ a₃ a₄ a₆).a₃ = 0 := by
-  simp only [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₃, inv_one,
-    Units.val_one, one_pow]
-  ring
+  grind [shortModel, completeSquare, toCurveQ, WeierstrassCurve.variableChange_a₃]
 
 @[simp]
 theorem shortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
@@ -145,10 +141,9 @@ theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
         (ℓ + (a₁ : ℚ) / 2)
       = (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
         + ((a₁ : ℚ) * (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₃) / 2 := by
-  simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
+  grind [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
     WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂,
     shortModel_a₃, toCurveQ]
-  ring
 
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
