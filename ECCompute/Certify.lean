@@ -66,27 +66,16 @@ private def parseLine (line : String) : Int × Nat × Int × Nat :=
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; (xn, xd, yn, yd)
   | _ => (0, 1, 0, 1)
 
-/-- Syntax term for an `Int` literal. -/
-private def intStx (n : Int) : MetaM Term :=
-  if n < 0 then `(-$(quote n.natAbs)) else `($(quote n.toNat))
-
-/-- Syntax term for the rational `num / den` (assumed reduced), in a kernel-reducible form: an
-integer literal when `den = 1`, otherwise the proof-free smart constructor `mkRat` (its normalization is ordinary kernel
-computation, so no `Coprime`/`den ≠ 0` proof is elaborated). -/
-private def coordStx (num : Int) (den : Nat) : MetaM Term := do
-  let n ← intStx num
-  if den == 1 then `(($n : ℚ))
-  else `(mkRat $n $(quote den))
+/-- `ℚ` Expr for `num / den` (reduced) via the proof-free `mkRat`; normalization is kernel
+computation, so no `Coprime`/`den ≠ 0` proof is constructed. -/
+private def coordExpr (num : Int) (den : Nat) : Expr :=
+  mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 private def parseLabel (line : String) : Nat × Int :=
   match ((strTrim line).splitOn " ").filter (· ≠ "") with
   | [p, t] => ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => (0, 0)
-
-/-- Syntax term for a label `(p, θ) : ℕ × ℤ`. -/
-private def labelStx (p : Nat) (θ : Int) : MetaM Term := do
-  `(($(quote p), $(← intStx θ)))
 
 /-- Syntax of the `certify_curve` tactic; see the module docstring. -/
 syntax (name := certifyCurve) "certify_curve" " torsion " term:max " points " str
@@ -123,29 +112,31 @@ private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat �
     | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
   return (matB, matM)
 
-/-- Assemble the `hasRankGE_of_certificate` proof term.  The parsed points and labels become plain
-`List` literals, so every referee obligation is a kernel-reducible `Bool` check closed by
-`quickRfl`. -/
-private def mkCertTerm (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
-    (matB matM : List Nat) (tp : Term) (a1E a2E a3E a4E a6E : Expr) : MetaM Term := do
-  let ptStxs ← pts.mapM fun (xn, xd, yn, yd) => do `(($(← coordStx xn xd), $(← coordStx yn yd)))
-  let labStxs ← ls.mapM fun (p, θ) => labelStx p θ
-  let a1S ← Lean.PrettyPrinter.delab a1E
-  let a2S ← Lean.PrettyPrinter.delab a2E
-  let a3S ← Lean.PrettyPrinter.delab a3E
-  let a4S ← Lean.PrettyPrinter.delab a4E
-  let a6S ← Lean.PrettyPrinter.delab a6E
-  `(
-      let c : Certificate :=
-        { a₁ := 0, a₂ := ModelChange.intShortA₂ $a1S $a2S, a₃ := 0,
-          a₄ := ModelChange.intShortA₄ $a1S $a3S $a4S, a₆ := ModelChange.intShortA₆ $a3S $a6S,
-          rho := $(quote rho), «points» := [$ptStxs,*], «labels» := [$labStxs,*],
-          matB := $(quote matB), matM := $(quote matM), t := 0, torsionPrime := $tp }
-      hasRankGE_of_certificate $a1S $a2S $a3S $a4S $a6S c
-        rfl rfl rfl rfl rfl
-        (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl)
-        rfl (by decide)
-        (by rw [← Bool.not_eq_true', ← Bool.not'_eq_not]; quickRfl))
+/-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
+private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
+    (matB matM : List Nat) (tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
+  let ratTy := mkConst ``Rat
+  let pairTy ← mkAppM ``Prod #[ratTy, ratTy]
+  let ptExprs ← pts.toList.mapM fun (xn, xd, yn, yd) =>
+    mkAppM ``Prod.mk #[coordExpr xn xd, coordExpr yn yd]
+  let pointsE ← mkListLit pairTy ptExprs
+  return mkAppN (mkConst ``Certificate.mk)
+    #[toExpr (0 : Int), mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E, toExpr (0 : Int),
+      mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
+      mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E, toExpr rho, pointsE,
+      toExpr ls.toList, toExpr matB, toExpr matM, toExpr (0 : Nat), toExpr tp]
+
+/-- Build the `hasRankGE_of_certificate` proof term directly.  The five checker obligations and the
+two torsion obligations are `Lean.reflBoolTrue`; the `rfl` obligations are `Eq.refl` on an explicit
+value. -/
+private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM Expr := do
+  let rb := Lean.reflBoolTrue
+  let hmodel ← mkEqRefl (mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E])
+  let hlen ← mkEqRefl (toExpr rho)
+  let ht ← mkEqRefl (toExpr (0 : Nat))
+  return mkAppN (mkConst ``hasRankGE_of_certificate)
+    #[a1E, a2E, a3E, a4E, a6E, cExpr,
+      hmodel, hlen, hlen, hlen, hlen, rb, rb, rb, rb, rb, ht, rb, rb]
 
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do
@@ -159,14 +150,13 @@ def evalCertifyCurve : Tactic := fun stx => do
     let v2 ← getIntE a2E
     let v3 ← getIntE a3E
     let v4 ← getIntE a4E
+    let tpNat ← getNatE (← elabTermEnsuringType tp (mkConst ``Nat))
     let (pts, lbls) ← readData path.getString lpath.getString rho
     let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
-    -- compute the character matrix and its 𝔽₂ inverse, then splice everything into the proof term
+    -- compute the character matrix and its 𝔽₂ inverse, then build the proof term directly
     let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
-    let term ← mkCertTerm rho pts lbls matB matM tp a1E a2E a3E a4E a6E
-    let e ← elabTermEnsuringType term (← goal.getType)
-    Term.synthesizeSyntheticMVarsNoPostponing
-    goal.assign (← instantiateMVars e)
+    let cExpr ← mkCertExpr rho pts lbls matB matM tpNat a1E a2E a3E a4E a6E
+    goal.assign (← mkCertProof rho a1E a2E a3E a4E a6E cExpr)
     replaceMainGoal []
   | _ => throwUnsupportedSyntax
 

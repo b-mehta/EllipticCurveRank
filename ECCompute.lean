@@ -22,7 +22,6 @@ import ECCompute.Check.CheckMatrix
 import ECCompute.Check.Primes
 import ECCompute.Check.ColumnCheck
 import ECCompute.Check.Torsion
-import ECCompute.Check.QuickRfl
 import ECCompute.Check.Points
 
 -- Main theory
