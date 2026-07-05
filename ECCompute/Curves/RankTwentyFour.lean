@@ -22,7 +22,6 @@ namespace ECCompute
 
 open WeierstrassCurve ModelIso ModelChange
 
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of the Martin-McMillen rank-24 curve (general model). -/
 abbrev mm24A₄ : ℤ := -120039822036992245303534619191166796374

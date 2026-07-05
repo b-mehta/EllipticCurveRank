@@ -21,7 +21,6 @@ namespace ECCompute
 
 open WeierstrassCurve ModelIso ModelChange
 
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of Nagao's rank-20 curve (general model). -/
 abbrev nagao20A₄ : ℤ := -431092980766333677958362095891166

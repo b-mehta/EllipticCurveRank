@@ -21,7 +21,6 @@ namespace ECCompute
 
 open WeierstrassCurve ModelIso ModelChange
 
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of the Nagao-Kouya rank-21 curve (general model). -/
 abbrev nk21A₄ : ℤ := -215843772422443922015169952702159835

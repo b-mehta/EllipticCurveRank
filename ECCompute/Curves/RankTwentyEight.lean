@@ -21,7 +21,6 @@ namespace ECCompute
 
 open WeierstrassCurve ModelIso ModelChange
 
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of Elkies' rank-28 curve (general model). -/
 abbrev elkies28A₄ : ℤ := -20067762415575526585033208209338542750930230312178956502

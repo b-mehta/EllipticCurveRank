@@ -71,11 +71,12 @@ private def intStx (n : Int) : MetaM Term :=
   if n < 0 then `(-$(quote n.natAbs)) else `($(quote n.toNat))
 
 /-- Syntax term for the rational `num / den` (assumed reduced), in a kernel-reducible form: an
-integer literal when `den = 1`, otherwise the smart constructor `Rat.mk'`. -/
+integer literal when `den = 1`, otherwise the proof-free smart constructor `mkRat` (its normalization is ordinary kernel
+computation, so no `Coprime`/`den ≠ 0` proof is elaborated). -/
 private def coordStx (num : Int) (den : Nat) : MetaM Term := do
   let n ← intStx num
   if den == 1 then `(($n : ℚ))
-  else `(Rat.mk' $n $(quote den) (by norm_num) (by norm_num))
+  else `(mkRat $n $(quote den))
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 private def parseLabel (line : String) : Nat × Int :=

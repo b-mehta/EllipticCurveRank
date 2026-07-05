@@ -21,7 +21,6 @@ namespace ECCompute
 
 open WeierstrassCurve ModelIso ModelChange
 
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of Fermigier's rank-22 curve (general model). -/
 abbrev fermigier22A₄ : ℤ := -940299517776391362903023121165864

@@ -26,7 +26,6 @@ open WeierstrassCurve ModelIso ModelChange
 
 -- The `rfl` certificate checks (`checkInv`, the `matB` entries) reduce large `Nat` recursions in
 -- the elaborator, so raise the recursion limit for the whole file.
-set_option maxRecDepth 100000
 
 /-- The `a₄` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
 abbrev ekA₄ : ℤ := -27006183241630922218434652145297453784768054621836357954737385
