@@ -54,8 +54,7 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
   -- `r.toNat` is congruent to `u` mod `ℓ`, and `cubicEval` at `u` is `0`, so the residue is a root
   have hcong : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
     have huv : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr0
-    have hmod : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by
-      rw [huv, hr]; exact Int.mod_modEq u _
+    have hmod : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by rw [huv, hr]; exact Int.mod_modEq u _
     have hthis : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = cubicEval c₂ c₁ c₀ u % (ℓ : ℤ) :=
       cubicEval_modEq (ℓ : ℤ) hmod
     rw [hthis, hu, Int.zero_emod]
@@ -67,7 +66,52 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
 
 /-! ## The t = 0 lemma -/
 
+/-- The scaled coordinate `4x` of a nonzero 2-torsion point is a root of the monic 2-division
+cubic, written as an identity in the curve coefficients. -/
+private theorem cubic_fourX_eq_zero (W : WeierstrassCurve ℚ) {x y : ℚ}
+    (heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)
+    (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
+    (4 * x) ^ 3 + (W.a₁ ^ 2 + 4 * W.a₂) * (4 * x) ^ 2
+      + 8 * (2 * W.a₄ + W.a₁ * W.a₃) * (4 * x) + 16 * (W.a₃ ^ 2 + 4 * W.a₆) = 0 := by
+  linear_combination (-64 : ℚ) * heq + 16 * (W.a₁ * x + W.a₃ + 2 * y) * htor
+
 open Polynomial in
+/-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
+`4x` is an integer root of the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/
+private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W : WeierstrassCurve ℚ)
+    (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
+    {x y : ℚ}
+    (heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)
+    (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
+    ∃ z : ℤ,
+      cubicEval (a₁ ^ 2 + 4 * a₂) (8 * (2 * a₄ + a₁ * a₃)) (16 * (a₃ ^ 2 + 4 * a₆)) z = 0 := by
+  set c₂ : ℤ := a₁ ^ 2 + 4 * a₂ with hc₂
+  set c₁ : ℤ := 8 * (2 * a₄ + a₁ * a₃) with hc₁
+  set c₀ : ℤ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
+  set p : ℤ[X] := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
+  have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
+  -- evaluate the abstract cubic polynomial, keeping the integer coefficients opaque
+  have haeval : aeval (4 * x : ℚ) p =
+      (4 * x) ^ 3 + (c₂ : ℚ) * (4 * x) ^ 2 + (c₁ : ℚ) * (4 * x) + (c₀ : ℚ) := by
+    simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
+      eq_intCast, Int.cast_one, one_mul]
+  have hroot : aeval (4 * x : ℚ) p = 0 := by
+    rw [haeval, hc₂, hc₁, hc₀]
+    push_cast
+    rw [← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
+    exact cubic_fourX_eq_zero W heq htor
+  -- the integral root theorem: `4x` equals some integer `z`
+  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
+  have hzcast : (4 * x : ℚ) = (z : ℚ) := by rw [hz]; simp
+  refine ⟨z, ?_⟩
+  -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
+  have hQ : ((cubicEval c₂ c₁ c₀ z : ℤ) : ℚ) = 0 := by
+    simp only [cubicEval, hc₂, hc₁, hc₀]
+    push_cast
+    rw [← hzcast, ← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
+    exact cubic_fourX_eq_zero W heq htor
+  exact_mod_cast hQ
+
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `ℓ ≠ 0`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
 `W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
@@ -90,34 +134,10 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
     (WeierstrassCurve.Affine.equation_iff _ _).mp hns.1
   have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by
     have := hy; simp only [WeierstrassCurve.Affine.negY] at this; linarith [this]
-  -- `r = 4x` is a rational root of the monic integer cubic `⟨1, b₂, 8b₄, 16b₆⟩`
-  set c₂ : ℤ := a₁ ^ 2 + 4 * a₂ with hc₂
-  set c₁ : ℤ := 8 * (2 * a₄ + a₁ * a₃) with hc₁
-  set c₀ : ℤ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
-  set p : ℤ[X] := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
-  have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
-  -- evaluate the abstract cubic polynomial, keeping the integer coefficients opaque
-  have haeval : aeval (4 * x : ℚ) p =
-      (4 * x) ^ 3 + (c₂ : ℚ) * (4 * x) ^ 2 + (c₁ : ℚ) * (4 * x) + (c₀ : ℚ) := by
-    simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
-      eq_intCast, Int.cast_one, one_mul]
-  have hroot : aeval (4 * x : ℚ) p = 0 := by
-    rw [haeval, hc₂, hc₁, hc₀]
-    push_cast
-    rw [← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    linear_combination (-64 : ℚ) * heq + 16 * (W.a₁ * x + W.a₃ + 2 * y) * htor
-  -- the integral root theorem: `4x` equals some integer `z`
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  -- `cubicEval c₂ c₁ c₀ z = 0` over ℤ, contradicting the no-root-mod hypothesis
-  refine no_int_root_of_hasRootMod_eq_false hℓ h z ?_
-  have hzcast : (4 * x : ℚ) = (z : ℚ) := by rw [hz]; simp
-  -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
-  have hQ : ((cubicEval c₂ c₁ c₀ z : ℤ) : ℚ) = 0 := by
-    simp only [cubicEval, hc₂, hc₁, hc₀]
-    push_cast
-    rw [← hzcast, ← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    linear_combination (-64 : ℚ) * heq + 16 * (W.a₁ * x + W.a₃ + 2 * y) * htor
-  exact_mod_cast hQ
+  -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
+  obtain ⟨z, hz⟩ :=
+    exists_intRoot_of_twoTorsion a₁ a₂ a₃ a₄ a₆ W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
+  exact no_int_root_of_hasRootMod_eq_false hℓ h z hz
 
 /-! ## Worked example: a `t = 0` certificate
 
