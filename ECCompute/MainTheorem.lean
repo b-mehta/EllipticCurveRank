@@ -8,7 +8,6 @@ import ECCompute.Check.ColumnCheck
 import ECCompute.Check.Points
 import ECCompute.Check.Primes
 import ECCompute.Check.CheckMatrix
-import ECCompute.Check.QuickRfl
 import ECCompute.Check.Torsion
 import ECCompute.Theory.Descent
 import ECCompute.Theory.LambdaCompute
