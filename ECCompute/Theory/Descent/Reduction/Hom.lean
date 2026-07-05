@@ -118,8 +118,7 @@ theorem toAffine_g_Trep {x y : ℚ} {w : ℕ} (h : (curve a₂ a₄ a₆).toAffi
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ Trep x y w)
       = .some x y h := by
-  have hw : (w : ℚ) ≠ 0 := by
-    rw [Ne, Nat.cast_eq_zero]; rintro rfl; simp at hden
+  have hw : (w : ℚ) ≠ 0 := by rw [Ne, Nat.cast_eq_zero]; rintro rfl; simp at hden
   rw [Trep_map_ℚ hden hden',
     Projective.Point.toAffine_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.Point.toAffine_some ((Projective.nonsingular_some x y).mpr h)]
@@ -158,18 +157,14 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
       nonsingular_of_toAffine_some a₂ a₄ a₆ hU
     rw [Projective.Point.toAffine_of_Z_ne_zero hns hUz, Affine.Point.some.injEq] at hU
     rw [hg] at hUz
-    refine ⟨?_, ?_⟩
-    · have := (div_eq_iff hUz).mp (hg 0 ▸ hU.1); rw [this]
-    · have := (div_eq_iff hUz).mp (hg 1 ▸ hU.2); rw [this]
+    exact ⟨(div_eq_iff hUz).mp (hg 0 ▸ hU.1), (div_eq_iff hUz).mp (hg 1 ▸ hU.2)⟩
   obtain ⟨hS0, hS1⟩ := key S hS
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by
-      push_cast; rw [hS0, hT0]; ring
+  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; rw [hS0, hT0]; ring
     exact_mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by
-      push_cast; rw [hS1, hT1]; ring
+  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; rw [hS1, hT1]; ring
     exact_mod_cast this
   · exact mul_comm _ _
 
@@ -188,12 +183,8 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
       by_contra hTz
       rw [Projective.Point.toAffine_of_Z_ne_zero hnsq hTz] at hTℚ
       exact Affine.Point.some_ne_zero _ hTℚ
-    have hTz' : T 2 = 0 := by
-      have h2 : ((Int.castRingHom ℚ) ∘ T) 2 = (T 2 : ℚ) := by simp [Function.comp_apply]
-      rw [h2] at hTz
-      exact_mod_cast hTz
-    have hfTz : ((Int.castRingHom (ZMod p)) ∘ T) 2 = 0 := by
-      simp [Function.comp_apply, hTz']
+    have hTz' : T 2 = 0 := by simpa [Function.comp_apply] using hTz
+    have hfTz : ((Int.castRingHom (ZMod p)) ∘ T) 2 = 0 := by simp [Function.comp_apply, hTz']
     exact Setoid.symm (Projective.equiv_zero_of_Z_eq_zero hnsp hfTz)
   | some X Y hR =>
     set w₃ := (den_isSquare_of_nonsingular a₂ a₄ a₆ hR).choose with hw₃
@@ -276,6 +267,21 @@ private theorem cast_secant_num {x₁ x₂ : ℚ} (hd1 : (x₁.den : ZMod p) ≠
     Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) (den_add_ne_zero hd1 hd2),
     Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast]
 
+/-- The reduced secant slope times `y₁ + y₂` equals the secant numerator: clearing the denominator
+of `slope = (y₁ - y₂)/(x₁ - x₂)` against the two curve relations gives
+`slope·(y₁ + y₂) = x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄`. -/
+private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
+    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂) :
+    (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (y₁ + y₂)
+      = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
+  have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
+  have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
+  have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
+    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+  apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
+  linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
+
 /-- The reduced secant slope is well-defined.  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
 reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ - y₂)/(x₁ - x₂)` (a
 `0/0` mod `p`) equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose
@@ -287,20 +293,12 @@ private theorem reduced_slope_den (hne : x₁ ≠ x₂)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0) :
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
-  have hxne : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
-  have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
-  have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
   have hy12 : y₁ + y₂ ≠ 0 := by
     intro h0; apply hy2; rw [← Rat.cast_add_of_ne_zero hdy1 hdy2, h0, Rat.cast_zero]
-  have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
   have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
       = (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)) / (y₁ + y₂) := by
-    rw [eq_div_iff hy12]
-    apply mul_left_cancel₀ hxne
-    linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
-  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by
-    rw [Rat.cast_add_of_ne_zero hdy1 hdy2]; exact hy2
+    rw [eq_div_iff hy12]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
+  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rw [Rat.cast_add_of_ne_zero hdy1 hdy2]; exact hy2
   have hNden := (cast_secant_num a₂ a₄ p hd1 hd2).1
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
@@ -324,10 +322,6 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
         = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
           + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
-  have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
-  have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; ring
   refine ⟨?_, ?_⟩
@@ -341,8 +335,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     exact hc
   · have hℓmul : ℓ * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
-      apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
-      linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
+      rw [hℓdef]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
     rw [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
       Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
