@@ -56,12 +56,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; push_cast; ring
   simp only [lambda, if_neg hd, halpha]
-  by_cases hxt : xbar p x = θ
-  · have hz : (w : ZMod p) ^ 2 * (xbar p x - θ) = 0 := by rw [hxt]; ring
-    rw [if_pos hz, if_pos hxt]
-  · have hne : (w : ZMod p) ^ 2 * (xbar p x - θ) ≠ 0 :=
-      mul_ne_zero (pow_ne_zero 2 hw) (sub_ne_zero.mpr hxt)
-    rw [if_neg hne, if_neg hxt, psi_mul_sq hw]
+  grind [psi_mul_sq]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
@@ -162,7 +157,6 @@ theorem lambdaHom_apply {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  have h2 : (2 : ZMod 2) = 0 := by decide
-  rw [two_nsmul, map_add, ← two_mul, h2, zero_mul]
+  grind [two_nsmul, map_add]
 
 end ECCompute
