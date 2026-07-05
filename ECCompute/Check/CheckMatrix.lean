@@ -37,19 +37,12 @@ theorem checkBRow_true {a₂ a₄ a₆ : ℤ} {x : ℚ} {lab : List (ℕ × ℤ)
       ∀ j, j < lab.length → b.testBit j = lambdaComputeBool a₂ a₄ a₆ (lab.getD j (0, 0)).1
         ((lab.getD j (0, 0)).2 : ZMod (lab.getD j (0, 0)).1) x := by
   induction lab with
-  | nil =>
-    intro b _ j hj
-    exact absurd hj (Nat.not_lt_zero j)
+  | nil => grind
   | cons l ls ih =>
     intro b hb j hj
     simp only [checkBRow, Bool.and'_eq_and, Bool.and_eq_true] at hb
     obtain ⟨h0, hrec⟩ := hb
-    cases j with
-    | zero => exact beq_iff_eq.mp h0
-    | succ j' =>
-      have hrec' := ih hrec j' (by simpa using hj)
-      rw [Nat.testBit_shiftRight, Nat.add_comm 1 j'] at hrec'
-      exact hrec'
+    cases j <;> grind
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
@@ -58,19 +51,15 @@ theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
         checkBRow a₂ a₄ a₆ (pt.getD i (0, 0)).1 (matB.getD i 0) lab = true := by
   intro matB
   induction matB with
-  | nil =>
-    intro _ _ i hi _
-    exact absurd hi (Nat.not_lt_zero i)
+  | nil => grind
   | cons b bs ih =>
     intro pt h i hi hip
     cases pt with
-    | nil => exact absurd hip (Nat.not_lt_zero i)
+    | nil => grind
     | cons p ps =>
       simp only [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
       obtain ⟨hrow, hrec⟩ := h
-      cases i with
-      | zero => exact hrow
-      | succ i' => exact ih hrec i' (by simpa using hi) (by simpa using hip)
+      cases i <;> grind
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
 theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
@@ -85,8 +74,6 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hip : i.val < pt.length := by rw [hplen]; exact i.isLt
   have hj : j.val < lab.length := by rw [hllen]; exact j.isLt
   have hcell := checkBRow_true (checkB_row h i.val hi hip) j.val hj
-  rw [lambdaCompute_eq_bool]
-  simp only [F2Invert.toMat]
-  rw [hcell]
+  grind [lambdaCompute_eq_bool, F2Invert.toMat]
 
 end ECCompute

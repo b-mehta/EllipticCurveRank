@@ -60,9 +60,7 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
     rw [hthis, hu, Int.zero_emod]
   -- but `hasRootMod = false` says no tested residue is a root, a contradiction
   rw [hasRootMod, anyBelow_eq_false] at h
-  have := h r.toNat (by omega)
-  rw [beq_eq_false_iff_ne] at this
-  exact this hcong
+  grind
 
 /-! ## The t = 0 lemma -/
 
