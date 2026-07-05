@@ -2,13 +2,18 @@
 # hopscotch-action (https://github.com/leanprover-community/hopscotch-action).
 #
 # The action bisects mathlib's commits itself, so ECCompute does not need to be
-# registered anywhere. Each day it advances the pin to the last mathlib commit
-# that still builds, opening/updating a bump PR plus a tracking issue while a
-# regression is active (closed automatically on recovery).
+# registered anywhere. Two modes run each day:
 #
-# The `pin-to: first-bad` fix-PR mode lives on the action's default branch, not
-# the @v1 release, so this runs the single default (last-good) mode. Pin the
-# action to a ref that ships `pin-to` to add the fix PR.
+#   last-good - open/update a bump PR advancing the pin to the last mathlib
+#               commit that still builds, plus a tracking issue while a
+#               regression is active (closed automatically on recovery).
+#   first-bad - open a fix PR pinned to the first breaking commit, on a per-SHA
+#               branch, so it can be `gh pr checkout`ed and fixed locally.
+#
+# The action is pinned to a main commit (e163305, 2026-05-25) rather than a tag:
+# the `pin-to`/`pr-token` inputs the two modes below rely on were added on main
+# and have not been cut into a release yet (latest tag v1.0.0 predates them).
+# Bump to a released tag once one ships `pin-to`.
 name: Update Dependencies
 
 on:
@@ -20,18 +25,29 @@ jobs:
   hopscotch:
     runs-on: ubuntu-latest
     permissions:
-      contents: write      # push the bump branch
-      pull-requests: write # open / update the PR
+      contents: write      # push bump / fix branches
+      pull-requests: write # open / update PRs
       issues: write        # open / close the tracking issue
     steps:
       - uses: actions/checkout@v7
 
-      - name: Bump mathlib to the last passing commit
-        uses: leanprover-community/hopscotch-action@v1
+      # Bump PR to the last passing mathlib commit, plus a tracking issue on breakage.
+      - name: Bump to last good mathlib
+        uses: leanprover-community/hopscotch-action@e163305f758acb4c1e77bbb357c258195aa9264a
         with:
           dependency: mathlib
           to: master
-          # A PAT so the bump PR triggers Lean Action CI; the default GITHUB_TOKEN
-          # does not. Falls back to the job token if the secret is unset (the PR
-          # still opens, without CI running on it).
-          github-token: ${{ secrets.HOPSCOTCH_PAT || github.token }}
+          pin-to: last-good
+          # PAT so the bump PR triggers Lean Action CI; the default GITHUB_TOKEN
+          # would not. If the secret is unset this is empty and the PR still opens
+          # (just without CI running on it).
+          pr-token: ${{ secrets.HOPSCOTCH_PAT }}
+
+      # Fix PR pinned to the first breaking mathlib commit, for local reproduction.
+      - name: Track first breaking mathlib commit
+        uses: leanprover-community/hopscotch-action@e163305f758acb4c1e77bbb357c258195aa9264a
+        with:
+          dependency: mathlib
+          to: master
+          pin-to: first-bad
+          pr-token: ${{ secrets.HOPSCOTCH_PAT }}
