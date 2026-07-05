@@ -44,7 +44,11 @@ jobs:
           pr-token: ${{ secrets.HOPSCOTCH_PAT }}
 
       # Fix PR pinned to the first breaking mathlib commit, for local reproduction.
+      # When mathlib is currently compatible there is no breaking commit to find,
+      # and hopscotch exits with a tool error (exit 2); tolerate that so the run
+      # stays green - the last-good step above already did the bump + tracking.
       - name: Track first breaking mathlib commit
+        continue-on-error: true
         uses: leanprover-community/hopscotch-action@e163305f758acb4c1e77bbb357c258195aa9264a
         with:
           dependency: mathlib
