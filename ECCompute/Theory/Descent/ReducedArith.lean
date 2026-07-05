@@ -6,6 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
+import ECCompute.ForMathlib.RatDenom
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod
@@ -20,8 +21,6 @@ survive reduction, shared between `ECCompute.Descent` and `ECCompute.Descent.Red
 
 * `ECCompute.xbar`: the reduced `x`-coordinate `(x : ZMod p)` as a plain field element.
 * `ECCompute.num_eq_xbar_mul_den`: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`.
-* `ECCompute.den_add_ne_zero` / `den_sub_ne_zero` / `den_mul_ne_zero` / `den_div_ne_zero`:
-  closure of the "good denominator" predicate `(·.den : ZMod p) ≠ 0` under the field operations.
 * `ECCompute.reduced_on_curve` / `reduced_addX` / `reduced_doubleX`: the reduced on-curve, secant
   and tangent identities, obtained by clearing denominators to an integer identity.
 * `ECCompute.den_dblX_ne_zero` / `ydenom_ne_zero`: good-denominator survival for the doubled
@@ -31,6 +30,8 @@ survive reduction, shared between `ECCompute.Descent` and `ECCompute.Descent.Red
 open WeierstrassCurve
 
 namespace ECCompute
+
+open Rat (den_add_ne_zero den_sub_ne_zero den_mul_ne_zero den_pow_ne_zero den_div_ne_zero)
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
@@ -54,51 +55,9 @@ theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 
 `Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in characteristic `p`.  In the
 *good-reduction* case we transfer group-law data to `ZMod p` by clearing denominators via the
 genuine ring hom `Int.cast`, pushing `Rat.cast` through sums/products whose denominators survive
-reduction (`(·.den : ZMod p) ≠ 0`) with the conditional cast lemmas; the divisibility lemmas
-`Rat.add_den_dvd`, `Rat.sub_den_dvd`, `Rat.mul_den_dvd` give closure of this predicate. -/
-
-/-- If `a ∣ b` and `b`'s reduction is nonzero, so is `a`'s. -/
-theorem den_ne_zero_of_dvd {a b : ℕ} (h : a ∣ b) (hb : (b : ZMod p) ≠ 0) :
-    (a : ZMod p) ≠ 0 := fun ha =>
-  hb ((ZMod.natCast_eq_zero_iff b p).mpr (((ZMod.natCast_eq_zero_iff a p).mp ha).trans h))
-
-/-- Good denominators are closed under addition. -/
-theorem den_add_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x + y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.add_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
-
-/-- Good denominators are closed under subtraction. -/
-theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x - y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.sub_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
-
-/-- Good denominators are closed under multiplication. -/
-theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
-
-/-- Good denominators are closed under powers. -/
-theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
-    ((x ^ n).den : ZMod p) ≠ 0 := by
-  rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero n hx
-
-/-- Good denominators are closed under division by a rational whose reduction is nonzero: if
-`b.den`, `a.den` reduce nonzero and `(a : ZMod p) ≠ 0`, then `(b / a).den` reduces nonzero.
-This is the denominator half of "the reduced slope `(y₁ - y₂)/(x₁ - x₂)` is well-defined mod `p`
-when `X₁ ≠ X₂`". -/
-theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
-    (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
-    ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
-  have hnum : (a.num : ZMod p) ≠ 0 := by
-    rw [num_eq_xbar_mul_den ha]; exact mul_ne_zero ha0 ha
-  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h => hnum <| by
-    rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
-    exact (ZMod.natCast_eq_zero_iff _ _).mp h
-  rw [div_eq_mul_inv]
-  refine den_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
-  rw [Nat.cast_mul, Rat.den_inv_of_ne_zero ha']
-  exact mul_ne_zero hb hnatabs
+reduction (`(·.den : ZMod p) ≠ 0`) with the conditional cast lemmas; the good-denominator closure
+lemmas `Rat.den_add_ne_zero` and friends (from `ECCompute.ForMathlib.RatDenom`) supply survival of
+this predicate. -/
 
 /-- A ℚ-point `(x, y)` on `E` with good denominators reduces to a point of `E` over `ZMod p`. -/
 theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}

@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Reduction.Def
 import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.ForMathlib.PadicValInt
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.Padics.PadicVal.Basic
 
@@ -25,6 +26,8 @@ open WeierstrassCurve
 open scoped WeierstrassCurve.Projective
 
 namespace ECCompute
+
+open Rat (den_add_ne_zero den_sub_ne_zero den_mul_ne_zero den_pow_ne_zero den_div_ne_zero)
 
 /-- Two nonsingular projective representatives over a field that are proportional with cross
 scalars given by each other's `Z`-coordinate are equivalent: if `(V z) • U = (U z) • V`, then
@@ -360,31 +363,6 @@ private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hp
   exact absurd (Int.isUnit_iff.mp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
     (by have := (Fact.out : p.Prime).two_le; omega)
-
-/-- `padicValInt p` is monotone under divisibility for a nonzero target. -/
-private theorem padicValInt_mono {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
-    padicValInt p a ≤ padicValInt p b := by
-  have hp : p.Prime := Fact.out
-  rcases eq_or_ne a 0 with rfl | ha
-  · simp [padicValInt]
-  · simp only [padicValInt]
-    have h1 : p ^ padicValNat p a.natAbs ∣ a.natAbs :=
-      (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr ha)).mpr le_rfl
-    exact (Nat.pow_dvd_iff_le_padicValNat hp.ne_one (Int.natAbs_ne_zero.mpr hb)).mp
-      (h1.trans (Int.natAbs_dvd_natAbs.mpr hab))
-
-/-- The crux valuation inequality of the kernel-closure certificate: from the integer identity
-`N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and all factors nonzero, conclude `v_p(N) < v_p(K)`. -/
-private theorem padicValInt_lt_of_mul_eq {N S K W : ℤ} (hid : N * S = K * W)
-    (hpS : (p : ℤ) ∣ S) (hpW : ¬ (p : ℤ) ∣ W)
-    (hN0 : N ≠ 0) (hS0 : S ≠ 0) (hK0 : K ≠ 0) (hW0 : W ≠ 0) :
-    padicValInt p N < padicValInt p K := by
-  have hSval : 1 ≤ padicValInt p S :=
-    one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
-      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
-  have e1 := padicValInt.mul (p := p) hN0 hS0
-  rw [hid, padicValInt.mul (p := p) hK0 hW0, padicValInt.eq_zero_of_not_dvd hpW] at e1
-  omega
 
 /-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
 `N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation

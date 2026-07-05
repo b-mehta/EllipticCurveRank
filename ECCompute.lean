@@ -42,4 +42,6 @@ import ECCompute.Curves.RankTwentyEight
 import ECCompute.Curves.RankTwentyNine
 
 -- Upstream candidates
+import ECCompute.ForMathlib.PadicValInt
+import ECCompute.ForMathlib.RatDenom
 import ECCompute.ForMathlib.TwoTorsion
