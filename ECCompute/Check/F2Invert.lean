@@ -114,7 +114,9 @@ theorem checkInvRow_true {bi i n : Nat} :
       ∀ k', k' < M.length → (popParityK n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
   intro k M
   induction M generalizing k with
-  | nil => intro _ k' hk'; exact absurd hk' (Nat.not_lt_zero k')
+  | nil =>
+    intro _ k' hk'
+    exact absurd hk' (Nat.not_lt_zero k')
   | cons m ms ih =>
     intro hc k' hk'
     simp only [checkInvRow, Bool.and'_eq_and, Bool.and_eq_true] at hc
@@ -124,7 +126,8 @@ theorem checkInvRow_true {bi i n : Nat} :
     | succ k'' =>
       have hh := ih hrec k'' (by simpa using hk')
       have hidx : k + (k'' + 1) = k + 1 + k'' := by omega
-      rw [hidx]; exact hh
+      rw [hidx]
+      exact hh
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
@@ -134,7 +137,9 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} :
         (popParityK n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
   intro i B
   induction B generalizing i with
-  | nil => intro _ i' hi'; exact absurd hi' (Nat.not_lt_zero i')
+  | nil =>
+    intro _ i' hi'
+    exact absurd hi' (Nat.not_lt_zero i')
   | cons b bs ih =>
     intro hc i' hi' k' hk'
     simp only [checkInvGo, Bool.and'_eq_and, Bool.and_eq_true] at hc
@@ -144,7 +149,8 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} :
     | succ i'' =>
       have hh := ih hrec i'' (by simpa using hi') k' hk'
       have hidx : i + (i'' + 1) = i + 1 + i'' := by omega
-      rw [hidx]; exact hh
+      rw [hidx]
+      exact hh
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
 theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :

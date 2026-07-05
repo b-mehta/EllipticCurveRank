@@ -37,7 +37,9 @@ theorem checkBRow_true {a₂ a₄ a₆ : ℤ} {x : ℚ} {lab : List (ℕ × ℤ)
       ∀ j, j < lab.length → b.testBit j = lambdaComputeBool a₂ a₄ a₆ (lab.getD j (0, 0)).1
         ((lab.getD j (0, 0)).2 : ZMod (lab.getD j (0, 0)).1) x := by
   induction lab with
-  | nil => intro b _ j hj; exact absurd hj (Nat.not_lt_zero j)
+  | nil =>
+    intro b _ j hj
+    exact absurd hj (Nat.not_lt_zero j)
   | cons l ls ih =>
     intro b hb j hj
     simp only [checkBRow, Bool.and'_eq_and, Bool.and_eq_true] at hb
@@ -56,7 +58,9 @@ theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
         checkBRow a₂ a₄ a₆ (pt.getD i (0, 0)).1 (matB.getD i 0) lab = true := by
   intro matB
   induction matB with
-  | nil => intro _ _ i hi _; exact absurd hi (Nat.not_lt_zero i)
+  | nil =>
+    intro _ _ i hi _
+    exact absurd hi (Nat.not_lt_zero i)
   | cons b bs ih =>
     intro pt h i hi hip
     cases pt with
