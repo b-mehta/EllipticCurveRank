@@ -144,8 +144,7 @@ private def mkCertTerm (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
       hasRankGE_of_certificate $a1S $a2S $a3S $a4S $a6S c
         rfl rfl rfl rfl rfl
         (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl) (by quickRfl)
-        rfl (by decide)
-        (by rw [← Bool.not_eq_true', ← Bool.not'_eq_not]; quickRfl))
+        rfl (by quickRfl) (by quickRfl))
 
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do

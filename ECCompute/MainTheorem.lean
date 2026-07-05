@@ -199,8 +199,8 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (ht : c.t = 0)
-    (htorP : c.torsionPrime ≠ 0)
-    (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false) :
+    (htorP : (c.torsionPrime != 0) = true)
+    (htor : (!hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime) = true) :
     HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) (c.rho - c.t) := by
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
   -- by `getD`.  Every kernel-checked hypothesis above is `List`-based; the families here appear
@@ -222,10 +222,13 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
       (c.labels.getD j.val (0, 0)).1 (c.labels.getD j.val (0, 0)).2 = true :=
     fun j => checkLabels_true hlabC _ (hmemL j)
+  have htorP' : c.torsionPrime ≠ 0 := by simpa using htorP
+  have htor' : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false := by
+    simpa using htor
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
       (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP htor
+      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP' htor'
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute
