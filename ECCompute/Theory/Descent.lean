@@ -70,7 +70,7 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
-/-! ### The trusted theorem: additivity via the reduction factorisation
+/-! ### The trusted theorem: additivity via the reduction factorization
 
 Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
 `λ = εp_finite ∘ red_p`, where `red_p : E(ℚ) → E(𝔽ₚ)` is the reduction map
@@ -106,7 +106,7 @@ theorem map_eq_reducedCurve :
 
 /-- The descent character `λ_{p,θ}` presented as the composition
 `εp_finite θ ∘ (transport) ∘ red_p`, packaged as an `AddMonoidHom E(ℚ) → ZMod 2`.  This is the
-factorisation that makes additivity of `λ` free (see `lambda_map_add`). -/
+factorization that makes additivity of `λ` free (see `lambda_map_add`). -/
 noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=

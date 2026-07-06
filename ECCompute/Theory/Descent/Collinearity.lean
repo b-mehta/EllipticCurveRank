@@ -15,7 +15,7 @@ Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` yields
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square; this feeds the descent-character
 additivity proof.
 
-The factorisation is stated as an equation of values `∀ x, …` rather than of polynomials, which
+The factorization is stated as an equation of values `∀ x, …` rather than of polynomials, which
 is what the `θ`-corollary needs.  Its content is the three Vieta relations between `(ℓ, m)` and
 the symmetric functions of `x₁, x₂, x₃`, so everything reduces to `linear_combination`.
 

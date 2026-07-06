@@ -12,7 +12,7 @@ import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 # The Legendre character `ψ_p` and the simple-root fact (shared base)
 
 The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, shared between the two sides of
-the descent factorisation `λ = εp_finite ∘ red_p`: `ECCompute.Descent` (the rational character
+the descent factorization `λ = εp_finite ∘ red_p`: `ECCompute.Descent` (the rational character
 `λ`) and `ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εp_finite`).
 
 ## Main declarations
