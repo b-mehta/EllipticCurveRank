@@ -125,12 +125,12 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
     #[toExpr (0 : Int), mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E, toExpr (0 : Int),
       mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
       mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E, toExpr rho, pointsE,
-      toExpr ls.toList, toExpr matB, toExpr matM, toExpr tp]
+      toExpr ls.toList, toExpr matB, toExpr matM, toExpr (0 : Nat), toExpr tp]
 
 /-- Build the `hasRankGE_of_certificate` proof term directly.  Every referee obligation is a
 kernel-reducible `Bool` check discharged by `Lean.reflBoolTrue`: the model equality via
-`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s, and the four length obligations via
-`Nat.eq_of_beq_eq_true`. -/
+`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s, and the four length obligations plus
+`t = 0` via `Nat.eq_of_beq_eq_true`. -/
 private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
@@ -151,9 +151,11 @@ private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM E
     natTy (mkConst ``Int))
   let hlenB := hlenOf ``Certificate.matB natTy
   let hlenM := hlenOf ``Certificate.matM natTy
+  let ht := mkAppN (mkConst ``Nat.eq_of_beq_eq_true)
+    #[mkApp (mkConst ``Certificate.t) cExpr, toExpr (0 : Nat), rb]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
     #[a1E, a2E, a3E, a4E, a6E, cExpr,
-      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, rb, rb]
+      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, ht, rb, rb]
 
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do
