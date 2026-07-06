@@ -36,12 +36,11 @@ namespace ECCompute
 
 open WeierstrassCurve Module ModelIso ModelChange
 
-/-- Two Weierstrass curves are equal when their five coefficients agree, each certified by a
+/-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified by a
 kernel-reducible `BEq` check. -/
-theorem _root_.WeierstrassCurve.ext_of_beq {R : Type*} [BEq R] [LawfulBEq R]
-    {W W' : WeierstrassCurve R} (h₁ : (W.a₁ == W'.a₁) = true) (h₂ : (W.a₂ == W'.a₂) = true)
-    (h₃ : (W.a₃ == W'.a₃) = true) (h₄ : (W.a₄ == W'.a₄) = true) (h₆ : (W.a₆ == W'.a₆) = true) :
-    W = W' := by
+theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
+    (h₁ : (W.a₁ == W'.a₁) = true) (h₂ : (W.a₂ == W'.a₂) = true) (h₃ : (W.a₃ == W'.a₃) = true)
+    (h₄ : (W.a₄ == W'.a₄) = true) (h₆ : (W.a₆ == W'.a₆) = true) : W = W' := by
   cases W; cases W'
   simp only [WeierstrassCurve.mk.injEq]
   exact ⟨eq_of_beq h₁, eq_of_beq h₂, eq_of_beq h₃, eq_of_beq h₄, eq_of_beq h₆⟩
@@ -132,10 +131,10 @@ passes:
 * `hB`: the `(i, j)` entry of the character matrix `B` is the computed descent character
   `λ_{pⱼ,θⱼ}(pt i)` (via the kernel-reducible `lambdaCompute`);
 * `hinv`: the supplied inverse certifies `B` is invertible over `𝔽₂`;
-* `ht`, `htorP`, `htor`: the torsion witness certifies `t = 0`, since the monic `2`-division cubic
+* `htorP`, `htor`: the torsion witness certifies no rational `2`-torsion, since the monic `2`-division cubic
   has no root modulo the witness prime.
 
-Then the Mordell-Weil rank of `curve c.a₂ c.a₄ c.a₆` over `ℚ` is at least `c.rho - c.t`. -/
+Then the Mordell-Weil rank of `curve c.a₂ c.a₄ c.a₆` over `ℚ` is at least `c.rho`. -/
 theorem rank_ge_of_certificate (c : Certificate)
     (pt : Fin c.rho → ℚ × ℚ) (lab : Fin c.rho → ℕ × ℤ)
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
@@ -147,10 +146,9 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hBlen : c.matB.length = c.rho)
     (hMlen : c.matM.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
-    (ht : c.t = 0)
     (htorP : c.torsionPrime ≠ 0)
     (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false) :
-    HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
+    HasRankGE (curve c.a₂ c.a₄ c.a₆) c.rho := by
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
   -- Each label gives the descent hypotheses `DescentHyp`.
@@ -183,7 +181,6 @@ theorem rank_ge_of_certificate (c : Certificate)
   -- Assemble the deduction: `ρ ≤ finrank H`, and `t = 0`.
   have hbound : c.rho ≤ Module.finrank ℤ H + 0 := RankDeduction.rank_ge gH φH hindep htcard
   refine ⟨H, hHfin, ?_⟩
-  rw [ht, Nat.sub_zero]
   simpa using hbound
 
 /-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
@@ -195,7 +192,7 @@ private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h 
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
 target of the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` (the equation `hmodel`), and the referee facts
 of `rank_ge_of_certificate`, the Mordell-Weil rank of `toCurveQ a₁ a₂ a₃ a₄ a₆` over `ℚ` is at least
-`c.rho - c.t`. -/
+`c.rho`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hlenP : c.points.length = c.rho)
@@ -207,10 +204,9 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
     (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
-    (ht : c.t = 0)
     (htorP : (c.torsionPrime != 0) = true)
     (htor : (!hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime) = true) :
-    HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) (c.rho - c.t) := by
+    HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) c.rho := by
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
   -- by `getD`.  Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
@@ -234,10 +230,10 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have htorP' : c.torsionPrime ≠ 0 := by simpa using htorP
   have htor' : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false := by
     simpa using htor
-  have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
+  have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) c.rho :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
       (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP' htor'
+      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv htorP' htor'
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

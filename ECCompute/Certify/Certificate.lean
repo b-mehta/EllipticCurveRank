@@ -10,7 +10,7 @@ import ECCompute.Check.F2Invert
 # The rank-bound certificate data type
 
 `ECCompute.Certificate` bundles the data a referee audits to accept a lower bound on the
-Mordell-Weil rank of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. It is pure data; downstream
+Mordell-Weil rank of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ`. It is pure data; downstream
 checkers audit each field. The intended witness is the general Weierstrass model
 `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` over `ℤ`.
 
@@ -24,9 +24,8 @@ checkers audit each field. The intended witness is the general Weierstrass model
 * `matB` / `matM` encode the `rho × rho` character matrix `B` over `𝔽₂` and its claimed inverse
   `M`, in the `List Nat` bitmask layout of `ECCompute.F2Invert` (`matB` by rows, `matM` by
   columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
-* `t : ℕ` is the 2-torsion dimension `dim_{𝔽₂} E(ℚ)[2]`, and `torsionPrime : ℕ` carries its
-  witness: for the running example `t = 0`, a prime at which the 2-torsion cubic
-  `4x³ + b₂x² + 2b₄x + b₆` has no root.
+* `torsionPrime : ℕ` witnesses that `E(ℚ)` has no rational `2`-torsion: a prime at which the
+  `2`-torsion cubic `4x³ + b₂x² + 2b₄x + b₆` has no root.
 
 ## Layout conventions
 
@@ -36,7 +35,7 @@ enforce this.
 
 namespace ECCompute
 
-/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the integral
+/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ`, over the integral
 Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`. See the module docstring for the
 field-by-field description. -/
 structure Certificate where
@@ -50,7 +49,7 @@ structure Certificate where
   a₄ : ℤ
   /-- The constant coefficient of the Weierstrass model. -/
   a₆ : ℤ
-  /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
+  /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ`. -/
   rho : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
   points : List (ℚ × ℚ)
@@ -60,10 +59,8 @@ structure Certificate where
   matB : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   matM : List Nat
-  /-- The 2-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`. -/
-  t : ℕ
-  /-- A prime witnessing the torsion claim (for `t = 0`, one at which the 2-torsion cubic has no
-  root). -/
+  /-- A prime witnessing that `E(ℚ)` has no rational `2`-torsion: one at which the `2`-division
+  cubic has no root. -/
   torsionPrime : ℕ
   deriving Repr, DecidableEq
 
