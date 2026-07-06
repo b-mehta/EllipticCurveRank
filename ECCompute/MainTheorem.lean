@@ -36,6 +36,16 @@ namespace ECCompute
 
 open WeierstrassCurve Module ModelIso ModelChange
 
+/-- Two Weierstrass curves are equal when their five coefficients agree, each certified by a
+kernel-reducible `BEq` check. -/
+theorem _root_.WeierstrassCurve.ext_of_beq {R : Type*} [BEq R] [LawfulBEq R]
+    {W W' : WeierstrassCurve R} (h₁ : (W.a₁ == W'.a₁) = true) (h₂ : (W.a₂ == W'.a₂) = true)
+    (h₃ : (W.a₃ == W'.a₃) = true) (h₄ : (W.a₄ == W'.a₄) = true) (h₆ : (W.a₆ == W'.a₆) = true) :
+    W = W' := by
+  cases W; cases W'
+  simp only [WeierstrassCurve.mk.injEq]
+  exact ⟨eq_of_beq h₁, eq_of_beq h₂, eq_of_beq h₃, eq_of_beq h₄, eq_of_beq h₆⟩
+
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
 def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
