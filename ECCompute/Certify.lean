@@ -116,27 +116,44 @@ private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat �
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
     (matB matM : List Nat) (tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
-  let pairTy ← mkAppM ``Prod #[ratTy, ratTy]
-  let ptExprs ← pts.toList.mapM fun (xn, xd, yn, yd) =>
-    mkAppM ``Prod.mk #[coordExpr xn xd, coordExpr yn yd]
+  let pairTy := mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) ratTy ratTy
+  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) =>
+    mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
+      #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr (0 : Int), mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E, toExpr (0 : Int),
       mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
       mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E, toExpr rho, pointsE,
-      toExpr ls.toList, toExpr matB, toExpr matM, toExpr (0 : Nat), toExpr tp]
+      toExpr ls.toList, toExpr matB, toExpr matM, toExpr tp]
 
-/-- Build the `hasRankGE_of_certificate` proof term directly.  The five checker obligations and the
-two torsion obligations are `Lean.reflBoolTrue`; the `rfl` obligations are `Eq.refl` on an explicit
-value. -/
+/-- Build the `hasRankGE_of_certificate` proof term directly.  Every referee obligation is a
+kernel-reducible `Bool` check discharged by `Lean.reflBoolTrue`: the model equality via
+`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s, and the four length obligations via
+`Nat.eq_of_beq_eq_true`. -/
 private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
-  let hmodel ← mkEqRefl (mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E])
-  let hlen ← mkEqRefl (toExpr rho)
-  let ht ← mkEqRefl (toExpr (0 : Nat))
+  let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
+  let wCurve := mkAppN (mkConst ``curve)
+    #[mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E,
+      mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
+      mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E]
+  let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
+    #[wModel, wCurve, rb, rb, rb, rb, rb]
+  let rhoE := mkApp (mkConst ``Certificate.rho) cExpr
+  let natTy := mkConst ``Nat
+  let hlenOf (field : Name) (elemTy : Expr) : Expr :=
+    let lenE := mkAppN (mkConst ``List.length [Level.zero]) #[elemTy, mkApp (mkConst field) cExpr]
+    mkAppN (mkConst ``Nat.eq_of_beq_eq_true) #[lenE, rhoE, rb]
+  let hlenP := hlenOf ``Certificate.points (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
+    (mkConst ``Rat) (mkConst ``Rat))
+  let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
+    natTy (mkConst ``Int))
+  let hlenB := hlenOf ``Certificate.matB natTy
+  let hlenM := hlenOf ``Certificate.matM natTy
   return mkAppN (mkConst ``hasRankGE_of_certificate)
     #[a1E, a2E, a3E, a4E, a6E, cExpr,
-      hmodel, hlen, hlen, hlen, hlen, rb, rb, rb, rb, rb, ht, rb, rb]
+      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, rb, rb]
 
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do
