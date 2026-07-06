@@ -5,7 +5,8 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.ZMod.Basic
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Data.Matrix.Basic
+import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
 import ECCompute.Check.Fold
@@ -177,7 +178,7 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
     rw [popParityK_eq_popParity] at hb
     grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
-  exact ⟨⟨toMat B n, toMatCols M n, key, mul_eq_one_comm.mp key⟩, rfl⟩
+  exact IsUnit.of_mul_eq_one (toMatCols M n) key
 
 /-! ## Worked 3×3 example
 

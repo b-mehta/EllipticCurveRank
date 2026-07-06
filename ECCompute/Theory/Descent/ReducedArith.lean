@@ -66,8 +66,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
     (y : ZMod p) ^ 2 = (x : ZMod p) ^ 3 + (a₂ : ZMod p) * (x : ZMod p) ^ 2
       + (a₄ : ZMod p) * (x : ZMod p) + (a₆ : ZMod p) := by
   have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
-    have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
-    simpa [curve] using this
+    grind [WeierstrassCurve.Affine.equation_iff, curve]
   have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
     (div_eq_iff (by exact_mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
   have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
@@ -87,9 +86,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
     have := congrArg (Int.cast : ℤ → ZMod p) key
     push_cast at this
     linear_combination this
-  simp only [Rat.cast_def]
-  field_simp
-  linear_combination keyZ
+  grind [Rat.cast_def]
 
 /-- For `x₁ ≠ x₂` and good denominators, the ℚ identity
 `(x₃ + a₂ + x₁ + x₂)(x₁ - x₂)² = (y₁ - y₂)²` (with `x₃ = addX x₁ x₂ (slope …)`) reduces
@@ -147,9 +144,7 @@ theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :
 
 /-- On `curve a₂ a₄ a₆`, `y ≠ negY x y` whenever `y ≠ 0`. -/
 theorem y_ne_negY {x y : ℚ} (hy0 : y ≠ 0) : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by
-  rw [negY_curve]
-  intro h
-  exact hy0 (by linarith)
+  grind [negY_curve]
 
 /-- Doubling analogue of `reduced_addX`: for a point `(x, y)` with `y ≠ 0` and good denominators
 (including the doubled `x`-coordinate `x₃ = dblX`), the `ℓ`-free tangent identity
@@ -166,9 +161,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
-    simp only [curve]
-    field_simp
-    ring
+    grind [curve]
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
   have REL : (x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2
@@ -202,9 +195,7 @@ theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 :
   have hslopeval : (curve a₂ a₄ a₆).toAffine.slope x x y y
       = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) / (2 * y) := by
     rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hyℚ), negY_curve]
-    simp only [curve]
-    rw [div_eq_div_iff (by simpa using hyℚ) (by simpa using hyℚ)]
-    ring
+    grind [curve]
   have hx2 : ((x ^ 2).den : ZMod p) ≠ 0 := den_pow_ne_zero hdx 2
   have hdnum : ((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
     den_add_ne_zero (den_add_ne_zero (den_mul_ne_zero (by simp) hx2)

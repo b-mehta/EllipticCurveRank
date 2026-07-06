@@ -93,8 +93,7 @@ theorem negAddY_scale (x₁ x₂ y₁ ℓ : ℚ) :
 theorem addY_scale (x₁ x₂ y₁ ℓ : ℚ) :
     W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by
-  rw [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.addY, addX_scale s,
-    negAddY_scale s, negY_scale s]
+  grind [WeierstrassCurve.Affine.addY, addX_scale, negAddY_scale, negY_scale]
 
 /-- The slope scales by `v`. -/
 theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :

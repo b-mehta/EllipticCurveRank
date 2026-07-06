@@ -69,15 +69,8 @@ theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     have hab : a * b ≠ 0 := mul_ne_zero ha hb
     rw [← quadraticChar_one_iff_isSquare hab, ← quadraticChar_one_iff_isSquare ha,
       ← quadraticChar_one_iff_isSquare hb, map_mul]
-    rcases quadraticChar_dichotomy ha with hA | hA <;>
-      rcases quadraticChar_dichotomy hb with hB | hB <;>
-      rw [hA, hB] <;> decide
-  unfold psi
-  by_cases hA : IsSquare a <;> by_cases hB : IsSquare b
-  · rw [if_pos hA, if_pos hB, if_pos (key.mpr (by tauto)), add_zero]
-  · rw [if_pos hA, if_neg hB, if_neg (fun h => hB ((key.mp h).mp hA)), zero_add]
-  · rw [if_neg hA, if_pos hB, if_neg (fun h => hA ((key.mp h).mpr hB)), add_zero]
-  · rw [if_neg hA, if_neg hB, if_pos (key.mpr (by tauto))]; decide
+    grind [quadraticChar_dichotomy]
+  grind [psi]
 
 end Psi
 

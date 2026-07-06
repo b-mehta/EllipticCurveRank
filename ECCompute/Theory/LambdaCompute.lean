@@ -127,9 +127,7 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
   have hiff : legendreSym p (a.val : ℤ) = 1 ↔ IsSquare a := by
     rw [legendreSym.eq_one_iff p (hval.symm ▸ ha), hval]
   rw [psiCompute, psi, hjf]
-  by_cases hsq : IsSquare a
-  · rw [if_pos hsq, if_pos (hiff.mpr hsq)]
-  · rw [if_neg hsq, if_neg (hiff.not.mpr hsq)]
+  grind
 
 /-! ### Kernel-reducible evaluation of `λ` on an affine point -/
 
@@ -155,10 +153,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
       else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
            else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p)) := rfl
   rw [lambdaCompute, hlam]
-  split_ifs with hd hα
-  · rfl
-  · exact psiCompute_eq p hp2 hfd
-  · exact psiCompute_eq p hp2 hα
+  grind [psiCompute_eq]
 
 /-! ### `Bool`-valued mirror for fast kernel checks
 
@@ -187,12 +182,7 @@ character matrix entirely over `Bool` and recover the `ZMod 2` value only at the
 theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
     lambdaCompute a₂ a₄ a₆ p θ x = if lambdaComputeBool a₂ a₄ a₆ p θ x then 1 else 0 := by
   rw [lambdaCompute, lambdaComputeBool]
-  by_cases hd : (x.den : ZMod p) = 0
-  · rw [if_pos hd, if_pos hd]; rfl
-  · rw [if_neg hd, if_neg hd]
-    by_cases hα : (x.num : ZMod p) - θ * (x.den : ZMod p) = 0
-    · rw [if_pos hα, if_pos hα, psiCompute_eq_bool]
-    · rw [if_neg hα, if_neg hα, psiCompute_eq_bool]
+  grind [psiCompute_eq_bool]
 
 /-! ### Worked examples: kernel reduction by `rfl`
 

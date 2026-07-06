@@ -259,8 +259,7 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · by_cases hne : x₁ = x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
-      have hyne' : y₁ ≠ -y₂ := fun hcon =>
-        hxy ⟨hne, by rw [reducedCurve_negY]; exact hcon⟩
+      have hyne' : y₁ ≠ -y₂ := by grind [reducedCurve_negY]
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
         rw [reducedCurve_equation h₁, reducedCurve_equation h₂, hne]
       have hyeq : y₁ = y₂ := by grind
