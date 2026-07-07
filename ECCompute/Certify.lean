@@ -77,8 +77,13 @@ private def parseLabel (line : String) : Nat × Int :=
   | [p, t] => ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => (0, 0)
 
-/-- Syntax of the `certify_curve` tactic; see the module docstring. -/
+/-- Syntax of the `certify_curve` tactic; see the module docstring.  The `torsion ℓ` form concedes
+`t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `fullTorsion` form concedes
+`t = 2` (full rational `2`-torsion, e.g. square-discriminant curves) via the universal bound. -/
 syntax (name := certifyCurve) "certify_curve" " torsion " term:max " points " str
+  " labels " str : tactic
+
+syntax (name := certifyCurveFull) "certify_curve" " fullTorsion " " points " str
   " labels " str : tactic
 
 /-- Read `HasRankGE (toCurveQ a₁…a₆) ρ` off `goal`: rank `ρ` and the five coefficient `Expr`s. -/
@@ -114,7 +119,7 @@ private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat �
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
-    (matB matM : List Nat) (tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
+    (matB matM : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) ratTy ratTy
   let ptExprs := pts.toList.map fun (xn, xd, yn, yd) =>
@@ -125,13 +130,14 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
     #[toExpr (0 : Int), mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E, toExpr (0 : Int),
       mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
       mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E, toExpr rho, pointsE,
-      toExpr ls.toList, toExpr matB, toExpr matM, toExpr (0 : Nat), toExpr tp]
+      toExpr ls.toList, toExpr matB, toExpr matM, toExpr t, toExpr tp]
 
-/-- Build the `hasRankGE_of_certificate` proof term directly.  Every referee obligation is a
-kernel-reducible `Bool` check discharged by `Lean.reflBoolTrue`: the model equality via
-`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s, and the four length obligations plus
-`t = 0` via `Nat.eq_of_beq_eq_true`. -/
-private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM Expr := do
+/-- Build the `hasRankGE_of_certificate` proof term directly.  The model equality (via
+`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the four length obligations, and the
+five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`.  The torsion obligation
+`|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, or by
+the universal `certTorsionBound_two` for `t = 2`. -/
+private def mkCertProof (t : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
   let wCurve := mkAppN (mkConst ``curve)
@@ -151,32 +157,52 @@ private def mkCertProof (rho : Nat) (a1E a2E a3E a4E a6E cExpr : Expr) : MetaM E
     natTy (mkConst ``Int))
   let hlenB := hlenOf ``Certificate.matB natTy
   let hlenM := hlenOf ``Certificate.matM natTy
-  let ht := mkAppN (mkConst ``Nat.eq_of_beq_eq_true)
-    #[mkApp (mkConst ``Certificate.t) cExpr, toExpr (0 : Nat), rb]
+  -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curve c.a₂ …`.
+  let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
+  let a4C := mkApp (mkConst ``Certificate.a₄) cExpr
+  let a6C := mkApp (mkConst ``Certificate.a₆) cExpr
+  let htors :=
+    if t == 0 then
+      let tpC := mkApp (mkConst ``Certificate.torsionPrime) cExpr
+      mkAppN (mkConst ``certTorsionBound_zero) #[a2C, a4C, a6C, tpC, rb, rb]
+    else
+      mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
     #[a1E, a2E, a3E, a4E, a6E, cExpr,
-      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, ht, rb, rb]
+      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, htors]
+
+/-- The shared driver: read the goal coefficients `a₁…a₆` and target rank `ρ_goal`, parse the two
+data files (which must have `ρ_goal + t` entries), compute the descent matrix and its `𝔽₂` inverse,
+and assign the `hasRankGE_of_certificate` proof term.  The certificate's `rho` is `ρ_goal + t`, so
+its conclusion `rank ≥ rho - t` is defeq to the goal `rank ≥ ρ_goal`. -/
+private def runCertify (t tpNat : Nat) (path lpath : String) : TacticM Unit := do
+  let goal ← getMainGoal
+  let (rhoGoal, a1E, a2E, a3E, a4E, a6E) ← readGoal goal
+  let v1 ← getIntE a1E
+  let v2 ← getIntE a2E
+  let v3 ← getIntE a3E
+  let v4 ← getIntE a4E
+  let rho := rhoGoal + t
+  let (pts, lbls) ← readData path lpath rho
+  let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
+  let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
+  let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
+  goal.assign (← mkCertProof t a1E a2E a3E a4E a6E cExpr)
+  replaceMainGoal []
 
 @[tactic certifyCurve]
 def evalCertifyCurve : Tactic := fun stx => do
   match stx with
   | `(tactic| certify_curve torsion $tp points $path:str labels $lpath:str) => do
-    -- read the coefficients `a₁…a₆` and rank `ρ` from the goal (so the curve and its coefficient
-    -- abbreviations must already be `unfold`ed to literals), then parse the two data files
-    let goal ← getMainGoal
-    let (rho, a1E, a2E, a3E, a4E, a6E) ← readGoal goal
-    let v1 ← getIntE a1E
-    let v2 ← getIntE a2E
-    let v3 ← getIntE a3E
-    let v4 ← getIntE a4E
     let tpNat ← getNatE (← elabTermEnsuringType tp (mkConst ``Nat))
-    let (pts, lbls) ← readData path.getString lpath.getString rho
-    let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
-    -- compute the character matrix and its 𝔽₂ inverse, then build the proof term directly
-    let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
-    let cExpr ← mkCertExpr rho pts lbls matB matM tpNat a1E a2E a3E a4E a6E
-    goal.assign (← mkCertProof rho a1E a2E a3E a4E a6E cExpr)
-    replaceMainGoal []
+    runCertify 0 tpNat path.getString lpath.getString
+  | _ => throwUnsupportedSyntax
+
+@[tactic certifyCurveFull]
+def evalCertifyCurveFull : Tactic := fun stx => do
+  match stx with
+  | `(tactic| certify_curve fullTorsion points $path:str labels $lpath:str) => do
+    runCertify 2 0 path.getString lpath.getString
   | _ => throwUnsupportedSyntax
 
 end ECCompute

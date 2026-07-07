@@ -32,6 +32,7 @@ import ECCompute.Certify.CertifyEval
 import ECCompute.Certify
 
 -- Certified curves
+import ECCompute.Curves.CurveFourteen
 import ECCompute.Curves.RankTwenty
 import ECCompute.Curves.RankTwentyOne
 import ECCompute.Curves.RankTwentyTwo

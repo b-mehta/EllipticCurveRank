@@ -6,6 +6,7 @@ Authors: Bhavik Mehta
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
 import ECCompute.Theory.ModelIso
+import ECCompute.Theory.Descent.Defs
 
 /-!
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
@@ -136,6 +137,136 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
   obtain ⟨z, hz⟩ :=
     exists_intRoot_of_twoTorsion a₁ a₂ a₃ a₄ a₆ W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
   exact no_int_root_of_hasRootMod_eq_false hℓ h z hz
+
+/-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
+
+For the short model `curve a₂ a₄ a₆` (with `a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
+`(x, 0)` where `x` is a rational root of `f = X³ + a₂X² + a₄X + a₆`.  Since `f` has at most three
+roots, the full `2`-torsion has at most four elements.  This is the torsion witness used by
+certificates that concede `t = 2` (full rational `2`-torsion, e.g. curves with square discriminant),
+for which the bound `rank ≥ ρ - t` needs only `|E(ℚ)[2]| ≤ 2^t = 4`. -/
+
+open Polynomial in
+/-- On the short model, a nonzero rational `2`-torsion point `some x y` has `y = 0`, and its
+`x`-coordinate is a root of the cubic `X³ + a₂X² + a₄X + a₆`. -/
+private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+    (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
+    y = 0 ∧ x ∈ (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ).roots := by
+  have hmonic : (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ).toPoly.Monic :=
+    Cubic.monic_of_a_eq_one' ..
+  have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := by
+    by_contra hne
+    exact Affine.Point.some_ne_zero _
+      (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
+  have hy0 : y = 0 := by
+    simp only [WeierstrassCurve.Affine.negY, curve] at hy
+    linarith
+  refine ⟨hy0, ?_⟩
+  rw [Cubic.mem_roots_iff hmonic.ne_zero]
+  have heq := (WeierstrassCurve.Affine.equation_iff _ _).mp h.1
+  simp only [curve] at heq
+  rw [hy0] at heq
+  push_cast at heq ⊢
+  linear_combination -heq
+
+open Polynomial in
+/-- Core of the `|E(ℚ)[2]| ≤ 4` bound: the `2`-torsion set of the short model is finite, with at
+most four elements.  Both facts come from the injection into the identity plus the (≤ 3) roots of
+the cubic. -/
+private theorem twoTorsion_finite_and_ncard_le (a₂ a₄ a₆ : ℤ) :
+    ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).Finite ∧
+      ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).ncard ≤ 4 := by
+  classical
+  set W := curve a₂ a₄ a₆ with hW
+  set Q : Cubic ℚ := ⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ with hQ
+  set T : Set W.toAffine.Point := {P | P + P = 0} with hT
+  set ι : W.toAffine.Point → Option ℚ :=
+    fun P => match P with
+      | .zero => none
+      | .some x _ _ => some x with hιdef
+  set S : Finset (Option ℚ) := (Q.roots.toFinset).insertNone with hS
+  have hinj : Set.InjOn ι T := by
+    intro P hP P' hP' hEq
+    simp only [hT, Set.mem_setOf_eq] at hP hP'
+    obtain _ | ⟨x, y, h⟩ := P
+    · obtain _ | ⟨x', y', h'⟩ := P'
+      · rfl
+      · simp [hιdef] at hEq
+    · obtain _ | ⟨x', y', h'⟩ := P'
+      · simp [hιdef] at hEq
+      · simp only [hιdef, Option.some.injEq] at hEq
+        subst hEq
+        obtain ⟨rfl, _⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP
+        obtain ⟨rfl, _⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h' hP'
+        rfl
+  have himg : ι '' T ⊆ ↑S := by
+    rintro o ⟨P, hP, rfl⟩
+    simp only [hT, Set.mem_setOf_eq] at hP
+    obtain _ | ⟨x, y, h⟩ := P
+    · simp [hιdef, hS]
+    · obtain ⟨_, hroot⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP
+      simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone, Multiset.mem_toFinset]
+      exact hroot
+  have hScard : S.card ≤ 4 := by
+    rw [hS, Finset.card_insertNone]
+    have := Cubic.card_roots_le (P := Q)
+    omega
+  refine ⟨Set.Finite.of_finite_image (S.finite_toSet.subset himg) hinj, ?_⟩
+  calc T.ncard
+      = (ι '' T).ncard := (hinj.ncard_image).symm
+    _ ≤ (↑S : Set (Option ℚ)).ncard := Set.ncard_le_ncard himg S.finite_toSet
+    _ = S.card := Set.ncard_coe_finset S
+    _ ≤ 4 := hScard
+
+/-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
+instance twoTorsion_finite (a₂ a₄ a₆ : ℤ) :
+    Finite {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
+  (twoTorsion_finite_and_ncard_le a₂ a₄ a₆).1.to_subtype
+
+/-- The rational `2`-torsion of the short model `curve a₂ a₄ a₆` has at most four elements: the
+identity together with the (at most three) nonzero points `(x, 0)` for `x` a root of the cubic. -/
+theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
+    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 4 := by
+  have h := (twoTorsion_finite_and_ncard_le a₂ a₄ a₆).2
+  rwa [← Nat.card_coe_set_eq] at h
+
+/-- The `t = 0` witness: if the monic `2`-division cubic of the short model has no root modulo a
+witness prime `ℓ ≠ 0`, then the only rational `2`-torsion point is the identity, so the `2`-torsion
+has at most one element. -/
+theorem card_twoTorsion_le_one_of_hasRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ = false) :
+    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
+  have hnn : ∀ P : (curve a₂ a₄ a₆).toAffine.Point, P + P = 0 → P = 0 := by
+    intro P hP
+    refine no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 a₂ 0 a₄ a₆ hℓ _
+      rfl rfl rfl rfl rfl ?_ P hP
+    have e1 : (0 : ℤ) ^ 2 + 4 * a₂ = 4 * a₂ := by ring
+    have e2 : 8 * (2 * a₄ + 0 * 0) = 16 * a₄ := by ring
+    have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * a₆) = 64 * a₆ := by ring
+    rw [e1, e2, e3]
+    exact h
+  have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
+    ⟨fun a b => Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
+  exact Finite.card_le_one_iff_subsingleton.mpr this
+
+/-! ## Certificate-facing torsion bounds
+
+These two wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
+`|E(ℚ)[2]| ≤ 2^t` bound the certificate soundness theorem consumes: `t = 0` from a no-root witness,
+`t = 2` unconditionally (the universal `≤ 4` bound). -/
+
+/-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
+theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (ℓ != 0) = true)
+    (h : (!hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ) = true) :
+    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 := by
+  rw [pow_zero]
+  exact card_twoTorsion_le_one_of_hasRootMod a₂ a₄ a₆ (by simpa using hp) (by simpa using h)
+
+/-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/
+theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
+    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 2 :=
+  card_twoTorsion_le_four a₂ a₄ a₆
 
 /-! ## Worked example: a `t = 0` certificate
 

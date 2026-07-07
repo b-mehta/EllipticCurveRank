@@ -97,29 +97,23 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
   exact Matrix.linearIndependent_rows_of_isUnit
     (F2Invert.checkInv_isUnit c.rho c.matB c.matM hBlen hMlen hinv)
 
-/-- No nonzero rational `2`-torsion, so the span `H` of the certified points has trivial
-`2`-torsion. -/
-private theorem torsionBy_two_eq_bot {c : Certificate}
-    (htorP : c.torsionPrime ≠ 0)
-    (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false)
-    (H : Submodule ℤ (curve c.a₂ c.a₄ c.a₆).toAffine.Point) :
-    Submodule.torsionBy ℤ H 2 = ⊥ := by
-  rw [eq_bot_iff]
-  intro x hx
-  rw [Submodule.mem_torsionBy_iff] at hx
-  rw [Submodule.mem_bot]
-  have hxE : (x : (curve c.a₂ c.a₄ c.a₆).toAffine.Point) + x = 0 := by
-    have h2 : (2 : ℤ) • (x : (curve c.a₂ c.a₄ c.a₆).toAffine.Point) = 0 := by
+/-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
+curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
+private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
+    (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
+    Nat.card (Submodule.torsionBy ℤ H 2) ≤
+      Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} := by
+  have hmap : ∀ x : Submodule.torsionBy ℤ H 2,
+      ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) + ((x : H) : _) = 0 := by
+    intro x
+    have hx : (2 : ℤ) • (x : H) = 0 := (Submodule.mem_torsionBy_iff _ _).mp x.2
+    have h2 : (2 : ℤ) • ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) = 0 := by
       rw [← Submodule.coe_smul, hx, Submodule.coe_zero]
     rwa [two_zsmul] at h2
-  refine Subtype.ext ?_
-  refine no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 c.a₂ 0 c.a₄ c.a₆ htorP _
-    rfl rfl rfl rfl rfl ?_ _ hxE
-  have e1 : (0 : ℤ) ^ 2 + 4 * c.a₂ = 4 * c.a₂ := by ring
-  have e2 : 8 * (2 * c.a₄ + 0 * 0) = 16 * c.a₄ := by ring
-  have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * c.a₆) = 64 * c.a₆ := by ring
-  rw [e1, e2, e3]
-  exact htor
+  refine Nat.card_le_card_of_injective (fun x => ⟨((x : H) : _), hmap x⟩) ?_
+  intro a b hab
+  have h := congrArg Subtype.val hab
+  exact Subtype.coe_injective (Subtype.coe_injective h)
 
 /-- The soundness theorem on the short integral model.  Let `c` be a certificate whose curve is the
 short integral model `curve c.a₂ c.a₄ c.a₆` (i.e. `a₁ = a₃ = 0`), and suppose every referee check
@@ -131,8 +125,7 @@ passes:
 * `hB`: the `(i, j)` entry of the character matrix `B` is the computed descent character
   `λ_{pⱼ,θⱼ}(pt i)` (via the kernel-reducible `lambdaCompute`);
 * `hinv`: the supplied inverse certifies `B` is invertible over `𝔽₂`;
-* `ht`, `htorP`, `htor`: the torsion witness certifies `t = 0`, since the monic `2`-division cubic
-  has no root modulo the witness prime.
+* `htors`: the torsion witness bounds the rational `2`-torsion of the curve, `|E(ℚ)[2]| ≤ 2^t`.
 
 Then the Mordell-Weil rank of `curve c.a₂ c.a₄ c.a₆` over `ℚ` is at least `c.rho - c.t`. -/
 theorem rank_ge_of_certificate (c : Certificate)
@@ -146,9 +139,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hBlen : c.matB.length = c.rho)
     (hMlen : c.matM.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
-    (ht : c.t = 0)
-    (htorP : c.torsionPrime ≠ 0)
-    (htor : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false) :
+    (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
@@ -176,14 +167,12 @@ theorem rank_ge_of_certificate (c : Certificate)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩ with hgH
   set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom with hφH
-  have htcard : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ 0 := by
-    rw [torsionBy_two_eq_bot htorP htor H, pow_zero]
-    exact Nat.card_unique
-  -- Assemble the deduction: `ρ ≤ finrank H`, and `t = 0`.
-  have hbound : c.rho ≤ Module.finrank ℤ H + 0 := RankDeduction.rank_ge gH φH hindep htcard
-  refine ⟨H, hHfin, ?_⟩
-  rw [ht, Nat.sub_zero]
-  simpa using hbound
+  -- The `2`-torsion of `H` is bounded by the curve's, hence by `2^t`.
+  have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
+    (card_torsionBy_le c.a₂ c.a₄ c.a₆ H).trans htors
+  -- Assemble the deduction: `ρ ≤ finrank H + t`, hence `ρ - t ≤ finrank H`.
+  have hbound : c.rho ≤ Module.finrank ℤ H + c.t := RankDeduction.rank_ge_le gH φH hindep htorH
+  exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
 
 /-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
 private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
@@ -206,9 +195,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
     (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
-    (ht : c.t = 0)
-    (htorP : (c.torsionPrime != 0) = true)
-    (htor : (!hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime) = true) :
+    (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) (c.rho - c.t) := by
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
   -- by `getD`.  Every kernel-checked hypothesis above is `List`-based; the families here appear
@@ -230,13 +217,10 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
       (c.labels.getD j.val (0, 0)).1 (c.labels.getD j.val (0, 0)).2 = true :=
     fun j => checkLabels_true hlabC _ (hmemL j)
-  have htorP' : c.torsionPrime ≠ 0 := by simpa using htorP
-  have htor' : hasRootMod (4 * c.a₂) (16 * c.a₄) (64 * c.a₆) c.torsionPrime = false := by
-    simpa using htor
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
       (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv ht htorP' htor'
+      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute
