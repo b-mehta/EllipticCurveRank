@@ -330,4 +330,22 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
     Nat.pow_right_injective (le_refl 2) key
   omega
 
+/-- The bound with only an *upper* bound on the 2-torsion: if `ρ` group elements have
+`𝔽₂`-linearly independent images under `φ`, and `|H[2]| ≤ 2 ^ t`, then `ρ ≤ rank H + t`.  This is
+what a certificate needs when it concedes `t` torsion dimensions without pinning down the exact
+2-torsion of the generated subgroup. -/
+theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
+    (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
+    (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :
+    ρ ≤ finrank ℤ H + t := by
+  have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep
+  have key := natCard_modN_two (H := H)
+  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
+  have hmono : (2 : ℕ) ^ ρ ≤ 2 ^ (finrank ℤ H + t) :=
+    calc (2 : ℕ) ^ ρ ≤ 2 ^ finrank (ZMod 2) (ModN H 2) := Nat.pow_le_pow_right (by norm_num) h1
+      _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := key
+      _ ≤ 2 ^ finrank ℤ H * 2 ^ t := Nat.mul_le_mul_left _ ht
+      _ = 2 ^ (finrank ℤ H + t) := (pow_add 2 _ _).symm
+  exact (Nat.pow_le_pow_iff_right (by norm_num)).mp hmono
+
 end RankDeduction
