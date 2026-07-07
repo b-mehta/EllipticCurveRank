@@ -171,7 +171,6 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
   linear_combination -heq
 
 open Polynomial in
-open Polynomial in
 /-- Core of the `|E(ℚ)[2]| ≤ 4` bound: the `2`-torsion set of the short model is finite, with at
 most four elements.  Both facts come from the injection into the identity plus the (≤ 3) roots of
 the cubic. -/
@@ -186,7 +185,7 @@ private theorem twoTorsion_finite_and_ncard_le (a₂ a₄ a₆ : ℤ) :
     fun P => match P with
       | .zero => none
       | .some x _ _ => some x with hιdef
-  set S : Finset (Option ℚ) := insert none (Q.roots.toFinset.image (some : ℚ → Option ℚ)) with hS
+  set S : Finset (Option ℚ) := (Q.roots.toFinset).insertNone with hS
   have hinj : Set.InjOn ι T := by
     intro P hP P' hP' hEq
     simp only [hT, Set.mem_setOf_eq] at hP hP'
@@ -206,15 +205,13 @@ private theorem twoTorsion_finite_and_ncard_le (a₂ a₄ a₆ : ℤ) :
     simp only [hT, Set.mem_setOf_eq] at hP
     obtain _ | ⟨x, y, h⟩ := P
     · simp [hιdef, hS]
-    · simp only [hιdef, hS, Finset.coe_insert, Set.mem_insert_iff, Finset.coe_image,
-        Set.mem_image, Finset.mem_coe, Multiset.mem_toFinset]
-      obtain ⟨_, hroot⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP
-      exact Or.inr ⟨x, hroot, rfl⟩
-  have hScard : S.card ≤ 4 :=
-    calc S.card ≤ (Q.roots.toFinset.image some).card + 1 := Finset.card_insert_le _ _
-      _ ≤ Q.roots.toFinset.card + 1 := by gcongr; exact Finset.card_image_le
-      _ ≤ 3 + 1 := by gcongr; exact Cubic.card_roots_le
-      _ = 4 := rfl
+    · obtain ⟨_, hroot⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP
+      simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone, Multiset.mem_toFinset]
+      exact hroot
+  have hScard : S.card ≤ 4 := by
+    rw [hS, Finset.card_insertNone]
+    have := Cubic.card_roots_le (P := Q)
+    omega
   refine ⟨Set.Finite.of_finite_image (S.finite_toSet.subset himg) hinj, ?_⟩
   calc T.ncard
       = (ι '' T).ncard := (hinj.ncard_image).symm
