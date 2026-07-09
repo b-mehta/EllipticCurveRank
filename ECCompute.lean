@@ -23,6 +23,7 @@ import ECCompute.Check.Primes
 import ECCompute.Check.ColumnCheck
 import ECCompute.Check.Torsion
 import ECCompute.Check.Points
+import ECCompute.Check.JInvariant
 
 -- Main theory
 import ECCompute.MainTheorem
