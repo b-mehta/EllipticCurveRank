@@ -9,10 +9,11 @@ import ECCompute.Certify.CertifyEval
 /-!
 # The `certify_curve` tactic
 
-`certify_curve` closes a goal `HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) ρ`.  It reads the coefficients
-and rank from the goal (so the curve must be `unfold`ed to literals first) and the generating points
-and descent labels from two data files, computes the descent-character matrix and its `𝔽₂` inverse,
-and discharges the referee obligations of `hasRankGE_of_certificate`.
+`certify_curve` closes a goal `HasRankGE W ρ`, where `W` is a Weierstrass curve over `ℚ` whose
+coefficients are integers.  It reads the coefficients and rank from the goal (so the curve must be
+`unfold`ed to a `WeierstrassCurve` literal first) and the generating points and descent labels from
+two data files, computes the descent-character matrix and its `𝔽₂` inverse, and discharges the
+referee obligations of `hasRankGE_of_certificate`.
 
 Each data file has one entry per line.  A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
@@ -20,7 +21,7 @@ of the 2-division cubic mod `p`.
 
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
-  unfold curveExample exampleA₄ exampleA₆   -- expose `toCurveQ 1 0 0 <lit> <lit>` in the goal
+  unfold curveExample exampleA₄ exampleA₆   -- expose the `WeierstrassCurve` literal in the goal
   certify_curve torsion 67 points "data/example.txt" labels "data/example-labels.txt"
 ```
 -/
@@ -91,14 +92,31 @@ syntax (name := certifyCurveFull) "certify_curve" " fullTorsion " " points " str
 syntax (name := certifyCurveOne) "certify_curve" " oneTorsion " " root " term:max
   " witness " term:max " points " str " labels " str : tactic
 
-/-- Read `HasRankGE (toCurveQ a₁…a₆) ρ` off `goal`: rank `ρ` and the five coefficient `Expr`s. -/
-private def readGoal (goal : MVarId) : MetaM (Nat × Expr × Expr × Expr × Expr × Expr) := do
+/-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
+negation, or an `Int.cast` of an `ℤ` literal.  Errors if the coefficient is not an integer. -/
+private def getRatIntE (e : Expr) : MetaM Int := do
+  let checkInt (q : Rat) : MetaM Int := do
+    if q.den == 1 then return q.num
+    throwError "certify_curve: curve coefficient is not an integer{indentExpr e}"
+  if let some q := e.rat? then return ← checkInt q          -- `OfNat` / `Neg (OfNat …)`
+  if e.isAppOfArity ``Int.cast 3 then                       -- `((n : ℤ) : ℚ)` with `n` a literal
+    if let some n := e.appArg!.int? then return n
+  if let some q := (← whnfR e).rat? then return ← checkInt q
+  if let some q := (← whnf e).rat? then return ← checkInt q  -- unfold abbreviations
+  throwError "certify_curve: expected an integer-valued rational coefficient, got{indentExpr e}"
+
+/-- Read `HasRankGE W ρ` off `goal`, where `W` reduces to a `WeierstrassCurve.mk` literal with
+integer-valued rational coefficients.  Returns the rank `ρ`, the original curve `Expr` `W`, and the
+five integer coefficient values. -/
+private def readGoal (goal : MVarId) :
+    MetaM (Nat × Expr × Int × Int × Int × Int × Int) := do
   let (``HasRankGE, #[curveE, rhoE]) := (← goal.getType).getAppFnArgs
     | throwError "certify_curve: goal must be `HasRankGE _ _`"
-  let (``ModelIso.toCurveQ, #[a1E, a2E, a3E, a4E, a6E]) := curveE.getAppFnArgs
-    | throwError "certify_curve: the curve must be `toCurveQ …`; `unfold` your curve definition \
-        and its coefficient abbreviations first"
-  return (← getNatE rhoE, a1E, a2E, a3E, a4E, a6E)
+  let (``WeierstrassCurve.mk, #[_, q1E, q2E, q3E, q4E, q6E]) := (← whnf curveE).getAppFnArgs
+    | throwError "certify_curve: the curve must reduce to a `WeierstrassCurve` literal; \
+        `unfold` your curve definition and its coefficient abbreviations first"
+  return (← getNatE rhoE, curveE,
+    ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
 /-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
 `rho` entries. -/
@@ -143,7 +161,7 @@ five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`.  The torsi
 `|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
 `certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
 universal `certTorsionBound_two` for `t = 2`.  `torsRoot` supplies the `t = 1` root `R`. -/
-private def mkCertProof (t : Nat) (torsRoot : Int) (a1E a2E a3E a4E a6E cExpr : Expr) :
+private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
@@ -177,26 +195,38 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (a1E a2E a3E a4E a6E cExpr : 
     else
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
-    #[a1E, a2E, a3E, a4E, a6E, cExpr,
+    #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW,
       hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, htors]
 
-/-- The shared driver: read the goal coefficients `a₁…a₆` and target rank `ρ_goal`, parse the two
-data files (which must have `ρ_goal + t` entries), compute the descent matrix and its `𝔽₂` inverse,
-and assign the `hasRankGE_of_certificate` proof term.  The certificate's `rho` is `ρ_goal + t`, so
-its conclusion `rank ≥ rho - t` is defeq to the goal `rank ≥ ρ_goal`. -/
+/-- The shared driver: read the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank
+`ρ_goal`, parse the two data files (which must have `ρ_goal + t` entries), compute the descent
+matrix and its `𝔽₂` inverse, and assign the `hasRankGE_of_certificate` proof term.  The coefficient
+bridge `W = ⟨↑a₁, …, ↑a₆⟩` is built purely with `ext_of_beq` on five `reflBoolTrue` `BEq` checks (no
+side goals).  The certificate's `rho` is `ρ_goal + t`, so its conclusion `rank ≥ rho - t` is defeq to
+the goal `rank ≥ ρ_goal`. -/
 private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
-  let (rhoGoal, a1E, a2E, a3E, a4E, a6E) ← readGoal goal
-  let v1 ← getIntE a1E
-  let v2 ← getIntE a2E
-  let v3 ← getIntE a3E
-  let v4 ← getIntE a4E
+  let (rhoGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
+  let a1E := toExpr v1
+  let a2E := toExpr v2
+  let a3E := toExpr v3
+  let a4E := toExpr v4
+  let a6E := toExpr v6
   let rho := rhoGoal + t
   let (pts, lbls) ← readData path lpath rho
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
   let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
   let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
-  goal.assign (← mkCertProof t torsRoot a1E a2E a3E a4E a6E cExpr)
+  -- The coefficient bridge `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each a
+  -- kernel-reducible `reflBoolTrue`: pure `Expr`, no side goals.
+  let ratTy := mkConst ``Rat
+  let castE (aE : Expr) : Expr :=
+    mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) aE
+  let litCurve := mkAppN (mkConst ``WeierstrassCurve.mk [Level.zero])
+    #[ratTy, castE a1E, castE a2E, castE a3E, castE a4E, castE a6E]
+  let rb := Lean.reflBoolTrue
+  let hW := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq) #[wE, litCurve, rb, rb, rb, rb, rb]
+  goal.assign (← mkCertProof t torsRoot wE a1E a2E a3E a4E a6E cExpr hW)
   replaceMainGoal []
 
 @[tactic certifyCurve]

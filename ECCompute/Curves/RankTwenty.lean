@@ -19,17 +19,16 @@ over `ℚ` has Mordell-Weil rank at least `20`, the 1993 rank record of K. Nagao
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
-
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of Nagao's rank-20 curve (general model). -/
-abbrev nagao20A₄ : ℤ := -431092980766333677958362095891166
+abbrev nagao20A₄ : ℚ := -431092980766333677958362095891166
 
 /-- The `a₆` coefficient of Nagao's rank-20 curve (general model). -/
-abbrev nagao20A₆ : ℤ := 5156283555366643659035652799871176909391533088196
+abbrev nagao20A₆ : ℚ := 5156283555366643659035652799871176909391533088196
 
 /-- Nagao's rank-20 elliptic curve over `ℚ`. Certified rank ≥ 20 in `nagao_hasRankGE_20`. -/
-def curveNagao20 : WeierstrassCurve ℚ := toCurveQ 1 0 0 nagao20A₄ nagao20A₆
+def curveNagao20 : WeierstrassCurve ℚ := ⟨1, 0, 0, nagao20A₄, nagao20A₆⟩
 
 /-- Nagao's curve has Mordell-Weil rank at least `20`. -/
 theorem nagao_hasRankGE_20 : HasRankGE curveNagao20 20 := by

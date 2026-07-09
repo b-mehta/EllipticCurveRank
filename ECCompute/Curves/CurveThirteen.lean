@@ -26,13 +26,13 @@ labels in `data/rank13-labels.txt`.
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of the rank-3 curve. -/
-abbrev curve13A₄ : ℤ := -82
+abbrev curve13A₄ : ℚ := -82
 
 /-- The rank-3 curve `y² = x³ - 82 x` over `ℚ`. -/
-def curveThirteen : WeierstrassCurve ℚ := toCurveQ 0 0 0 curve13A₄ 0
+def curveThirteen : WeierstrassCurve ℚ := ⟨0, 0, 0, curve13A₄, 0⟩
 
 /-- The rank-3 curve has Mordell-Weil rank at least `3`, with a single rational
 `2`-torsion point. -/

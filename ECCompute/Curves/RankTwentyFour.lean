@@ -20,18 +20,17 @@ rest.
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
-
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of the Martin-McMillen rank-24 curve (general model). -/
-abbrev mm24A₄ : ℤ := -120039822036992245303534619191166796374
+abbrev mm24A₄ : ℚ := -120039822036992245303534619191166796374
 
 /-- The `a₆` coefficient of the Martin-McMillen rank-24 curve (general model). -/
-abbrev mm24A₆ : ℤ := 504224992484910670010801799168082726759443756222911415116
+abbrev mm24A₆ : ℚ := 504224992484910670010801799168082726759443756222911415116
 
 /-- The Martin-McMillen rank-24 elliptic curve over `ℚ`. Certified rank ≥ 24 in
 `martinMcMillen_hasRankGE_24`. -/
-def curveMartinMcMillen24 : WeierstrassCurve ℚ := toCurveQ 1 0 1 mm24A₄ mm24A₆
+def curveMartinMcMillen24 : WeierstrassCurve ℚ := ⟨1, 0, 1, mm24A₄, mm24A₆⟩
 
 /-- The Martin-McMillen curve has Mordell-Weil rank at least `24`. -/
 theorem martinMcMillen_hasRankGE_24 : HasRankGE curveMartinMcMillen24 24 := by

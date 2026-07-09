@@ -22,21 +22,21 @@ certificate in the sense of `ECCompute.MainTheorem`.
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
+open WeierstrassCurve
 
 -- The `rfl` certificate checks (`checkInv`, the `matB` entries) reduce large `Nat` recursions in
 -- the elaborator, so raise the recursion limit for the whole file.
 
 /-- The `a₄` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
-abbrev ekA₄ : ℤ := -27006183241630922218434652145297453784768054621836357954737385
+abbrev ekA₄ : ℚ := -27006183241630922218434652145297453784768054621836357954737385
 
 /-- The `a₆` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
-abbrev ekA₆ : ℤ :=
+abbrev ekA₆ : ℚ :=
   55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497
 
 /-- The Elkies-Klagsbrun rank-29 elliptic curve over `ℚ` (general model).  Certified to have
 Mordell-Weil rank at least `29` in `elkiesKlagsbrun_hasRankGE_29`. -/
-def curveElkiesKlagsbrun : WeierstrassCurve ℚ := toCurveQ 1 0 0 ekA₄ ekA₆
+def curveElkiesKlagsbrun : WeierstrassCurve ℚ := ⟨1, 0, 0, ekA₄, ekA₆⟩
 
 /-- The Elkies-Klagsbrun curve has Mordell-Weil rank at least `29`. -/
 theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 := by

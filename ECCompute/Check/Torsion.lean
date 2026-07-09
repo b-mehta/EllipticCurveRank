@@ -216,8 +216,8 @@ open Polynomial in
 private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
-    y = 0 ∧ x ∈ (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ).roots := by
-  have hmonic : (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ).toPoly.Monic :=
+    y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
+  have hmonic : (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).toPoly.Monic :=
     Cubic.monic_of_a_eq_one' ..
   have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := by
     by_contra hne
@@ -285,7 +285,7 @@ open Polynomial in
 private theorem twoTorsion_xcoord_mem_roots (a₂ a₄ a₆ : ℤ) (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
-    x ∈ (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ).roots.toFinset :=
+    x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots.toFinset :=
   Multiset.mem_toFinset.mpr (twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP).2
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
@@ -299,7 +299,7 @@ identity together with the (at most three) nonzero points `(x, 0)` for `x` a roo
 theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 4 := by
   have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
-  have := Cubic.card_roots_le (P := (⟨1, (a₂ : ℚ), (a₄ : ℚ), (a₆ : ℚ)⟩ : Cubic ℚ))
+  have := Cubic.card_roots_le (P := (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ))
   omega
 
 /-- The `t = 0` witness: if the monic `2`-division cubic of the short model has no root modulo a
@@ -416,10 +416,10 @@ For `a₁ = 1, a₂ = -3, a₃ = 1, a₄ = -3, a₆ = -2`, the monic 2-division 
 /-- The kernel check: the monic 2-division cubic of the example curve has no root mod `29`. -/
 example : hasRootMod (-11) (-40) (-112) 29 = false := rfl
 
-open ModelIso in
 /-- Assembled `t = 0`: the example curve has no nonzero rational 2-torsion. -/
-example (P : (toCurveQ 1 (-3) 1 (-3) (-2)).toAffine.Point) (hP : P + P = 0) : P = 0 :=
+example (P : (⟨1, -3, 1, -3, -2⟩ : WeierstrassCurve ℚ).toAffine.Point) (hP : P + P = 0) :
+    P = 0 :=
   no_nonzero_twoTorsion_of_hasRootMod_eq_false 1 (-3) 1 (-3) (-2) (ℓ := 29) (by norm_num)
-    (toCurveQ 1 (-3) 1 (-3) (-2)) rfl rfl rfl rfl rfl rfl P hP
+    ⟨1, -3, 1, -3, -2⟩ rfl rfl rfl rfl rfl rfl P hP
 
 end ECCompute
