@@ -20,16 +20,16 @@ Mordell-Weil and 2-Selmer groups*); `certify_curve` does the rest.
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of the Martin-McMillen curve (general model). -/
-abbrev mmA₄ : ℤ := -19252966408674012828065964616418441723
+abbrev mmA₄ : ℚ := -19252966408674012828065964616418441723
 
 /-- The `a₆` coefficient of the Martin-McMillen curve (general model). -/
-abbrev mmA₆ : ℤ := 32685500727716376257923347071452044295907443056345614006
+abbrev mmA₆ : ℚ := 32685500727716376257923347071452044295907443056345614006
 
 /-- The Martin-McMillen curve over `ℚ`. Certified rank ≥ 23 in `martinMcMillen_hasRankGE_23`. -/
-def curveMartinMcMillen : WeierstrassCurve ℚ := toCurveQ 1 0 1 mmA₄ mmA₆
+def curveMartinMcMillen : WeierstrassCurve ℚ := ⟨1, 0, 1, mmA₄, mmA₆⟩
 
 /-- The Martin-McMillen curve has Mordell-Weil rank at least `23`. -/
 theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 := by

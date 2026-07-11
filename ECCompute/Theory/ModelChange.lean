@@ -11,12 +11,12 @@ import ECCompute.Theory.ModelIso
 
 The certified rank bound (`ECCompute.rank_ge_of_certificate`) lives on the integer short model
 `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character `lambda`
-is defined. A general integral Weierstrass curve `ModelIso.toCurveQ a₁ a₂ a₃ a₄ a₆`
+is defined. A general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`
 (`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.pointAddEquiv`
 completes the square but only to a *rational*-coefficient short model; this file adds the integral
 scaling step.
 
-The change of variables `⟨u, r, s, t⟩ = ⟨1/2, 0, -a₁/2, -a₃/2⟩` carries `toCurveQ a₁ a₂ a₃ a₄ a₆`
+The change of variables `⟨u, r, s, t⟩ = ⟨1/2, 0, -a₁/2, -a₃/2⟩` carries `⟨a₁, a₂, a₃, a₄, a₆⟩`
 to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invariants `b₂ = a₁² + 4a₂`,
 `b₄ = 2a₄ + a₁a₃`, `b₆ = a₃² + 4a₆`:
 
@@ -193,30 +193,35 @@ def intShortA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
 def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
 
 /-- The integral short model `curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
-integral Weierstrass curve `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
+integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   curve (intShortA₂ a₁ a₂) (intShortA₄ a₁ a₃ a₄) (intShortA₆ a₃ a₆)
 
+/-- The general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` over `ℚ`. -/
+def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
+  ⟨a₁, a₂, a₃, a₄, a₆⟩
+
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
-`u = 1/2`) is a group isomorphism from the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` to the integral
+`u = 1/2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
 short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
 def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
-  (pointAddEquiv a₁ a₂ a₃ a₄ a₆).trans <|
-    scaleEquiv (W := shortModel a₁ a₂ a₃ a₄ a₆) (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
+    (genModel a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
+  (pointAddEquiv (genModel a₁ a₂ a₃ a₄ a₆)).trans <|
+    scaleEquiv (W := shortModel (genModel a₁ a₂ a₃ a₄ a₆))
+      (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       ⟨two_ne_zero,
         by simp only [intShortModel, curve, shortModel_a₁, mul_zero],
         by
-          simp only [intShortModel, curve, intShortA₂, shortModel_a₂]
+          simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
           push_cast
           ring,
         by simp only [intShortModel, curve, shortModel_a₃, mul_zero],
         by
-          simp only [intShortModel, curve, intShortA₄, shortModel_a₄]
+          simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
           push_cast
           ring,
         by
-          simp only [intShortModel, curve, intShortA₆, shortModel_a₆]
+          simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
           push_cast
           ring⟩
 

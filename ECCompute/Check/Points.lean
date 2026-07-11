@@ -29,11 +29,12 @@ def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
         + a₆ * xd ^ 3 * yd ^ 2
 
 /-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
-the affine Weierstrass equation of `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
+the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
-      (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation x y := by
-  simp only [WeierstrassCurve.Affine.equation_iff, toCurveQ, chkZ, beq_iff_eq]
+      (⟨a₁, a₂, a₃, a₄, a₆⟩ :
+        WeierstrassCurve ℚ).toAffine.Equation x y := by
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, beq_iff_eq]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
@@ -51,16 +52,17 @@ theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
 theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
-  simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff, toCurveQ]
+  simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff]
 
-/-- Check that every point in a list lies on `toCurveQ a₁ a₂ a₃ a₄ a₆`. -/
+/-- Check that every point in a list lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
   allList (fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
 
 /-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
 theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts = true ↔
-      ∀ p ∈ pts, (toCurveQ a₁ a₂ a₃ a₄ a₆).toAffine.Equation p.1 p.2 := by
+      ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ :
+        WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_eq_true, chkZ_iff]
 
 /-! ## Worked example
@@ -72,7 +74,7 @@ The running example is `y² + xy + y = x³` (`a₁ = a₃ = 1`, `a₂ = a₄ = a
 example : chkZ 1 0 1 0 0 0 0 = true := rfl
 
 /-- Hence `(0, 0)` satisfies the affine Weierstrass equation, from the `rfl` certificate. -/
-example : (toCurveQ 1 0 1 0 0).toAffine.Equation 0 0 :=
+example : (⟨1, 0, 1, 0, 0⟩ : WeierstrassCurve ℚ).toAffine.Equation 0 0 :=
   (chkZ_iff 1 0 1 0 0 0 0).mp rfl
 
 end ECCompute.ModelIso

@@ -19,17 +19,16 @@ over `ℚ` has Mordell-Weil rank at least `22`, the 1997 rank record of S. Fermi
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
-
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of Fermigier's rank-22 curve (general model). -/
-abbrev fermigier22A₄ : ℤ := -940299517776391362903023121165864
+abbrev fermigier22A₄ : ℚ := -940299517776391362903023121165864
 
 /-- The `a₆` coefficient of Fermigier's rank-22 curve (general model). -/
-abbrev fermigier22A₆ : ℤ := 10707363070719743033425295515449274534651125011362
+abbrev fermigier22A₆ : ℚ := 10707363070719743033425295515449274534651125011362
 
 /-- Fermigier's rank-22 elliptic curve over `ℚ`. Certified rank ≥ 22 in `fermigier_hasRankGE_22`. -/
-def curveFermigier22 : WeierstrassCurve ℚ := toCurveQ 1 0 1 fermigier22A₄ fermigier22A₆
+def curveFermigier22 : WeierstrassCurve ℚ := ⟨1, 0, 1, fermigier22A₄, fermigier22A₆⟩
 
 /-- Fermigier's curve has Mordell-Weil rank at least `22`. -/
 theorem fermigier_hasRankGE_22 : HasRankGE curveFermigier22 22 := by

@@ -28,8 +28,9 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
 
 * `rank_ge_of_certificate`: the bound on the short integral model `curve c.a₂ c.a₄ c.a₆`, where the
   descent character lives.
-* `hasRankGE_of_certificate`: the front door for a general model `toCurveQ a₁ … a₆`, obtained by
-  transporting the short-model bound along `ModelChange.generalToShortEquiv`.
+* `hasRankGE_of_certificate`: the front door for an arbitrary curve `W` whose coefficients are the
+  integers `a₁ … a₆`, obtained by transporting the short-model bound along
+  `ModelChange.generalToShortEquiv`.
 -/
 
 namespace ECCompute
@@ -181,10 +182,12 @@ private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h 
   exact List.getElem_mem h
 
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
-target of the general model `toCurveQ a₁ a₂ a₃ a₄ a₆` (the equation `hmodel`), and the referee facts
-of `rank_ge_of_certificate`, the Mordell-Weil rank of `toCurveQ a₁ a₂ a₃ a₄ a₆` over `ℚ` is at least
-`c.rho`. -/
+target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`
+with those coefficients (the `haᵢ` hypotheses), and the referee facts of `rank_ge_of_certificate`,
+the Mordell-Weil rank of `W` over `ℚ` is at least `c.rho`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
+    (W : WeierstrassCurve ℚ)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
     (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hlenP : c.points.length = c.rho)
     (hlenL : c.labels.length = c.rho)
@@ -196,7 +199,9 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
-    HasRankGE (toCurveQ a₁ a₂ a₃ a₄ a₆) (c.rho - c.t) := by
+    HasRankGE W (c.rho - c.t) := by
+  -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
+  rw [hW]
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
   -- by `getD`.  Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
@@ -204,8 +209,9 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
   have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
     fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
-  have hcurve : curve c.a₂ c.a₄ c.a₆ = toCurveQ 0 c.a₂ 0 c.a₄ c.a₆ := by
-    simp only [curve, toCurveQ, Int.cast_zero]
+  have hcurve : curve c.a₂ c.a₄ c.a₆
+      = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
+    simp only [curve]
   rw [checkPoints_iff] at hpt
   have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation
       (c.points.getD i.val (0, 0)).1 (c.points.getD i.val (0, 0)).2 := by

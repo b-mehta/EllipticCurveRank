@@ -19,18 +19,17 @@ in `data/rank21.txt`, descent labels in `data/rank21-labels.txt`; `certify_curve
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
-
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of the Nagao-Kouya rank-21 curve (general model). -/
-abbrev nk21A₄ : ℤ := -215843772422443922015169952702159835
+abbrev nk21A₄ : ℚ := -215843772422443922015169952702159835
 
 /-- The `a₆` coefficient of the Nagao-Kouya rank-21 curve (general model). -/
-abbrev nk21A₆ : ℤ := -19474361277787151947255961435459054151501792241320535
+abbrev nk21A₆ : ℚ := -19474361277787151947255961435459054151501792241320535
 
 /-- The Nagao-Kouya rank-21 elliptic curve over `ℚ`. Certified rank ≥ 21 in
 `nagaoKouya_hasRankGE_21`. -/
-def curveNagaoKouya21 : WeierstrassCurve ℚ := toCurveQ 1 1 1 nk21A₄ nk21A₆
+def curveNagaoKouya21 : WeierstrassCurve ℚ := ⟨1, 1, 1, nk21A₄, nk21A₆⟩
 
 /-- The Nagao-Kouya curve has Mordell-Weil rank at least `21`. -/
 theorem nagaoKouya_hasRankGE_21 : HasRankGE curveNagaoKouya21 21 := by

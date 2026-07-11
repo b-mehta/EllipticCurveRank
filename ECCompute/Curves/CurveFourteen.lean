@@ -25,19 +25,19 @@ coordinates) in `data/rank14.txt`, descent labels in `data/rank14-labels.txt`.
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
+open WeierstrassCurve
 
 /-- The `a₂` coefficient of the rank-4 curve. -/
-abbrev curve14A₂ : ℤ := -1
+abbrev curve14A₂ : ℚ := -1
 
 /-- The `a₄` coefficient of the rank-4 curve. -/
-abbrev curve14A₄ : ℤ := -24649
+abbrev curve14A₄ : ℚ := -24649
 
 /-- The `a₆` coefficient of the rank-4 curve. -/
-abbrev curve14A₆ : ℤ := 1355209
+abbrev curve14A₆ : ℚ := 1355209
 
 /-- The rank-4 curve `y² = x³ - x² - 24649 x + 1355209` over `ℚ`. -/
-def curveFourteen : WeierstrassCurve ℚ := toCurveQ 0 curve14A₂ 0 curve14A₄ curve14A₆
+def curveFourteen : WeierstrassCurve ℚ := ⟨0, curve14A₂, 0, curve14A₄, curve14A₆⟩
 
 /-- The rank-4 curve has Mordell-Weil rank at least `4`, despite full rational `2`-torsion. -/
 theorem curveFourteen_hasRankGE_4 : HasRankGE curveFourteen 4 := by

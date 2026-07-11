@@ -19,18 +19,17 @@ over `ℚ` has Mordell-Weil rank at least `28`, the 2006 rank record of N. D. El
 
 namespace ECCompute
 
-open WeierstrassCurve ModelIso ModelChange
-
+open WeierstrassCurve
 
 /-- The `a₄` coefficient of Elkies' rank-28 curve (general model). -/
-abbrev elkies28A₄ : ℤ := -20067762415575526585033208209338542750930230312178956502
+abbrev elkies28A₄ : ℚ := -20067762415575526585033208209338542750930230312178956502
 
 /-- The `a₆` coefficient of Elkies' rank-28 curve (general model). -/
-abbrev elkies28A₆ : ℤ :=
+abbrev elkies28A₆ : ℚ :=
   34481611795030556467032985690390720374855944359319180361266008296291939448732243429
 
 /-- Elkies' rank-28 elliptic curve over `ℚ`. Certified rank ≥ 28 in `elkies_hasRankGE_28`. -/
-def curveElkies28 : WeierstrassCurve ℚ := toCurveQ 1 (-1) 1 elkies28A₄ elkies28A₆
+def curveElkies28 : WeierstrassCurve ℚ := ⟨1, -1, 1, elkies28A₄, elkies28A₆⟩
 
 /-- Elkies' curve has Mordell-Weil rank at least `28`. -/
 theorem elkies_hasRankGE_28 : HasRankGE curveElkies28 28 := by
