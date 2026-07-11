@@ -43,9 +43,9 @@ theorem curveThirteen_hasRankGE_3 : HasRankGE curveThirteen 3 := by
     points "data/rank13.txt" labels "data/rank13-labels.txt"
 
 /-- The rank-3 curve is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
-instance : curveThirteen.IsElliptic := isElliptic_of_bne (by refl_bool)
+instance : curveThirteen.IsElliptic := isElliptic_of_bne (by quickRfl)
 
 /-- The `j`-invariant of the rank-3 curve is `1728` (it has complex multiplication by `ℤ[i]`). -/
-theorem curveThirteen_j : curveThirteen.j = 1728 := j_eq_of_beq _ 1728 (by refl_bool)
+theorem curveThirteen_j : curveThirteen.j = 1728 := j_eq_of_beq _ 1728 (by quickRfl)
 
 end ECCompute
