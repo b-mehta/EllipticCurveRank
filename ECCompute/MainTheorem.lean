@@ -210,7 +210,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
     fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
   have hcurve : curve c.a₂ c.a₄ c.a₆
-      = (⟨(0 : ℚ), (c.a₂ : ℚ), (0 : ℚ), (c.a₄ : ℚ), (c.a₆ : ℚ)⟩ : WeierstrassCurve ℚ) := by
+      = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
     simp only [curve]
   rw [checkPoints_iff] at hpt
   have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation
