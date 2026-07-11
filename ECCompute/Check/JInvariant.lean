@@ -14,7 +14,8 @@ model of a curve (mathlib's `WeierstrassCurve.variableChange_j`), so it can be r
 model `⟨a₁, …, a₆⟩` with no minimal model needed.
 
 `j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`, avoiding division; the
-per-curve obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true` (`j_eq_of_beq`).
+per-curve obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true`, discharged
+by `j_eq_of_beq`.
 -/
 
 namespace ECCompute
@@ -44,7 +45,7 @@ theorem j_eq_of_beq (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ)
 instance makes `.j` well-formed for the curve. -/
 instance : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).IsElliptic := isElliptic_of_bne (by quickRfl)
 
-/-- Worked example: `y² = x³ - 82x` has `j = 1728`, via the kernel `Bool` check `c₄³ == Δ · 1728`. -/
+/-- Worked example: `y² = x³ - 82x` has `j = 1728`, via the kernel check `c₄³ == Δ · 1728`. -/
 example : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).j = 1728 := j_eq_of_beq _ 1728 (by quickRfl)
 
 end ECCompute

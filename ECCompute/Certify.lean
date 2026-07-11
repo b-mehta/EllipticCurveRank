@@ -201,9 +201,9 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
 /-- The shared driver: read the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank
 `ρ_goal`, parse the two data files (which must have `ρ_goal + t` entries), compute the descent
 matrix and its `𝔽₂` inverse, and assign the `hasRankGE_of_certificate` proof term.  The coefficient
-bridge `W = ⟨↑a₁, …, ↑a₆⟩` is built purely with `ext_of_beq` on five `reflBoolTrue` `BEq` checks (no
-side goals).  The certificate's `rho` is `ρ_goal + t`, so its conclusion `rank ≥ rho - t` is defeq to
-the goal `rank ≥ ρ_goal`. -/
+bridge `W = ⟨↑a₁, …, ↑a₆⟩` is built purely with `ext_of_beq` on five `reflBoolTrue` `BEq` checks
+(no side goals).  The certificate's `rho` is `ρ_goal + t`, so its conclusion `rank ≥ rho - t` is
+defeq to the goal `rank ≥ ρ_goal`. -/
 private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
   let (rhoGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal

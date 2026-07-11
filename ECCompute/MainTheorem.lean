@@ -37,8 +37,8 @@ namespace ECCompute
 
 open WeierstrassCurve Module ModelIso ModelChange
 
-/-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified by a
-kernel-reducible `BEq` check. -/
+/-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified
+by a kernel-reducible `BEq` check. -/
 theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
     (h₁ : (W.a₁ == W'.a₁) = true) (h₂ : (W.a₂ == W'.a₂) = true) (h₃ : (W.a₃ == W'.a₃) = true)
     (h₄ : (W.a₄ == W'.a₄) = true) (h₆ : (W.a₆ == W'.a₆) = true) : W = W' := by
@@ -183,8 +183,8 @@ private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h 
 
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
 target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`
-with those coefficients (the `haᵢ` hypotheses), and the referee facts of `rank_ge_of_certificate`,
-the Mordell-Weil rank of `W` over `ℚ` is at least `c.rho`. -/
+equal to that model (`hW`), and the referee facts of `rank_ge_of_certificate`, the Mordell-Weil
+rank of `W` over `ℚ` is at least `c.rho`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
@@ -209,8 +209,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
   have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
     fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
-  have hcurve : curve c.a₂ c.a₄ c.a₆
-      = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
+  have hcurve : curve c.a₂ c.a₄ c.a₆ = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
     simp only [curve]
   rw [checkPoints_iff] at hpt
   have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation

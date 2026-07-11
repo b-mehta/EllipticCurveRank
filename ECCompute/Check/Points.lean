@@ -32,8 +32,7 @@ def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
 the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
-      (⟨a₁, a₂, a₃, a₄, a₆⟩ :
-        WeierstrassCurve ℚ).toAffine.Equation x y := by
+      (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
   simp only [WeierstrassCurve.Affine.equation_iff, chkZ, beq_iff_eq]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
@@ -61,8 +60,7 @@ noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ 
 /-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
 theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts = true ↔
-      ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ :
-        WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
+      ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_eq_true, chkZ_iff]
 
 /-! ## Worked example
