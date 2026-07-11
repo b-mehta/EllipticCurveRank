@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certify
+import ECCompute.Check.JInvariant
 
 /-!
 # A rank-4 curve with full rational 2-torsion
@@ -43,5 +44,12 @@ def curveFourteen : WeierstrassCurve ℚ := ⟨0, curve14A₂, 0, curve14A₄, c
 theorem curveFourteen_hasRankGE_4 : HasRankGE curveFourteen 4 := by
   unfold curveFourteen curve14A₂ curve14A₄ curve14A₆
   certify_curve fullTorsion points "data/rank14.txt" labels "data/rank14-labels.txt"
+
+/-- The rank-4 curve is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curveFourteen.IsElliptic := isElliptic_of_bne (by quickRfl)
+
+/-- The `j`-invariant of the rank-4 curve. -/
+theorem curveFourteen_j : curveFourteen.j = 404370344147392 / 42649271289 :=
+  j_eq_of_beq _ _ (by quickRfl)
 
 end ECCompute

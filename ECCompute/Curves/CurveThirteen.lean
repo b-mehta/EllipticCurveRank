@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certify
+import ECCompute.Check.JInvariant
 
 /-!
 # A rank-3 curve with a single rational 2-torsion point
@@ -40,5 +41,11 @@ theorem curveThirteen_hasRankGE_3 : HasRankGE curveThirteen 3 := by
   unfold curveThirteen curve13A₄
   certify_curve oneTorsion root 0 witness 5
     points "data/rank13.txt" labels "data/rank13-labels.txt"
+
+/-- The rank-3 curve is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curveThirteen.IsElliptic := isElliptic_of_bne (by quickRfl)
+
+/-- The `j`-invariant of the rank-3 curve is `1728` (it has complex multiplication by `ℤ[i]`). -/
+theorem curveThirteen_j : curveThirteen.j = 1728 := j_eq_of_beq _ 1728 (by quickRfl)
 
 end ECCompute
