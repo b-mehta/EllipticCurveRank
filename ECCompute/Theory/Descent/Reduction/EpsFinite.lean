@@ -32,8 +32,6 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-open scoped Classical
-
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-- The reduced Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ZMod p`, i.e. the reduction

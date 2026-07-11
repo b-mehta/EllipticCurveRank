@@ -60,7 +60,8 @@ structure Certificate where
   matB : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   matM : List Nat
-  /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is `rank ≥ ρ - t`. -/
+  /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
+  `rank ≥ ρ - t`. -/
   t : ℕ
   /-- A prime witnessing the `2`-torsion claim (for `t = 0`, one at which the `2`-division cubic has
   no root). -/

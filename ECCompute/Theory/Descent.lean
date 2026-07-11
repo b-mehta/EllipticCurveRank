@@ -33,8 +33,6 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-open scoped Classical
-
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate -/
@@ -157,6 +155,6 @@ theorem lambdaHom_apply {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  grind [two_nsmul, map_add]
+  grind [two_nsmul]
 
 end ECCompute

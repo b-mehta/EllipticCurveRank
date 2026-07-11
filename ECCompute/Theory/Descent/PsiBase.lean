@@ -28,8 +28,6 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-open scoped Classical
-
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
