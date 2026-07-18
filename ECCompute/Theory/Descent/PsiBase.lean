@@ -100,7 +100,7 @@ theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ a₆ p θ ≠ 0 := by
   have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
-    have := h.root; simpa [fval] using this
+    simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
       = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
         + 18 * a₂ * a₄ * a₆) := by
@@ -116,7 +116,7 @@ theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a�
   apply h.discr
   rw [hΔ]
   have hfd' : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := by
-    have := hfd; simpa [fderiv] using this
+    simpa [fderiv] using hfd
   push_cast
   linear_combination
     (16 * (-3 * θ ^ 2 - 2 * (a₂ : ZMod p) * θ + (a₂ : ZMod p) ^ 2 - 4 * (a₄ : ZMod p)) *
