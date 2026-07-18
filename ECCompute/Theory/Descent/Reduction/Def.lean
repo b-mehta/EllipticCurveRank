@@ -55,9 +55,7 @@ private theorem Trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2
       = (x : ZMod p) := by
   rw [Trep_map_zero, Trep_map_two, Rat.cast_def, hden]
-  push_cast
-  rw [div_eq_div_iff (pow_ne_zero 3 hwne) (pow_ne_zero 2 hwne)]
-  ring
+  grind
 
 private theorem Trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2
