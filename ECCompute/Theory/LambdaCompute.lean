@@ -115,7 +115,6 @@ def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
 `psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
-  classical
   have hp : p.Prime := Fact.out
   -- the natural-number value `a.val` casts back to `a`, and is nonzero mod `p`
   have hval : ((a.val : ℤ) : ZMod p) = a := by
