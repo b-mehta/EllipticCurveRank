@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
 import ECCompute.ForMathlib.RatDenom
+import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod
@@ -139,8 +140,8 @@ theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) 
   ring
 
 /-- On `curve a₂ a₄ a₆`, `negY x y = -y` (the curve has `a₁ = a₃ = 0`). -/
-theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y := by
-  simp [WeierstrassCurve.Affine.negY, curve]
+theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x y
 
 /-- On `curve a₂ a₄ a₆`, `y ≠ negY x y` whenever `y ≠ 0`. -/
 theorem y_ne_negY {x y : ℚ} (hy0 : y ≠ 0) : y ≠ (curve a₂ a₄ a₆).toAffine.negY x y := by

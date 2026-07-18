@@ -47,3 +47,4 @@ import ECCompute.Curves.RankTwentyNine
 import ECCompute.ForMathlib.PadicValInt
 import ECCompute.ForMathlib.RatDenom
 import ECCompute.ForMathlib.TwoTorsion
+import ECCompute.ForMathlib.WeierstrassCurveAffine

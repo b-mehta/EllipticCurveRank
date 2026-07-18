@@ -1,0 +1,24 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+
+/-!
+# Negation on Weierstrass curves with `a₁ = a₃ = 0`
+
+For a Weierstrass curve `W` with `W.a₁ = 0` and `W.a₃ = 0`, the negation map `negY` on affine
+points is simply `y ↦ -y`.
+-/
+
+namespace WeierstrassCurve.Affine
+
+variable {R : Type*} [CommRing R]
+
+/-- On a Weierstrass curve with `a₁ = a₃ = 0`, negation is `negY x y = -y`. -/
+theorem negY_of_a₁_a₃_eq_zero (W : WeierstrassCurve R) (ha1 : W.a₁ = 0) (ha3 : W.a₃ = 0)
+    (x y : R) : W.toAffine.negY x y = -y := by
+  simp [negY, ha1, ha3]
+
+end WeierstrassCurve.Affine

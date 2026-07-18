@@ -568,8 +568,9 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
 
 /-- Reduced-curve negation is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
 private theorem reduced_negY (X Y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y := by
-  simp [WeierstrassCurve.Affine.negY, WeierstrassCurve.map, curveℤ]
+    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
+    (by simp [WeierstrassCurve.map, curveℤ]) X Y
 
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` survives reduction, so does the slope:
 from `ℓ² = addX + a₂ + x₁ + x₂` a nonzero `addX`-denominator forces a nonzero `ℓ`-denominator. -/
@@ -750,8 +751,7 @@ private theorem red_p_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
   rw [Affine.Point.add_of_Y_eq hx12 hy, red_p_zero, red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1]
   have hyneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
       (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
-    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := by
-      simp [WeierstrassCurve.Affine.negY, curve]
+    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := negY_curve x₂ y₂
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
     rw [reduced_negY]
     linear_combination hcast + hYbar

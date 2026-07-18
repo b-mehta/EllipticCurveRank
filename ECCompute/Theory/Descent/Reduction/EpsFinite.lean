@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
+import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Algebra.Field.ZMod
 
 /-!
@@ -87,8 +88,8 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
 private theorem reducedCurve_negY (x y : ZMod p) :
-    (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y := by
-  simp [WeierstrassCurve.Affine.negY, reducedCurve]
+    (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y = -y :=
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x y
 
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
