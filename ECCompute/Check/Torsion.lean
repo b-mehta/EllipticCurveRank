@@ -43,25 +43,31 @@ theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ 
   exact ((h.pow 3).add ((Int.ModEq.refl c₂).mul (h.pow 2))).add
     ((Int.ModEq.refl c₁).mul h) |>.add (Int.ModEq.refl c₀)
 
-/-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
-theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 := by
+/-- If a `ℤ → ℤ` map that is invariant mod `ℓ` (`hmod`) fails the `anyBelow ℓ` residue test (`h`),
+then it has no integer root. Shared core of the cubic and quadratic no-root lemmas. -/
+private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (hmod : ∀ {a b : ℤ}, a ≡ b [ZMOD (ℓ : ℤ)] → eval a ≡ eval b [ZMOD (ℓ : ℤ)])
+    (h : anyBelow ℓ (fun r => eval (r : ℤ) % (ℓ : ℤ) == 0) = false) (u : ℤ) : eval u ≠ 0 := by
   intro hu
   -- reduce `u` to its residue `r = u % ℓ ∈ {0, …, ℓ-1}`
   set r : ℤ := u % (ℓ : ℤ) with hr
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
   have hr0 : 0 ≤ r := Int.emod_nonneg u (by exact_mod_cast hℓ)
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
-  -- `r.toNat` is congruent to `u` mod `ℓ`, and `cubicEval` at `u` is `0`, so the residue is a root
-  have hcong : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
+  -- `r.toNat` is congruent to `u` mod `ℓ`, and `eval` at `u` is `0`, so the residue is a root
+  have hcong : eval (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
     have huv : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr0
-    have hmod : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by rw [huv, hr]; exact Int.mod_modEq u _
-    have hthis : cubicEval c₂ c₁ c₀ (r.toNat : ℤ) % (ℓ : ℤ) = cubicEval c₂ c₁ c₀ u % (ℓ : ℤ) :=
-      cubicEval_modEq (ℓ : ℤ) hmod
+    have hmodEq : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by rw [huv, hr]; exact Int.mod_modEq u _
+    have hthis : eval (r.toNat : ℤ) % (ℓ : ℤ) = eval u % (ℓ : ℤ) := hmod hmodEq
     rw [hthis, hu, Int.zero_emod]
-  -- but `hasRootMod = false` says no tested residue is a root, a contradiction
-  rw [hasRootMod, anyBelow_eq_false] at h
+  -- but the test is `false`, i.e. no tested residue is a root, a contradiction
+  rw [anyBelow_eq_false] at h
   grind
+
+/-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
+theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 :=
+  no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
 
 /-! ## Quadratic no-root machinery (for the `t = 1` cofactor)
 
@@ -85,20 +91,8 @@ theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]
 
 /-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 := by
-  intro hu
-  set r : ℤ := u % (ℓ : ℤ) with hr
-  have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
-  have hr0 : 0 ≤ r := Int.emod_nonneg u (by exact_mod_cast hℓ)
-  have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
-  have hcong : quadEval b c (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
-    have huv : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr0
-    have hmod : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by rw [huv, hr]; exact Int.mod_modEq u _
-    have hthis : quadEval b c (r.toNat : ℤ) % (ℓ : ℤ) = quadEval b c u % (ℓ : ℤ) :=
-      quadEval_modEq (ℓ : ℤ) hmod
-    rw [hthis, hu, Int.zero_emod]
-  rw [quadHasRootMod, anyBelow_eq_false] at h
-  grind
+    (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 :=
+  no_int_root_of_anyBelow hℓ (quadEval_modEq (ℓ : ℤ)) h u
 
 open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
