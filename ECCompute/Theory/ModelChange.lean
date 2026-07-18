@@ -201,6 +201,24 @@ def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   ⟨a₁, a₂, a₃, a₄, a₆⟩
 
+private lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
+  simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
+  push_cast
+  ring
+
+private lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
+  simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
+  push_cast
+  ring
+
+private lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
+  simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
+  push_cast
+  ring
+
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
 `u = 1/2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
 short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
@@ -211,18 +229,9 @@ def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
       (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       ⟨two_ne_zero,
         by simp only [intShortModel, curve, shortModel_a₁, mul_zero],
-        by
-          simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
-          push_cast
-          ring,
+        intShortModel_a₂ a₁ a₂ a₃ a₄ a₆,
         by simp only [intShortModel, curve, shortModel_a₃, mul_zero],
-        by
-          simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
-          push_cast
-          ring,
-        by
-          simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
-          push_cast
-          ring⟩
+        intShortModel_a₄ a₁ a₂ a₃ a₄ a₆,
+        intShortModel_a₆ a₁ a₂ a₃ a₄ a₆⟩
 
 end ECCompute.ModelChange
