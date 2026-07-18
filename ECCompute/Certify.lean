@@ -140,19 +140,29 @@ private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat �
     | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
   return (matB, matM)
 
+/-- The pair type `ℚ × ℚ` as an `Expr`. -/
+private def ratPairTy : Expr :=
+  mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
+
+/-- The short-model coefficient Exprs `(a₂, a₄, a₆)` built from the integer coefficient Exprs
+`a₁…a₆` via `ModelChange.intShortA₂/₄/₆`. -/
+private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr :=
+  (mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E,
+    mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
+    mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E)
+
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
     (matB matM : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
-  let pairTy := mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) ratTy ratTy
+  let pairTy := ratPairTy
   let ptExprs := pts.toList.map fun (xn, xd, yn, yd) =>
     mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
+  let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
   return mkAppN (mkConst ``Certificate.mk)
-    #[toExpr (0 : Int), mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E, toExpr (0 : Int),
-      mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
-      mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E, toExpr rho, pointsE,
+    #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
       toExpr ls.toList, toExpr matB, toExpr matM, toExpr t, toExpr tp]
 
 /-- Build the `hasRankGE_of_certificate` proof term directly.  The model equality (via
@@ -165,10 +175,8 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
-  let wCurve := mkAppN (mkConst ``curve)
-    #[mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E,
-      mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
-      mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E]
+  let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
+  let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
     #[wModel, wCurve, rb, rb, rb, rb, rb]
   let rhoE := mkApp (mkConst ``Certificate.rho) cExpr
@@ -176,8 +184,7 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
     let lenE := mkAppN (mkConst ``List.length [Level.zero]) #[elemTy, mkApp (mkConst field) cExpr]
     mkAppN (mkConst ``Nat.eq_of_beq_eq_true) #[lenE, rhoE, rb]
-  let hlenP := hlenOf ``Certificate.points (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
-    (mkConst ``Rat) (mkConst ``Rat))
+  let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))
   let hlenB := hlenOf ``Certificate.matB natTy
