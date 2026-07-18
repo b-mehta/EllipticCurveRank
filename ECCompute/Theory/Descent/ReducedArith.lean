@@ -218,8 +218,7 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : (x.den : ZMod p) ≠ 0) :
     (y.den : ZMod p) ≠ 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
-  have hw : (w : ZMod p) ≠ 0 := by
-    intro h0; apply hdx; rw [hxw]; push_cast; rw [h0]; ring
+  have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
   push_cast
   exact pow_ne_zero 3 hw

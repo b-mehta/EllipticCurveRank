@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Reduction.IntModel
 import ECCompute.Theory.Descent.DenominatorSquare
+import ECCompute.ForMathlib.RatDenom
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 
 /-!
@@ -66,8 +67,7 @@ theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
 theorem Trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveℤ a₂ a₄ a₆).toProjective.Equation (Trep x y w) := by
-  have hw : (w : ℚ) ≠ 0 := by
-    rw [Ne, Nat.cast_eq_zero]; rintro rfl; simp at hden
+  have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
   rw [← Projective.map_equation (W' := (curveℤ a₂ a₄ a₆).toProjective)
       (f := Int.castRingHom ℚ) (Int.castRingHom ℚ).injective_int, Trep_map_ℚ hden hden',
     Projective.equation_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
@@ -78,8 +78,7 @@ theorem Trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
 theorem Trep_nonsingular (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveℤ a₂ a₄ a₆).toProjective.Nonsingular (Trep x y w) := by
-  have hw : (w : ℚ) ≠ 0 := by
-    rw [Ne, Nat.cast_eq_zero]; rintro rfl; simp at hden
+  have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
   rw [← Projective.map_nonsingular (W' := (curveℤ a₂ a₄ a₆).toProjective)
       (f := Int.castRingHom ℚ) (Int.castRingHom ℚ).injective_int, Trep_map_ℚ hden hden',
     Projective.nonsingular_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),

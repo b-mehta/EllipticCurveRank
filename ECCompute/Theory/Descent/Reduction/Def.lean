@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Reduction.Repr
+import ECCompute.ForMathlib.RatDenom
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import Mathlib.Algebra.Field.ZMod
@@ -135,8 +136,7 @@ theorem red_p_of_den_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     red_p a₂ a₄ a₆ p hΔ (.some x y h) = 0 := by
   set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose with hw
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
-  have hsq : (w : ZMod p) ^ 2 = 0 := by rw [hden] at hd; push_cast at hd; exact hd
-  have hwz : (w : ZMod p) = 0 := (pow_eq_zero_iff (by norm_num)).mp hsq
+  have hwz : (w : ZMod p) = 0 := (Rat.den_cast_eq_zero_iff two_ne_zero hden).mp hd
   have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
     rw [Trep_map_two, hwz]; ring
   simp only [red_p]
@@ -163,15 +163,12 @@ theorem red_p_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
           (red_nonsingular_affine a₂ a₄ a₆ p hΔ h
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2
-            (by
-              set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose
-              have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
-              intro hzero; apply hd; rw [hden]; push_cast; rw [hzero]; ring)) := by
+            (mt (Rat.den_cast_eq_zero_iff two_ne_zero
+              (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1).mpr hd)) := by
   set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose with hw
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hden' : y.den = w ^ 3 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2
-  have hwne : (w : ZMod p) ≠ 0 := by
-    intro hzero; apply hd; rw [hden]; push_cast; rw [hzero]; ring
+  have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
   have hzne : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 ≠ 0 := by
     rw [Trep_map_two]; exact pow_ne_zero 3 hwne
   simp only [red_p]

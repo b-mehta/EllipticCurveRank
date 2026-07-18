@@ -106,7 +106,7 @@ theorem toAffine_g_Trep {x y : ℚ} {w : ℕ} (h : (curve a₂ a₄ a₆).toAffi
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ Trep x y w)
       = .some x y h := by
-  have hw : (w : ℚ) ≠ 0 := by rw [Ne, Nat.cast_eq_zero]; rintro rfl; simp at hden
+  have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
   rw [Trep_map_ℚ hden hden',
     Projective.Point.toAffine_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.Point.toAffine_some ((Projective.nonsingular_some x y).mpr h)]
@@ -386,8 +386,7 @@ private theorem kernel_point_data {x y : ℚ}
   obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
   have hpw : (p : ℤ) ∣ (w : ℤ) := by
     exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
-  have hwne : (w : ℤ) ≠ 0 := by
-    intro hc; apply x.den_ne_zero; rw [hxd]; exact_mod_cast pow_eq_zero_iff (by norm_num) |>.mpr hc
+  have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
     not_dvd_num p (by rw [hxd]; push_cast; ring) hpw, hwne⟩
 
@@ -619,13 +618,8 @@ private theorem red_p_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).
     red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁
       (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1
       (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.2
-      (by
-        intro h0
-        apply hd1
-        rw [(den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1]
-        push_cast
-        rw [h0]
-        ring)
+      (mt (Rat.den_cast_eq_zero_iff two_ne_zero
+        (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1).mpr hd1)
   rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
   exact hns.2.elim (fun hfd_ne => (Ne.symm hfd_ne) hfd) (fun hyne2 => hyne2 hYeq)
