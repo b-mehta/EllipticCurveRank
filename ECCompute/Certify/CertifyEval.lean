@@ -44,13 +44,15 @@ def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :
     let a := if α == 0 then 3 * θ ^ 2 + 2 * a₂ * θ + a₄ else α
     jacobi a p != 1
 
+/-- Pack booleans `p 0, …, p (n-1)` into a `Nat` bitmask: bit `j` set iff `p j`. -/
+def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
+  (List.range n).foldl (fun acc j => if p j then acc ||| (1 <<< j) else acc) 0
+
 /-- The descent-character matrix `matB` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `labs[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
 def computeMatB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
   xs.map fun x =>
-    (List.range labs.length).foldl (fun acc j =>
-      let lab := labs[j]!
-      if lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2 then acc ||| (1 <<< j) else acc) 0
+    bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `matM`).  Returns
@@ -75,6 +77,6 @@ def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
           a := a.set! r2 (a[r2]! ^^^ a[col]!)
           inv := inv.set! r2 (inv[r2]! ^^^ inv[col]!)
   return some <| (List.range n).map fun k =>
-    (List.range n).foldl (fun acc j => if inv[j]!.testBit k then acc ||| (1 <<< j) else acc) 0
+    bitmaskOf n (fun j => inv[j]!.testBit k)
 
 end ECCompute.CertifyEval
