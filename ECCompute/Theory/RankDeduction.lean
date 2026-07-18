@@ -283,6 +283,13 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
         rw [hfrH, natCard_torsionBy_two_congr iso]
 
+/-- For a finitely generated abelian group `H` whose 2-torsion has cardinality `2 ^ t`,
+`|H ⧸ 2H| = 2 ^ (rank H + t)`. -/
+theorem natCard_modN_two_pow [Module.Finite ℤ H] {t : ℕ}
+    (ht : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ t) :
+    Nat.card (ModN H 2) = 2 ^ (finrank ℤ H + t) := by
+  rw [natCard_modN_two, ht, ← pow_add]
+
 /-! ### The dimension identity -/
 
 /-- For a finitely generated abelian group `H`, `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`, where
@@ -292,9 +299,8 @@ theorem finrank_modN_two [Module.Finite ℤ H] :
     finrank (ZMod 2) (ModN H 2) =
       finrank ℤ H + finrank (ZMod 2) (Submodule.torsionBy ℤ H 2) := by
   let : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
-  have key := natCard_modN_two (H := H)
-  rw [natCard_eq_two_pow_finrank (ModN H 2),
-    natCard_eq_two_pow_finrank (Submodule.torsionBy ℤ H 2), ← pow_add] at key
+  have key := natCard_modN_two_pow (natCard_eq_two_pow_finrank (Submodule.torsionBy ℤ H 2))
+  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
   exact Nat.pow_right_injective (le_refl 2) key
 
 /-! ### The deduction -/
@@ -324,8 +330,8 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ t) :
     ρ ≤ finrank ℤ H + t := by
   have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep
-  have key := natCard_modN_two (H := H)
-  rw [natCard_eq_two_pow_finrank (ModN H 2), ht, ← pow_add] at key
+  have key := natCard_modN_two_pow ht
+  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
   have h2 : finrank (ZMod 2) (ModN H 2) = finrank ℤ H + t :=
     Nat.pow_right_injective (le_refl 2) key
   omega
