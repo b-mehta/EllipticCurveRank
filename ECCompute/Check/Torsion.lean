@@ -40,8 +40,7 @@ noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
     cubicEval c₂ c₁ c₀ a ≡ cubicEval c₂ c₁ c₀ b [ZMOD n] := by
   unfold cubicEval
-  exact ((h.pow 3).add ((Int.ModEq.refl c₂).mul (h.pow 2))).add
-    ((Int.ModEq.refl c₁).mul h) |>.add (Int.ModEq.refl c₀)
+  gcongr
 
 /-- If a `ℤ → ℤ` map that is invariant mod `ℓ` (`hmod`) fails the `anyBelow ℓ` residue test (`h`),
 then it has no integer root. Shared core of the cubic and quadratic no-root lemmas. -/
@@ -87,7 +86,7 @@ noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
 theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :
     quadEval b c a ≡ quadEval b c a' [ZMOD n] := by
   unfold quadEval
-  exact ((h.pow 2).add ((Int.ModEq.refl b).mul h)).add (Int.ModEq.refl c)
+  gcongr
 
 /-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
