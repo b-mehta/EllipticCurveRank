@@ -95,6 +95,7 @@ theorem example_descentHyp : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
 noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
   allList (fun l => checkPrime l.1) labels
 
+/-- If `checkPrimes` passes, every label's prime component really is prime. -/
 theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
     ∀ l ∈ labels, (l.1).Prime := by
   rw [checkPrimes, allList_eq_true] at h
@@ -104,6 +105,7 @@ theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = 
 noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
   allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
 
+/-- If `checkLabels` passes, every label passes `checkLabel`. -/
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels = true) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by

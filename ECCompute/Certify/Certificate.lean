@@ -25,8 +25,8 @@ checkers audit each field. The intended witness is the general Weierstrass model
   `M`, in the `List Nat` bitmask layout of `ECCompute.F2Invert` (`matB` by rows, `matM` by
   columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
 * `t : ℕ` is the rational `2`-torsion dimension `dim_{𝔽₂} E(ℚ)[2]`, and `torsionPrime : ℕ`
-  witnesses it: for `t = 0`, a prime at which the `2`-torsion cubic `4x³ + b₂x² + 2b₄x + b₆` has
-  no root.
+  witnesses it: for `t = 0`, a prime at which the `2`-torsion cubic has no root. Scaling by
+  `u = 4x`, this is the monic cubic `u³ + b₂u² + 8b₄u + 16b₆` used by `ECCompute.hasRootMod`.
 
 ## Layout conventions
 
