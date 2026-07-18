@@ -30,22 +30,22 @@ open Lean Elab Tactic Meta
 
 namespace ECCompute
 
-/-- Extract the `Nat` value of a numeral `Expr` (trying the raw expression first, for `0`/`1` and
-`OfNat` numerals, then its `whnf`, which unfolds abbreviations and projections). -/
-private def getNatE (e : Expr) : MetaM Nat := do
-  if let some n := (← whnfR e).nat? then return n     -- reducible: coeff abbrevs, `0`/`1`
-  let e ← whnf e                                        -- full: unfold the point/label `def`s
-  if let some n := e.nat? then return n
-  if let some n ← getNatValue? e then return n          -- `OfNat` numerals behind a projection
-  throwError "certify_curve: expected a `Nat` literal, got{indentExpr e}"
+/-- Generic literal extractor: try the raw expression first (for `0`/`1` and `OfNat` numerals via
+`parse`), then its `whnf` (which unfolds abbreviations and projections), then the metaprogramming
+`fallback` (for `OfNat` numerals behind a projection).  `kind` names the type in the error. -/
+private def getLitE {α} (kind : String) (parse : Expr → Option α)
+    (fallback : Expr → MetaM (Option α)) (e : Expr) : MetaM α := do
+  if let some n := parse (← whnfR e) then return n
+  let e ← whnf e
+  if let some n := parse e then return n
+  if let some n ← fallback e then return n
+  throwError "certify_curve: expected a `{kind}` literal, got{indentExpr e}"
+
+/-- Extract the `Nat` value of a numeral `Expr`. -/
+private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? e
 
 /-- Extract the `Int` value of a numeral `Expr`; see `getNatE`. -/
-private def getIntE (e : Expr) : MetaM Int := do
-  if let some n := (← whnfR e).int? then return n
-  let e ← whnf e
-  if let some n := e.int? then return n
-  if let some n ← getIntValue? e then return n
-  throwError "certify_curve: expected a `Int` literal, got{indentExpr e}"
+private def getIntE (e : Expr) : MetaM Int := getLitE "Int" (·.int?) getIntValue? e
 
 /-- ASCII-trim, returning a `String`.  `String.trim` is deprecated in favour of `String.trimAscii`,
 which returns a `String.Slice`, so we convert back. -/
