@@ -31,6 +31,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The bisect builds several multi-GB mathlib checkouts in one job, which
+      # overflows the ~14 GB ubuntu-latest disk (No space left on device). Drop
+      # the preinstalled toolchains we do not use to reclaim ~25 GB first.
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/lib/jvm
+          sudo docker image prune --all --force || true
+          df -h /
+
       # Bump PR to the last passing mathlib commit, plus a tracking issue on breakage.
       - name: Bump to last good mathlib
         uses: leanprover-community/hopscotch-action@e163305f758acb4c1e77bbb357c258195aa9264a
