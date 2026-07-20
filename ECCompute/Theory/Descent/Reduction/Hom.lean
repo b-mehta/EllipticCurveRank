@@ -574,6 +574,7 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
   grind [Affine.Point.some.injEq]
 
 /-- Reduced-curve negation is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
+@[grind =]
 private theorem reduced_negY (X Y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
   WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
@@ -617,10 +618,10 @@ private theorem red_p_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den a₂ a₄ a₆ p hd1 hd2 hd3_s) hd3_s
   have hYeq : (y₁ : ZMod p) = -(y₁ : ZMod p) := hYneg.trans (reduced_negY a₂ a₄ a₆ p _ _)
-  have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by linear_combination -hYbar + hYeq
+  have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
-    linear_combination -htan + (2 * (x₁ : ZMod p) + (x₂ : ZMod p) + (a₂ : ZMod p)) * hXbar
+    grind
   have hns : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular
       (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁
@@ -703,7 +704,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; ring
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; rw [reduced_negY]; linear_combination h + hYbar
+    intro h; apply hYneg; grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rw [← hslX]; exact hℓden_s
@@ -715,11 +716,11 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; rw [reduced_negY]; linear_combination h
+    intro h; apply hYneg; grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
   have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
       = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
-    linear_combination -hS2 + hXbar
+    grind
   have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
   rw [Affine.Point.add_of_X_ne hne,
     red_p_of_den_ne a₂ a₄ a₆ p hΔ
@@ -758,8 +759,7 @@ private theorem red_p_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
       (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := negY_curve x₂ y₂
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
-    rw [reduced_negY]
-    linear_combination hcast + hYbar
+    grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
 /-- Additivity of `red_p` in the tangent-mod-`p` configuration (S4): when two affine points
