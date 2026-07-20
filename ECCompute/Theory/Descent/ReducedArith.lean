@@ -78,7 +78,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
     have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
             + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by
-      rw [hx, hy]; linear_combination ((x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2) * heq
+      rw [hx, hy]; grind
     exact_mod_cast hQ
   have keyZ : (y.num : ZMod p) ^ 2 * (x.den : ZMod p) ^ 3
       = ((x.num : ZMod p) ^ 3 + (a₂ : ZMod p) * (x.num : ZMod p) ^ 2 * (x.den : ZMod p)
@@ -86,7 +86,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
           + (a₆ : ZMod p) * (x.den : ZMod p) ^ 3) * (y.den : ZMod p) ^ 2 := by
     have := congrArg (Int.cast : ℤ → ZMod p) key
     push_cast at this
-    linear_combination this
+    grind
   grind [Rat.cast_def]
 
 /-- For `x₁ ≠ x₂` and good denominators, the ℚ identity
@@ -104,7 +104,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     rw [hx3def]; grind [WeierstrassCurve.Affine.addX, curve]
   have REL : (x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 = (y₁ - y₂) ^ 2 := by
@@ -221,6 +221,6 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
   push_cast
-  exact pow_ne_zero 3 hw
+  grind
 
 end ECCompute
