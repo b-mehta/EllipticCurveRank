@@ -70,8 +70,7 @@ theorem equation_completeSquare (W : WeierstrassCurve ℚ) (x y : ℚ) :
     W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff]
-  simp only [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
-  constructor <;> intro h <;> linear_combination h
+  grind [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
 
 section GroupIso
 
@@ -105,11 +104,11 @@ theorem nonsingular_completeSquare (x y : ℚ) :
         - (3 * x ^ 2 + 2 * (shortModel W).toAffine.a₂ * x + (shortModel W).toAffine.a₄)
       = (W.toAffine.a₁ * y - (3 * x ^ 2 + 2 * W.toAffine.a₂ * x + W.toAffine.a₄))
         - W.a₁ / 2 * (2 * y + W.toAffine.a₁ * x + W.toAffine.a₃) := by
-    simp only [shortModel_a₁, shortModel_a₂, shortModel_a₄]; ring
+    grind [shortModel_a₁, shortModel_a₂, shortModel_a₄]
   have e2 : 2 * (y + (W.a₁ * x + W.a₃) / 2) + (shortModel W).toAffine.a₁ * x
         + (shortModel W).toAffine.a₃
       = 2 * y + W.toAffine.a₁ * x + W.toAffine.a₃ := by
-    simp only [shortModel_a₁, shortModel_a₃]; ring
+    grind [shortModel_a₁, shortModel_a₃]
   rw [e1, e2]
   exact or_ne_zero_sub_iff _ _ _
 
@@ -117,13 +116,13 @@ theorem nonsingular_completeSquare (x y : ℚ) :
 theorem negY_completeSquare (x y : ℚ) :
     (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
       = W.toAffine.negY x y + (W.a₁ * x + W.a₃) / 2 := by
-  simp only [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]; ring
+  grind [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
 theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
     (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
       = W.toAffine.addX x₁ x₂ ℓ := by
-  simp only [WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂]; ring
+  grind [WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂]
 
 /-- The `Y`-coordinate of the sum commutes with the shift. -/
 theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
@@ -155,19 +154,18 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       intro hcontra
       exact hy (add_right_cancel hcontra)
     have hDval : y₁ - W.toAffine.negY x₁ y₁ = 2 * y₁ + W.a₁ * x₁ + W.a₃ := by
-      simp only [WeierstrassCurve.Affine.negY]; ring
+      grind [WeierstrassCurve.Affine.negY]
     have hDval' : (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
           - (shortModel W).toAffine.negY x₁ (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
         = 2 * y₁ + W.a₁ * x₁ + W.a₃ := by
-      simp only [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]; ring
+      grind [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]
     have hden : 2 * y₁ + W.a₁ * x₁ + W.a₃ ≠ 0 := hDval ▸ sub_ne_zero.mpr hy
     rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hDval, hDval', div_add' _ _ _ hden,
       div_eq_div_iff hden hden]
-    simp only [shortModel_a₁, shortModel_a₂, shortModel_a₄]
-    ring
+    grind [shortModel_a₁, shortModel_a₂, shortModel_a₄]
   · rw [slope_of_X_ne hx, slope_of_X_ne hx, div_add' _ _ _ (sub_ne_zero.mpr hx),
       div_eq_div_iff (sub_ne_zero.mpr hx) (sub_ne_zero.mpr hx)]
-    ring
+    grind
 
 /-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
 def fwd :
@@ -236,11 +234,11 @@ def pointAddEquiv :
       fun P => by
         rcases P with _ | ⟨x, y, h⟩
         · rfl
-        · rw [fwd_some, bwd_some]; exact point_some_congr rfl (by ring),
+        · rw [fwd_some, bwd_some]; exact point_some_congr rfl (by grind),
       fun P => by
         rcases P with _ | ⟨x, y, h⟩
         · rfl
-        · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by ring)⟩
+        · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by grind)⟩
     (fwd_map_add W)
 
 end GroupIso
