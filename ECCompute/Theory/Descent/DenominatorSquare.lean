@@ -39,7 +39,7 @@ variable (a₂ a₄ a₆ : ℤ)
 private theorem isCoprime_add_mul_left_left {R : Type*} [CommRing R] {a b : R}
     (h : IsCoprime a b) (c : R) : IsCoprime (a + b * c) b := by
   obtain ⟨u, v, huv⟩ := h
-  exact ⟨u, v - u * c, by linear_combination huv⟩
+  exact ⟨u, v - u * c, by grind⟩
 
 private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
@@ -71,7 +71,7 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
             + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by
-      rw [hx, hy]; linear_combination ((x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2) * heq
+      rw [hx, hy]; grind
     exact_mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3 with hN
