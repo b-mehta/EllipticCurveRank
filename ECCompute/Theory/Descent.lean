@@ -52,7 +52,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
   have hw : (w : ZMod p) ≠ 0 := by
     intro h0; apply hd; rw [hxden]; grind
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
-    rw [num_eq_xbar_mul_den hd, hxden]; grind
+    grind [num_eq_xbar_mul_den]
   simp only [lambda]
   grind [psi_mul_sq]
 

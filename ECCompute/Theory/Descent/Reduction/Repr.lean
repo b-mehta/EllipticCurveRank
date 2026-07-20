@@ -54,7 +54,7 @@ theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
   have e0 : (Int.castRingHom ℚ) (x.num * (w : ℤ)) = (w : ℚ) ^ 3 * x := by
     rw [eq_intCast]; push_cast; rw [hx, hden]; push_cast; ring
   have e1 : (Int.castRingHom ℚ) (y.num) = (w : ℚ) ^ 3 * y := by
-    rw [eq_intCast, hy, hden']; grind
+    grind [eq_intCast]
   have e2 : (Int.castRingHom ℚ) ((w : ℤ) ^ 3) = (w : ℚ) ^ 3 * 1 := by
     rw [eq_intCast]; push_cast; ring
   simp only [Trep]

@@ -146,9 +146,9 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; rw [hS0, hT0]; grind
+  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; grind
     exact_mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; rw [hS1, hT1]; grind
+  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; grind
     exact_mod_cast this
   · exact mul_comm _ _
 
@@ -259,7 +259,7 @@ private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
   have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
   have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
+    grind [WeierstrassCurve.Affine.slope_of_X_ne]
   apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
   grind
 
@@ -307,7 +307,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
   refine ⟨?_, ?_⟩
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
-      rw [haddX]; grind
+      grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     rw [Rat.cast_pow,
       Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
@@ -528,7 +528,7 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
+    grind [WeierstrassCurve.Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
