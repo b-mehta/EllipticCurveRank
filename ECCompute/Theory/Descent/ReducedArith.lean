@@ -108,7 +108,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     rw [hx3def]; grind [WeierstrassCurve.Affine.addX, curve]
   have REL : (x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 = (y₁ - y₂) ^ 2 := by
-    rw [haddX]; linear_combination (ℓ * (x₁ - x₂) + (y₁ - y₂)) * hℓ
+    grind
   have hcast : (((x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 : ℚ) : ZMod p)
       = (((y₁ - y₂) ^ 2 : ℚ) : ZMod p) := by rw [REL]
   rw [Rat.cast_mul_of_ne_zero
@@ -167,8 +167,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
     rw [hx3def]; grind [WeierstrassCurve.Affine.addX, curve]
   have REL : (x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2
       = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 := by
-    rw [haddX]
-    linear_combination (ℓ * (2 * y) + (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ))) * hℓ
+    grind
   have hL : (((x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2 : ℚ) : ZMod p)
       = ((x₃ : ZMod p) + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2 := by
     rw [Rat.cast_mul_of_ne_zero
