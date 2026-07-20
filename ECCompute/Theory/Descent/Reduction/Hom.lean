@@ -146,9 +146,9 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; rw [hS0, hT0]; grind
+  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; grind
     exact_mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; rw [hS1, hT1]; grind
+  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; grind
     exact_mod_cast this
   · exact mul_comm _ _
 
@@ -307,7 +307,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
   refine ⟨?_, ?_⟩
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
-      rw [haddX]; grind
+      grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     rw [Rat.cast_pow,
       Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
@@ -388,7 +388,7 @@ private theorem kernel_point_data {x y : ℚ}
     exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
   have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
-    not_dvd_num p (by rw [hxd]; grind) hpw, hwne⟩
+    not_dvd_num p (by grind) hpw, hwne⟩
 
 /-- Integer form of the curve relation for a point `(A/E², B/E³)`: clearing denominators of
 `y² = x³ + a₂x² + a₄x + a₆` gives `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
@@ -398,7 +398,7 @@ private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
     B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
   have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
       + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
-    rw [hA, hB]; grind
+    grind
   exact_mod_cast hq
 
 omit [Fact p.Prime] in
@@ -494,7 +494,7 @@ private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
     + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
   have hI2 : N * (A * D * E + B * C * G) = K * W := by
-    rw [hNdef, hKdef, hWdef]; grind
+    grind
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
   have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
@@ -528,7 +528,7 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
+    grind [WeierstrassCurve.Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
@@ -585,7 +585,7 @@ private theorem slope_den_of_addX_den
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]; exact den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2
   rw [Rat.den_pow, Nat.cast_pow] at hℓ2
-  exact fun h => hℓ2 (by rw [h]; grind)
+  exact fun h => hℓ2 (by grind)
 
 /-- Tangent-mod-`p` additivity, `2`-torsion sub-case: the shared reduced point is `2`-torsion
 (`Ȳ₁ = -Ȳ₁`), so both `red_p (P + Q)` and `P̄ + P̄` are the origin.  The doubled `x`-coordinate
