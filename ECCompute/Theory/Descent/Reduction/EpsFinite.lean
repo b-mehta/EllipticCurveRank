@@ -158,8 +158,8 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
-  have hm1 : ℓ * x₁ + m = y₁ := by rw [hmb]; ring
-  have hm2 : ℓ * x₂ + m = y₂ := by rw [hmb]; linear_combination -hℓmul
+  have hm1 : ℓ * x₁ + m = y₁ := by grind
+  have hm2 : ℓ * x₂ + m = y₂ := by grind
   have hpt1 : (ℓ * x₁ + m) ^ 2
       = x₁ ^ 3 + (a₂ : ZMod p) * x₁ ^ 2 + (a₄ : ZMod p) * x₁ + (a₆ : ZMod p) := by
     rw [hm1]; exact reducedCurve_equation h₁
@@ -230,12 +230,12 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     rw [div_mul_cancel₀ _ h2y]
     ring
   set m : ZMod p := y - ℓ * x with hmb
-  have hm : ℓ * x + m = y := by rw [hmb]; ring
+  have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by
     rw [hm]; exact hcurve
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
-    rw [hm]; linear_combination -hℓ
+    grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
     rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
