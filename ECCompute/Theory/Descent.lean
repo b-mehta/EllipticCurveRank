@@ -50,10 +50,10 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
       = if xbar p x = θ then psi p (fderiv a₂ a₄ a₆ p θ) else psi p (xbar p x - θ) := by
   obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := by
-    intro h0; apply hd; rw [hxden]; push_cast; rw [h0]; ring
+    intro h0; apply hd; rw [hxden]; grind
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
-    rw [num_eq_xbar_mul_den hd, hxden]; push_cast; ring
-  simp only [lambda, if_neg hd, halpha]
+    rw [num_eq_xbar_mul_den hd, hxden]; grind
+  simp only [lambda]
   grind [psi_mul_sq]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
@@ -121,9 +121,9 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
     by_cases hd : (x.den : ZMod p) = 0
     · rw [lambda_some_of_den_zero hns hd, red_p_of_den_zero a₂ a₄ a₆ p hΔ hns hd,
         map_zero, εpHom_apply, εp_finite_zero]
-    · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd,
-        Point.congr_some, εpHom_apply, εp_finite_some]
-      simp only [xbar]
+    · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd]
+      simp only [Point.congr_some, εpHom_apply, εp_finite_some, xbar]
+      rfl
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
@@ -132,29 +132,23 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
   have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
-      rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq,
-        WeierstrassCurve.map_Δ, eq_intCast]
-    rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ, ← hval]
-    exact h.discr
+      rw [← baseChange_curveℤ_ℚ, baseChange, algebraMap_int_eq, map_Δ, eq_intCast]
+    rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ]
+    grind
   simp only [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
+@[simps]
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero a₂ a₄ a₆ p θ
   map_add' := lambda_map_add a₂ a₄ a₆ p h
 
-@[simp]
-theorem lambdaHom_apply {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambdaHom a₂ a₄ a₆ p h P = lambda a₂ a₄ a₆ p θ P :=
-  rfl
-
 /-- The descent character vanishes on `2·E(ℚ)`, hence factors through `E(ℚ)/2E(ℚ)`. -/
 theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  grind [two_nsmul]
+  grind
 
 end ECCompute
