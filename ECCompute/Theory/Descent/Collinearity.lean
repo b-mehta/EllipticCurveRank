@@ -17,7 +17,7 @@ additivity proof.
 
 The factorization is stated as an equation of values `∀ x, …` rather than of polynomials, which
 is what the `θ`-corollary needs.  Its content is the three Vieta relations between `(ℓ, m)` and
-the symmetric functions of `x₁, x₂, x₃`, so everything reduces to `linear_combination`.
+the symmetric functions of `x₁, x₂, x₃`, so everything reduces to `grind`.
 
 ## Main declarations
 
@@ -44,7 +44,7 @@ theorem cubic_sub_lineSq_eq_prod
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) (x : R) :
     x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2
       = (x - x₁) * (x - x₂) * (x - x₃) := by
-  linear_combination x ^ 2 * hσ₁ - x * hσ₂ + hσ₃
+  grind
 
 /-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
