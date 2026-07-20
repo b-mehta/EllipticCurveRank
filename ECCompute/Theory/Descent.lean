@@ -123,7 +123,6 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
         map_zero, εpHom_apply, εp_finite_zero]
     · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd]
       simp only [Point.congr_some, εpHom_apply, εp_finite_some, xbar]
-      rfl
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
