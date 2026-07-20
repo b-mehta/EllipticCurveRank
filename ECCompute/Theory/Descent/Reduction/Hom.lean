@@ -259,7 +259,7 @@ private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
   have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
   have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
-    grind [WeierstrassCurve.Affine.slope_of_X_ne]
+    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
   apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
   grind
 
