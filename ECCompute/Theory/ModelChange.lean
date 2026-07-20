@@ -62,9 +62,10 @@ theorem nonsingular_scale (x y : ℚ) :
   rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff']
   refine and_congr (equation_scale s x y) ?_
   have eX : W'.a₁ * (v ^ 3 * y) - (3 * (v ^ 2 * x) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x) + W'.a₄)
-      = v ^ 4 * (W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄)) := by rw [s.a1, s.a2, s.a4]; ring
+      = v ^ 4 * (W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄)) := by
+    grind [IsScaling.a1, IsScaling.a2, IsScaling.a4]
   have eY : 2 * (v ^ 3 * y) + W'.a₁ * (v ^ 2 * x) + W'.a₃
-      = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by rw [s.a1, s.a3]; ring
+      = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by grind [s.a1, s.a3]
   rw [eX, eY, mul_ne_zero_iff_left (pow_ne_zero 4 s.ne), mul_ne_zero_iff_left (pow_ne_zero 3 s.ne)]
 
 /-- Nonsingularity transfers along the inverse scaling `(X, Y) ↦ (X/v², Y/v³)`. -/
@@ -76,18 +77,18 @@ theorem nonsingular_scale' (X Y : ℚ) :
 /-- The `Y`-negation scales by `v³`. -/
 theorem negY_scale (x y : ℚ) :
     W'.toAffine.negY (v ^ 2 * x) (v ^ 3 * y) = v ^ 3 * W.toAffine.negY x y := by
-  simp only [WeierstrassCurve.Affine.negY, s.a1, s.a3]; ring
+  grind [WeierstrassCurve.Affine.negY, IsScaling.a1, IsScaling.a3]
 
 /-- The `X`-coordinate of the sum scales by `v²` (the slope scales by `v`). -/
 theorem addX_scale (x₁ x₂ ℓ : ℚ) :
     W'.toAffine.addX (v ^ 2 * x₁) (v ^ 2 * x₂) (v * ℓ) = v ^ 2 * W.toAffine.addX x₁ x₂ ℓ := by
-  simp only [WeierstrassCurve.Affine.addX, s.a1, s.a2]; ring
+  grind [WeierstrassCurve.Affine.addX, IsScaling.a1, IsScaling.a2]
 
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
 theorem negAddY_scale (x₁ x₂ y₁ ℓ : ℚ) :
     W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by
-  simp only [WeierstrassCurve.Affine.negAddY, addX_scale s]; ring
+  grind [WeierstrassCurve.Affine.negAddY, addX_scale]
 
 /-- The `Y`-coordinate of the sum scales by `v³`. -/
 theorem addY_scale (x₁ x₂ y₁ ℓ : ℚ) :
@@ -109,14 +110,14 @@ theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
         exact fun hc => hy (mul_left_cancel₀ (pow_ne_zero 3 s.ne) hc)
       have enum : 3 * (v ^ 2 * x₁) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x₁) + W'.a₄ - W'.a₁ * (v ^ 3 * y₁)
           = v ^ 3 * (v * (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)) := by
-        rw [s.a1, s.a2, s.a4]; ring
+        grind [IsScaling.a1, IsScaling.a2, IsScaling.a4]
       have eden : v ^ 3 * y₁ - v ^ 3 * W.toAffine.negY x₁ y₁
-          = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by ring
+          = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by grind
       rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, negY_scale s, enum, eden,
         mul_div_mul_left _ _ (pow_ne_zero 3 s.ne), mul_div_assoc]
   · have hx' : v ^ 2 * x₁ ≠ v ^ 2 * x₂ := fun hc => hx (mul_left_cancel₀ (pow_ne_zero 2 s.ne) hc)
-    have enum : v ^ 3 * y₁ - v ^ 3 * y₂ = v ^ 2 * (v * (y₁ - y₂)) := by ring
-    have eden : v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) := by ring
+    have enum : v ^ 3 * y₁ - v ^ 3 * y₂ = v ^ 2 * (v * (y₁ - y₂)) := by grind
+    have eden : v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) := by grind
     rw [slope_of_X_ne hx', slope_of_X_ne hx, enum, eden,
       mul_div_mul_left _ _ (pow_ne_zero 2 s.ne), mul_div_assoc]
 
@@ -204,20 +205,17 @@ def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 private lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
   simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
-  push_cast
-  ring
+  grind
 
 private lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
   simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
-  push_cast
-  ring
+  grind
 
 private lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
   simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
-  push_cast
-  ring
+  grind
 
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
 `u = 1/2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
