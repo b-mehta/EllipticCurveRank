@@ -117,20 +117,20 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
       hσ₁ hσ₂ hσ₃ hθroot hc
   have hfd2 : x₂ = θ → fderiv a₂ a₄ a₆ p θ = (x₁ - θ) * (X₃ - θ) := fun hc =>
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
-      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      (by grind) (by grind) (by grind)
       hθroot hc
   have hfd3 : X₃ = θ → fderiv a₂ a₄ a₆ p θ = (x₁ - θ) * (x₂ - θ) := fun hc =>
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
-      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      (by grind) (by grind) (by grind)
       hθroot hc
   by_cases c1 : x₁ = θ
   · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
-    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; ring)
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; grind)
     rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c2 : x₂ = θ
-  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; ring)
+  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; grind)
     rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
@@ -190,7 +190,7 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
   · rw [if_pos c3]
     have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
       fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
-        (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+        (by grind) (by grind) (by grind)
         hθroot c3
     rw [hfd]
     exact psi_of_isSquare ⟨x - θ, by ring⟩
