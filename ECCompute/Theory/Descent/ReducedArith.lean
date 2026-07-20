@@ -78,7 +78,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
     have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
             + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by
-      rw [hx, hy]; grind
+      grind
     exact_mod_cast hQ
   have keyZ : (y.num : ZMod p) ^ 2 * (x.den : ZMod p) ^ 3
       = ((x.num : ZMod p) ^ 3 + (a₂ : ZMod p) * (x.num : ZMod p) ^ 2 * (x.den : ZMod p)

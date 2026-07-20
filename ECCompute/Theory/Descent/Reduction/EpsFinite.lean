@@ -213,7 +213,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
   have hneg := reducedCurve_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
   have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by
-    rw [hneg]; grind
+    grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
     reducedCurve_equation hP
