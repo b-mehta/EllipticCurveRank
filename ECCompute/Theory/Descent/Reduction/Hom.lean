@@ -75,7 +75,7 @@ theorem Projective.equiv_of_proportional {F : Type*} [Field F] {W : Projective F
       rw [WeierstrassCurve.Projective.nonsingular_of_Z_eq_zero hVz] at hV
       grind [mul_eq_zero]
     exact WeierstrassCurve.Projective.equiv_of_X_eq_of_Y_eq hUz hVz
-      (by linear_combination hcU0) (by linear_combination hcU1)
+      (by grind) (by grind)
 
 /-- Two nonsingular projective representatives over a field are equivalent as soon as they have the
 same underlying affine point (the converse of `toAffine_of_equiv`). -/
@@ -171,9 +171,9 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; rw [hS0, hT0]; ring
+  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; rw [hS0, hT0]; grind
     exact_mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; rw [hS1, hT1]; ring
+  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; rw [hS1, hT1]; grind
     exact_mod_cast this
   · exact mul_comm _ _
 
@@ -270,9 +270,9 @@ private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
   have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
   have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
   apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
-  linear_combination (y₁ + y₂) * hℓ + hcv1 - hcv2
+  grind
 
 /-- The reduced secant slope is well-defined.  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
 reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ - y₂)/(x₁ - x₂)` (a
@@ -315,10 +315,10 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
           + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-    simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    simp only [WeierstrassCurve.Affine.addX, curve]; grind
   refine ⟨?_, ?_⟩
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
-      rw [haddX]; ring
+      rw [haddX]; grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     push_ratcast at hc
     exact hc
@@ -332,7 +332,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
 private theorem cast_num_eq {q : ℚ} {w : ℕ} {k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
-  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; push_cast; ring
+  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
 /-- The numerator of a rational with square denominator `w²` is prime to any `p ∣ w`: since
 `num`, `den` are coprime and `w² = den`, a prime dividing both `num` and `w` would be a unit. -/
@@ -353,15 +353,15 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
     padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
       ∧ (N ^ 2 - M * K ^ 2 : ℤ) ≠ 0 := by
   have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
-    rw [pow_two, padicValInt.mul hK0 hK0]; ring
+    rw [pow_two, padicValInt.mul hK0 hK0]; grind
   have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
-    rw [pow_two, padicValInt.mul hN0 hN0]; ring
+    rw [pow_two, padicValInt.mul hN0 hN0]; grind
   have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
-    rw [padicValRat.of_int, hNval2]; push_cast; ring
+    rw [padicValRat.of_int, hNval2]; grind
   rcases eq_or_ne (M * K ^ 2 : ℤ) 0 with h0 | h0
   · rw [h0, sub_zero]; exact ⟨hqv, pow_ne_zero 2 hN0⟩
   · have hsplit : ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ)
-        = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by push_cast; ring
+        = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by grind
     have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
     have hr0 : (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
       have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
@@ -373,7 +373,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
       rw [hK2] at hle
       omega
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
-      have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by linear_combination he
+      have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
       exact lt_irrefl _ hlt
     refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
@@ -395,7 +395,7 @@ private theorem kernel_point_data {x y : ℚ}
     exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
   have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
-    not_dvd_num p (by rw [hxd]; push_cast; ring) hpw, hwne⟩
+    not_dvd_num p (by rw [hxd]; grind) hpw, hwne⟩
 
 /-- Integer form of the curve relation for a point `(A/E², B/E³)`: clearing denominators of
 `y² = x³ + a₂x² + a₄x + a₆` gives `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
@@ -405,7 +405,7 @@ private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
     B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
   have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
       + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
-    rw [hA, hB]; linear_combination (E : ℚ) ^ 6 * hcv
+    rw [hA, hB]; grind
   exact_mod_cast hq
 
 omit [Fact p.Prime] in
@@ -459,8 +459,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   have hx3neg : padicValRat p x₃ < 0 := by
     rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
-    push_cast
-    omega
+    grind
   have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; omega
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
@@ -502,7 +501,7 @@ private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
     + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
   have hI2 : N * (A * D * E + B * C * G) = K * W := by
-    rw [hNdef, hKdef, hWdef]; linear_combination (-C ^ 2 * G ^ 2) * hCR1 + (A ^ 2 * E ^ 2) * hCR2
+    rw [hNdef, hKdef, hWdef]; grind
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
   have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
@@ -536,9 +535,9 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hcv1 := curve_equation_iff a₂ a₄ a₆ h₁
   have hcv2 := curve_equation_iff a₂ a₄ a₆ h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data a₂ a₄ a₆ p h₁ hd1
@@ -574,6 +573,7 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
   grind [Affine.Point.some.injEq]
 
 /-- Reduced-curve negation is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
+@[grind =]
 private theorem reduced_negY (X Y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
   WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
@@ -588,11 +588,11 @@ private theorem slope_den_of_addX_den
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   have he : (ℓ : ℚ) ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
-    simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]; exact den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2
   rw [Rat.den_pow, Nat.cast_pow] at hℓ2
-  exact fun h => hℓ2 (by rw [h]; ring)
+  exact fun h => hℓ2 (by rw [h]; grind)
 
 /-- Tangent-mod-`p` additivity, `2`-torsion sub-case: the shared reduced point is `2`-torsion
 (`Ȳ₁ = -Ȳ₁`), so both `red_p (P + Q)` and `P̄ + P̄` are the origin.  The doubled `x`-coordinate
@@ -617,10 +617,10 @@ private theorem red_p_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den a₂ a₄ a₆ p hd1 hd2 hd3_s) hd3_s
   have hYeq : (y₁ : ZMod p) = -(y₁ : ZMod p) := hYneg.trans (reduced_negY a₂ a₄ a₆ p _ _)
-  have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by linear_combination -hYbar + hYeq
+  have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
-    linear_combination -htan + (2 * (x₁ : ZMod p) + (x₂ : ZMod p) + (a₂ : ZMod p)) * hXbar
+    grind
   have hns : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular
       (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁
@@ -653,7 +653,7 @@ private theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
   rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hYneg]
   simp only [map_curveℤ_zmod, WeierstrassCurve.Affine.negY, zero_mul, sub_zero, sub_neg_eq_add]
   rw [div_mul_cancel₀ _ h2Yne]
-  linear_combination -htan + (2 * x₁ + x₂ + a₂) * hXbar - ℓ * hYbar
+  grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
 private theorem reduced_addY_eq (X Y L : ZMod p) :
@@ -661,13 +661,13 @@ private theorem reduced_addY_eq (X Y L : ZMod p) :
       = -(L * (((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L - X)
         + Y) := by
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
-    WeierstrassCurve.Affine.negAddY, map_curveℤ_zmod]; ring
+    WeierstrassCurve.Affine.negAddY, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
 private theorem reduced_addX_eq (X L : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L
       = L ^ 2 - (a₂ : ZMod p) - X - X := by
-  simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; ring
+  simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The cast of the rational `addY` matches the reduced `addY` form when the slope, `x`-coordinates
 and `y`-coordinate all survive reduction: the denominators of each summand are nonzero mod `p`, so
@@ -681,7 +681,7 @@ private theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZM
   have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
       = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
     simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
-      WeierstrassCurve.Affine.negAddY, curve]; ring
+      WeierstrassCurve.Affine.negAddY, curve]; grind
   rw [haddY]; push_ratcast
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
@@ -701,9 +701,9 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
     WeierstrassCurve.Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-    simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; rw [reduced_negY]; linear_combination h + hYbar
+    intro h; apply hYneg; grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rw [← hslX]; exact hℓden_s
@@ -715,11 +715,11 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; rw [reduced_negY]; linear_combination h
+    intro h; apply hYneg; grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
   have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
       = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
-    linear_combination -hS2 + hXbar
+    grind
   have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
   rw [Affine.Point.add_of_X_ne hne,
     red_p_of_den_ne a₂ a₄ a₆ p hΔ
@@ -758,8 +758,7 @@ private theorem red_p_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
       (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := negY_curve x₂ y₂
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
-    rw [reduced_negY]
-    linear_combination hcast + hYbar
+    grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
 /-- Additivity of `red_p` in the tangent-mod-`p` configuration (S4): when two affine points
@@ -968,15 +967,12 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 /-- The reduction map bundled as an additive homomorphism
 `(curve …).toAffine.Point →+ (reducedCurve …).toAffine.Point`. -/
+@[simps]
 noncomputable def redHom (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point where
   toFun := red_p a₂ a₄ a₆ p hΔ
   map_zero' := red_p_zero a₂ a₄ a₆ p hΔ
   map_add' := red_p_map_add a₂ a₄ a₆ p hΔ
-
-@[simp] theorem redHom_apply (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (P : (curve a₂ a₄ a₆).toAffine.Point) : redHom a₂ a₄ a₆ p hΔ P = red_p a₂ a₄ a₆ p hΔ P :=
-  rfl
 
 end ECCompute

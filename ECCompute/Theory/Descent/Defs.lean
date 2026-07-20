@@ -56,14 +56,14 @@ kept in the signature so `fval` and `fderiv` share the same interface.) -/
 def fderiv (b₂ b₄ _b₆ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
   3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)
 
-/-- The descent character as a raw function.  See the module docstring for the definition. -/
+/-- The descent character as a raw function. -/
 noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
-      if (x.den : ZMod p) = 0 then 0
-      else
-        let α : ZMod p := (x.num : ZMod p) - θ * (x.den : ZMod p)
-        if α = 0 then psi p (fderiv a₂ a₄ a₆ p θ) else psi p α
+    if (x.den : ZMod p) = 0 then 0
+    else
+      let α : ZMod p := x.num - θ * x.den
+      if α = 0 then psi p (fderiv a₂ a₄ a₆ p θ) else psi p α
 
 @[simp]
 theorem lambda_zero (θ : ZMod p) :
@@ -85,5 +85,7 @@ structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where
   discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
   root : fval a₂ a₄ a₆ p θ = 0
+
+attribute [grind →] DescentHyp.discr DescentHyp.root
 
 end ECCompute

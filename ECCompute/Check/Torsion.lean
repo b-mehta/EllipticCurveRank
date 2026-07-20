@@ -117,7 +117,7 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
     simp only [quadEval]
     push_cast
     rw [← hzcast]
-    linear_combination hx
+    grind
   exact_mod_cast hQ
 
 /-! ## The t = 0 lemma -/
@@ -129,7 +129,7 @@ private theorem cubic_fourX_eq_zero (W : WeierstrassCurve ℚ) {x y : ℚ}
     (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
     (4 * x) ^ 3 + (W.a₁ ^ 2 + 4 * W.a₂) * (4 * x) ^ 2
       + 8 * (2 * W.a₄ + W.a₁ * W.a₃) * (4 * x) + 16 * (W.a₃ ^ 2 + 4 * W.a₆) = 0 := by
-  linear_combination (-64 : ℚ) * heq + 16 * (W.a₁ * x + W.a₃ + 2 * y) * htor
+  grind
 
 open Polynomial in
 /-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
@@ -155,7 +155,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     rw [haeval, hc₂, hc₁, hc₀]
     push_cast
     rw [← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    exact cubic_fourX_eq_zero W heq htor
+    grind
   -- the integral root theorem: `4x` equals some integer `z`
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   have hzcast : (4 * x : ℚ) = (z : ℚ) := by rw [hz]; simp
@@ -165,7 +165,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     simp only [cubicEval, hc₂, hc₁, hc₀]
     push_cast
     rw [← hzcast, ← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    exact cubic_fourX_eq_zero W heq htor
+    grind
   exact_mod_cast hQ
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
@@ -189,7 +189,7 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
   have heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆ :=
     (WeierstrassCurve.Affine.equation_iff _ _).mp hns.1
   have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by
-    have := hy; simp only [WeierstrassCurve.Affine.negY] at this; linarith [this]
+    grind [WeierstrassCurve.Affine.negY]
   -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
   obtain ⟨z, hz⟩ :=
     exists_intRoot_of_twoTorsion a₁ a₂ a₃ a₄ a₆ W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
@@ -217,15 +217,14 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
     exact Affine.Point.some_ne_zero _
       (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
   have hy0 : y = 0 := by
-    simp only [WeierstrassCurve.Affine.negY, curve] at hy
-    linarith
+    grind [WeierstrassCurve.Affine.negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
   have heq := (WeierstrassCurve.Affine.equation_iff _ _).mp h.1
   simp only [curve] at heq
   rw [hy0] at heq
   push_cast at heq ⊢
-  linear_combination -heq
+  grind
 
 /-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
 `2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
@@ -329,7 +328,7 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : cubicEval a�
   have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
     have : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by rw [hR]; simp
     simpa only [cubicEval, Int.cast_add, Int.cast_mul, Int.cast_pow] using this
-  linear_combination hRQ
+  grind
 
 /-- If the `2`-division cubic `F` of the short model has integer root `R` and its cofactor quadratic
 `q = X² + (a₂+R)X + (a₄+R(a₂+R))` has no rational root (witnessed by `ℓ ≠ 0`), then every rational
@@ -341,11 +340,10 @@ private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : cubic
     x = (R : ℚ) := by
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
   rcases hx with h | h
-  · linarith [sub_eq_zero.mp h]
+  · grind
   · refine absurd h fun hqx =>
       no_rat_root_of_quadHasRootMod_eq_false hℓ hq x ?_
-    push_cast
-    linarith
+    grind
 
 open Polynomial in
 /-- The `t = 1` bound.  If the short model's `2`-division cubic has an integer root `R` and its
@@ -363,7 +361,7 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
     refine Finset.mem_singleton.mpr (root_eq_of_cofactor_no_root a₂ a₄ a₆ R hR hℓ hq ?_)
     push_cast at hroot ⊢
-    linarith
+    grind
   have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ hx).2
   simpa using h
 

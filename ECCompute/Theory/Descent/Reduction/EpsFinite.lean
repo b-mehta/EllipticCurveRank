@@ -117,20 +117,20 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
       hσ₁ hσ₂ hσ₃ hθroot hc
   have hfd2 : x₂ = θ → fderiv a₂ a₄ a₆ p θ = (x₁ - θ) * (X₃ - θ) := fun hc =>
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
-      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      (by grind) (by grind) (by grind)
       hθroot hc
   have hfd3 : X₃ = θ → fderiv a₂ a₄ a₆ p θ = (x₁ - θ) * (x₂ - θ) := fun hc =>
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
-      (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+      (by grind) (by grind) (by grind)
       hθroot hc
   by_cases c1 : x₁ = θ
   · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
-    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; ring)
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; grind)
     rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c2 : x₂ = θ
-  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; ring)
+  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; grind)
     rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
@@ -158,8 +158,8 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
-  have hm1 : ℓ * x₁ + m = y₁ := by rw [hmb]; ring
-  have hm2 : ℓ * x₂ + m = y₂ := by rw [hmb]; linear_combination -hℓmul
+  have hm1 : ℓ * x₁ + m = y₁ := by grind
+  have hm2 : ℓ * x₂ + m = y₂ := by grind
   have hpt1 : (ℓ * x₁ + m) ^ 2
       = x₁ ^ 3 + (a₂ : ZMod p) * x₁ ^ 2 + (a₄ : ZMod p) * x₁ + (a₆ : ZMod p) := by
     rw [hm1]; exact reducedCurve_equation h₁
@@ -167,7 +167,7 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
       = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
     rw [hm2]; exact reducedCurve_equation h₂
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
-    rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
+    rw [hX3def]; grind [WeierstrassCurve.Affine.addX, reducedCurve]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
@@ -190,7 +190,7 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
   · rw [if_pos c3]
     have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
       fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
-        (by linear_combination hσ₁) (by linear_combination hσ₂) (by linear_combination hσ₃)
+        (by grind) (by grind) (by grind)
         hθroot c3
     rw [hfd]
     exact psi_of_isSquare ⟨x - θ, by ring⟩
@@ -230,12 +230,12 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     rw [div_mul_cancel₀ _ h2y]
     ring
   set m : ZMod p := y - ℓ * x with hmb
-  have hm : ℓ * x + m = y := by rw [hmb]; ring
+  have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by
     rw [hm]; exact hcurve
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
-    rw [hm]; linear_combination -hℓ
+    grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
     rw [hX3def]; simp only [WeierstrassCurve.Affine.addX, reducedCurve]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
@@ -272,17 +272,12 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       exact εp_finite_map_add_of_X_ne h h₁ h₂ hne
 
 /-- The finite-field descent character `εp_finite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
+@[simps]
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     (reducedCurve a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εp_finite a₂ a₄ a₆ p θ
   map_zero' := εp_finite_zero a₂ a₄ a₆ p θ
   map_add' := εp_finite_map_add h
-
-@[simp]
-theorem εpHom_apply (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : (reducedCurve a₂ a₄ a₆ p).toAffine.Point) :
-    εpHom h P = εp_finite a₂ a₄ a₆ p θ P :=
-  rfl
 
 /-- `εp_finite` vanishes on `2·E(𝔽ₚ)`, immediate from being a homomorphism into `ZMod 2`. -/
 theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)

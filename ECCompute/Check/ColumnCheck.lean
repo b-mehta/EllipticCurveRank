@@ -45,8 +45,7 @@ theorem curve_Δ_eq (a₂ a₄ a₆ : ℤ) :
     (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
   simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
     WeierstrassCurve.b₆, WeierstrassCurve.b₈, curve, discrInt]
-  push_cast
-  ring
+  grind
 
 /-- The numerator of the (integral) discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
 theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
@@ -76,7 +75,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [beq_iff_eq, ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
     rw [fval]
     push_cast at hf ⊢
-    linear_combination hf
+    grind
 
 /-! ### Worked example
 

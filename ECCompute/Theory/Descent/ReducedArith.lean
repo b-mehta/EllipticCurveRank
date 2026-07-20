@@ -78,7 +78,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
     have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
             + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by
-      rw [hx, hy]; linear_combination ((x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2) * heq
+      rw [hx, hy]; grind
     exact_mod_cast hQ
   have keyZ : (y.num : ZMod p) ^ 2 * (x.den : ZMod p) ^ 3
       = ((x.num : ZMod p) ^ 3 + (a₂ : ZMod p) * (x.num : ZMod p) ^ 2 * (x.den : ZMod p)
@@ -86,7 +86,7 @@ theorem reduced_on_curve [Fact p.Prime] {x y : ℚ}
           + (a₆ : ZMod p) * (x.den : ZMod p) ^ 3) * (y.den : ZMod p) ^ 2 := by
     have := congrArg (Int.cast : ℤ → ZMod p) key
     push_cast at this
-    linear_combination this
+    grind
   grind [Rat.cast_def]
 
 /-- For `x₁ ≠ x₂` and good denominators, the ℚ identity
@@ -104,11 +104,11 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; field_simp
+    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    rw [hx3def]; grind [WeierstrassCurve.Affine.addX, curve]
   have REL : (x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 = (y₁ - y₂) ^ 2 := by
-    rw [haddX]; linear_combination (ℓ * (x₁ - x₂) + (y₁ - y₂)) * hℓ
+    grind
   have hcast : (((x₃ + (a₂ : ℚ) + x₁ + x₂) * (x₁ - x₂) ^ 2 : ℚ) : ZMod p)
       = (((y₁ - y₂) ^ 2 : ℚ) : ZMod p) := by rw [REL]
   rw [Rat.cast_mul_of_ne_zero
@@ -137,7 +137,7 @@ theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) 
       Rat.cast_mul_of_ne_zero h2a2 hdx,
       Rat.cast_mul_of_ne_zero (by simp) (by simp)]
   push_cast
-  ring
+  grind
 
 /-- On `curve a₂ a₄ a₆`, `negY x y = -y` (the curve has `a₁ = a₃ = 0`). -/
 theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
@@ -164,11 +164,10 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
     grind [curve]
   have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - 2 * x := by
-    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    rw [hx3def]; grind [WeierstrassCurve.Affine.addX, curve]
   have REL : (x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2
       = (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 := by
-    rw [haddX]
-    linear_combination (ℓ * (2 * y) + (3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ))) * hℓ
+    grind
   have hL : (((x₃ + (a₂ : ℚ) + 2 * x) * (2 * y) ^ 2 : ℚ) : ZMod p)
       = ((x₃ : ZMod p) + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2 := by
     rw [Rat.cast_mul_of_ne_zero
@@ -179,7 +178,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
         Rat.cast_add_of_ne_zero hdx3 (by simp),
         Rat.cast_mul_of_ne_zero (by simp) hdx, Rat.cast_intCast]
     push_cast
-    ring
+    grind
   have hR : (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ)) ^ 2 : ℚ) : ZMod p)
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
     rw [Rat.cast_pow, cast_fderivPoly hdx]
@@ -208,7 +207,7 @@ theorem den_dblX_ne_zero [Fact p.Prime] {x y : ℚ} (hyℚ : y ≠ 0) (h2 : (2 :
     rw [hslopeval]; exact den_div_ne_zero hdnum hden2y hcast2y
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x x ((curve a₂ a₄ a₆).toAffine.slope x x y y)
       = (curve a₂ a₄ a₆).toAffine.slope x x y y ^ 2 - (a₂ : ℚ) - x - x := by
-    simp only [WeierstrassCurve.Affine.addX, curve]; ring
+    grind [WeierstrassCurve.Affine.addX, curve]
   rw [haddX]
   exact den_sub_ne_zero (den_sub_ne_zero (den_sub_ne_zero
     (den_pow_ne_zero hdℓ 2) (by simp)) hdx) hdx
@@ -222,6 +221,6 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
   push_cast
-  exact pow_ne_zero 3 hw
+  grind
 
 end ECCompute

@@ -84,7 +84,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
     have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
-      rw [Trep_map_two, hwz]; ring
+      grind [Trep_map_two]
     rw [Projective.nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
     have hX0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 = 0 :=
@@ -98,7 +98,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
         (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
       have hunit : IsUnit (p : ℤ) := (Trep_primitive hden').isUnit_of_dvd' hpy hpw3
       have h2 : (2 : ℤ) ≤ (p : ℤ) := by exact_mod_cast hp.two_le
-      rcases Int.isUnit_iff.mp hunit with h1 | h1 <;> omega
+      grind [Int.isUnit_iff]
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
@@ -138,7 +138,7 @@ theorem red_p_of_den_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hwz : (w : ZMod p) = 0 := (Rat.den_cast_eq_zero_iff two_ne_zero hden).mp hd
   have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
-    rw [Trep_map_two, hwz]; ring
+    grind [Trep_map_two]
   simp only [red_p]
   exact Projective.Point.toAffineLift_of_Z_eq_zero _ hz0
 
