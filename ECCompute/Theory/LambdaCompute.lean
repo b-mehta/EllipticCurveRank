@@ -84,7 +84,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
       have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by rw [Int.natCast_ediv]; norm_num
       have hae' : (a : ℤ) % 2 = 0 := by omega
       rw [hIH, hcast, ← jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb]
-      split_ifs <;> ring
+      grind
     · -- odd: quadratic reciprocity
       rw [if_neg hae]
       have ha2 : a % 2 = 1 := by omega
@@ -93,7 +93,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
       have hml : jacobiSym ((b % a : ℕ) : ℤ) a = jacobiSym (b : ℤ) a := by
         rw [Int.natCast_emod, ← jacobiSym.mod_left]
       rw [hIH, hml, ← jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb]
-      split_ifs <;> ring
+      grind
 
 /-- For `p` odd and positive, `jacobiFast a p = J(a | p)`. -/
 theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
