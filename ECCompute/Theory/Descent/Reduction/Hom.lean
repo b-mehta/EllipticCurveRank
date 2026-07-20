@@ -29,31 +29,6 @@ namespace ECCompute
 
 open Rat (den_add_ne_zero den_sub_ne_zero den_mul_ne_zero den_pow_ne_zero den_div_ne_zero)
 
-/-- Discharge a good-denominator goal `(e.den : ZMod p) ≠ 0` by recursing through the
-field-operation closure lemmas down to the atomic denominator hypotheses (or an integer
-denominator). -/
-syntax "den_ne_zero" : tactic
-macro_rules
-  | `(tactic| den_ne_zero) =>
-    `(tactic|
-      first
-      | assumption
-      | (apply den_add_ne_zero <;> den_ne_zero)
-      | (apply den_sub_ne_zero <;> den_ne_zero)
-      | (apply den_mul_ne_zero <;> den_ne_zero)
-      | (apply den_pow_ne_zero <;> den_ne_zero)
-      | simp)
-
-/-- Push `Rat.cast` (`ℚ → ZMod p`) through a `+`, `-`, `*`, `^`, negation and `ℤ`-cast
-expression, discharging the good-denominator side conditions with `den_ne_zero`. -/
-syntax "push_ratcast" (Lean.Parser.Tactic.location)? : tactic
-macro_rules
-  | `(tactic| push_ratcast $[$loc]?) =>
-    `(tactic|
-      simp (disch := den_ne_zero) only [Rat.cast_neg, Rat.cast_add_of_ne_zero,
-        Rat.cast_sub_of_ne_zero, Rat.cast_mul_of_ne_zero, Rat.cast_pow, Rat.cast_intCast]
-        $[$loc]?)
-
 /-- Two nonsingular projective representatives over a field that are proportional with cross
 scalars given by each other's `Z`-coordinate are equivalent: if `(V z) • U = (U z) • V`, then
 `U ≈ V`. -/
@@ -255,9 +230,23 @@ private theorem cast_secant_num {x₁ x₂ : ℚ} (hd1 : (x₁.den : ZMod p) ≠
       ∧ ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) : ℚ) : ZMod p)
         = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
           + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
-  have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)).den : ZMod p) ≠ 0 := by
-    den_ne_zero
-  exact ⟨hd, by push_ratcast⟩
+  have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1
+  have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
+    rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2
+  have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero hd1 hd2
+  have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
+    den_add_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp)
+  refine ⟨hd, ?_⟩
+  rw [Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+        (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp),
+    Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
+      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2)),
+    Rat.cast_add_of_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq,
+    Rat.cast_add_of_ne_zero hx1sq hprod, Rat.cast_pow, Rat.cast_mul_of_ne_zero hd1 hd2,
+    Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) (den_add_ne_zero hd1 hd2),
+    Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast]
 
 /-- The reduced secant slope times `y₁ + y₂` equals the secant numerator: clearing the denominator
 of `slope = (y₁ - y₂)/(x₁ - x₂)` against the two curve relations gives
@@ -320,13 +309,17 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
       rw [haddX]; grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
-    push_ratcast at hc
+    rw [Rat.cast_pow,
+      Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
+      Rat.cast_add_of_ne_zero (den_add_ne_zero hd3 (by simp)) hd1,
+      Rat.cast_add_of_ne_zero hd3 (by simp), Rat.cast_intCast] at hc
     exact hc
   · have hℓmul : ℓ * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
       rw [hℓdef]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
-    push_ratcast at hc
+    rw [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
+      Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
     exact hc
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
@@ -682,7 +675,9 @@ private theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZM
       = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
     simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
       WeierstrassCurve.Affine.negAddY, curve]; grind
-  rw [haddY]; push_ratcast
+  rw [haddY, Rat.cast_neg,
+    Rat.cast_add_of_ne_zero (den_mul_ne_zero hℓden (den_sub_ne_zero hd3 hd1)) hdy1,
+    Rat.cast_mul_of_ne_zero hℓden (den_sub_ne_zero hd3 hd1), Rat.cast_sub_of_ne_zero hd3 hd1]
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
 `red_p (P + Q)` is the tangent doubling of the common reduced point `P̄`.  Both reduced `x`- and
