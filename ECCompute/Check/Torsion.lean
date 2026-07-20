@@ -189,7 +189,7 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
   have heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆ :=
     (WeierstrassCurve.Affine.equation_iff _ _).mp hns.1
   have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by
-    have := hy; simp only [WeierstrassCurve.Affine.negY] at this; linarith [this]
+    grind [WeierstrassCurve.Affine.negY]
   -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
   obtain ⟨z, hz⟩ :=
     exists_intRoot_of_twoTorsion a₁ a₂ a₃ a₄ a₆ W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
@@ -217,8 +217,7 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
     exact Affine.Point.some_ne_zero _
       (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
   have hy0 : y = 0 := by
-    simp only [WeierstrassCurve.Affine.negY, curve] at hy
-    linarith
+    grind [WeierstrassCurve.Affine.negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
   have heq := (WeierstrassCurve.Affine.equation_iff _ _).mp h.1
@@ -341,11 +340,10 @@ private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : cubic
     x = (R : ℚ) := by
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
   rcases hx with h | h
-  · linarith [sub_eq_zero.mp h]
+  · grind
   · refine absurd h fun hqx =>
       no_rat_root_of_quadHasRootMod_eq_false hℓ hq x ?_
-    push_cast
-    linarith
+    grind
 
 open Polynomial in
 /-- The `t = 1` bound.  If the short model's `2`-division cubic has an integer root `R` and its
@@ -363,7 +361,7 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
     refine Finset.mem_singleton.mpr (root_eq_of_cofactor_no_root a₂ a₄ a₆ R hR hℓ hq ?_)
     push_cast at hroot ⊢
-    linarith
+    grind
   have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ hx).2
   simpa using h
 
