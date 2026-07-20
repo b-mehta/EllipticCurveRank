@@ -85,7 +85,7 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
     x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧
         x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
-  grind
+  grind (ringSteps := 200000)
 
 /-- Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on `E` with `x₁ ≠ x₂` and the group-law third
 coordinate `x₃ = ℓ² - a₂ - x₁ - x₂` factor the cubic-minus-line-squared as
