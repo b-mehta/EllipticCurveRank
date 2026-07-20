@@ -968,15 +968,12 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 /-- The reduction map bundled as an additive homomorphism
 `(curve …).toAffine.Point →+ (reducedCurve …).toAffine.Point`. -/
+@[simps]
 noncomputable def redHom (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point where
   toFun := red_p a₂ a₄ a₆ p hΔ
   map_zero' := red_p_zero a₂ a₄ a₆ p hΔ
   map_add' := red_p_map_add a₂ a₄ a₆ p hΔ
-
-@[simp] theorem redHom_apply (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (P : (curve a₂ a₄ a₆).toAffine.Point) : redHom a₂ a₄ a₆ p hΔ P = red_p a₂ a₄ a₆ p hΔ P :=
-  rfl
 
 end ECCompute

@@ -272,17 +272,12 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       exact εp_finite_map_add_of_X_ne h h₁ h₂ hne
 
 /-- The finite-field descent character `εp_finite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
+@[simps]
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     (reducedCurve a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εp_finite a₂ a₄ a₆ p θ
   map_zero' := εp_finite_zero a₂ a₄ a₆ p θ
   map_add' := εp_finite_map_add h
-
-@[simp]
-theorem εpHom_apply (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : (reducedCurve a₂ a₄ a₆ p).toAffine.Point) :
-    εpHom h P = εp_finite a₂ a₄ a₆ p θ P :=
-  rfl
 
 /-- `εp_finite` vanishes on `2·E(𝔽ₚ)`, immediate from being a homomorphism into `ZMod 2`. -/
 theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)
