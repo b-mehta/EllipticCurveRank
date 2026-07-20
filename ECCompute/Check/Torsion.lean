@@ -117,7 +117,7 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
     simp only [quadEval]
     push_cast
     rw [← hzcast]
-    linear_combination hx
+    grind
   exact_mod_cast hQ
 
 /-! ## The t = 0 lemma -/
@@ -129,7 +129,7 @@ private theorem cubic_fourX_eq_zero (W : WeierstrassCurve ℚ) {x y : ℚ}
     (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
     (4 * x) ^ 3 + (W.a₁ ^ 2 + 4 * W.a₂) * (4 * x) ^ 2
       + 8 * (2 * W.a₄ + W.a₁ * W.a₃) * (4 * x) + 16 * (W.a₃ ^ 2 + 4 * W.a₆) = 0 := by
-  linear_combination (-64 : ℚ) * heq + 16 * (W.a₁ * x + W.a₃ + 2 * y) * htor
+  grind
 
 open Polynomial in
 /-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
@@ -155,7 +155,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     rw [haeval, hc₂, hc₁, hc₀]
     push_cast
     rw [← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    exact cubic_fourX_eq_zero W heq htor
+    grind
   -- the integral root theorem: `4x` equals some integer `z`
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   have hzcast : (4 * x : ℚ) = (z : ℚ) := by rw [hz]; simp
@@ -165,7 +165,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     simp only [cubicEval, hc₂, hc₁, hc₀]
     push_cast
     rw [← hzcast, ← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
-    exact cubic_fourX_eq_zero W heq htor
+    grind
   exact_mod_cast hQ
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
@@ -224,7 +224,7 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
   simp only [curve] at heq
   rw [hy0] at heq
   push_cast at heq ⊢
-  linear_combination -heq
+  grind
 
 /-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
 `2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
@@ -328,7 +328,7 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : cubicEval a�
   have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
     have : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by rw [hR]; simp
     simpa only [cubicEval, Int.cast_add, Int.cast_mul, Int.cast_pow] using this
-  linear_combination hRQ
+  grind
 
 /-- If the `2`-division cubic `F` of the short model has integer root `R` and its cofactor quadratic
 `q = X² + (a₂+R)X + (a₄+R(a₂+R))` has no rational root (witnessed by `ℓ ≠ 0`), then every rational
