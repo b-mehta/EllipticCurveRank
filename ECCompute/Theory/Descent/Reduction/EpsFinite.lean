@@ -72,9 +72,8 @@ variable {θ : ZMod p}
 private theorem reducedCurve_equation {X Y : ZMod p}
     (h : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
-  have := (WeierstrassCurve.Affine.equation_iff
-    (W := (reducedCurve a₂ a₄ a₆ p).toAffine) X Y).mp h.1
-  simpa [reducedCurve] using this
+  simpa [reducedCurve] using
+    (WeierstrassCurve.Affine.equation_iff (W := (reducedCurve a₂ a₄ a₆ p).toAffine) X Y).mp h.1
 
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
@@ -209,11 +208,9 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     (hP : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
-  have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rw [ZMod.ringChar_zmod_n]; exact hp2)
-  have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
+  have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
   have hneg := reducedCurve_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
-  have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by
-    grind
+  have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
     reducedCurve_equation hP
@@ -232,7 +229,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by
-    rw [hm]; exact hcurve
+    rwa [hm]
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
     grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
