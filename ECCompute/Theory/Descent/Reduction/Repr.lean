@@ -57,39 +57,35 @@ theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     rw [eq_intCast, hy, hden']; grind
   have e2 : (Int.castRingHom ℚ) ((w : ℤ) ^ 3) = (w : ℚ) ^ 3 * 1 := by
     rw [eq_intCast]; push_cast; grind
-  simp only [Trep]
-  rw [Projective.comp_fin3, Projective.smul_fin3]
+  rw [Trep, Projective.comp_fin3, Projective.smul_fin3]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
-    Matrix.tail_cons]
-  rw [e0, e1, e2]
+    Matrix.tail_cons, e0, e1, e2]
 
 /-- The integer representative lies on the integral projective curve. -/
 theorem Trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveℤ a₂ a₄ a₆).toProjective.Equation (Trep x y w) := by
   have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
-  rw [← Projective.map_equation (W' := (curveℤ a₂ a₄ a₆).toProjective)
+  rwa [← Projective.map_equation (W' := (curveℤ a₂ a₄ a₆).toProjective)
       (f := Int.castRingHom ℚ) (Int.castRingHom ℚ).injective_int, Trep_map_ℚ hden hden',
     Projective.equation_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.equation_some, map_curveℤ_toProjective]
-  exact h
 
 /-- The integer representative is a nonsingular projective point of the integral curve. -/
 theorem Trep_nonsingular (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveℤ a₂ a₄ a₆).toProjective.Nonsingular (Trep x y w) := by
   have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
-  rw [← Projective.map_nonsingular (W' := (curveℤ a₂ a₄ a₆).toProjective)
+  rwa [← Projective.map_nonsingular (W' := (curveℤ a₂ a₄ a₆).toProjective)
       (f := Int.castRingHom ℚ) (Int.castRingHom ℚ).injective_int, Trep_map_ℚ hden hden',
     Projective.nonsingular_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.nonsingular_some, map_curveℤ_toProjective]
-  exact h
 
 /-- The `y`- and `z`-coordinates of the representative are coprime; in particular the
 representative is primitive. -/
 theorem Trep_primitive (hden' : y.den = w ^ 3) : IsCoprime (y.num) ((w : ℤ) ^ 3) := by
-  have : IsCoprime (y.num) (y.den : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
+  have : IsCoprime (y.num) (y.den : ℤ) :=
+    Int.isCoprime_iff_nat_coprime.mpr (by simpa using y.reduced)
   rwa [hden', Nat.cast_pow] at this
 
 end ECCompute
