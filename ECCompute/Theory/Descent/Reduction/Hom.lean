@@ -279,7 +279,7 @@ private theorem reduced_slope_den (hne : x₁ ≠ x₂)
   have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
       = (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)) / (y₁ + y₂) := by
     rw [eq_div_iff hy12]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
-  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rw [Rat.cast_add_of_ne_zero hdy1 hdy2]; exact hy2
+  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [Rat.cast_add_of_ne_zero hdy1 hdy2]
   have hNden := (cast_secant_num a₂ a₄ p hd1 hd2).1
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
@@ -323,7 +323,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     exact hc
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
-private theorem cast_num_eq {q : ℚ} {w : ℕ} {k : ℕ} (hd : q.den = w ^ k) :
+private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
   rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
@@ -336,7 +336,7 @@ private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hp
     rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
   exact absurd (Int.isUnit_iff.mp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
-    (by have := (Fact.out : p.Prime).two_le; omega)
+    (by have := (Fact.out : p.Prime).two_le; lia)
 
 /-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
 `N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation
@@ -364,7 +364,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
       rw [hqv, padicValRat.neg, padicValRat.of_int]
       have hle := padicValInt_mono p (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
       rw [hK2] at hle
-      omega
+      lia
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
@@ -452,7 +452,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
     grind
-  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; omega
+  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
 
@@ -700,11 +700,11 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
     intro h; grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
-  have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rw [← hslX]; exact hℓden_s
+  have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
   have hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
     addX_den_ne a₂ a₄ a₆ p hℓden hd1 hd2 haddX
   have hd3_s : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rw [hslX]; exact hd3
+      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ :=
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
