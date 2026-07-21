@@ -15,7 +15,7 @@ the field operations. These lemmas transfer that survival through addition, subt
 multiplication, powers and division, using the denominator divisibility bounds `Rat.add_den_dvd`
 and friends.
 
-## Main statements
+## Main results
 
 * `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
   `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
@@ -62,8 +62,7 @@ theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (
   rw [Rat.den_pow, Nat.cast_pow]
   exact pow_ne_zero n hx
 
-/-- Good denominators are closed under division by a rational whose reduction is nonzero: if
-`b.den`, `a.den` reduce nonzero and `(a : ZMod p) ≠ 0`, then `(b / a).den` reduces nonzero. -/
+/-- Good denominators are closed under division by a rational whose reduction is nonzero. -/
 theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
     (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
     ((b / a).den : ZMod p) ≠ 0 := by
