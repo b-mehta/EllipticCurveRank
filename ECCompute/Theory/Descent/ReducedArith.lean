@@ -220,7 +220,6 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
-  push_cast
   grind
 
 end ECCompute

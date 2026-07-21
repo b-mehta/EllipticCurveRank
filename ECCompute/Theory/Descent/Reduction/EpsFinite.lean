@@ -125,12 +125,12 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
       hθroot hc
   by_cases c1 : x₁ = θ
   · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
-    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; grind)
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
     rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c2 : x₂ = θ
-  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; grind)
+  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
     rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
@@ -227,7 +227,6 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp only [reducedCurve]
-    rw [div_mul_cancel₀ _ h2y]
     grind
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind

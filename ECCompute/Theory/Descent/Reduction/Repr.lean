@@ -52,7 +52,7 @@ theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
   have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
     (div_eq_iff (by exact_mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
   have e0 : (Int.castRingHom ℚ) (x.num * (w : ℤ)) = (w : ℚ) ^ 3 * x := by
-    rw [eq_intCast]; push_cast; rw [hx, hden]; push_cast; grind
+    rw [eq_intCast]; push_cast; rw [hx, hden]; grind
   have e1 : (Int.castRingHom ℚ) (y.num) = (w : ℚ) ^ 3 * y := by
     rw [eq_intCast, hy, hden']; grind
   have e2 : (Int.castRingHom ℚ) ((w : ℤ) ^ 3) = (w : ℚ) ^ 3 * 1 := by

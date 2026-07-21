@@ -116,7 +116,6 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
   have hQ : ((quadEval b c z : ℤ) : ℚ) = 0 := by
     simp only [quadEval]
     push_cast
-    rw [← hzcast]
     grind
   exact_mod_cast hQ
 
@@ -154,7 +153,6 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
   have hroot : aeval (4 * x : ℚ) p = 0 := by
     rw [haeval, hc₂, hc₁, hc₀]
     push_cast
-    rw [← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
     grind
   -- the integral root theorem: `4x` equals some integer `z`
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
@@ -164,7 +162,6 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
   have hQ : ((cubicEval c₂ c₁ c₀ z : ℤ) : ℚ) = 0 := by
     simp only [cubicEval, hc₂, hc₁, hc₀]
     push_cast
-    rw [← hzcast, ← ha₁, ← ha₂, ← ha₃, ← ha₄, ← ha₆]
     grind
   exact_mod_cast hQ
 
@@ -223,7 +220,6 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
   have heq := (WeierstrassCurve.Affine.equation_iff _ _).mp h.1
   simp only [curve] at heq
   rw [hy0] at heq
-  push_cast at heq ⊢
   grind
 
 /-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
@@ -360,7 +356,6 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     obtain ⟨-, hroot⟩ := twoTorsion_y_eq_zero_and_root a₂ a₄ a₆ h hP
     rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
     refine Finset.mem_singleton.mpr (root_eq_of_cofactor_no_root a₂ a₄ a₆ R hR hℓ hq ?_)
-    push_cast at hroot ⊢
     grind
   have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ hx).2
   simpa using h

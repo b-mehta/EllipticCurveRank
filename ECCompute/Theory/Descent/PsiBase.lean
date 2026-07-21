@@ -51,7 +51,7 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
     constructor
     · rintro ⟨s, hs⟩
       exact ⟨s / w, by
-        rw [div_mul_div_comm, eq_div_iff (mul_ne_zero hw hw)]; grind⟩
+        grind⟩
     · rintro ⟨r, rfl⟩
       exact ⟨w * r, by ring⟩
   unfold psi
