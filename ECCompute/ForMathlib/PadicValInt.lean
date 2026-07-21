@@ -12,7 +12,7 @@ import Mathlib.NumberTheory.Padics.PadicVal.Basic
 Monotonicity of `padicValInt p` under divisibility, and a strict inequality read off an integer
 product identity.
 
-## Main statements
+## Main results
 
 * `padicValInt_mono`: `padicValInt p` is monotone under divisibility with a nonzero target.
 * `padicValInt_lt_of_mul_eq`: from `N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and nonzero factors,
@@ -27,7 +27,7 @@ theorem padicValInt_mono {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
   have hp : p.Prime := Fact.out
   rcases eq_or_ne a 0 with rfl | ha
   · simp [padicValInt]
-  · rw [padicValInt, padicValInt, ← Nat.factorization_def _ hp, ← Nat.factorization_def _ hp]
+  · simp only [padicValInt, ← Nat.factorization_def _ hp]
     exact (Nat.factorization_le_iff_dvd (Int.natAbs_ne_zero.mpr ha)
       (Int.natAbs_ne_zero.mpr hb)).mpr (Int.natAbs_dvd_natAbs.mpr hab) p
 
@@ -42,4 +42,4 @@ theorem padicValInt_lt_of_mul_eq {N S K W : ℤ} (hid : N * S = K * W)
       (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
   have e1 := padicValInt.mul (p := p) hN0 hS0
   rw [hid, padicValInt.mul (p := p) hK0 hW0, padicValInt.eq_zero_of_not_dvd hpW] at e1
-  omega
+  lia
