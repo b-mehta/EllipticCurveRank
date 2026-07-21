@@ -60,7 +60,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     jOdd fuel a b = jacobiSym (a : ℤ) b := by
   intro fuel
   induction fuel with
-  | zero => omega
+  | zero => lia
   | succ fuel ih =>
     intro a b hb ha
     rw [jOdd]
@@ -70,7 +70,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     rw [if_neg hb1]
     -- `a = 0`
     by_cases ha0 : a = 0
-    · rw [if_pos ha0, ha0, Nat.cast_zero, jacobiSym.zero_left (by omega)]
+    · rw [if_pos ha0, ha0, Nat.cast_zero, jacobiSym.zero_left (by lia)]
     rw [if_neg ha0]
     -- `a = 1`
     by_cases ha1 : a = 1
@@ -80,16 +80,16 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     by_cases hae : a % 2 = 0
     · -- even: strip one factor of two
       rw [if_pos hae]
-      have hIH := ih (a / 2) b hb (by omega)
+      have hIH := ih (a / 2) b hb (by lia)
       have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by rw [Int.natCast_ediv]; norm_num
-      have hae' : (a : ℤ) % 2 = 0 := by omega
+      have hae' : (a : ℤ) % 2 = 0 := by lia
       rw [hIH, hcast, ← jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb]
       grind
     · -- odd: quadratic reciprocity
       rw [if_neg hae]
-      have ha2 : a % 2 = 1 := by omega
-      have hmod_lt : b % a < a := Nat.mod_lt _ (by omega)
-      have hIH := ih (b % a) a ha2 (by omega)
+      have ha2 : a % 2 = 1 := by lia
+      have hmod_lt : b % a < a := Nat.mod_lt _ (by lia)
+      have hIH := ih (b % a) a ha2 (by lia)
       have hml : jacobiSym ((b % a : ℕ) : ℤ) a = jacobiSym (b : ℤ) a := by
         rw [Int.natCast_emod, ← jacobiSym.mod_left]
       rw [hIH, hml, ← jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb]
@@ -101,7 +101,7 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
   have hred : ((a % (p : ℤ)).toNat : ℤ) = a % (p : ℤ) :=
     Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast hp.ne'))
   have hlt : (a % (p : ℤ)).toNat < p := by
-    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); omega
+    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); lia
   rw [jacobiFast, jOdd_eq p _ p hodd hlt, hred, ← jacobiSym.mod_left]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
