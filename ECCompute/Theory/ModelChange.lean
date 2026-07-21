@@ -23,6 +23,16 @@ to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invarian
 * `A₂ = a₁² + 4a₂`  (`= b₂`),
 * `A₄ = 16a₄ + 8a₁a₃`  (`= 8·b₄`),
 * `A₆ = 64a₆ + 16a₃²`  (`= 16·b₆`).
+
+## Main results
+
+* `ModelChange.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an `(x, y) ↦ (v²x,
+  v³y)` rescaling.
+* `ModelChange.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
+* `ModelChange.intShortModel`, `ModelChange.genModel`: the integral short model and the general
+  integral Weierstrass curve over `ℚ`.
+* `ModelChange.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of variables, a
+  group isomorphism from the general model to its integral short model.
 -/
 
 namespace ECCompute.ModelChange
