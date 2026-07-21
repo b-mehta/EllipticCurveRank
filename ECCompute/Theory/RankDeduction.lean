@@ -187,10 +187,9 @@ lemma range_lsmul_prod :
     LinearMap.range (LinearMap.lsmul ℤ (M × N) 2) =
       (LinearMap.range (LinearMap.lsmul ℤ M 2)).prod
         (LinearMap.range (LinearMap.lsmul ℤ N 2)) := by
-  have h : LinearMap.lsmul ℤ (M × N) 2 =
-      LinearMap.prodMap (LinearMap.lsmul ℤ M 2) (LinearMap.lsmul ℤ N 2) := by
-    ext p <;> simp [LinearMap.lsmul_apply]
-  rw [h, LinearMap.range_prodMap]
+  rw [show LinearMap.lsmul ℤ (M × N) 2 =
+      LinearMap.prodMap (LinearMap.lsmul ℤ M 2) (LinearMap.lsmul ℤ N 2) by
+    ext p <;> simp [LinearMap.lsmul_apply], LinearMap.range_prodMap]
 
 /-- `H ⧸ 2H` for a product is the product of the factors' `H ⧸ 2H`. -/
 lemma natCard_modN_two_prod :
@@ -334,7 +333,7 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
   rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
   have h2 : finrank (ZMod 2) (ModN H 2) = finrank ℤ H + t :=
     Nat.pow_right_injective (le_refl 2) key
-  omega
+  lia
 
 /-- The bound with only an *upper* bound on the 2-torsion: if `ρ` group elements have
 `𝔽₂`-linearly independent images under `φ`, and `|H[2]| ≤ 2 ^ t`, then `ρ ≤ rank H + t`.  This is
