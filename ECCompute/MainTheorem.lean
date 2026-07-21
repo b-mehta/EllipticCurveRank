@@ -59,19 +59,17 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
   obtain ⟨H, hfin, hle⟩ := h
   -- View `e` as a `ℤ`-linear equivalence and pull `H` back to `W₁(ℚ)` as `H.map e⁻¹`.
   let el : W₁.toAffine.Point ≃ₗ[ℤ] W₂.toAffine.Point := e.toIntLinearEquiv
-  set eq := el.symm.submoduleMap H with heq
+  set eq := el.symm.submoduleMap H
   refine ⟨H.map (el.symm : W₂.toAffine.Point →ₗ[ℤ] W₁.toAffine.Point), ?_, ?_⟩
   · -- The image of `H` under the inverse equivalence is isomorphic to `H`, hence f.g.
-    have : Module.Finite ℤ H := hfin
-    exact Module.Finite.equiv eq
-  · rw [← eq.finrank_eq]
-    exact hle
+    exact Module.Finite.equiv (M := H) eq
+  · rwa [← eq.finrank_eq]
 
 /-- A descent hypothesis for `curve a₂ a₄ a₆` witnesses that its discriminant is nonzero. -/
 private theorem discr_ne_zero_of_descentHyp {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
     (h : DescentHyp a₂ a₄ a₆ p θ) : (curve a₂ a₄ a₆).Δ ≠ 0 := by
   intro hΔ
-  exact h.discr (by rw [hΔ]; simp)
+  exact h.discr (by simp [hΔ])
 
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
@@ -108,11 +106,8 @@ private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
       ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) + ((x : H) : _) = 0 := by
     intro x
     have hx : (2 : ℤ) • (x : H) = 0 := (Submodule.mem_torsionBy_iff _ _).mp x.2
-    have h2 : (2 : ℤ) • ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) = 0 := by
-      rw [← Submodule.coe_smul, hx, Submodule.coe_zero]
-    rwa [two_zsmul] at h2
-  refine Nat.card_le_card_of_injective (fun x => ⟨((x : H) : _), hmap x⟩) ?_
-  intro a b hab
+    rw [← two_zsmul, ← Submodule.coe_smul, hx, Submodule.coe_zero]
+  refine Nat.card_le_card_of_injective (fun x => ⟨((x : H) : _), hmap x⟩) fun a b hab => ?_
   have h := congrArg Subtype.val hab
   exact Subtype.coe_injective (Subtype.coe_injective h)
 
@@ -164,10 +159,10 @@ theorem rank_ge_of_certificate (c : Certificate)
   have hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)) :=
     linearIndependent_descent hyp pt hns hB hBlen hMlen hinv φ hφ g hg
   -- The finitely generated subgroup `H = ⟨P₁, …, P_ρ⟩` and the restricted data.
-  set H : Submodule ℤ E := Submodule.span ℤ (Set.range g) with hH
+  set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩ with hgH
-  set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom with hφH
+  set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩
+  set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom
   -- The `2`-torsion of `H` is bounded by the curve's, hence by `2^t`.
   have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
     (card_torsionBy_le c.a₂ c.a₄ c.a₆ H).trans htors
