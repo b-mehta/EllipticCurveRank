@@ -15,7 +15,7 @@ import Mathlib.Tactic.NormNum
 survives trial division by the primes below `23`, then `n` is prime. This gives a fast primality
 certificate for the small label primes used by the rank certificates.
 
-## Main statements
+## Main results
 
 * `Nat.primes_below_23`: the primes below `23` are exactly `[2,3,5,7,11,13,17,19]`.
 * `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2,3,5,7,11,13,17,19] = true`, then
@@ -55,16 +55,16 @@ prime. -/
 theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
     (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : Nat.Prime n := by
   by_contra hnp
-  have hn0 : 0 < n := by omega
-  set p := n.minFac with hp
-  have hpp : p.Prime := Nat.minFac_prime (by omega)
+  have hn0 : 0 < n := by lia
+  set p := n.minFac
+  have hpp : p.Prime := Nat.minFac_prime (by lia)
   have hsq : p ^ 2 ≤ n := Nat.minFac_sq_le_self hn0 hnp
   have hplt23 : p < 23 := lt_of_pow_lt_pow_left' 2 (by grind)
   have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := Nat.primes_below_23 p hplt23 hpp
   have hpltn : p < n := by nlinarith [hpp.two_le, hsq]
   rcases (passes_true_iff.mp hpass) p hpmem with hmod | hle
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
-  · omega
+  · lia
 
 /-- Kernel `Bool`: `p` is a prime below `529 = 23²`, certified by trial division by the primes below
 `23` (`ECCompute.passes`). -/
@@ -74,6 +74,6 @@ noncomputable def checkPrime (p : ℕ) : Bool :=
 theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
   simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
   obtain ⟨h2, hle, hpass⟩ := h
-  exact Nat.prime_of_passes p h2 (by omega) hpass
+  exact Nat.prime_of_passes p h2 (by lia) hpass
 
 end ECCompute
