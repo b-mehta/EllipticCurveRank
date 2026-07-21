@@ -413,7 +413,7 @@ private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
       + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2) := by
     have heq : -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
           + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2
-        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by ring
+        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by grind
     rw [heq]
     exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
   have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
@@ -444,7 +444,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
       pow_two, padicValInt.mul hK0 hK0]
-    ring
+    grind
   have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
     exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by

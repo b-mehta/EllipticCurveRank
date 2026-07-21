@@ -39,7 +39,7 @@ private theorem Trep_map_zero :
   simp only [Function.comp_apply, Trep, Matrix.cons_val_zero]
   rw [eq_intCast]
   push_cast
-  ring
+  grind
 
 private theorem Trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 = (y.num : ZMod p) := by
@@ -50,7 +50,7 @@ private theorem Trep_map_two :
   simp only [Function.comp_apply, Trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
   rw [eq_intCast]
   push_cast
-  ring
+  grind
 
 private theorem Trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2

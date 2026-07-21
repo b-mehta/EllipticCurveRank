@@ -224,11 +224,11 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set X₃ := (reducedCurve a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
-    have hsub : y - -y = 2 * y := by ring
+    have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp only [reducedCurve]
     rw [div_mul_cancel₀ _ h2y]
-    ring
+    grind
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
