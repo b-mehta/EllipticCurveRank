@@ -41,7 +41,6 @@ theorem checkBRow_true {a₂ a₄ a₆ : ℤ} {x : ℚ} {lab : List (ℕ × ℤ)
   | cons l ls ih =>
     intro b hb j hj
     simp only [checkBRow, Bool.and'_eq_and, Bool.and_eq_true] at hb
-    obtain ⟨h0, hrec⟩ := hb
     cases j <;> grind
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
@@ -58,7 +57,6 @@ theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
     | nil => grind
     | cons p ps =>
       simp only [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
-      obtain ⟨hrow, hrec⟩ := h
       cases i <;> grind
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
@@ -70,10 +68,8 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
       lambdaCompute a₂ a₄ a₆ (lab.getD j.val (0, 0)).1
         ((lab.getD j.val (0, 0)).2 : ZMod (lab.getD j.val (0, 0)).1) (pt.getD i.val (0, 0)).1 := by
   intro i j
-  have hi : i.val < matB.length := by rw [hBlen]; exact i.isLt
-  have hip : i.val < pt.length := by rw [hplen]; exact i.isLt
-  have hj : j.val < lab.length := by rw [hllen]; exact j.isLt
-  have hcell := checkBRow_true (checkB_row h i.val hi hip) j.val hj
+  have hcell := checkBRow_true (checkB_row h i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt))
+    j.val (hllen ▸ j.isLt)
   grind [lambdaCompute_eq_bool, F2Invert.toMat]
 
 end ECCompute
