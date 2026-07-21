@@ -50,8 +50,7 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
   have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a := by
     constructor
     · rintro ⟨s, hs⟩
-      exact ⟨s / w, by
-        grind⟩
+      exact ⟨s / w, by grind⟩
     · rintro ⟨r, rfl⟩
       exact ⟨w * r, by ring⟩
   unfold psi
