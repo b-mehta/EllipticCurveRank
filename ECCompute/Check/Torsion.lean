@@ -241,7 +241,7 @@ private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finse
   set S : Finset (Option ℚ) := Sx.insertNone with hS
   have hinj : Set.InjOn ι T := by
     intro P hP P' hP' hEq
-    simp only [hT, Set.mem_setOf_eq] at hP hP'
+    simp only [hT, Set.mem_ofPred_eq] at hP hP'
     obtain _ | ⟨x, y, h⟩ := P
     · obtain _ | ⟨x', y', h'⟩ := P'
       · rfl
@@ -255,7 +255,7 @@ private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finse
         rfl
   have himg : ι '' T ⊆ ↑S := by
     rintro o ⟨P, hP, rfl⟩
-    simp only [hT, Set.mem_setOf_eq] at hP
+    simp only [hT, Set.mem_ofPred_eq] at hP
     obtain _ | ⟨x, y, h⟩ := P
     · simp [hιdef, hS]
     · simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone]
