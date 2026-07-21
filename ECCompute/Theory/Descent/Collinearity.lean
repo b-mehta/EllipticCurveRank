@@ -66,8 +66,8 @@ theorem vieta_of_double_root
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - 2 * x₁) :
     x₁ + x₁ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₁ + x₁ * x₃ + x₁ * x₃ = a₄ - 2 * ℓ * m ∧
-        x₁ * x₁ * x₃ = m ^ 2 - a₆ :=
-  by grind
+        x₁ * x₁ * x₃ = m ^ 2 - a₆ := by
+  grind
 
 end CommRing
 
