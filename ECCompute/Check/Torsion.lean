@@ -111,12 +111,10 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
     ring
   have hroot : aeval x p = 0 := by rw [haeval, hx]
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  have hzcast : x = (z : ℚ) := by rw [hz]; simp
+  have hzcast : x = (z : ℚ) := by simp [hz]
   refine no_int_root_of_quadHasRootMod_eq_false hℓ h z ?_
   have hQ : ((quadEval b c z : ℤ) : ℚ) = 0 := by
-    simp only [quadEval]
-    push_cast
-    grind
+    simp only [quadEval]; push_cast; grind
   exact_mod_cast hQ
 
 /-! ## The t = 0 lemma -/
@@ -151,18 +149,14 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
       eq_intCast, Int.cast_one, one_mul]
   have hroot : aeval (4 * x : ℚ) p = 0 := by
-    rw [haeval, hc₂, hc₁, hc₀]
-    push_cast
-    grind
+    rw [haeval, hc₂, hc₁, hc₀]; push_cast; grind
   -- the integral root theorem: `4x` equals some integer `z`
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  have hzcast : (4 * x : ℚ) = (z : ℚ) := by rw [hz]; simp
+  have hzcast : (4 * x : ℚ) = (z : ℚ) := by simp [hz]
   refine ⟨z, ?_⟩
   -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
   have hQ : ((cubicEval c₂ c₁ c₀ z : ℤ) : ℚ) = 0 := by
-    simp only [cubicEval, hc₂, hc₁, hc₀]
-    push_cast
-    grind
+    simp only [cubicEval, hc₂, hc₁, hc₀]; push_cast; grind
   exact_mod_cast hQ
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
@@ -288,7 +282,7 @@ theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 4 := by
   have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
   have := Cubic.card_roots_le (P := (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ))
-  omega
+  lia
 
 /-- The `t = 0` witness: if the monic `2`-division cubic of the short model has no root modulo a
 witness prime `ℓ ≠ 0`, then the only rational `2`-torsion point is the identity, so the `2`-torsion
@@ -322,7 +316,7 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : cubicEval a�
     x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ)
       = (x - R) * (x ^ 2 + ((a₂ : ℚ) + R) * x + ((a₄ : ℚ) + R * ((a₂ : ℚ) + R))) := by
   have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
-    have : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by rw [hR]; simp
+    have : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by simp [hR]
     simpa only [cubicEval, Int.cast_add, Int.cast_mul, Int.cast_pow] using this
   grind
 
