@@ -43,9 +43,7 @@ theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   rw [← @Int.cast_inj ℚ]
   push_cast
   rw [hx, hy]
-  refine ⟨fun h => mul_left_cancel₀ hD ?_, fun h => ?_⟩
-  · grind
-  · grind
+  exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
 
 /-- The correctness lemma phrased with the raw Weierstrass equation rather than `Equation`. -/
 theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
