@@ -8,18 +8,26 @@ Authors: Bhavik Mehta
 # Evaluator-side helpers for the `certify_curve` command
 
 These functions reproduce the descent character and the `𝔽₂` matrix inverse using plain
-`Int`/`Nat`/`Rat` arithmetic (the Legendre symbol via quadratic reciprocity), written for the
-compiler/interpreter.
-The `certify_curve` elaborator uses them to produce a certificate's character matrix `matB` and its
-inverse `matM`.
+`Int`/`Nat` arithmetic (the Legendre symbol via quadratic reciprocity), written for the
+compiler/interpreter. The `certify_curve` elaborator calls them to produce a certificate's
+character matrix `matB` and its inverse `matM`.
 
-This module imports nothing (`ℚ` is the core type `Rat`), so it stays cheap to build.
+## Main definitions
+
+* `jacobi`: the Jacobi symbol `(a | n)` for odd `n`.
+* `lambdaEval`: evaluator-side value of the descent character `λ_{p,θ}`.
+* `computeMatB`: the descent-character matrix `matB` as `Nat` row bitmasks.
+* `invF2`: inverse of an `𝔽₂` matrix in the column-bitmask convention feeding `matM`.
+
+## Implementation notes
+
+The module imports nothing, so it stays cheap to build.
 -/
 
 namespace ECCompute.CertifyEval
 
-/-- The Jacobi symbol `(a | n)` for odd `n`, by quadratic reciprocity.  For prime `n` this is
-the Legendre symbol.  Returns `0`, `1`, or `-1`. -/
+/-- The Jacobi symbol `(a | n)` for odd `n`, by quadratic reciprocity. For prime `n` this is
+the Legendre symbol. Returns `0`, `1`, or `-1`. -/
 partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
   let mut a := ((a % (n : Int)) + n).toNat % n
   let mut n := n
@@ -34,7 +42,7 @@ partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
   return if n == 1 then acc else 0
 
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
-`xnum / xden`, mirroring `ECCompute.lambdaComputeBool` (`true` = nontrivial).  `a₂ a₄` are the
+`xnum / xden`, mirroring `ECCompute.lambdaComputeBool` (`true` = nontrivial). `a₂ a₄` are the
 short-model coefficients; the cubic's constant term `a₆` does not enter the character. -/
 def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
   if (xden : Int) % (p : Int) == 0 then false
@@ -55,7 +63,7 @@ def computeMatB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × 
     bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
-column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `matM`).  Returns
+column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `matM`). Returns
 `none` if the matrix is singular. -/
 def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
