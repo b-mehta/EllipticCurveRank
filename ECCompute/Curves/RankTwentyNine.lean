@@ -6,26 +6,23 @@ Authors: Bhavik Mehta
 import ECCompute.Certify
 
 /-!
-# A second curve of rank at least 29
+# The Elkies-Klagsbrun curve has rank at least 29
 
-This file certifies that the elliptic curve `E : y² + xy = x³ + a₄ x + a₆` over `ℚ` (with the large
-integer coefficients `a₄`, `a₆` below) has Mordell-Weil rank at least `29`, a descent-character
-certificate in the sense of `ECCompute.MainTheorem`.
+The Elkies-Klagsbrun elliptic curve
 
-* `data/rank29.txt`: the 29 points on the short model, one `x y` per line, each coordinate an
-  integer or a reduced fraction `a/b`.
-* `data/rank29-labels.txt`: the 29 descent columns `p θ`, primes between `19` and `179`, matching
-  Cremona's descent-image output for this curve.
+  `E : y² + xy = x³ + a₄·x + a₆`,   with
+  `a₄ = -27006183241630922218434652145297453784768054621836357954737385`   and
+  `a₆ = 5525805855134237647573669959111819182152106703253507960837240477`
+  `     9149413277716173425636721497`
 
+over `ℚ` has Mordell-Weil rank at least `29`, a rank record of N. D. Elkies and Z. Klagsbrun. Points
+in `data/rank29.txt`, descent labels in `data/rank29-labels.txt` (primes `19` to `179`);
 `certify_curve` does the rest.
 -/
 
 namespace ECCompute
 
 open WeierstrassCurve
-
--- The `rfl` certificate checks (`checkInv`, the `matB` entries) reduce large `Nat` recursions in
--- the elaborator, so raise the recursion limit for the whole file.
 
 /-- The `a₄` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
 abbrev ekA₄ : ℚ := -27006183241630922218434652145297453784768054621836357954737385
@@ -34,8 +31,8 @@ abbrev ekA₄ : ℚ := -27006183241630922218434652145297453784768054621836357954
 abbrev ekA₆ : ℚ :=
   55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497
 
-/-- The Elkies-Klagsbrun rank-29 elliptic curve over `ℚ` (general model).  Certified to have
-Mordell-Weil rank at least `29` in `elkiesKlagsbrun_hasRankGE_29`. -/
+/-- The Elkies-Klagsbrun rank-29 elliptic curve over `ℚ`. Certified rank ≥ 29 in
+`elkiesKlagsbrun_hasRankGE_29`. -/
 def curveElkiesKlagsbrun : WeierstrassCurve ℚ := ⟨1, 0, 0, ekA₄, ekA₆⟩
 
 /-- The Elkies-Klagsbrun curve has Mordell-Weil rank at least `29`. -/
