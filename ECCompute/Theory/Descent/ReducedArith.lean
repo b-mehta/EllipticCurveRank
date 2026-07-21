@@ -101,8 +101,8 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) : ZMod p)
       + (a₂ : ZMod p) + (x₁ : ZMod p) + (x₂ : ZMod p)) * ((x₁ : ZMod p) - (x₂ : ZMod p)) ^ 2
       = ((y₁ : ZMod p) - (y₂ : ZMod p)) ^ 2 := by
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     grind [WeierstrassCurve.Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
@@ -159,7 +159,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
       + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x x y y with hℓdef
-  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
     grind [curve]
