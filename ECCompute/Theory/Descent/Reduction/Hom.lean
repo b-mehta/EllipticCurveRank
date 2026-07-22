@@ -697,7 +697,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by
-    intro h; grind
+    grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
@@ -709,7 +709,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by
-    intro h; grind
+    grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
   have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
       = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
