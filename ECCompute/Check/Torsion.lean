@@ -68,7 +68,7 @@ theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (h
     (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 :=
   no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
 
-/-! ## Quadratic no-root machinery (for the `t = 1` cofactor)
+/-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
 
 For the `t = 1` bound the `2`-division cubic factors as `(X - R) · q` with `q = X² + bX + c` an
 irreducible quadratic; certifying that `q` has no rational root is done exactly as for the cubic,
@@ -195,9 +195,9 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
 /-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
 
 For the short model `curve a₂ a₄ a₆` (with `a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
-`(x, 0)` where `x` is a rational root of `f = X³ + a₂X² + a₄X + a₆`.  Since `f` has at most three
-roots, the full `2`-torsion has at most four elements.  This is the torsion witness used by
-certificates that concede `t = 2` (full rational `2`-torsion, e.g. curves with square discriminant),
+`(x, 0)` where `x` is a rational root of `f = X³ + a₂X² + a₄X + a₆`. Since `f` has at most three
+roots, the full `2`-torsion has at most four elements. This is the torsion witness for
+certificates with `t = 2` (full rational `2`-torsion, e.g. curves with square discriminant),
 for which the bound `rank ≥ ρ - t` needs only `|E(ℚ)[2]| ≤ 2^t = 4`. -/
 
 open Polynomial in
@@ -224,7 +224,7 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
 
 /-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
 `2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
-`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`).  Each concrete bound
+`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`). Each concrete bound
 just supplies an `Sx`: the cubic's roots (`≤ 3`) for the universal case, a singleton for `t = 1`. -/
 private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finset ℚ)
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
@@ -312,7 +312,7 @@ theorem card_twoTorsion_le_one_of_hasRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} 
 /-! ## The `t = 1` bound `|E(ℚ)[2]| ≤ 2`
 
 If the `2`-division cubic `F = X³ + a₂X² + a₄X + a₆` has an integer root `R`, then it factors as
-`F = (X - R) · q` with `q = X² + (a₂ + R)X + (a₄ + R(a₂ + R))`.  If `q` has no rational root (again
+`F = (X - R) · q` with `q = X² + (a₂ + R)X + (a₄ + R(a₂ + R))`. If `q` has no rational root (again
 certified by a prime `ℓ` modulo which `q` has no root), then `R` is the *only* rational root of `F`,
 so the nonzero `2`-torsion points all share the `x`-coordinate `R`, giving `|E(ℚ)[2]| ≤ 2`. -/
 
@@ -342,7 +342,7 @@ private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : cubic
     grind
 
 open Polynomial in
-/-- The `t = 1` bound.  If the short model's `2`-division cubic has an integer root `R` and its
+/-- The `t = 1` bound. If the short model's `2`-division cubic has an integer root `R` and its
 cofactor quadratic has no rational root (via a prime `ℓ ≠ 0`), then every nonzero rational
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
 theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
@@ -375,7 +375,7 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (ℓ != 0
 
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
-`ℓ ≠ 0` (`!quadHasRootMod …`).  Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
+`ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (ℓ != 0) = true)
     (hR : (cubicEval a₂ a₄ a₆ R == 0) = true)
     (hq : (!quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ) = true) :

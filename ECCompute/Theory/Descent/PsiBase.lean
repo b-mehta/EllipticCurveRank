@@ -20,7 +20,7 @@ the descent factorization `λ = εp_finite ∘ red_p`: `ECCompute.Descent` (the 
 * `ECCompute.psi_of_isSquare`: `ψ_p` vanishes on squares.
 * `ECCompute.psi_mul_sq`: multiplying by a nonzero square does not change `ψ_p`.
 * `ECCompute.psi_mul`: `ψ_p` turns products into sums on nonzero elements.
-* `ECCompute.psi_collinear`: the `𝔽ₚ`-arithmetic heart: `ψ_p` sums to zero on a collinear triple.
+* `ECCompute.psi_collinear`: `ψ_p` sums to zero on a collinear triple.
 * `ECCompute.fderiv_ne_zero`: `f'(θ) ≠ 0` (the root `θ` is simple, from `p ∤ 6Δ`).
 -/
 
@@ -33,7 +33,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
 On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-residue character
-transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`.  Proved via
+transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`. Proved via
 `quadraticChar`. -/
 
 section Psi
@@ -76,7 +76,7 @@ variable {a₂ a₄ a₆ p}
 /-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then the `ψ_p`-values sum to
 zero: collinearity makes `(X₁-θ)(X₂-θ)(X₃-θ)` a square, and `ψ_p` is additive on the nonzero
-factors.  The `𝔽ₚ`-arithmetic heart of additivity. -/
+factors. -/
 theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)

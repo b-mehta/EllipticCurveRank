@@ -12,12 +12,12 @@ import Mathlib.Tactic.LinearCombination
 A line `y = ℓx + m` meeting `E : y² = x³ + a₂x² + a₄x + a₆` in three points with
 `x`-coordinates `x₁, x₂, x₃` gives `x³ + a₂x² + a₄x + a₆ - (ℓx + m)² = (x - x₁)(x - x₂)(x - x₃)`.
 Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` yields
-`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square; this feeds the descent-character
+`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square, used in the descent-character
 additivity proof.
 
 The factorization is stated as an equation of values `∀ x, …` rather than of polynomials, which
-is what the `θ`-corollary needs.  Its content is the three Vieta relations between `(ℓ, m)` and
-the symmetric functions of `x₁, x₂, x₃`, so everything reduces to `grind`.
+is what the `θ`-corollary needs. Its content is the three Vieta relations between `(ℓ, m)` and
+the symmetric functions of `x₁, x₂, x₃`.
 
 ## Main declarations
 
@@ -58,7 +58,7 @@ theorem prod_sub_theta_eq_lineSq
 
 /-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
 slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
-relations hold for the triple `x₁, x₁, x₃` with `x₃ = ℓ² - a₂ - 2x₁`.  Doubling analogue of
+relations hold for the triple `x₁, x₁, x₃` with `x₃ = ℓ² - a₂ - 2x₁`. Doubling analogue of
 `vieta_of_roots`. -/
 theorem vieta_of_double_root
     (hpt : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
@@ -108,7 +108,7 @@ theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
   grind [vieta_of_roots, prod_sub_theta_eq_lineSq]
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
-`f'(θ) = (x₂ - θ)(x₃ - θ)`.  Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
+`f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
 mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
 theorem fderiv_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)

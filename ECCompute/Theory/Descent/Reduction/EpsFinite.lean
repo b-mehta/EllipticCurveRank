@@ -16,7 +16,7 @@ character on the reduced curve `E/𝔽ₚ` is
   `εp_finite θ : E(𝔽ₚ) → ZMod 2`,   `εp_finite θ O = 0`,
   `εp_finite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X - θ)`   otherwise,
 
-where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`.  This file proves that
+where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`. This file proves that
 `εp_finite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
 is then automatic.
 
@@ -36,7 +36,7 @@ namespace ECCompute
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-- The reduced Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ZMod p`, i.e. the reduction
-mod `p` of `ECCompute.curve`.  The coefficients are the mod-`p` reductions of the integers
+mod `p` of `ECCompute.curve`. The coefficients are the mod-`p` reductions of the integers
 `a₂, a₄, a₆`, and `a₁ = a₃ = 0`. -/
 def reducedCurve : WeierstrassCurve (ZMod p) where
   a₁ := 0
@@ -47,7 +47,7 @@ def reducedCurve : WeierstrassCurve (ZMod p) where
 
 variable [Fact p.Prime]
 
-/-- The finite-field descent character.  On `O` it is `0`; on an affine point `(X, Y)` it is
+/-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
 noncomputable def εp_finite (θ : ZMod p) :
     (reducedCurve a₂ a₄ a₆ p).toAffine.Point → ZMod 2
@@ -99,7 +99,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 
 /-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
 whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
-`X₃` equals the sum of the values at `x₁` and `x₂`.  The `𝔽ₚ`-arithmetic core of the secant
+`X₃` equals the sum of the values at `x₁` and `x₂`. The `𝔽ₚ`-arithmetic core of the secant
 additivity, split off from the group-law setup in `εp_finite_map_add_of_X_ne`. -/
 private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)

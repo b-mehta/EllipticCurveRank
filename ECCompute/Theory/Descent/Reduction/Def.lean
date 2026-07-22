@@ -110,7 +110,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 open Classical in
 /-- The reduction map on affine points: `P ↦` the affine point underlying `ℤ → ZMod p` applied
-to the integer representative `Trep` of `P`.  Requires good reduction (`hΔ`). -/
+to the integer representative `Trep` of `P`. Requires good reduction (`hΔ`). -/
 noncomputable def red_p (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point

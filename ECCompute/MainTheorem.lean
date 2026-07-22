@@ -28,7 +28,7 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
 
 * `rank_ge_of_certificate`: the bound on the short integral model `curve c.a₂ c.a₄ c.a₆`, where the
   descent character lives.
-* `hasRankGE_of_certificate`: the front door for an arbitrary curve `W` whose coefficients are the
+* `hasRankGE_of_certificate`: the bound for an arbitrary curve `W` whose coefficients are the
   integers `a₁ … a₆`, obtained by transporting the short-model bound along
   `ModelChange.generalToShortEquiv`.
 -/
@@ -111,7 +111,7 @@ private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
   have h := congrArg Subtype.val hab
   exact Subtype.coe_injective (Subtype.coe_injective h)
 
-/-- The soundness theorem on the short integral model.  Let `c` be a certificate whose curve is the
+/-- The soundness theorem on the short integral model. Let `c` be a certificate whose curve is the
 short integral model `curve c.a₂ c.a₄ c.a₆` (i.e. `a₁ = a₃ = 0`), and suppose every referee check
 passes:
 
@@ -198,7 +198,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
   rw [hW]
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
-  -- by `getD`.  Every kernel-checked hypothesis above is `List`-based; the families here appear
+  -- by `getD`. Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
   have hmemP : ∀ i : Fin c.rho, c.points.getD i.val (0, 0) ∈ c.points :=
     fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)

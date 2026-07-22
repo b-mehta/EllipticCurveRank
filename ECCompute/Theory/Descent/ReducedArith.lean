@@ -39,7 +39,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### Reducing `x` to `ZMod p`
 
 For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
-`w` with `x.den = w²`.  Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
+`w` with `x.den = w²`. Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
 
 /-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
 noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
@@ -53,7 +53,7 @@ theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 
 
 /-! ### Elementary reduction mod `p`
 
-`Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in characteristic `p`.  In the
+`Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in characteristic `p`. In the
 *good-reduction* case we transfer group-law data to `ZMod p` by clearing denominators via the
 genuine ring hom `Int.cast`, pushing `Rat.cast` through sums/products whose denominators survive
 reduction (`(·.den : ZMod p) ≠ 0`) with the conditional cast lemmas; the good-denominator closure
@@ -123,7 +123,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   rwa [Rat.cast_intCast] at hcast
 
 /-- Casting the derivative polynomial `f'(x) = 3x² + 2a₂x + a₄` commutes with reduction when
-`p ∤ x.den`.  Used by `reduced_doubleX`. -/
+`p ∤ x.den`. Used by `reduced_doubleX`. -/
 theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) :
     (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) : ℚ)) : ZMod p)
       = 3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p) := by
