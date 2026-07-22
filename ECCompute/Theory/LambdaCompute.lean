@@ -65,16 +65,16 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     intro a b hb ha
     rw [jOdd]
     -- `b = 1`
-    by_cases hb1 : b = 1
-    · rw [if_pos hb1, hb1, jacobiSym.one_right]
+    obtain rfl | hb1 := eq_or_ne b 1
+    · rw [if_pos rfl, jacobiSym.one_right]
     rw [if_neg hb1]
     -- `a = 0`
-    by_cases ha0 : a = 0
-    · rw [if_pos ha0, ha0, Nat.cast_zero, jacobiSym.zero_left (by lia)]
+    obtain rfl | ha0 := eq_or_ne a 0
+    · rw [if_pos rfl, Nat.cast_zero, jacobiSym.zero_left (by lia)]
     rw [if_neg ha0]
     -- `a = 1`
-    by_cases ha1 : a = 1
-    · rw [if_pos ha1, ha1, Nat.cast_one, jacobiSym.one_left]
+    obtain rfl | ha1 := eq_or_ne a 1
+    · rw [if_pos rfl, Nat.cast_one, jacobiSym.one_left]
     rw [if_neg ha1]
     -- `a` even vs odd
     by_cases hae : a % 2 = 0
