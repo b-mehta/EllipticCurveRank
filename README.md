@@ -1,13 +1,40 @@
 # ECCompute
 
-## GitHub configuration
+Certified lower bounds on the Mordell-Weil rank of elliptic curves over `ℚ`, in Lean 4 on top of
+mathlib.
 
-To set up your new GitHub repository, follow these steps:
+For a Weierstrass curve `E/ℚ` and an integer `ρ`, ECCompute produces a proof of
+`rank E(ℚ) ≥ ρ` that the Lean kernel checks directly. No `native_decide` is used: every
+computational obligation reduces in the kernel via `Lean.reflBoolTrue`.
 
-* Under your repository name, click **Settings**.
-* In the **Actions** section of the sidebar, click "General".
-* Check the box **Allow GitHub Actions to create and approve pull requests**.
-* Click the **Pages** section of the settings sidebar.
-* In the **Source** dropdown menu, select "GitHub Actions".
+## How it works
 
-After following the steps above, you can remove this section from the README file.
+The bound avoids Mordell-Weil (which mathlib does not have) by working inside a finitely generated
+subgroup. Given `ρ` rational points, Cremona's descent character `λ_{p,θ}` maps the subgroup they
+generate to `𝔽₂^ρ`. If the resulting `ρ × ρ` matrix is invertible over `𝔽₂`, the points are
+independent modulo `2·E(ℚ)`, which gives `rank ≥ ρ - t` where `t = dim_{𝔽₂} E(ℚ)[2]` is the
+rational 2-torsion dimension.
+
+A certificate lists the `ρ` points, the `ρ` descent labels `(p, θ)`, the character matrix and its
+inverse over `𝔽₂`, and a witness bounding `t`. The `certify_curve` tactic reads the points and
+labels from two data files, recomputes the matrix, and discharges the referee obligations of
+`hasRankGE_of_certificate`, each a kernel-reducible `Bool` check.
+
+## Layout
+
+* `Theory/` - the descent character and the rank-bound argument.
+* `Check/` - the `Bool`-valued checkers the kernel reduces (matrix inverse over `𝔽₂`, primality,
+  2-torsion, points on the curve).
+* `Certify/` and `Certify.lean` - the certificate type and the `certify_curve` tactic.
+* `Curves/` - certified curves, with rank records from `20` to `29` (Nagao, Fermigier,
+  Martin-McMillen, Elkies, Elkies-Klagsbrun) and two small worked examples.
+* `data/` - the points and labels each certificate reads.
+
+## Building
+
+The project uses a pinned mathlib. After cloning, fetch the cache once, then build:
+
+```
+lake exe cache get
+lake build
+```
