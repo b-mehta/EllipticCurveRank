@@ -731,8 +731,8 @@ private theorem red_p_add_kernel (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
     red_p a₂ a₄ a₆ p hΔ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂) = 0 := by
-  by_cases hx12 : x₁ = x₂
-  · rw [Affine.Point.add_of_Y_eq hx12 (y_eq_negY_of_X_eq a₂ a₄ a₆ h₁ h₂ hx12 hPQ), red_p_zero]
+  obtain rfl | hx12 := eq_or_ne x₁ x₂
+  · rw [Affine.Point.add_of_Y_eq rfl (y_eq_negY_of_X_eq a₂ a₄ a₆ h₁ h₂ rfl hPQ), red_p_zero]
   · rw [Affine.Point.add_of_X_ne hx12]
     exact red_p_of_den_zero a₂ a₄ a₆ p hΔ _
       (den_addX_both_kernel a₂ a₄ a₆ p h₁.1 h₂.1 hx12 hd1 hd2)
@@ -787,9 +787,9 @@ private theorem red_p_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
         Affine.Point.some.injEq]
       exact ⟨hXbar.symm, hYbar.symm⟩
     rw [hQeqP]
-    by_cases hx12 : x₁ = x₂
+    obtain rfl | hx12 := eq_or_ne x₁ x₂
     · -- `Q = -P`, so `P + Q = 0`, and the common reduced point is `2`-torsion.
-      exact red_p_add_neg a₂ a₄ a₆ p hΔ h₁ h₂ hPQ hd1 hx12 hYbar
+      exact red_p_add_neg a₂ a₄ a₆ p hΔ h₁ h₂ hPQ hd1 rfl hYbar
     · -- `x₁ ≠ x₂` over `ℚ` but the reduced points coincide: the tangent-mod-`p` case, split on
       -- whether the common reduced point is `2`-torsion.
       by_cases hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map

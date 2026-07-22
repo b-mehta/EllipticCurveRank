@@ -150,10 +150,9 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
     (shortModel W).toAffine.slope x₁ x₂ (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
         (y₂ + (W.a₁ * x₂ + W.a₃) / 2)
       = W.toAffine.slope x₁ x₂ y₁ y₂ + W.a₁ / 2 := by
-  by_cases hx : x₁ = x₂
-  · have hy : y₁ ≠ W.toAffine.negY x₂ y₂ := fun h => hxy ⟨hx, h⟩
-    have hyeq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ hx hy
-    subst hx
+  obtain rfl | hx := eq_or_ne x₁ x₂
+  · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h => hxy ⟨rfl, h⟩
+    have hyeq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ rfl hy
     subst hyeq
     have hy' : y₁ + (W.a₁ * x₁ + W.a₃) / 2
         ≠ (shortModel W).toAffine.negY x₁ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) := by

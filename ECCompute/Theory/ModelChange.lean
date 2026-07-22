@@ -110,9 +110,8 @@ theorem addY_scale (x₁ x₂ y₁ ℓ : ℚ) :
 theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
     W'.toAffine.slope (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v ^ 3 * y₂)
       = v * W.toAffine.slope x₁ x₂ y₁ y₂ := by
-  by_cases hx : x₁ = x₂
-  · subst hx
-    by_cases hy : y₁ = W.toAffine.negY x₁ y₂
+  obtain rfl | hx := eq_or_ne x₁ x₂
+  · by_cases hy : y₁ = W.toAffine.negY x₁ y₂
     · rw [slope_of_Y_eq rfl (by rw [negY_scale s, hy] : v ^ 3 * y₁ = _),
         slope_of_Y_eq rfl hy, mul_zero]
     · have hy' : v ^ 3 * y₁ ≠ W'.toAffine.negY (v ^ 2 * x₁) (v ^ 3 * y₂) := by

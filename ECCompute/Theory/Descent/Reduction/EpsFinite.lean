@@ -122,19 +122,19 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
       (by grind) (by grind) (by grind)
       hθroot hc
-  by_cases c1 : x₁ = θ
-  · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
-    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
-    rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
+  obtain rfl | c1 := eq_or_ne x₁ θ
+  · have hX2ne : x₂ ≠ x₁ := fun hc => hne hc.symm
+    have hX3ne : X₃ ≠ x₁ := fun hc => hfd_ne (by grind)
+    rw [if_neg hX3ne, if_pos rfl, if_neg hX2ne, hfd1 rfl,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
-  by_cases c2 : x₂ = θ
-  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
-    rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
+  obtain rfl | c2 := eq_or_ne x₂ θ
+  · have hX3ne : X₃ ≠ x₂ := fun hc => hfd_ne (by grind)
+    rw [if_neg hX3ne, if_neg c1, if_pos rfl, hfd2 rfl,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
-  by_cases c3 : X₃ = θ
-  · rw [if_pos c3, if_neg c1, if_neg c2, hfd3 c3,
+  obtain rfl | c3 := eq_or_ne X₃ θ
+  · rw [if_pos rfl, if_neg c1, if_neg c2, hfd3 rfl,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr c2)]
   · rw [if_neg c3, if_neg c1, if_neg c2]
     have := psi_collinear h.prime hσ₁ hσ₂ hσ₃ h.root c1 c2 c3
@@ -185,14 +185,14 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
     prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x x X₃ θ
       hσ₁ hσ₂ hσ₃ hθroot
-  by_cases c3 : X₃ = θ
-  · rw [if_pos c3]
-    have hfd : fderiv a₂ a₄ a₆ p θ = (x - θ) * (x - θ) :=
-      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x θ
+  obtain rfl | c3 := eq_or_ne X₃ θ
+  · rw [if_pos rfl]
+    have hfd : fderiv a₂ a₄ a₆ p X₃ = (x - X₃) * (x - X₃) :=
+      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x X₃
         (by grind) (by grind) (by grind)
-        hθroot c3
+        hθroot rfl
     rw [hfd]
-    exact psi_of_isSquare ⟨x - θ, by ring⟩
+    exact psi_of_isSquare ⟨x - X₃, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
     have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
@@ -252,14 +252,14 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
     rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, εp_finite_zero,
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
-  · by_cases hne : x₁ = x₂
+  · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
       have hyne' : y₁ ≠ -y₂ := by grind [reducedCurve_negY]
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
-        rw [reducedCurve_equation h₁, reducedCurve_equation h₂, hne]
+        rw [reducedCurve_equation h₁, reducedCurve_equation h₂]
       have hyeq : y₁ = y₂ := by grind
       have hy1ne0 : y₁ ≠ 0 := by grind
-      subst hne hyeq
+      subst hyeq
       have hpt : (Affine.Point.some x₁ y₁ h₂ : (reducedCurve a₂ a₄ a₆ p).toAffine.Point)
           = Affine.Point.some x₁ y₁ h₁ := rfl
       rw [hpt, CharTwo.add_self_eq_zero]
