@@ -13,7 +13,7 @@ For a Weierstrass curve `W` over a field of characteristic different from `2` wi
 discriminant, this file identifies the roots of `W.twoTorsionPolynomial` with the `X`-coordinates
 of the nonzero `2`-torsion affine points of `W`.
 
-## Main statements
+## Main results
 
 * `WeierstrassCurve.isRoot_twoTorsionPolynomial_iff`: `x` is a root of `W.twoTorsionPolynomial`
   if and only if it is the `X`-coordinate of a nonzero affine point `P` with `P + P = 0`.
@@ -25,6 +25,7 @@ namespace WeierstrassCurve
 
 variable {F : Type*} [Field F] (W : WeierstrassCurve F)
 
+/-- Evaluate the 2-torsion polynomial at `x`, expanded via the `bᵢ` coefficients. -/
 lemma eval_twoTorsionPolynomial_toPoly (x : F) :
     W.twoTorsionPolynomial.toPoly.eval x = 4 * x ^ 3 + W.b₂ * x ^ 2 + 2 * W.b₄ * x + W.b₆ := by
   simp [twoTorsionPolynomial, Cubic.toPoly]
@@ -38,8 +39,8 @@ theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (h�
       ∃ y, ∃ h : W.toAffine.Nonsingular x y,
         (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0 := by
   have h4 : (4 : F) ≠ 0 := by
-    have : (4 : F) = 2 * 2 := by norm_num
-    rw [this]
+    have h22 : (4 : F) = 2 * 2 := by norm_num
+    rw [h22]
     exact mul_ne_zero h2 h2
   rw [IsRoot.def, eval_twoTorsionPolynomial_toPoly, b₂, b₄, b₆]
   constructor

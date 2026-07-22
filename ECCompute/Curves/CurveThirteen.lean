@@ -13,7 +13,7 @@ The elliptic curve
 
   `E : y² = x³ - 82 x`
 
-over `ℚ` has Mordell-Weil rank at least `3`.  Its `2`-division cubic `x³ - 82 x = x (x² - 82)`
+over `ℚ` has Mordell-Weil rank at least `3`. Its `2`-division cubic `x³ - 82 x = x (x² - 82)`
 has the single rational root `x = 0` (the quadratic cofactor `x² - 82` is irreducible over `ℚ`),
 so `E` has exactly one nonzero rational `2`-torsion point `(0, 0)`, i.e. `t = dim_𝔽₂ E(ℚ)[2] = 1`.
 
@@ -21,7 +21,7 @@ The certificate exhibits `ρ = 4` points with `𝔽₂`-independent descent imag
 torsion dimension *sharply*: rather than the universal `|E(ℚ)[2]| ≤ 4` bound (which would only give
 `rank ≥ ρ - 2 = 2`), it certifies `|E(ℚ)[2]| ≤ 2` by naming the short-model root `R = 0` and the
 witness prime `ℓ = 5` at which the cofactor `x² - 1312` has no root, giving the full
-`rank ≥ ρ - t = 4 - 1 = 3`.  Points (in short-model coordinates) in `data/rank13.txt`, descent
+`rank ≥ ρ - t = 4 - 1 = 3`. Points (in short-model coordinates) in `data/rank13.txt`, descent
 labels in `data/rank13-labels.txt`.
 -/
 

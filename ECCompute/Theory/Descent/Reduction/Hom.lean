@@ -146,9 +146,9 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by push_cast; grind
+  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by grind
     exact_mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by push_cast; grind
+  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by grind
     exact_mod_cast this
   · exact mul_comm _ _
 
@@ -263,7 +263,7 @@ private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
   apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
   grind
 
-/-- The reduced secant slope is well-defined.  When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
+/-- The reduced secant slope is well-defined. When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
 reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y₁ - y₂)/(x₁ - x₂)` (a
 `0/0` mod `p`) equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose
 denominator survives reduction. -/
@@ -279,7 +279,7 @@ private theorem reduced_slope_den (hne : x₁ ≠ x₂)
   have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
       = (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)) / (y₁ + y₂) := by
     rw [eq_div_iff hy12]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
-  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rw [Rat.cast_add_of_ne_zero hdy1 hdy2]; exact hy2
+  have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [Rat.cast_add_of_ne_zero hdy1 hdy2]
   have hNden := (cast_secant_num a₂ a₄ p hd1 hd2).1
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
@@ -323,7 +323,7 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     exact hc
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
-private theorem cast_num_eq {q : ℚ} {w : ℕ} {k : ℕ} (hd : q.den = w ^ k) :
+private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
   rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
@@ -336,7 +336,7 @@ private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hp
     rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
   exact absurd (Int.isUnit_iff.mp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
-    (by have := (Fact.out : p.Prime).two_le; omega)
+    (by have := (Fact.out : p.Prime).two_le; lia)
 
 /-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
 `N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation
@@ -364,7 +364,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
       rw [hqv, padicValRat.neg, padicValRat.of_int]
       have hle := padicValInt_mono p (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
       rw [hK2] at hle
-      omega
+      lia
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
@@ -375,7 +375,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
     rw [← hsplit]
     exact_mod_cast he
 
-/-- Coordinate data for a kernel point.  If `(x, y)` satisfies the curve equation and reduces to
+/-- Coordinate data for a kernel point. If `(x, y)` satisfies the curve equation and reduces to
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
 private theorem kernel_point_data {x y : ℚ}
@@ -413,7 +413,7 @@ private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
       + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2) := by
     have heq : -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
           + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2
-        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by ring
+        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by grind
     rw [heq]
     exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
   have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
@@ -427,10 +427,9 @@ private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂
     A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h => hne <| by
   have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
   push_cast at h0
-  rw [hA, hC] at h0
   grind [mul_right_cancel₀, pow_ne_zero]
 
-/-- Final valuation step of the kernel-closure certificate.  Given the single-fraction
+/-- Final valuation step of the kernel-closure certificate. Given the single-fraction
 `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and the crux `v_p(N) < v_p(K)`, the `p`-adic
 valuation of `x₃` is `2·(v_p N - v_p K) < 0`, hence `p ∣ x₃.den`. -/
 private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
@@ -444,7 +443,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
       pow_two, padicValInt.mul hK0 hK0]
-    ring
+    grind
   have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
     exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
@@ -453,12 +452,12 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
     grind
-  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; omega
+  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
 
 /-- The single-fraction identity `x₃·(A·C·K²) = N² - a₆E²G²K²` for the doubled `x`-coordinate,
-where `K = AG² - CE²`, `N = ADE - BCG`.  It follows from the slope relation `hℓ` and the two
+where `K = AG² - CE²`, `N = ADE - BCG`. It follows from the slope relation `hℓ` and the two
 curve relations by clearing denominators. -/
 private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C D E G : ℤ}
     (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂)
@@ -478,7 +477,7 @@ private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C
       + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
 
 /-- The crux valuation inequality of the kernel-closure certificate, isolated from the integer
-curve relations.  With `K = AG² - CE²`, `N = ADE - BCG` and the `p`-unit `W = -A²C² + …`, the
+curve relations. With `K = AG² - CE²`, `N = ADE - BCG` and the `p`-unit `W = -A²C² + …`, the
 identity `N·(ADE + BCG) = K·W` (from the two curve relations) together with `p ∣ E`, `p ∣ G` and
 `p`-unit `A`, `C` gives `N ≠ 0`, `K ≠ 0` and `v_p(N) < v_p(K)`. -/
 private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
@@ -505,17 +504,17 @@ private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ
   exact ⟨padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
     hN0, hK0⟩
 
-/-- The kernel of reduction is closed under the group law.  If two affine points `P`, `Q`
+/-- The kernel of reduction is closed under the group law. If two affine points `P`, `Q`
 both reduce to the origin mod `p` (`p ∣ x₁.den` and `p ∣ x₂.den`) but are distinct over `ℚ`, then
 their sum also reduces to the origin: the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of `P + Q`
 again has `p ∣ x₃.den`.
 
-This is the one genuinely `p`-adic corner of `red_p` additivity.  It is proved by an explicit
+This is the one genuinely `p`-adic corner of `red_p` additivity. It is proved by an explicit
 single-fraction certificate: writing `x_i = A_i / w_i²`, `y_i = B_i / w_i³` (`den_isSquare`) with
 `E = w₁`, `G = w₂`, `p ∣ E`, `p ∣ G`, the group law gives the integer identity
-`x₃ = (N² - a₆E²G²K²) / (A·C·K²)` where `K = A·G² - C·E²` and `N = A·D·E - B·C·G`.  The secant
+`x₃ = (N² - a₆E²G²K²) / (A·C·K²)` where `K = A·G² - C·E²` and `N = A·D·E - B·C·G`. The secant
 intercept `ν = N / (E·G·K)` satisfies `N·(A·D·E + B·C·G) = K·W` with `W ≡ -A²C²` a `p`-unit
-(both integer identities follow from the two curve relations), so `v_p(N) < v_p(K)`.  Tracking
+(both integer identities follow from the two curve relations), so `v_p(N) < v_p(K)`. Tracking
 `padicValRat` through the fraction yields `padicValRat p x₃ = 2·(v_p N - v_p K) < 0`, i.e.
 `p ∣ x₃.den`. -/
 private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
@@ -546,7 +545,7 @@ private theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     int_curve_relation a₂ a₄ a₆ hcv2 hC hD
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
   set N : ℤ := A * D * E - B * C * G with hNdef
-  -- the single-fraction identity feeds the final valuation certificate
+  -- the single-fraction identity for the final valuation certificate
   have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
     rw [hKdef, hNdef]; exact addX_single_fraction a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
   -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
@@ -588,7 +587,7 @@ private theorem slope_den_of_addX_den
   exact fun h => hℓ2 (by grind)
 
 /-- Tangent-mod-`p` additivity, `2`-torsion sub-case: the shared reduced point is `2`-torsion
-(`Ȳ₁ = -Ȳ₁`), so both `red_p (P + Q)` and `P̄ + P̄` are the origin.  The doubled `x`-coordinate
+(`Ȳ₁ = -Ȳ₁`), so both `red_p (P + Q)` and `P̄ + P̄` are the origin. The doubled `x`-coordinate
 must have vanishing denominator mod `p`, else the reduced slope forces `f'(X̄₁) = 0`, contradicting
 nonsingularity of the reduced point. -/
 private theorem red_p_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
@@ -680,7 +679,7 @@ private theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZM
     Rat.cast_mul_of_ne_zero hℓden (den_sub_ne_zero hd3 hd1), Rat.cast_sub_of_ne_zero hd3 hd1]
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
-`red_p (P + Q)` is the tangent doubling of the common reduced point `P̄`.  Both reduced `x`- and
+`red_p (P + Q)` is the tangent doubling of the common reduced point `P̄`. Both reduced `x`- and
 `y`-coordinates are matched against the doubling formulas via the reduced tangent identities. -/
 private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     {x₁ y₁ x₂ y₂ : ℚ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
@@ -698,19 +697,19 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; grind
+    intro h; grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
-  have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rw [← hslX]; exact hℓden_s
+  have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
   have hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
     addX_den_ne a₂ a₄ a₆ p hℓden hd1 hd2 haddX
   have hd3_s : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rw [hslX]; exact hd3
+      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ :=
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by
-    intro h; apply hYneg; grind
+    intro h; grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
   have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
       = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
@@ -724,7 +723,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   rw [hslX, hy3cast, hℓd, reduced_addY_eq, reduced_addX_eq, hxeq]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum
-reduces to `O` too.  If `x₁ = x₂` then `Q = -P` and `P + Q = 0`; otherwise `x₁ ≠ x₂` and the
+reduces to `O` too. If `x₁ = x₂` then `Q = -P` and `P + Q = 0`; otherwise `x₁ ≠ x₂` and the
 kernel-closure certificate `den_addX_both_kernel` gives `p ∣ x₃.den`. -/
 private theorem red_p_add_kernel (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
@@ -878,7 +877,7 @@ private theorem red_p_map_add_secant (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
     (toAffine_g_Trep a₂ a₄ a₆ h₁ hden1 hden1') (toAffine_g_Trep a₂ a₄ a₆ h₂ hden2 hden2') hadd
 
 /-- Additivity of `red_p` on `some + some` in the tangent-mod-`p` case (S4): the reduced
-representatives are proportional but the points differ over `ℚ`.  The projective-class goal is
+representatives are proportional but the points differ over `ℚ`. The projective-class goal is
 reduced to the affine additivity supplied by `red_p_add_tangent`. -/
 private theorem red_p_map_add_tangent_case (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     {x₁ y₁ x₂ y₂ : ℚ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)

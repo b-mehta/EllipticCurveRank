@@ -13,14 +13,14 @@ The elliptic curve
 
   `E : y² = x³ - x² - 24649 x + 1355209`
 
-over `ℚ` has Mordell-Weil rank at least `4` (a curve of Wiman, 1945).  Its `2`-division cubic
+over `ℚ` has Mordell-Weil rank at least `4` (a curve of Wiman, 1945). Its `2`-division cubic
 factors completely, `x³ - x² - 24649 x + 1355209 = (x - 67)(x - 113)(x + 179)`, so `E` has full
 rational `2`-torsion `E(ℚ)[2] ≅ (ℤ/2)²`, i.e. `t = 2`, and its discriminant is a perfect square.
 
-This is the first ECCompute deliverable with `t > 0`.  The certificate exhibits `ρ = 6` points with
+This is the first ECCompute deliverable with `t > 0`. The certificate exhibits `ρ = 6` points with
 `𝔽₂`-independent descent images (the four rational points of infinite order plus the two
 `2`-torsion points `(67, 0)`, `(113, 0)`), and concedes the two torsion dimensions via the
-universal bound `|E(ℚ)[2]| ≤ 4 = 2²`, giving `rank ≥ ρ - t = 6 - 2 = 4`.  Points (in short-model
+universal bound `|E(ℚ)[2]| ≤ 4 = 2²`, giving `rank ≥ ρ - t = 6 - 2 = 4`. Points (in short-model
 coordinates) in `data/rank14.txt`, descent labels in `data/rank14-labels.txt`.
 -/
 

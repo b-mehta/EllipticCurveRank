@@ -45,14 +45,11 @@ private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
   have hQ : (d : ℚ) ^ 3 = (g : ℚ) ^ 2 := by exact_mod_cast hdg
   obtain ⟨c, hc⟩ := (pow_eq_pow_iff_of_coprime (by decide : (3 : ℕ).Coprime 2)).mp hQ
-  have hsq : IsSquare d := by
-    rw [← Rat.isSquare_natCast_iff]
-    exact ⟨c, by grind⟩
+  have hsq : IsSquare d := Rat.isSquare_natCast_iff.mp ⟨c, by grind⟩
   obtain ⟨w, hw⟩ := hsq.exists_sq
   refine ⟨w, hw, ?_⟩
-  have : g ^ 2 = (w ^ 3) ^ 2 := by grind
-  have := congrArg Nat.sqrt this
-  rwa [Nat.sqrt_eq', Nat.sqrt_eq'] at this
+  have hg : g ^ 2 = (w ^ 3) ^ 2 := by grind
+  simpa using congrArg Nat.sqrt hg
 
 /-- For a solution `(x, y)` of the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is a
 natural number `w` with `x.den = w²` and `y.den = w³`. -/
@@ -74,10 +71,10 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
       grind
     exact_mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
-      + a₆ * (x.den : ℤ) ^ 3 with hN
-  have hcx : IsCoprime (x.num) (x.den : ℤ) := by
+      + a₆ * (x.den : ℤ) ^ 3
+  have hcx : IsCoprime x.num (x.den : ℤ) := by
     rw [Int.isCoprime_iff_nat_coprime]; simpa using x.reduced
-  have hcy : IsCoprime (y.num) (y.den : ℤ) := by
+  have hcy : IsCoprime y.num (y.den : ℤ) := by
     rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
   have hcN : IsCoprime N (x.den : ℤ) := by
     have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
@@ -85,16 +82,13 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     rw [hNfac]
     exact isCoprime_add_mul_left_left hcx.pow_left _
   have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 := by
-    have hc : IsCoprime ((x.den : ℤ) ^ 3) N := (hcN.symm).pow_left
+    have hc : IsCoprime ((x.den : ℤ) ^ 3) N := hcN.symm.pow_left
     exact hc.dvd_of_dvd_mul_left ⟨y.num ^ 2, by grind⟩
   have hdvd2 : (y.den : ℤ) ^ 2 ∣ (x.den : ℤ) ^ 3 := by
-    have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := (hcy.symm.pow_left).pow_right
+    have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := hcy.symm.pow_left.pow_right
     exact hc.dvd_of_dvd_mul_left ⟨N, by grind⟩
-  have hcube : x.den ^ 3 = y.den ^ 2 := by
-    have d1 : x.den ^ 3 ∣ y.den ^ 2 := by exact_mod_cast hdvd1
-    have d2 : y.den ^ 2 ∣ x.den ^ 3 := by exact_mod_cast hdvd2
-    exact Nat.dvd_antisymm d1 d2
-  exact exists_sq_cube_of_cube_eq_sq hcube
+  exact exists_sq_cube_of_cube_eq_sq
+    (Nat.dvd_antisymm (by exact_mod_cast hdvd1) (by exact_mod_cast hdvd2))
 
 /-- Point form of `den_isSquare`: for a point `.some x y h` on the integral curve, there is
 `w` with `x.den = w²` and `y.den = w³`. -/

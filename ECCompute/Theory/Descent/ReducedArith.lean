@@ -39,7 +39,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### Reducing `x` to `ZMod p`
 
 For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
-`w` with `x.den = w²`.  Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
+`w` with `x.den = w²`. Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
 
 /-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
 noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
@@ -53,7 +53,7 @@ theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 
 
 /-! ### Elementary reduction mod `p`
 
-`Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in characteristic `p`.  In the
+`Rat.cast : ℚ → ZMod p` is *not* a ring homomorphism in characteristic `p`. In the
 *good-reduction* case we transfer group-law data to `ZMod p` by clearing denominators via the
 genuine ring hom `Int.cast`, pushing `Rat.cast` through sums/products whose denominators survive
 reduction (`(·.den : ZMod p) ≠ 0`) with the conditional cast lemmas; the good-denominator closure
@@ -101,8 +101,8 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) : ZMod p)
       + (a₂ : ZMod p) + (x₁ : ZMod p) + (x₂ : ZMod p)) * ((x₁ : ZMod p) - (x₂ : ZMod p)) ^ 2
       = ((y₁ : ZMod p) - (y₂ : ZMod p)) ^ 2 := by
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     grind [WeierstrassCurve.Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
@@ -123,7 +123,7 @@ theorem reduced_addX [Fact p.Prime] {x₁ x₂ y₁ y₂ : ℚ} (hne : x₁ ≠ 
   rwa [Rat.cast_intCast] at hcast
 
 /-- Casting the derivative polynomial `f'(x) = 3x² + 2a₂x + a₄` commutes with reduction when
-`p ∤ x.den`.  Used by `reduced_doubleX`. -/
+`p ∤ x.den`. Used by `reduced_doubleX`. -/
 theorem cast_fderivPoly [Fact p.Prime] {x : ℚ} (hdx : (x.den : ZMod p) ≠ 0) :
     (((3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) : ℚ)) : ZMod p)
       = 3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p) := by
@@ -159,7 +159,7 @@ theorem reduced_doubleX [Fact p.Prime] {x y : ℚ} (hy0 : y ≠ 0)
       + (a₂ : ZMod p) + 2 * (x : ZMod p)) * (2 * (y : ZMod p)) ^ 2
       = (3 * (x : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x : ZMod p) + (a₄ : ZMod p)) ^ 2 := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x x y y with hℓdef
-  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ with hx3def
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x x ℓ
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ℚ) * x + (a₄ : ℚ) := by
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl (y_ne_negY hy0), negY_curve]
     grind [curve]
@@ -220,7 +220,6 @@ theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
-  push_cast
   grind
 
 end ECCompute

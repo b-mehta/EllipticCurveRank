@@ -36,10 +36,9 @@ variable {x y : ℚ} {w : ℕ}
 
 private theorem Trep_map_zero :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
-  simp only [Function.comp_apply, Trep, Matrix.cons_val_zero]
-  rw [eq_intCast]
+  simp only [Function.comp_apply, Trep, Matrix.cons_val_zero, eq_intCast]
   push_cast
-  ring
+  grind
 
 private theorem Trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 = (y.num : ZMod p) := by
@@ -47,10 +46,10 @@ private theorem Trep_map_one :
 
 private theorem Trep_map_two :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = (w : ZMod p) ^ 3 := by
-  simp only [Function.comp_apply, Trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
-  rw [eq_intCast]
+  simp only [Function.comp_apply, Trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons,
+    eq_intCast]
   push_cast
-  ring
+  grind
 
 private theorem Trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2
@@ -83,8 +82,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (Trep_equation a₂ a₄ a₆ h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
-    have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
-      grind [Trep_map_two]
+    have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by grind [Trep_map_two]
     rw [Projective.nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
     have hX0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 = 0 :=
@@ -112,7 +110,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 open Classical in
 /-- The reduction map on affine points: `P ↦` the affine point underlying `ℤ → ZMod p` applied
-to the integer representative `Trep` of `P`.  Requires good reduction (`hΔ`). -/
+to the integer representative `Trep` of `P`. Requires good reduction (`hΔ`). -/
 noncomputable def red_p (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point
@@ -134,11 +132,10 @@ origin. -/
 theorem red_p_of_den_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
     red_p a₂ a₄ a₆ p hΔ (.some x y h) = 0 := by
-  set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose with hw
+  set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hwz : (w : ZMod p) = 0 := (Rat.den_cast_eq_zero_iff two_ne_zero hden).mp hd
-  have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by
-    grind [Trep_map_two]
+  have hz0 : ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = 0 := by grind [Trep_map_two]
   simp only [red_p]
   exact Projective.Point.toAffineLift_of_Z_eq_zero _ hz0
 
@@ -165,7 +162,7 @@ theorem red_p_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2
             (mt (Rat.den_cast_eq_zero_iff two_ne_zero
               (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1).mpr hd)) := by
-  set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose with hw
+  set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hden' : y.den = w ^ 3 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2
   have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd

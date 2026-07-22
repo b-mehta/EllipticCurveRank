@@ -15,7 +15,7 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 # The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`.  Additivity is obtained by factoring `λ` through the reduction map
+`ECCompute.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
 `red_p : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εp_finite`, both of which are
 additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 `ECCompute.Descent.Reduction.EpsFinite`).
@@ -26,7 +26,7 @@ additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 * `ECCompute.lambda_some_of_den_ne`: reduction of `λ` on an affine point to `ψ_p(X - θ)`.
 * `ECCompute.lambda_map_add`: the trusted theorem, `λ` is additive.
 * `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
-* `ECCompute.lambdaHom_two_nsmul`: `λ` vanishes on `2·E(ℚ)` (follows for free from `ZMod 2`).
+* `ECCompute.lambdaHom_two_nsmul`: `λ` vanishes on `2·E(ℚ)` (automatic in `ZMod 2`).
 -/
 
 open WeierstrassCurve
@@ -74,7 +74,7 @@ Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
 `λ = εp_finite ∘ red_p`, where `red_p : E(ℚ) → E(𝔽ₚ)` is the reduction map
 (`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εp_finite : E(𝔽ₚ) → ZMod 2` is the
 finite-field descent character (`ECCompute.Descent.Reduction.EpsFinite`, also an
-`AddMonoidHom`).  Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
+`AddMonoidHom`). Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
 The reduction map lands in `((curveℤ …).map (ℤ → ZMod p)).toAffine.Point`, which is the same
 curve as `reducedCurve … p` up to the definitional equality `map_eq_reducedCurve`; we transport
 across it with `Point.congr`. -/
@@ -103,7 +103,7 @@ theorem map_eq_reducedCurve :
   rw [map_curveℤ_zmod]; rfl
 
 /-- The descent character `λ_{p,θ}` presented as the composition
-`εp_finite θ ∘ (transport) ∘ red_p`, packaged as an `AddMonoidHom E(ℚ) → ZMod 2`.  This is the
+`εp_finite θ ∘ (transport) ∘ red_p`, packaged as an `AddMonoidHom E(ℚ) → ZMod 2`. This is the
 factorization that makes additivity of `λ` free (see `lambda_map_add`). -/
 noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :

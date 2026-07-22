@@ -35,14 +35,12 @@ theorem isElliptic_of_Δ_ne_zero {W : WeierstrassCurve ℚ} (hΔ : W.Δ ≠ 0) :
 theorem isElliptic_of_bne {W : WeierstrassCurve ℚ} (h : (W.Δ != 0) = true) : W.IsElliptic :=
   isElliptic_of_Δ_ne_zero (by simpa using h)
 
-/-- `j = q` from a kernel-reducible `Bool` witness `(c₄³ == Δ · q) = true` (discharged by
-`quickRfl`, i.e. `reflBoolTrue`, as elsewhere in the project) -- no `norm_num`. -/
+/-- `j = q` from a kernel-reducible `Bool` witness `(c₄³ == Δ · q) = true`. -/
 theorem j_eq_of_beq (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ)
     (h : (W.c₄ ^ 3 == W.Δ * q) = true) : W.j = q :=
   (j_eq_iff W q).mpr (eq_of_beq h)
 
-/-- The example curve `y² = x³ - 82x` (the `CurveThirteen` deliverable) is elliptic; declaring the
-instance makes `.j` well-formed for the curve. -/
+/-- The example curve `y² = x³ - 82x` is elliptic, so `.j` is well-formed for it. -/
 instance : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).IsElliptic := isElliptic_of_bne (by quickRfl)
 
 /-- Worked example: `y² = x³ - 82x` has `j = 1728`, via the kernel check `c₄³ == Δ · 1728`. -/

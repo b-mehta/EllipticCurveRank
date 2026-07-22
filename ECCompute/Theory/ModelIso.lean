@@ -16,6 +16,13 @@ invariant, so a rank lower bound on the short model transfers back; see `pointAd
 
 The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism lives in
 `ECCompute.Check.Points`.
+
+## Main results
+
+* `ModelIso.completeSquare`, `ModelIso.shortModel`: the `⟨1, 0, -a₁/2, -a₃/2⟩` change of variables
+  and the resulting short model `y² = x³ + a₂'x² + a₄'x + a₆'`.
+* `ModelIso.pointAddEquiv`: this change of variables as a group isomorphism `W.Point ≃+
+  (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
 
 namespace ECCompute.ModelIso
@@ -90,7 +97,7 @@ theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
-  subst hx; subst hy; rfl
+  subst hx hy; rfl
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/

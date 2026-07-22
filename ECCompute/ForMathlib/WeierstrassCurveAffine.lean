@@ -9,7 +9,11 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 # Negation on Weierstrass curves with `a₁ = a₃ = 0`
 
 For a Weierstrass curve `W` with `W.a₁ = 0` and `W.a₃ = 0`, the negation map `negY` on affine
-points is simply `y ↦ -y`.
+points is `y ↦ -y`.
+
+## Main results
+
+* `WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero`: `negY x y = -y` when `a₁ = a₃ = 0`.
 -/
 
 namespace WeierstrassCurve.Affine

@@ -19,10 +19,9 @@ import Mathlib.Algebra.Field.ZMod
 /-!
 # The rank-bound deduction (abstract core)
 
-This file develops, as pure finitely-generated-abelian-group theory, the group-theoretic part of
-the descent argument used to certify lower bounds on the rank of an elliptic curve. It mentions
-neither the elliptic curve nor the concrete `𝔽₂`-invertibility check: everything is phrased for a
-finitely generated additive abelian group `H`, viewed as a `ℤ`-module.
+The group-theoretic core of the rank-bound descent argument, phrased for a finitely generated
+additive abelian group `H` as a `ℤ`-module, with no reference to the elliptic curve or the
+`𝔽₂`-invertibility check.
 
 Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-vector space) and
 `H[2] = Submodule.torsionBy ℤ H 2` for the 2-torsion.
@@ -38,8 +37,7 @@ Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-
 * `RankDeduction.rank_ge`: the packaged deduction, `ρ ≤ rank H + t` whenever `Nat.card H[2] = 2 ^ t`
   and there are `ρ` independent descent-character values, i.e. `rank H ≥ ρ - t`.
 
-The hypothesis "the images are linearly independent" is exactly what an invertible `ρ × ρ` matrix
-over `𝔽₂` supplies, so this is the interface the certificate checker instantiates.
+An invertible `ρ × ρ` matrix over `𝔽₂` supplies the linear-independence hypothesis.
 -/
 
 open Module
@@ -334,10 +332,10 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
   rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
   have h2 : finrank (ZMod 2) (ModN H 2) = finrank ℤ H + t :=
     Nat.pow_right_injective (le_refl 2) key
-  omega
+  lia
 
 /-- The bound with only an *upper* bound on the 2-torsion: if `ρ` group elements have
-`𝔽₂`-linearly independent images under `φ`, and `|H[2]| ≤ 2 ^ t`, then `ρ ≤ rank H + t`.  This is
+`𝔽₂`-linearly independent images under `φ`, and `|H[2]| ≤ 2 ^ t`, then `ρ ≤ rank H + t`. This is
 what a certificate needs when it concedes `t` torsion dimensions without pinning down the exact
 2-torsion of the generated subgroup. -/
 theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))

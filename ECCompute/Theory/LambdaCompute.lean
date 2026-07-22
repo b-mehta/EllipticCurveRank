@@ -11,7 +11,7 @@ import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 The descent character `λ_{p,θ}` (`ECCompute.Descent.Defs`) is `noncomputable`, as `ECCompute.psi`
 decides `IsSquare` classically. To evaluate `λ` inside a certificate we need a `rfl`-reducible
-replacement. The heart is `jOdd`, a fuel-recursive evaluator for the Jacobi symbol `J(a | b)`
+replacement. This is built on `jOdd`, a fuel-recursive evaluator for the Jacobi symbol `J(a | b)`
 (`b` odd) by the gcd-style reciprocity algorithm; the fuel recursion reduces in the kernel.
 
 ## Main declarations
@@ -32,7 +32,7 @@ namespace ECCompute
 
 /-- Fuel-recursive evaluator for the Jacobi symbol `J(a | b)`, valid when `b` is odd. One
 reciprocity step per fuel unit:
-* `b = 1`: `1`.  `a = 0` (with `b > 1`): `0`.  `a = 1`: `1`.
+* `b = 1`: `1`. `a = 0` (with `b > 1`): `0`. `a = 1`: `1`.
 * `a` even: `J(a | b) = ±J(a/2 | b)`, sign `-1` when `b % 8 ∈ {3, 5}`.
 * `a` odd (`a ≥ 3`): reciprocity `J(a | b) = ±J(b % a | a)`, sign `-1` when `a ≡ b ≡ 3 (mod 4)`.
 
@@ -48,7 +48,7 @@ def jOdd : Nat → Nat → Nat → Int
     else
       (if a % 4 = 3 ∧ b % 4 = 3 then -1 else 1) * jOdd fuel (b % a) a
 
-/-- The top-level kernel-reducible Jacobi symbol.  Reduce `a` modulo `p`, then run `jOdd` with
+/-- The top-level kernel-reducible Jacobi symbol. Reduce `a` modulo `p`, then run `jOdd` with
 fuel `p` (which exceeds the reduced value `a % p < p`). -/
 def jacobiFast (a : ℤ) (p : ℕ) : Int :=
   jOdd p (a % (p : ℤ)).toNat p
@@ -60,7 +60,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     jOdd fuel a b = jacobiSym (a : ℤ) b := by
   intro fuel
   induction fuel with
-  | zero => omega
+  | zero => lia
   | succ fuel ih =>
     intro a b hb ha
     rw [jOdd]
@@ -70,7 +70,7 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     rw [if_neg hb1]
     -- `a = 0`
     by_cases ha0 : a = 0
-    · rw [if_pos ha0, ha0, Nat.cast_zero, jacobiSym.zero_left (by omega)]
+    · rw [if_pos ha0, ha0, Nat.cast_zero, jacobiSym.zero_left (by lia)]
     rw [if_neg ha0]
     -- `a = 1`
     by_cases ha1 : a = 1
@@ -80,16 +80,16 @@ theorem jOdd_eq : ∀ (fuel a b : ℕ), b % 2 = 1 → a < fuel →
     by_cases hae : a % 2 = 0
     · -- even: strip one factor of two
       rw [if_pos hae]
-      have hIH := ih (a / 2) b hb (by omega)
+      have hIH := ih (a / 2) b hb (by lia)
       have hcast : ((a / 2 : ℕ) : ℤ) = (a : ℤ) / 2 := by rw [Int.natCast_ediv]; norm_num
-      have hae' : (a : ℤ) % 2 = 0 := by omega
+      have hae' : (a : ℤ) % 2 = 0 := by lia
       rw [hIH, hcast, ← jacobiSym.even_odd (a := (a : ℤ)) (b := b) hae' hb]
       grind
     · -- odd: quadratic reciprocity
       rw [if_neg hae]
-      have ha2 : a % 2 = 1 := by omega
-      have hmod_lt : b % a < a := Nat.mod_lt _ (by omega)
-      have hIH := ih (b % a) a ha2 (by omega)
+      have ha2 : a % 2 = 1 := by lia
+      have hmod_lt : b % a < a := Nat.mod_lt _ (by lia)
+      have hIH := ih (b % a) a ha2 (by lia)
       have hml : jacobiSym ((b % a : ℕ) : ℤ) a = jacobiSym (b : ℤ) a := by
         rw [Int.natCast_emod, ← jacobiSym.mod_left]
       rw [hIH, hml, ← jacobiSym.quadratic_reciprocity_if (a := a) (b := b) ha2 hb]
@@ -101,12 +101,12 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
   have hred : ((a % (p : ℤ)).toNat : ℤ) = a % (p : ℤ) :=
     Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast hp.ne'))
   have hlt : (a % (p : ℤ)).toNat < p := by
-    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); omega
+    have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); lia
   rw [jacobiFast, jOdd_eq p _ p hodd hlt, hred, ← jacobiSym.mod_left]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
-/-- Kernel-reducible replacement for `ECCompute.psi`.  Uses `jacobiFast` on a representative of
+/-- Kernel-reducible replacement for `ECCompute.psi`. Uses `jacobiFast` on a representative of
 `a`: the symbol is `0` on quadratic residues (`J = 1`) and `1` on non-residues (`J = -1`). -/
 def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
   if jacobiFast (a.val : ℤ) p = 1 then 0 else 1
@@ -131,7 +131,7 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
 /-! ### Kernel-reducible evaluation of `λ` on an affine point -/
 
 /-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
-`x`-coordinate `x`.  This is `ECCompute.lambda` with `psi` replaced by the computable
+`x`-coordinate `x`. This is `ECCompute.lambda` with `psi` replaced by the computable
 `psiCompute`; it reduces to a value by `rfl` on concrete data. -/
 def lambdaCompute (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if (x.den : ZMod p) = 0 then 0
@@ -176,7 +176,7 @@ theorem psiCompute_eq_bool (p : ℕ) (a : ZMod p) :
     psiCompute p a = if psiComputeBool p a then 1 else 0 := by
   rw [psiCompute, psiComputeBool]; split <;> rfl
 
-/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`.  This lets a certificate check the
+/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
 character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
 theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
     lambdaCompute a₂ a₄ a₆ p θ x = if lambdaComputeBool a₂ a₄ a₆ p θ x then 1 else 0 := by

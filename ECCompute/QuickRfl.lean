@@ -9,9 +9,9 @@ import Lean
 # The `quickRfl` tactic
 
 `quickRfl` closes a goal of the form `b = true` for a `Bool` expression `b` by assigning
-`Lean.reflBoolTrue`, so the kernel reduces `b` to `true` directly. It is the standard way this
-project discharges the kernel-reducible `Bool` certificate obligations (the `checkLabel`,
-`checkInv`, `hasRootMod`, and j-invariant checks), avoiding `decide`/`norm_num`.
+`Lean.reflBoolTrue`, so the kernel reduces `b` to `true` directly. The project discharges its
+kernel-reducible `Bool` certificate obligations with it (the `checkLabel`, `checkInv`,
+`hasRootMod`, and j-invariant checks), not `decide`/`norm_num`.
 -/
 
 /-- Close a goal `b = true` (`b : Bool`) by kernel reduction, via `Lean.reflBoolTrue`. -/

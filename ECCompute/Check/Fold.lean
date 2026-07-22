@@ -27,15 +27,10 @@ theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
 theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
     anyBelow n p = false ↔ ∀ m, m < n → p m = false := by
   induction n with
-  | zero => exact ⟨fun _ m hm => absurd hm (Nat.not_lt_zero m), fun _ => rfl⟩
+  | zero => exact iff_of_true rfl (by simp)
   | succ k ih =>
     rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]
-    constructor
-    · rintro ⟨hk, hlt⟩ m hm
-      rcases (Nat.lt_succ_iff_lt_or_eq.mp hm) with h | h
-      · exact hlt m h
-      · exact h ▸ hk
-    · exact fun h => ⟨h k (Nat.lt_succ_self k), fun m hm => h m (Nat.lt_succ_of_lt hm)⟩
+    grind
 
 /-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type*} (p : α → Bool) : List α → Bool :=

@@ -10,12 +10,12 @@ import ECCompute.Certify.CertifyEval
 # The `certify_curve` tactic
 
 `certify_curve` closes a goal `HasRankGE W ρ`, where `W` is a Weierstrass curve over `ℚ` whose
-coefficients are integers.  It reads the coefficients and rank from the goal (so the curve must be
+coefficients are integers. It reads the coefficients and rank from the goal (so the curve must be
 `unfold`ed to a `WeierstrassCurve` literal first) and the generating points and descent labels from
 two data files, computes the descent-character matrix and its `𝔽₂` inverse, and discharges the
 referee obligations of `hasRankGE_of_certificate`.
 
-Each data file has one entry per line.  A points file has `x y`, with each coordinate either an
+Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
 of the 2-division cubic mod `p`.
 
@@ -32,7 +32,7 @@ namespace ECCompute
 
 /-- Generic literal extractor: try the raw expression first (for `0`/`1` and `OfNat` numerals via
 `parse`), then its `whnf` (which unfolds abbreviations and projections), then the metaprogramming
-`fallback` (for `OfNat` numerals behind a projection).  `kind` names the type in the error. -/
+`fallback` (for `OfNat` numerals behind a projection). `kind` names the type in the error. -/
 private def getLitE {α} (kind : String) (parse : Expr → Option α)
     (fallback : Expr → MetaM (Option α)) (e : Expr) : MetaM α := do
   if let some n := parse (← whnfR e) then return n
@@ -47,7 +47,7 @@ private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValu
 /-- Extract the `Int` value of a numeral `Expr`; see `getNatE`. -/
 private def getIntE (e : Expr) : MetaM Int := getLitE "Int" (·.int?) getIntValue? e
 
-/-- ASCII-trim, returning a `String`.  `String.trim` is deprecated in favour of `String.trimAscii`,
+/-- ASCII-trim, returning a `String`. `String.trim` is deprecated in favour of `String.trimAscii`,
 which returns a `String.Slice`, so we convert back. -/
 private def strTrim (s : String) : String := s.trimAscii.toString
 
@@ -78,7 +78,7 @@ private def parseLabel (line : String) : Nat × Int :=
   | [p, t] => ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => (0, 0)
 
-/-- Syntax of the `certify_curve` tactic; see the module docstring.  The `torsion ℓ` form concedes
+/-- Syntax of the `certify_curve` tactic; see the module docstring. The `torsion ℓ` form concedes
 `t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `oneTorsion root R witness ℓ`
 form concedes `t = 1` by naming the short-model root `R` of the `2`-division cubic and a prime `ℓ`
 at which the quadratic cofactor has no root; the `fullTorsion` form concedes `t = 2` (full rational
@@ -93,7 +93,7 @@ syntax (name := certifyCurveOne) "certify_curve" " oneTorsion " " root " term:ma
   " witness " term:max " points " str " labels " str : tactic
 
 /-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
-negation, or an `Int.cast` of an `ℤ` literal.  Errors if the coefficient is not an integer. -/
+negation, or an `Int.cast` of an `ℤ` literal. Errors if the coefficient is not an integer. -/
 private def getRatIntE (e : Expr) : MetaM Int := do
   let checkInt (q : Rat) : MetaM Int := do
     if q.den == 1 then return q.num
@@ -106,7 +106,7 @@ private def getRatIntE (e : Expr) : MetaM Int := do
   throwError "certify_curve: expected an integer-valued rational coefficient, got{indentExpr e}"
 
 /-- Read `HasRankGE W ρ` off `goal`, where `W` reduces to a `WeierstrassCurve.mk` literal with
-integer-valued rational coefficients.  Returns the rank `ρ`, the original curve `Expr` `W`, and the
+integer-valued rational coefficients. Returns the rank `ρ`, the original curve `Expr` `W`, and the
 five integer coefficient values. -/
 private def readGoal (goal : MVarId) :
     MetaM (Nat × Expr × Int × Int × Int × Int × Int) := do
@@ -165,12 +165,12 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
     #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
       toExpr ls.toList, toExpr matB, toExpr matM, toExpr t, toExpr tp]
 
-/-- Build the `hasRankGE_of_certificate` proof term directly.  The model equality (via
+/-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
 `WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the four length obligations, and the
-five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`.  The torsion obligation
+five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`. The torsion obligation
 `|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
 `certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
-universal `certTorsionBound_two` for `t = 2`.  `torsRoot` supplies the `t = 1` root `R`. -/
+universal `certTorsionBound_two` for `t = 2`. `torsRoot` supplies the `t = 1` root `R`. -/
 private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
@@ -205,12 +205,11 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
     #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW,
       hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, htors]
 
-/-- The shared driver: read the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank
-`ρ_goal`, parse the two data files (which must have `ρ_goal + t` entries), compute the descent
-matrix and its `𝔽₂` inverse, and assign the `hasRankGE_of_certificate` proof term.  The coefficient
-bridge `W = ⟨↑a₁, …, ↑a₆⟩` is built purely with `ext_of_beq` on five `reflBoolTrue` `BEq` checks
-(no side goals).  The certificate's `rho` is `ρ_goal + t`, so its conclusion `rank ≥ rho - t` is
-defeq to the goal `rank ≥ ρ_goal`. -/
+/-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
+the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
+and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by
+`ext_of_beq` on five `reflBoolTrue` `BEq` checks, with no side goals. The certificate's `rho` is
+`ρ_goal + t`, so `rank ≥ rho - t` is defeq to the goal `rank ≥ ρ_goal`. -/
 private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
   let (rhoGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
@@ -224,8 +223,8 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
   let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
   let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
-  -- The coefficient bridge `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each a
-  -- kernel-reducible `reflBoolTrue`: pure `Expr`, no side goals.
+  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`:
+  -- pure `Expr`, no side goals.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=
     mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) aE

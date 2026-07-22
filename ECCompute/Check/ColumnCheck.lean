@@ -74,7 +74,6 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   · -- `f(θ) ≡ 0 (mod p)`
     rw [beq_iff_eq, ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
     rw [fval]
-    push_cast at hf ⊢
     grind
 
 /-! ### Worked example

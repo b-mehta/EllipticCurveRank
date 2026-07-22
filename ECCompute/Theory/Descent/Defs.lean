@@ -15,7 +15,7 @@ of non-zero discriminant, a prime `p ∤ 6Δ`, and a root `θ ∈ 𝔽ₚ` of `f
 hypotheses `DescentHyp`.
 
 For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num - θ·x.den` in
-`ZMod p` (when `p ∤ w`, i.e. `(x.den : ZMod p) ≠ 0`).  Then `λ(O) = 0`; `λ(P) = 0` if `p ∣ w`;
+`ZMod p` (when `p ∤ w`, i.e. `(x.den : ZMod p) ≠ 0`). Then `λ(O) = 0`; `λ(P) = 0` if `p ∣ w`;
 `λ(P) = ψ_p(f'(θ))` if `α = 0` (the tangent case); and `λ(P) = ψ_p(α)` otherwise, where
 `ψ_p : ZMod p → ZMod 2` is the Legendre symbol (`0` on squares, `1` on non-squares).
 
@@ -51,7 +51,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 def fval (θ : ZMod p) : ZMod p :=
   θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
 
-/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`.  (The coefficient `_a₆` is unused, but
+/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. (The coefficient `_a₆` is unused, but
 kept in the signature so `fval` and `fderiv` share the same interface.) -/
 def fderiv (b₂ b₄ _b₆ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
   3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)

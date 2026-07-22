@@ -16,7 +16,7 @@ character on the reduced curve `E/𝔽ₚ` is
   `εp_finite θ : E(𝔽ₚ) → ZMod 2`,   `εp_finite θ O = 0`,
   `εp_finite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X - θ)`   otherwise,
 
-where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`.  This file proves that
+where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`. This file proves that
 `εp_finite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
 is then automatic.
 
@@ -36,7 +36,7 @@ namespace ECCompute
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-- The reduced Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ZMod p`, i.e. the reduction
-mod `p` of `ECCompute.curve`.  The coefficients are the mod-`p` reductions of the integers
+mod `p` of `ECCompute.curve`. The coefficients are the mod-`p` reductions of the integers
 `a₂, a₄, a₆`, and `a₁ = a₃ = 0`. -/
 def reducedCurve : WeierstrassCurve (ZMod p) where
   a₁ := 0
@@ -47,7 +47,7 @@ def reducedCurve : WeierstrassCurve (ZMod p) where
 
 variable [Fact p.Prime]
 
-/-- The finite-field descent character.  On `O` it is `0`; on an affine point `(X, Y)` it is
+/-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
 noncomputable def εp_finite (θ : ZMod p) :
     (reducedCurve a₂ a₄ a₆ p).toAffine.Point → ZMod 2
@@ -72,9 +72,8 @@ variable {θ : ZMod p}
 private theorem reducedCurve_equation {X Y : ZMod p}
     (h : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
-  have := (WeierstrassCurve.Affine.equation_iff
-    (W := (reducedCurve a₂ a₄ a₆ p).toAffine) X Y).mp h.1
-  simpa [reducedCurve] using this
+  simpa [reducedCurve] using
+    (WeierstrassCurve.Affine.equation_iff (W := (reducedCurve a₂ a₄ a₆ p).toAffine) X Y).mp h.1
 
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
@@ -100,7 +99,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 
 /-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
 whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
-`X₃` equals the sum of the values at `x₁` and `x₂`.  The `𝔽ₚ`-arithmetic core of the secant
+`X₃` equals the sum of the values at `x₁` and `x₂`. The `𝔽ₚ`-arithmetic core of the secant
 additivity, split off from the group-law setup in `εp_finite_map_add_of_X_ne`. -/
 private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
@@ -125,12 +124,12 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
       hθroot hc
   by_cases c1 : x₁ = θ
   · have hX2ne : x₂ ≠ θ := fun hc => hne (c1.trans hc.symm)
-    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd1 c1, hc]; grind)
+    have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
     rw [if_neg hX3ne, if_pos c1, if_neg hX2ne, hfd1 c1,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   by_cases c2 : x₂ = θ
-  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by rw [hfd2 c2, hc]; grind)
+  · have hX3ne : X₃ ≠ θ := fun hc => hfd_ne (by grind)
     rw [if_neg hX3ne, if_neg c1, if_pos c2, hfd2 c2,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
@@ -209,11 +208,9 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     (hP : (reducedCurve a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
-  have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rw [ZMod.ringChar_zmod_n]; exact hp2)
-  have h2y : (2 : ZMod p) * y ≠ 0 := mul_ne_zero h2 hy0
+  have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
   have hneg := reducedCurve_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
-  have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by
-    grind
+  have hyne : y ≠ (reducedCurve a₂ a₄ a₆ p).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
     reducedCurve_equation hP
@@ -224,16 +221,15 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   set ℓ := (reducedCurve a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set X₃ := (reducedCurve a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
-    have hsub : y - -y = 2 * y := by ring
+    have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp only [reducedCurve]
-    rw [div_mul_cancel₀ _ h2y]
-    ring
+    grind
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by
-    rw [hm]; exact hcurve
+    rwa [hm]
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
     grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
