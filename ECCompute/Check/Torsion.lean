@@ -114,7 +114,9 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
   have hzcast : x = (z : ℚ) := by simp [hz]
   refine no_int_root_of_quadHasRootMod_eq_false hℓ h z ?_
   have hQ : ((quadEval b c z : ℤ) : ℚ) = 0 := by
-    simp only [quadEval]; push_cast; grind
+    simp only [quadEval]
+    push_cast
+    grind
   exact_mod_cast hQ
 
 /-! ## The t = 0 lemma -/
@@ -149,14 +151,18 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
       eq_intCast, Int.cast_one, one_mul]
   have hroot : aeval (4 * x : ℚ) p = 0 := by
-    rw [haeval, hc₂, hc₁, hc₀]; push_cast; grind
+    rw [haeval, hc₂, hc₁, hc₀]
+    push_cast
+    grind
   -- the integral root theorem: `4x` equals some integer `z`
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   have hzcast : (4 * x : ℚ) = (z : ℚ) := by simp [hz]
   refine ⟨z, ?_⟩
   -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
   have hQ : ((cubicEval c₂ c₁ c₀ z : ℤ) : ℚ) = 0 := by
-    simp only [cubicEval, hc₂, hc₁, hc₀]; push_cast; grind
+    simp only [cubicEval, hc₂, hc₁, hc₀]
+    push_cast
+    grind
   exact_mod_cast hQ
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let

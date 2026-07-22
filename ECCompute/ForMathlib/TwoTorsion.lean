@@ -39,7 +39,9 @@ theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (h�
       ∃ y, ∃ h : W.toAffine.Nonsingular x y,
         (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0 := by
   have h4 : (4 : F) ≠ 0 := by
-    rw [show (4 : F) = 2 * 2 by norm_num]; exact mul_ne_zero h2 h2
+    have h22 : (4 : F) = 2 * 2 := by norm_num
+    rw [h22]
+    exact mul_ne_zero h2 h2
   rw [IsRoot.def, eval_twoTorsionPolynomial_toPoly, b₂, b₄, b₆]
   constructor
   · intro hroot

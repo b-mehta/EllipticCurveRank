@@ -28,7 +28,9 @@ theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
     anyBelow n p = false ↔ ∀ m, m < n → p m = false := by
   induction n with
   | zero => exact iff_of_true rfl (by simp)
-  | succ k ih => rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]; grind
+  | succ k ih =>
+    rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]
+    grind
 
 /-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type*} (p : α → Bool) : List α → Bool :=

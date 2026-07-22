@@ -57,7 +57,8 @@ theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     rw [eq_intCast, hy, hden']; grind
   have e2 : (Int.castRingHom ℚ) ((w : ℤ) ^ 3) = (w : ℚ) ^ 3 * 1 := by
     rw [eq_intCast]; push_cast; grind
-  rw [Trep, Projective.comp_fin3, Projective.smul_fin3]
+  simp only [Trep]
+  rw [Projective.comp_fin3, Projective.smul_fin3]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
     Matrix.tail_cons, e0, e1, e2]
 

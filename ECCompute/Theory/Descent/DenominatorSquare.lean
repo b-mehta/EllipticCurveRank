@@ -77,8 +77,9 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
   have hcy : IsCoprime y.num (y.den : ℤ) := by
     rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
   have hcN : IsCoprime N (x.den : ℤ) := by
-    rw [show N = x.num ^ 3 + (x.den : ℤ) *
-        (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) by grind]
+    have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
+        (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by grind
+    rw [hNfac]
     exact isCoprime_add_mul_left_left hcx.pow_left _
   have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 := by
     have hc : IsCoprime ((x.den : ℤ) ^ 3) N := hcN.symm.pow_left

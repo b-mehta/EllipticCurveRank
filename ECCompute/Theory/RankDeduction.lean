@@ -187,9 +187,10 @@ lemma range_lsmul_prod :
     LinearMap.range (LinearMap.lsmul ℤ (M × N) 2) =
       (LinearMap.range (LinearMap.lsmul ℤ M 2)).prod
         (LinearMap.range (LinearMap.lsmul ℤ N 2)) := by
-  rw [show LinearMap.lsmul ℤ (M × N) 2 =
-      LinearMap.prodMap (LinearMap.lsmul ℤ M 2) (LinearMap.lsmul ℤ N 2) by
-    ext p <;> simp [LinearMap.lsmul_apply], LinearMap.range_prodMap]
+  have h : LinearMap.lsmul ℤ (M × N) 2 =
+      LinearMap.prodMap (LinearMap.lsmul ℤ M 2) (LinearMap.lsmul ℤ N 2) := by
+    ext p <;> simp [LinearMap.lsmul_apply]
+  rw [h, LinearMap.range_prodMap]
 
 /-- `H ⧸ 2H` for a product is the product of the factors' `H ⧸ 2H`. -/
 lemma natCard_modN_two_prod :
