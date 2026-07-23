@@ -267,6 +267,97 @@ theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x 
   rw [lambdaCompute, lambdaComputeBool]
   grind [psiCompute_eq_bool]
 
+/-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
+
+`lambdaComputeBool` still casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`, so the kernel unfolds
+`Int.cast` and the whole `Fin`/`ZMod` arithmetic layer. `lambdaComputeBoolNat` removes all of it: each
+signed value arrives as a difference `mp - mn` of two `ℕ`, the modulus reduction is `(mp % p + (p -
+mn % p)) % p` in `Nat`, and the characters compare through `jacobiFastOne`. Nothing but `Nat.add`,
+`Nat.mul`, `Nat.mod`, `Nat.sub`, `Nat.beq` and `Bool.rec` reduces in the kernel. It agrees with
+`lambdaComputeBool` through `lambdaComputeBoolNat_eq` (given `0 < p` and that the pairs represent the
+inputs). -/
+
+/-- Residue in `[0, p)` of `x.num - θ·x.den`, from the `mp - mn` pair `(xp, xm)` for `x.num` and the
+label residue `tval` for `θ`. -/
+noncomputable def alphaResNat (p tval xp xm xden : ℕ) : ℕ :=
+  Nat.mod (Nat.add (Nat.mod xp p) (Nat.sub p (Nat.mod (Nat.add xm (Nat.mul tval xden)) p))) p
+
+/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
+and `(c4p, c4m)` for `a₄`. -/
+noncomputable def fderivResNat (c2p c2m c4p c4m p tval : ℕ) : ℕ :=
+  Nat.mod (Nat.add
+    (Nat.mod (Nat.add (Nat.add (Nat.mul (Nat.mul 3 tval) tval) (Nat.mul (Nat.mul 2 c2p) tval)) c4p) p)
+    (Nat.sub p (Nat.mod (Nat.add (Nat.mul (Nat.mul 2 c2m) tval) c4m) p))) p
+
+/-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`. -/
+noncomputable def lambdaComputeBoolNat (c2p c2m c4p c4m p tval xp xm xden : ℕ) : Bool :=
+  ((Nat.mod xden p).beq 0).rec
+    (((alphaResNat p tval xp xm xden).beq 0).rec
+      ((jacobiFastOne (alphaResNat p tval xp xm xden) p).not')
+      ((jacobiFastOne (fderivResNat c2p c2m c4p c4m p tval) p).not'))
+    false
+
+private theorem natPrim (x y : ℕ) :
+    Nat.mod x y = x % y ∧ Nat.add x y = x + y ∧ Nat.sub x y = x - y ∧ Nat.mul x y = x * y :=
+  ⟨rfl, rfl, rfl, rfl⟩
+
+/-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
+private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
+    ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+      = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
+  have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le
+  simp only [alphaResNat, (natPrim _ _).1, (natPrim _ _).2.1, (natPrim _ _).2.2.1,
+    (natPrim _ _).2.2.2, ZMod.natCast_mod, Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self,
+    Nat.cast_mul]
+  ring
+
+/-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
+private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ a₆ : ℤ) (θ : ZMod p)
+    (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
+    (htval : (tval : ZMod p) = θ) :
+    ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ a₆ p θ := by
+  have hle : (2 * c2m * tval + c4m) % p ≤ p := (Nat.mod_lt _ hp).le
+  simp only [fderivResNat, (natPrim _ _).1, (natPrim _ _).2.1, (natPrim _ _).2.2.1,
+    (natPrim _ _).2.2.2, ZMod.natCast_mod, Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self,
+    Nat.cast_mul, Nat.cast_ofNat]
+  subst hc2 hc4 htval
+  unfold fderiv
+  push_cast
+  ring
+
+/-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
+private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ) (tval xp xm xden : ℕ)
+    (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
+    alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * (x.den : ZMod p)).val := by
+  have hcast : ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+      = (x.num : ZMod p) - θ * (x.den : ZMod p) := by
+    rw [alphaResNat_cast hp, ← htval, ← hxden]
+    have : (x.num : ZMod p) = (xp : ZMod p) - (xm : ZMod p) := by rw [hxnum]; push_cast; ring
+    rw [this]; ring
+  rw [← hcast, ZMod.val_cast_of_lt (show alphaResNat p tval xp xm xden < p from Nat.mod_lt _ hp)]
+
+/-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
+private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ a₆ : ℤ) (θ : ZMod p)
+    (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
+    (htval : (tval : ZMod p) = θ) :
+    fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ a₆ p θ).val := by
+  rw [← fderivResNat_cast hp a₂ a₄ a₆ θ c2p c2m c4p c4m tval hc2 hc4 htval,
+    ZMod.val_cast_of_lt (show fderivResNat c2p c2m c4p c4m p tval < p from Nat.mod_lt _ hp)]
+
+/-- The fully-`Nat` mirror agrees with `lambdaComputeBool` when `0 < p` and the pairs represent the
+inputs (`a₂ = c2p - c2m`, `a₄ = c4p - c4m`, `θ = tval`, `x.num = xp - xm`, `xden = x.den`). -/
+theorem lambdaComputeBoolNat_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
+    (c2p c2m c4p c4m tval xp xm xden : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
+    (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
+    lambdaComputeBoolNat c2p c2m c4p c4m p tval xp xm xden = lambdaComputeBool a₂ a₄ a₆ p θ x := by
+  have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
+  have hfd := fderivResNat_eq_val hp a₂ a₄ a₆ θ c2p c2m c4p c4m tval hc2 hc4 htval
+  have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
+    rw [hxden, (natPrim _ _).1, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff,
+      ZMod.natCast_eq_zero_iff]
+  rw [lambdaComputeBool, lambdaComputeBoolNat, psiComputeBool, psiComputeBool]
+  simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
+
 /-! ### Worked examples: kernel reduction by `rfl`
 
 Each of these closes by `rfl`, confirming the reciprocity evaluator reduces in the kernel. -/
