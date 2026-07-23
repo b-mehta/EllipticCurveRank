@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.ModelIso
 import ECCompute.QuickRfl
+import ECCompute.Check.Fold
 
 /-!
 # Certifying the j-invariant
@@ -31,14 +32,29 @@ theorem j_eq_iff (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ) :
 theorem isElliptic_of_Δ_ne_zero {W : WeierstrassCurve ℚ} (hΔ : W.Δ ≠ 0) : W.IsElliptic :=
   ⟨isUnit_iff_ne_zero.mpr hΔ⟩
 
-/-- `IsElliptic` from a kernel-reducible `Bool` witness `(Δ != 0) = true`. -/
-theorem isElliptic_of_bne {W : WeierstrassCurve ℚ} (h : (W.Δ != 0) = true) : W.IsElliptic :=
-  isElliptic_of_Δ_ne_zero (by simpa using h)
+/-- Kernel-reducible `ℚ` equality via `Int.beq'`/`Nat.beq` on the numerator and denominator,
+avoiding the `BEq` typeclass dispatch of `==`. -/
+noncomputable def ratBeq' (a b : ℚ) : Bool := (Int.beq' a.num b.num).and' (Nat.beq a.den b.den)
 
-/-- `j = q` from a kernel-reducible `Bool` witness `(c₄³ == Δ · q) = true`. -/
+/-- `ratBeq'` agrees with `==` on `ℚ`. -/
+theorem ratBeq'_eq (a b : ℚ) : ratBeq' a b = (a == b) := by
+  rw [ratBeq', Bool.and'_eq_and, Int.beq'_eq_beq, ← natBeqEq]
+  rcases eq_or_ne a b with h | h
+  · subst h; simp
+  · rw [beq_eq_false_iff_ne.mpr h, Bool.and_eq_false_iff]
+    by_contra hc
+    rw [not_or, Bool.not_eq_false, Bool.not_eq_false, beq_iff_eq, beq_iff_eq] at hc
+    exact h (Rat.ext hc.1 hc.2)
+
+/-- `IsElliptic` from a kernel-reducible `Bool` witness that `Δ ≠ 0`. -/
+theorem isElliptic_of_bne {W : WeierstrassCurve ℚ} (h : (ratBeq' W.Δ 0).not' = true) :
+    W.IsElliptic :=
+  isElliptic_of_Δ_ne_zero (by simpa [Bool.not'_eq_not, ratBeq'_eq] using h)
+
+/-- `j = q` from a kernel-reducible `Bool` witness that `c₄³ = Δ · q`. -/
 theorem j_eq_of_beq (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ)
-    (h : (W.c₄ ^ 3 == W.Δ * q) = true) : W.j = q :=
-  (j_eq_iff W q).mpr (eq_of_beq h)
+    (h : ratBeq' (W.c₄ ^ 3) (W.Δ * q) = true) : W.j = q :=
+  (j_eq_iff W q).mpr (eq_of_beq (by rwa [ratBeq'_eq] at h))
 
 /-- The example curve `y² = x³ - 82x` is elliptic, so `.j` is well-formed for it. -/
 instance : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).IsElliptic := isElliptic_of_bne (by quickRfl)
