@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Int.Cast.Lemmas
 import Mathlib.Data.Nat.ModEq
+import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Ring.Divisibility.Basic
 import Mathlib.Tactic.Ring
 import ECCompute.Check.Fold
@@ -111,5 +112,13 @@ theorem dvd_eq_beq' (a : ℕ × ℕ) (m : ℕ) : dvd a m = Int.beq' (value a % (
   have h1 : dvd a m = true ↔ value a % (m : ℤ) = 0 := by rw [dvd_iff, Int.dvd_iff_emod_eq_zero]
   have h2 : Int.beq' (value a % (m : ℤ)) 0 = true ↔ value a % (m : ℤ) = 0 := by rw [Int.beq'_eq]
   cases hd : dvd a m <;> cases hb : Int.beq' (value a % (m : ℤ)) 0 <;> simp_all
+
+/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p` (`0 < p`). Used by the modular
+checkers to reduce a signed coefficient mod `p` before evaluating in `Nat`. -/
+theorem intResNat_cast {p : ℕ} (hp : 0 < p) (z : ℤ) :
+    (((z % (p : ℤ)).toNat : ℕ) : ZMod p) = (z : ZMod p) := by
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast hp.ne')
+  rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
+  exact Int.emod_emod_of_dvd z dvd_rfl
 
 end ECCompute.SN

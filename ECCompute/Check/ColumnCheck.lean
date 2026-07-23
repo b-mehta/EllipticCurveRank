@@ -70,19 +70,36 @@ theorem discrIntSN_value (a₂ a₄ a₆ : ℤ) :
     SN.value_pow, SN.value_ofInt, SN.value_ofNat, Nat.cast_ofNat]
   ring
 
-/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` over signed-`Nat` pairs. -/
-noncomputable def fvalSN (a₂ a₄ a₆ θ : ℤ) : ℕ × ℕ :=
-  SN.ofInt θ ^ₛ 3 +ₛ SN.ofInt a₂ *ₛ SN.ofInt θ ^ₛ 2 +ₛ SN.ofInt a₄ *ₛ SN.ofInt θ +ₛ SN.ofInt a₆
+/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
+coefficients reduced to residues first). -/
+noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
+  Nat.mod (Nat.add (Nat.add (Nat.add
+    (Nat.mul (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat) (θ % (p : ℤ)).toNat)
+    (Nat.mul (a₂ % (p : ℤ)).toNat (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)))
+    (Nat.mul (a₄ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)) (a₆ % (p : ℤ)).toNat) p
 
-theorem fvalSN_value (a₂ a₄ a₆ θ : ℤ) :
-    SN.value (fvalSN a₂ a₄ a₆ θ) = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
-  simp only [fvalSN, SN.value_add, SN.value_mul, SN.value_pow, SN.value_ofInt]
+theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
+    Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
+      ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
+  haveI : NeZero p := ⟨hp.ne'⟩
+  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
+  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
+  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
+  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
+  have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
+      = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
+    simp only [fvalModP, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
+      SN.intResNat_cast hp]
+    push_cast; ring
+  have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
+    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
+  rw [Nat.beq_eq, ← hnz, hcast]
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, all in `Nat`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   ((Nat.beq (6 % p) 0).not').and'
-    (((SN.dvd (discrIntSN a₂ a₄ a₆) p).not').and' (SN.dvd (fvalSN a₂ a₄ a₆ θ) p))
+    (((SN.dvd (discrIntSN a₂ a₄ a₆) p).not').and' (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
@@ -99,9 +116,8 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [curve_Δ_num, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd, ← discrIntSN_value, ← SN.dvd_iff]
     simpa using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
-    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-      rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← fvalSN_value, ← SN.dvd_iff]
-      simpa using hf
+    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
+      (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf
     rw [fval]
     grind
 
