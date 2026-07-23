@@ -269,11 +269,11 @@ theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x 
 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
-`lambdaComputeBool` still casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`, so the kernel unfolds
-`Int.cast` and the whole `Fin`/`ZMod` arithmetic layer. `lambdaComputeBoolNat` removes all of it:
-each signed value arrives as a difference `mp - mn` of two `ℕ`, the modulus reduction is
-`(mp % p + (p - mn % p)) % p` in `Nat`, and the characters compare through `jacobiFastOne`. Nothing
-but `Nat.add`, `Nat.mul`, `Nat.mod`, `Nat.sub`, `Nat.beq` and `Bool.rec` reduces in the kernel. It
+`lambdaComputeBool` casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`, so the kernel unfolds
+`Int.cast` and the whole `Fin`/`ZMod` layer. `lambdaComputeBoolNat` does the same computation in
+`Nat`: each signed value arrives as a difference `mp - mn` of two `ℕ`, the modulus reduction is
+`(mp % p + (p - mn % p)) % p`, and the characters compare through `jacobiFastOne`. Nothing but
+`Nat.add`, `Nat.mul`, `Nat.mod`, `Nat.sub`, `Nat.beq` and `Bool.rec` reduces in the kernel. It
 agrees with `lambdaComputeBool` through `lambdaComputeBoolNat_eq` (given `0 < p` and that the pairs
 represent the inputs). -/
 
