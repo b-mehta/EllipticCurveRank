@@ -34,7 +34,7 @@ def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
 modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1`. -/
 noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ) == 0
+  anyBelow ℓ fun r => Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0
 
 /-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -46,7 +46,8 @@ theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ 
 then it has no integer root. Shared core of the cubic and quadratic no-root lemmas. -/
 private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (hmod : ∀ {a b : ℤ}, a ≡ b [ZMOD (ℓ : ℤ)] → eval a ≡ eval b [ZMOD (ℓ : ℤ)])
-    (h : anyBelow ℓ (fun r => eval (r : ℤ) % (ℓ : ℤ) == 0) = false) (u : ℤ) : eval u ≠ 0 := by
+    (h : anyBelow ℓ (fun r => Int.beq' (eval (r : ℤ) % (ℓ : ℤ)) 0) = false) (u : ℤ) :
+    eval u ≠ 0 := by
   intro hu
   -- reduce `u` to its residue `r = u % ℓ ∈ {0, …, ℓ-1}`
   set r : ℤ := u % (ℓ : ℤ) with hr
@@ -61,7 +62,7 @@ private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ :
     rw [hthis, hu, Int.zero_emod]
   -- but the test is `false`, i.e. no tested residue is a root, a contradiction
   rw [anyBelow_eq_false] at h
-  grind
+  grind [Int.beq'_ne]
 
 /-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
@@ -80,7 +81,7 @@ def quadEval (b c u : ℤ) : ℤ := u ^ 2 + b * u + c
 /-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
 `ℓ`, checked by trying every residue `0, …, ℓ - 1`. -/
 noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => quadEval b c (r : ℤ) % (ℓ : ℤ) == 0
+  anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0
 
 /-- `quadEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :
@@ -367,22 +368,25 @@ These two wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`
 `t = 2` unconditionally (the universal `≤ 4` bound). -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
-theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (ℓ != 0) = true)
-    (h : (!hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ) = true) :
+theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
+    (h : (hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 := by
   rw [pow_zero]
-  exact card_twoTorsion_le_one_of_hasRootMod a₂ a₄ a₆ (by simpa using hp) (by simpa using h)
+  exact card_twoTorsion_le_one_of_hasRootMod a₂ a₄ a₆
+    (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
+    (by simpa [Bool.not'_eq_not] using h)
 
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
-theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (ℓ != 0) = true)
-    (hR : (cubicEval a₂ a₄ a₆ R == 0) = true)
-    (hq : (!quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ) = true) :
+theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
+    (hR : Int.beq' (cubicEval a₂ a₄ a₆ R) 0 = true)
+    (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
-  exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa using hR) (by simpa using hp) (by simpa using hq)
+  exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R (by simpa [Int.beq'_eq] using hR)
+    (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
+    (by simpa [Bool.not'_eq_not] using hq)
 
 /-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/
 theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
