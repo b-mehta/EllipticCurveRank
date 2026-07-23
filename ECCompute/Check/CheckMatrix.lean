@@ -26,8 +26,9 @@ coefficient pairs, fold over the `Nat` labels `labN = (p, tval)`, consuming `b` 
 comparing each against the `Nat`-valued descent character. -/
 noncomputable def checkBRow (c2p c2m c4p c4m xnp xnm xden b : ℕ) (labN : List (ℕ × ℕ)) : Bool :=
   labN.rec (motive := fun _ => ℕ → Bool) (fun _ => true)
-    (fun l _ ih b => (beqBool (b.testBit 0) (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and'
-      (ih (b >>> 1))) b
+    (fun l _ ih b =>
+      (beqBool (b.testBit 0) (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and'
+        (ih (b.shiftRight 1))) b
 
 theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ) (ls : List (ℕ × ℕ)) :
     checkBRow c2p c2m c4p c4m xnp xnm xden b (l :: ls) =

@@ -54,4 +54,8 @@ noncomputable def beqBool (a b : Bool) : Bool := a.rec b.not' b
 /-- `beqBool` agrees with `==` on `Bool`. -/
 theorem beqBool_eq (a b : Bool) : beqBool a b = (a == b) := by cases a <;> cases b <;> rfl
 
+/-- The kernel-cheap `Nat.beq` agrees with the `BEq`-dispatched `==` on `ℕ`. -/
+theorem natBeqEq (a b : ℕ) : (a == b) = Nat.beq a b := by
+  cases hab : a == b <;> cases hnb : Nat.beq a b <;> simp_all [beq_iff_eq, Nat.beq_eq]
+
 end ECCompute

@@ -66,14 +66,23 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
 /-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
 over the columns of `M`, comparing the parity of `bi &&& mₖ` against the diagonal indicator
 `i == k`. -/
-noncomputable def checkInvRow (bi i n : Nat) : Nat → List Nat → Bool
-  | _, [] => true
-  | k, m :: ms => (popParityK n (bi &&& m) == (i == k)).and' (checkInvRow bi i n (k + 1) ms)
+noncomputable def checkInvRow (bi i n k : Nat) (M : List Nat) : Bool :=
+  M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
+    (fun m _ ih k => (beqBool (popParityK n (Nat.land bi m)) (Nat.beq i k)).and' (ih k.succ)) k
+
+theorem checkInvRow_cons (bi i n k m : Nat) (ms : List Nat) :
+    checkInvRow bi i n k (m :: ms) =
+      (beqBool (popParityK n (Nat.land bi m)) (Nat.beq i k)).and'
+        (checkInvRow bi i n k.succ ms) := rfl
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
-noncomputable def checkInvGo (n : Nat) (M : List Nat) : Nat → List Nat → Bool
-  | _, [] => true
-  | i, b :: bs => (checkInvRow b i n 0 M).and' (checkInvGo n M (i + 1) bs)
+noncomputable def checkInvGo (n : Nat) (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
+  B.rec (motive := fun _ => Nat → Bool) (fun _ => true)
+    (fun b _ ih i => (checkInvRow b i n 0 M).and' (ih i.succ)) i
+
+theorem checkInvGo_cons (n : Nat) (M : List Nat) (i b : Nat) (bs : List Nat) :
+    checkInvGo n M i (b :: bs) =
+      (checkInvRow b i n 0 M).and' (checkInvGo n M i.succ bs) := rfl
 
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. -/
@@ -112,13 +121,14 @@ theorem popParity_sum (fuel a : Nat) :
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
 theorem checkInvRow_true {bi i n : Nat} :
     ∀ {k : Nat} {M : List Nat}, checkInvRow bi i n k M = true →
-      ∀ k', k' < M.length → (popParityK n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
+      ∀ k', k' < M.length →
+        (beqBool (popParityK n (Nat.land bi (M.getD k' 0))) (Nat.beq i (k + k'))) = true := by
   intro k M
   induction M generalizing k with
   | nil => intro _ k' hk'; simp at hk'
   | cons m ms ih =>
     intro hc k' hk'
-    simp only [checkInvRow, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
     | zero => simpa using h0
@@ -132,13 +142,14 @@ column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i
 theorem checkInvGo_true {n : Nat} {M : List Nat} :
     ∀ {i : Nat} {B : List Nat}, checkInvGo n M i B = true →
       ∀ i', i' < B.length → ∀ k', k' < M.length →
-        (popParityK n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
+        beqBool (popParityK n (Nat.land (B.getD i' 0) (M.getD k' 0)))
+          (Nat.beq (i + i') k') = true := by
   intro i B
   induction B generalizing i with
   | nil => intro _ i' hi'; simp at hi'
   | cons b bs ih =>
     intro hc i' hi' k' hk'
-    simp only [checkInvGo, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨hrow, hrec⟩ := hc
     cases i' with
     | zero => simpa using checkInvRow_true hrow k' hk'
@@ -152,7 +163,8 @@ theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
     ∀ i k, i < B.length → k < M.length →
       (popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
   intro i k hi hk
-  simpa using checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
+  have hgo := checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
+  simpa [beqBool_eq, ← natBeqEq] using hgo
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
