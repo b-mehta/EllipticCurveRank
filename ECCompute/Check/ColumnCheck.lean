@@ -54,25 +54,28 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`. -/
-def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
-  (6 % p != 0) &&
-  (discrInt a₂ a₄ a₆ % (p : ℤ) != 0) &&
-  ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆) % (p : ℤ) == 0)
+noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
+  ((Nat.beq (6 % p) 0).not').and'
+    (((Int.beq' (discrInt a₂ a₄ a₆ % (p : ℤ)) 0).not').and'
+      (Int.beq' ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆) % (p : ℤ)) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     (h : checkLabel a₂ a₄ a₆ p θ = true) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
-  rw [checkLabel, Bool.and_eq_true, Bool.and_eq_true] at h
-  obtain ⟨⟨h6, hΔ⟩, hf⟩ := h
+  rw [checkLabel] at h
+  simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Int.beq'_eq_beq, ← natBeqEq] at h
+  obtain ⟨h6, hΔ, hf⟩ := h
+  simp only [Bool.not_eq_true', beq_eq_false_iff_ne] at h6 hΔ
+  rw [beq_iff_eq] at hf
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rwa [bne_iff_ne, ne_eq, ← Nat.dvd_iff_mod_eq_zero] at h6
+    rwa [Nat.dvd_iff_mod_eq_zero]
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    rwa [bne_iff_ne, ne_eq, ← Int.dvd_iff_emod_eq_zero] at hΔ
+    rwa [Int.dvd_iff_emod_eq_zero]
   · -- `f(θ) ≡ 0 (mod p)`
-    rw [beq_iff_eq, ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
+    rw [← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
     rw [fval]
     grind
 

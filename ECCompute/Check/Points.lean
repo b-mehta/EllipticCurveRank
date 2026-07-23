@@ -22,18 +22,18 @@ open WeierstrassCurve
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
 integers, which `chkZ` tests. -/
-def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
+noncomputable def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
   let xn := x.num; let xd := (x.den : ℤ); let yn := y.num; let yd := (y.den : ℤ)
-  yn ^ 2 * xd ^ 3 + a₁ * xn * yn * xd ^ 2 * yd + a₃ * yn * xd ^ 3 * yd
-    == xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
-        + a₆ * xd ^ 3 * yd ^ 2
+  Int.beq' (yn ^ 2 * xd ^ 3 + a₁ * xn * yn * xd ^ 2 * yd + a₃ * yn * xd ^ 3 * yd)
+    (xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
+        + a₆ * xd ^ 3 * yd ^ 2)
 
 /-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
 the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, beq_iff_eq]
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
