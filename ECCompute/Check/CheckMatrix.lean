@@ -27,13 +27,13 @@ comparing each against the `Nat`-valued descent character. -/
 noncomputable def checkBRow (c2p c2m c4p c4m xnp xnm xden b : ℕ) (labN : List (ℕ × ℕ)) : Bool :=
   labN.rec (motive := fun _ => ℕ → Bool) (fun _ => true)
     (fun l _ ih b =>
-      (beqBool (b.testBit 0) (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and'
-        (ih (b.shiftRight 1))) b
+      (beqBool (Nat.beq (Nat.mod b 2) 1)
+        (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and' (ih (Nat.div b 2))) b
 
 theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ) (ls : List (ℕ × ℕ)) :
     checkBRow c2p c2m c4p c4m xnp xnm xden b (l :: ls) =
-      (beqBool (b.testBit 0) (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and'
-        (checkBRow c2p c2m c4p c4m xnp xnm xden (b >>> 1) ls) := rfl
+      (beqBool (Nat.beq (b % 2) 1) (lambdaComputeBoolNat c2p c2m c4p c4m l.1 l.2 xnp xnm xden)).and'
+        (checkBRow c2p c2m c4p c4m xnp xnm xden (b / 2) ls) := rfl
 
 /-- Fold over the rows, pairing each row bitmask of `matB` with its point in `pt`, and check each
 row with `checkBRow`. The point's numerator is split into `x.num.toNat - (-x.num).toNat`. -/
@@ -69,7 +69,7 @@ theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden : ℕ} :
   | cons l ls ih =>
     intro hb j hj
     simp only [checkBRow_cons, beqBool_eq, Bool.and'_eq_and, Bool.and_eq_true, beq_iff_eq] at hb
-    cases j <;> grind
+    cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ)} :
