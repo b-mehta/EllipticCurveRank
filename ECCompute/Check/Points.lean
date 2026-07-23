@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.ModelIso
 import ECCompute.Check.Fold
+import ECCompute.Check.SignedNat
 
 /-!
 # Point-on-curve check
@@ -18,22 +19,28 @@ import ECCompute.Check.Fold
 namespace ECCompute.ModelIso
 
 open WeierstrassCurve
+open scoped ECCompute.SN
 
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
 integers, which `chkZ` tests. -/
 noncomputable def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
-  let xn := x.num; let xd := (x.den : ℤ); let yn := y.num; let yd := (y.den : ℤ)
-  Int.beq' (yn ^ 2 * xd ^ 3 + a₁ * xn * yn * xd ^ 2 * yd + a₃ * yn * xd ^ 3 * yd)
-    (xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2
-        + a₆ * xd ^ 3 * yd ^ 2)
+  let xn := SN.ofInt x.num; let xd := SN.ofNat x.den
+  let yn := SN.ofInt y.num; let yd := SN.ofNat y.den
+  let b₁ := SN.ofInt a₁; let b₂ := SN.ofInt a₂; let b₃ := SN.ofInt a₃
+  let b₄ := SN.ofInt a₄; let b₆ := SN.ofInt a₆
+  SN.beq
+    (yn ^ₛ 2 *ₛ xd ^ₛ 3 +ₛ b₁ *ₛ xn *ₛ yn *ₛ xd ^ₛ 2 *ₛ yd +ₛ b₃ *ₛ yn *ₛ xd ^ₛ 3 *ₛ yd)
+    (xn ^ₛ 3 *ₛ yd ^ₛ 2 +ₛ b₂ *ₛ xn ^ₛ 2 *ₛ xd *ₛ yd ^ₛ 2 +ₛ b₄ *ₛ xn *ₛ xd ^ₛ 2 *ₛ yd ^ₛ 2
+      +ₛ b₆ *ₛ xd ^ₛ 3 *ₛ yd ^ₛ 2)
 
 /-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
 the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq]
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, SN.beq_iff, SN.value_add, SN.value_mul,
+    SN.value_pow, SN.value_ofInt, SN.value_ofNat]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)

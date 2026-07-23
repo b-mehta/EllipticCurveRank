@@ -52,6 +52,10 @@ noncomputable def pow (a : ℕ × ℕ) : ℕ → ℕ × ℕ :=
 noncomputable def beq (a b : ℕ × ℕ) : Bool :=
   a.rec fun ap an => b.rec fun bp bn => Nat.beq (Nat.add ap bn) (Nat.add an bp)
 
+@[inherit_doc] scoped infixr:75 " ^ₛ " => ECCompute.SN.pow
+@[inherit_doc] scoped infixl:70 " *ₛ " => ECCompute.SN.mul
+@[inherit_doc] scoped infixl:65 " +ₛ " => ECCompute.SN.add
+
 @[simp] theorem value_ofNat (n : ℕ) : value (ofNat n) = (n : ℤ) := by simp [value, ofNat]
 
 @[simp] theorem value_ofInt (v : ℤ) : value (ofInt v) = v := by
