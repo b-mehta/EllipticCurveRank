@@ -18,17 +18,30 @@ namespace ECCompute
 
 /-- One row of the descent-matrix check: for the row bitmask `b` and the `x`-coordinate of point
 `i`, fold over the labels, consuming `b` one bit at a time (`b >>> 1`). -/
-noncomputable def checkBRow (a₂ a₄ a₆ : ℤ) (x : ℚ) : ℕ → List (ℕ × ℤ) → Bool
-  | _, [] => true
-  | b, l :: ls =>
+noncomputable def checkBRow (a₂ a₄ a₆ : ℤ) (x : ℚ) (b : ℕ) (labs : List (ℕ × ℤ)) : Bool :=
+  labs.rec (motive := fun _ => ℕ → Bool) (fun _ => true)
+    (fun l _ ih b => (b.testBit 0 == lambdaComputeBool a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) x).and'
+      (ih (b >>> 1))) b
+
+theorem checkBRow_nil (a₂ a₄ a₆ : ℤ) (x : ℚ) (b : ℕ) : checkBRow a₂ a₄ a₆ x b [] = true := rfl
+
+theorem checkBRow_cons (a₂ a₄ a₆ : ℤ) (x : ℚ) (b : ℕ) (l : ℕ × ℤ) (ls : List (ℕ × ℤ)) :
+    checkBRow a₂ a₄ a₆ x b (l :: ls) =
       (b.testBit 0 == lambdaComputeBool a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) x).and'
-        (checkBRow a₂ a₄ a₆ x (b >>> 1) ls)
+        (checkBRow a₂ a₄ a₆ x (b >>> 1) ls) := rfl
 
 /-- The aggregate descent-matrix check: fold over the rows, pairing each row bitmask of `matB` with
 its point in `pt`, and check each row with `checkBRow`. -/
-noncomputable def checkB (a₂ a₄ a₆ : ℤ) (lab : List (ℕ × ℤ)) : List ℕ → List (ℚ × ℚ) → Bool
-  | b :: bs, p :: ps => (checkBRow a₂ a₄ a₆ p.1 b lab).and' (checkB a₂ a₄ a₆ lab bs ps)
-  | _, _ => true
+noncomputable def checkB (a₂ a₄ a₆ : ℤ) (lab : List (ℕ × ℤ)) (matB : List ℕ)
+    (pt : List (ℚ × ℚ)) : Bool :=
+  matB.rec (motive := fun _ => List (ℚ × ℚ) → Bool) (fun _ => true)
+    (fun b _ ih pt => pt.rec (motive := fun _ => Bool) true
+      (fun p ps _ => (checkBRow a₂ a₄ a₆ p.1 b lab).and' (ih ps))) pt
+
+theorem checkB_cons_cons (a₂ a₄ a₆ : ℤ) (lab : List (ℕ × ℤ)) (b : ℕ) (bs : List ℕ)
+    (p : ℚ × ℚ) (ps : List (ℚ × ℚ)) :
+    checkB a₂ a₄ a₆ lab (b :: bs) (p :: ps) =
+      (checkBRow a₂ a₄ a₆ p.1 b lab).and' (checkB a₂ a₄ a₆ lab bs ps) := rfl
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j` on the point. -/
@@ -40,7 +53,7 @@ theorem checkBRow_true {a₂ a₄ a₆ : ℤ} {x : ℚ} {lab : List (ℕ × ℤ)
   | nil => grind
   | cons l ls ih =>
     intro b hb j hj
-    simp only [checkBRow, Bool.and'_eq_and, Bool.and_eq_true] at hb
+    simp only [checkBRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hb
     cases j <;> grind
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
@@ -56,7 +69,7 @@ theorem checkB_row {a₂ a₄ a₆ : ℤ} {lab : List (ℕ × ℤ)} :
     cases pt with
     | nil => grind
     | cons p ps =>
-      simp only [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
+      simp only [checkB_cons_cons, Bool.and'_eq_and, Bool.and_eq_true] at h
       cases i <;> grind
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/

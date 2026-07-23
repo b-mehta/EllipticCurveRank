@@ -66,14 +66,22 @@ theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity f
 /-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
 over the columns of `M`, comparing the parity of `bi &&& mₖ` against the diagonal indicator
 `i == k`. -/
-noncomputable def checkInvRow (bi i n : Nat) : Nat → List Nat → Bool
-  | _, [] => true
-  | k, m :: ms => (popParityK n (bi &&& m) == (i == k)).and' (checkInvRow bi i n (k + 1) ms)
+noncomputable def checkInvRow (bi i n : Nat) (k : Nat) (M : List Nat) : Bool :=
+  M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
+    (fun m _ ih k => (popParityK n (bi &&& m) == (i == k)).and' (ih k.succ)) k
+
+theorem checkInvRow_cons (bi i n k : Nat) (m : Nat) (ms : List Nat) :
+    checkInvRow bi i n k (m :: ms) =
+      (popParityK n (bi &&& m) == (i == k)).and' (checkInvRow bi i n (k + 1) ms) := rfl
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
-noncomputable def checkInvGo (n : Nat) (M : List Nat) : Nat → List Nat → Bool
-  | _, [] => true
-  | i, b :: bs => (checkInvRow b i n 0 M).and' (checkInvGo n M (i + 1) bs)
+noncomputable def checkInvGo (n : Nat) (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
+  B.rec (motive := fun _ => Nat → Bool) (fun _ => true)
+    (fun b _ ih i => (checkInvRow b i n 0 M).and' (ih i.succ)) i
+
+theorem checkInvGo_cons (n : Nat) (M : List Nat) (i b : Nat) (bs : List Nat) :
+    checkInvGo n M i (b :: bs) =
+      (checkInvRow b i n 0 M).and' (checkInvGo n M (i + 1) bs) := rfl
 
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. -/
@@ -118,7 +126,7 @@ theorem checkInvRow_true {bi i n : Nat} :
   | nil => intro _ k' hk'; simp at hk'
   | cons m ms ih =>
     intro hc k' hk'
-    simp only [checkInvRow, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
     | zero => simpa using h0
@@ -138,7 +146,7 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} :
   | nil => intro _ i' hi'; simp at hi'
   | cons b bs ih =>
     intro hc i' hi' k' hk'
-    simp only [checkInvGo, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨hrow, hrec⟩ := hc
     cases i' with
     | zero => simpa using checkInvRow_true hrow k' hk'
