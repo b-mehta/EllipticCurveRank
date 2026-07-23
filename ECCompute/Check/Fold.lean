@@ -47,4 +47,11 @@ theorem allList_eq_true {α : Type*} {p : α → Bool} {l : List α} :
   | nil => simp [allList]
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
+/-- Kernel-reducible `Bool` equality via `Bool.rec`, avoiding the `BEq` typeclass dispatch of `==`.
+The second argument is evaluated once, in the branch `Bool.rec` selects. -/
+noncomputable def beqBool (a b : Bool) : Bool := a.rec b.not' b
+
+/-- `beqBool` agrees with `==` on `Bool`. -/
+theorem beqBool_eq (a b : Bool) : beqBool a b = (a == b) := by cases a <;> cases b <;> rfl
+
 end ECCompute
