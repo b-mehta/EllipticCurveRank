@@ -121,8 +121,7 @@ theorem popParity_sum (fuel a : Nat) :
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
 theorem checkInvRow_true {bi i n : Nat} :
     ∀ {k : Nat} {M : List Nat}, checkInvRow bi i n k M = true →
-      ∀ k', k' < M.length →
-        (beqBool (popParityK n (Nat.land bi (M.getD k' 0))) (Nat.beq i (k + k'))) = true := by
+      ∀ k', k' < M.length → (popParityK n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
   intro k M
   induction M generalizing k with
   | nil => intro _ k' hk'; simp at hk'
@@ -131,7 +130,7 @@ theorem checkInvRow_true {bi i n : Nat} :
     simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
-    | zero => simpa using h0
+    | zero => simpa [beqBool_eq, ← natBeqEq] using h0
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]
@@ -142,8 +141,7 @@ column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i
 theorem checkInvGo_true {n : Nat} {M : List Nat} :
     ∀ {i : Nat} {B : List Nat}, checkInvGo n M i B = true →
       ∀ i', i' < B.length → ∀ k', k' < M.length →
-        beqBool (popParityK n (Nat.land (B.getD i' 0) (M.getD k' 0)))
-          (Nat.beq (i + i') k') = true := by
+        (popParityK n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
   intro i B
   induction B generalizing i with
   | nil => intro _ i' hi'; simp at hi'
@@ -164,7 +162,7 @@ theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
       (popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
   intro i k hi hk
   have hgo := checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
-  simpa [beqBool_eq, ← natBeqEq] using hgo
+  simpa using hgo
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
