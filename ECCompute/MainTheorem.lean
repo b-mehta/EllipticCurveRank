@@ -220,7 +220,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
       (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hB) hlenB hlenM hinv htors
+      (checkB_true hlenB hlenP hlenL (fun j => (hlabP' j).pos) hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

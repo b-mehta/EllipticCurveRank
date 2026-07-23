@@ -270,12 +270,12 @@ theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
 `lambdaComputeBool` still casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`, so the kernel unfolds
-`Int.cast` and the whole `Fin`/`ZMod` arithmetic layer. `lambdaComputeBoolNat` removes all of it: each
-signed value arrives as a difference `mp - mn` of two `ℕ`, the modulus reduction is `(mp % p + (p -
-mn % p)) % p` in `Nat`, and the characters compare through `jacobiFastOne`. Nothing but `Nat.add`,
-`Nat.mul`, `Nat.mod`, `Nat.sub`, `Nat.beq` and `Bool.rec` reduces in the kernel. It agrees with
-`lambdaComputeBool` through `lambdaComputeBoolNat_eq` (given `0 < p` and that the pairs represent the
-inputs). -/
+`Int.cast` and the whole `Fin`/`ZMod` arithmetic layer. `lambdaComputeBoolNat` removes all of it:
+each signed value arrives as a difference `mp - mn` of two `ℕ`, the modulus reduction is
+`(mp % p + (p - mn % p)) % p` in `Nat`, and the characters compare through `jacobiFastOne`. Nothing
+but `Nat.add`, `Nat.mul`, `Nat.mod`, `Nat.sub`, `Nat.beq` and `Bool.rec` reduces in the kernel. It
+agrees with `lambdaComputeBool` through `lambdaComputeBoolNat_eq` (given `0 < p` and that the pairs
+represent the inputs). -/
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, from the `mp - mn` pair `(xp, xm)` for `x.num` and the
 label residue `tval` for `θ`. -/
@@ -286,7 +286,8 @@ noncomputable def alphaResNat (p tval xp xm xden : ℕ) : ℕ :=
 and `(c4p, c4m)` for `a₄`. -/
 noncomputable def fderivResNat (c2p c2m c4p c4m p tval : ℕ) : ℕ :=
   Nat.mod (Nat.add
-    (Nat.mod (Nat.add (Nat.add (Nat.mul (Nat.mul 3 tval) tval) (Nat.mul (Nat.mul 2 c2p) tval)) c4p) p)
+    (Nat.mod
+      (Nat.add (Nat.add (Nat.mul (Nat.mul 3 tval) tval) (Nat.mul (Nat.mul 2 c2p) tval)) c4p) p)
     (Nat.sub p (Nat.mod (Nat.add (Nat.mul (Nat.mul 2 c2m) tval) c4m) p))) p
 
 /-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`. -/
@@ -357,6 +358,18 @@ theorem lambdaComputeBoolNat_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) (hp : 0 < p) (�
       ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNat, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
+
+/-- Any integer is the difference of the `Nat`s `v.toNat` and `(-v).toNat` (one of them zero). This
+is how a signed input is fed to `lambdaComputeBoolNat` as an `mp - mn` pair. -/
+theorem int_toNat_sub (v : ℤ) : v = (v.toNat : ℤ) - ((-v).toNat : ℤ) := by omega
+
+/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p` (`0 < p`); this is how a label
+representative `θ : ℤ` becomes the `Nat` residue `tval` fed to `lambdaComputeBoolNat`. -/
+theorem intModToNat_cast {p : ℕ} (hp : 0 < p) (z : ℤ) :
+    (((z % (p : ℤ)).toNat : ℕ) : ZMod p) = (z : ZMod p) := by
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast hp.ne')
+  rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
+  exact Int.emod_emod_of_dvd z dvd_rfl
 
 /-! ### Worked examples: kernel reduction by `rfl`
 
