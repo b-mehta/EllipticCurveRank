@@ -104,6 +104,89 @@ theorem jacobiFast_eq (a : ℤ) (p : ℕ) (hp : 0 < p) (hodd : p % 2 = 1) :
     have := Int.emod_lt_of_pos a (b := (p : ℤ)) (by exact_mod_cast hp); lia
   rw [jacobiFast, jOdd_eq p _ p hodd hlt, hred, ← jacobiSym.mod_left]
 
+/-! ### `Nat`/`Bool` mirror of the Jacobi evaluator for kernel reduction
+
+`jOdd` returns an `Int` to carry the reciprocity sign, so reducing it in the kernel unfolds
+`Int.casesOn`/`Int.mul`. `jOddNat` is the `Bool` mirror: it threads the running sign in a `Bool`
+`neg` (flipped by `Bool.rec neg neg.not'` at each step) and reports whether the signed symbol is
+`1`. Built from `Nat.rec`/`Bool.rec`, `Nat.beq`, `Nat.mod`, `Nat.div` with no equation compiler and
+no `Int`, so the kernel stays in `Nat`. It agrees with `jOdd` through `jOddNat_eq`. -/
+
+/-- `Bool` mirror of `jOdd`: `true` iff `(-1)^neg · J(a | b) = 1`. See the section note. -/
+noncomputable def jOddNat : Nat → Nat → Nat → Bool → Bool :=
+  Nat.rec (motive := fun _ => Nat → Nat → Bool → Bool) (fun _ _ _ => false)
+    fun _ ih a b neg =>
+      (b.beq 1).rec
+        ((a.beq 0).rec
+          ((a.beq 1).rec
+            (((a.mod 2).beq 0).rec
+              (ih (b.mod a) a ((((a.mod 4).beq 3).and' ((b.mod 4).beq 3)).rec neg neg.not'))
+              (ih (a.div 2) b ((((b.mod 8).beq 3).or' ((b.mod 8).beq 5)).rec neg neg.not')))
+            neg.not')
+          false)
+        neg.not'
+
+theorem jOddNat_zero (a b : Nat) (neg : Bool) : jOddNat 0 a b neg = false := rfl
+
+theorem jOddNat_succ (fuel a b : Nat) (neg : Bool) :
+    jOddNat (fuel + 1) a b neg =
+      (b.beq 1).rec
+        ((a.beq 0).rec
+          ((a.beq 1).rec
+            (((a.mod 2).beq 0).rec
+              (jOddNat fuel (b.mod a) a
+                ((((a.mod 4).beq 3).and' ((b.mod 4).beq 3)).rec neg neg.not'))
+              (jOddNat fuel (a.div 2) b
+                ((((b.mod 8).beq 3).or' ((b.mod 8).beq 5)).rec neg neg.not')))
+            neg.not')
+          false)
+        neg.not' := rfl
+
+/-- The signed unit `(-1)^neg : ℤ`. -/
+private def sgn (neg : Bool) : ℤ := if neg then -1 else 1
+
+private theorem sgn_flip (neg : Bool) (P : Prop) [Decidable P] :
+    sgn (if P then !neg else neg) = sgn neg * (if P then -1 else 1) := by
+  by_cases P <;> cases neg <;> simp_all [sgn]
+
+/-- `jOddNat` reports whether the signed Jacobi symbol `(-1)^neg · J(a | b)` equals `1`. -/
+theorem jOddNat_eq (fuel a b : Nat) (neg : Bool) :
+    jOddNat fuel a b neg = decide (sgn neg * jOdd fuel a b = 1) := by
+  induction fuel generalizing a b neg with
+  | zero => cases neg <;> simp [jOddNat_zero, jOdd, sgn]
+  | succ f ih =>
+    rw [jOddNat_succ, jOdd]
+    have m2 : a.mod 2 = a % 2 := rfl
+    have d2 : a.div 2 = a / 2 := rfl
+    have mba : b.mod a = b % a := rfl
+    have m4a : a.mod 4 = a % 4 := rfl
+    have m4b : b.mod 4 = b % 4 := rfl
+    have m8 : b.mod 8 = b % 8 := rfl
+    simp only [Bool.rec_eq, Bool.and'_eq_and, Bool.or'_eq_or, Bool.not'_eq_not,
+      Nat.beq_eq, Bool.and_eq_true, Bool.or_eq_true, m2, d2, mba, m4a, m4b, m8]
+    by_cases hb : b = 1
+    · cases neg <;> simp [hb, sgn]
+    by_cases ha0 : a = 0
+    · cases neg <;> simp [hb, ha0, sgn]
+    by_cases ha1 : a = 1
+    · cases neg <;> simp [hb, ha1, sgn]
+    by_cases hae : a % 2 = 0
+    · simp only [hb, ha0, ha1, hae, reduceIte]
+      rw [ih, sgn_flip, mul_assoc]
+    · simp only [hb, ha0, ha1, hae, reduceIte]
+      rw [ih, sgn_flip, mul_assoc]
+
+/-- Kernel-reducible `Bool`: `true` iff `J(a | p) = 1` for `a : ℕ`, the `Nat`-only mirror of
+`jacobiFast (a : ℤ) p = 1`. -/
+noncomputable def jacobiFastOne (a p : Nat) : Bool := jOddNat p (a.mod p) p false
+
+theorem jacobiFastOne_eq (a p : Nat) : jacobiFastOne a p = decide (jacobiFast (a : ℤ) p = 1) := by
+  have hmod : ((a : ℤ) % (p : ℤ)).toNat = a % p := by
+    rw [← Int.natCast_mod, Int.toNat_natCast]
+  have hmn : a.mod p = a % p := rfl
+  rw [jacobiFastOne, jOddNat_eq, jacobiFast, hmod, hmn, sgn]
+  simp
+
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
 /-- Kernel-reducible replacement for `ECCompute.psi`. Uses `jacobiFast` on a representative of
@@ -162,11 +245,11 @@ result back into `ZMod 2`. -/
 
 /-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
 residues (where `psiCompute = 0`). -/
-def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
-  if jacobiFast (a.val : ℤ) p = 1 then false else true
+noncomputable def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
+  (jacobiFastOne a.val p).not'
 
 /-- `Bool` mirror of `lambdaCompute`, with `false`/`true` in place of `0`/`1 : ZMod 2`. -/
-def lambdaComputeBool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+noncomputable def lambdaComputeBool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
   if (x.den : ZMod p) = 0 then false
   else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ a₆ p θ)
        else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
@@ -174,7 +257,8 @@ def lambdaComputeBool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
 /-- `psiCompute` is `psiComputeBool` read into `ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
 theorem psiCompute_eq_bool (p : ℕ) (a : ZMod p) :
     psiCompute p a = if psiComputeBool p a then 1 else 0 := by
-  rw [psiCompute, psiComputeBool]; split <;> rfl
+  rw [psiCompute, psiComputeBool, jacobiFastOne_eq, Bool.not'_eq_not]
+  by_cases h : jacobiFast (a.val : ℤ) p = 1 <;> simp [h]
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
 character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
