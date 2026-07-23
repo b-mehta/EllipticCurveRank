@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
+import ECCompute.Check.SignedNat
 import ECCompute.Theory.ModelIso
 import ECCompute.Theory.Descent.Defs
 
@@ -27,14 +28,32 @@ cubic has no root modulo some prime `ℓ`, then `W` has no nonzero rational 2-to
 namespace ECCompute
 
 open WeierstrassCurve
+open scoped ECCompute.SN
 
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
+/-- `cubicEval` over signed-`Nat` pairs, so the kernel evaluates the cubic in `Nat`. -/
+noncomputable def cubicEvalSN (c₂ c₁ c₀ u : ℤ) : ℕ × ℕ :=
+  SN.ofInt u ^ₛ 3 +ₛ SN.ofInt c₂ *ₛ SN.ofInt u ^ₛ 2 +ₛ SN.ofInt c₁ *ₛ SN.ofInt u +ₛ SN.ofInt c₀
+
+theorem cubicEvalSN_value (c₂ c₁ c₀ u : ℤ) :
+    SN.value (cubicEvalSN c₂ c₁ c₀ u) = cubicEval c₂ c₁ c₀ u := by
+  simp only [cubicEvalSN, cubicEval, SN.value_add, SN.value_mul, SN.value_pow, SN.value_ofInt]
+
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
-modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1`. -/
+modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat`. -/
 noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0
+  anyBelow ℓ fun r => SN.dvd (cubicEvalSN c₂ c₁ c₀ (r : ℤ)) ℓ
+
+/-- The `Nat` test agrees with the `ℤ` residue test, bridging to the `ℤ` no-root argument. -/
+theorem hasRootMod_eq (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) :
+    hasRootMod c₂ c₁ c₀ ℓ
+      = anyBelow ℓ fun r => Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
+  rw [hasRootMod]
+  congr 1
+  funext r
+  rw [SN.dvd_eq_beq', cubicEvalSN_value]
 
 /-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -66,8 +85,9 @@ private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ :
 
 /-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 :=
-  no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
+    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 := by
+  rw [hasRootMod_eq] at h
+  exact no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
 
 /-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
 
@@ -78,10 +98,25 @@ by exhibiting a prime `ℓ` modulo which `q` has no root. -/
 /-- The value of the monic quadratic `u² + b u + c` at an integer `u`. -/
 def quadEval (b c u : ℤ) : ℤ := u ^ 2 + b * u + c
 
+/-- `quadEval` over signed-`Nat` pairs. -/
+noncomputable def quadEvalSN (b c u : ℤ) : ℕ × ℕ :=
+  SN.ofInt u ^ₛ 2 +ₛ SN.ofInt b *ₛ SN.ofInt u +ₛ SN.ofInt c
+
+theorem quadEvalSN_value (b c u : ℤ) : SN.value (quadEvalSN b c u) = quadEval b c u := by
+  simp only [quadEvalSN, quadEval, SN.value_add, SN.value_mul, SN.value_pow, SN.value_ofInt]
+
 /-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
-`ℓ`, checked by trying every residue `0, …, ℓ - 1`. -/
+`ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat`. -/
 noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0
+  anyBelow ℓ fun r => SN.dvd (quadEvalSN b c (r : ℤ)) ℓ
+
+/-- The `Nat` quadratic test agrees with the `ℤ` residue test. -/
+theorem quadHasRootMod_eq (b c : ℤ) (ℓ : ℕ) :
+    quadHasRootMod b c ℓ = anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
+  rw [quadHasRootMod]
+  congr 1
+  funext r
+  rw [SN.dvd_eq_beq', quadEvalSN_value]
 
 /-- `quadEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :
@@ -91,8 +126,9 @@ theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]
 
 /-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 :=
-  no_int_root_of_anyBelow hℓ (quadEval_modEq (ℓ : ℤ)) h u
+    (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 := by
+  rw [quadHasRootMod_eq] at h
+  exact no_int_root_of_anyBelow hℓ (quadEval_modEq (ℓ : ℤ)) h u
 
 open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
@@ -380,11 +416,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : Int.beq' (cubicEval a₂ a₄ a₆ R) 0 = true)
+    (hR : SN.beq (cubicEvalSN a₂ a₄ a₆ R) (SN.ofNat 0) = true)
     (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
-  exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R (by simpa [Int.beq'_eq] using hR)
+  exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
+    (by simpa [SN.beq_iff, cubicEvalSN_value, SN.value_ofNat] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 

@@ -39,6 +39,12 @@ noncomputable def ofInt (v : ℤ) : ℕ × ℕ := (v.toNat, (-v).toNat)
 noncomputable def add (a b : ℕ × ℕ) : ℕ × ℕ :=
   a.rec fun ap an => b.rec fun bp bn => (Nat.add ap bp, Nat.add an bn)
 
+/-- Negation: swap the two components. -/
+noncomputable def neg (a : ℕ × ℕ) : ℕ × ℕ := a.rec fun ap an => (an, ap)
+
+/-- Difference of two pairs. -/
+noncomputable def sub (a b : ℕ × ℕ) : ℕ × ℕ := add a (neg b)
+
 /-- Product of two pairs, in `Nat`: `(ap·bp + an·bn, ap·bn + an·bp)`. -/
 noncomputable def mul (a b : ℕ × ℕ) : ℕ × ℕ :=
   a.rec fun ap an => b.rec fun bp bn =>
@@ -55,6 +61,7 @@ noncomputable def beq (a b : ℕ × ℕ) : Bool :=
 @[inherit_doc] scoped infixr:75 " ^ₛ " => ECCompute.SN.pow
 @[inherit_doc] scoped infixl:70 " *ₛ " => ECCompute.SN.mul
 @[inherit_doc] scoped infixl:65 " +ₛ " => ECCompute.SN.add
+@[inherit_doc] scoped infixl:65 " -ₛ " => ECCompute.SN.sub
 
 @[simp] theorem value_ofNat (n : ℕ) : value (ofNat n) = (n : ℤ) := by simp [value, ofNat]
 
@@ -64,6 +71,12 @@ noncomputable def beq (a b : ℕ × ℕ) : Bool :=
 @[simp] theorem value_add (a b : ℕ × ℕ) : value (add a b) = value a + value b := by
   obtain ⟨ap, an⟩ := a; obtain ⟨bp, bn⟩ := b
   simp only [value, add, Nat.add_eq, Nat.cast_add]; ring
+
+@[simp] theorem value_neg (a : ℕ × ℕ) : value (neg a) = -value a := by
+  obtain ⟨ap, an⟩ := a; simp only [value, neg]; ring
+
+@[simp] theorem value_sub (a b : ℕ × ℕ) : value (sub a b) = value a - value b := by
+  rw [sub, value_add, value_neg]; ring
 
 @[simp] theorem value_mul (a b : ℕ × ℕ) : value (mul a b) = value a * value b := by
   obtain ⟨ap, an⟩ := a; obtain ⟨bp, bn⟩ := b
@@ -90,7 +103,13 @@ noncomputable def dvd (a : ℕ × ℕ) (m : ℕ) : Bool :=
 theorem dvd_iff (a : ℕ × ℕ) (m : ℕ) : dvd a m = true ↔ (m : ℤ) ∣ value a := by
   obtain ⟨ap, an⟩ := a
   simp only [dvd, value, Nat.beq_eq]
-  show Nat.ModEq m ap an ↔ (m : ℤ) ∣ ((ap : ℤ) - (an : ℤ))
+  change Nat.ModEq m ap an ↔ (m : ℤ) ∣ ((ap : ℤ) - (an : ℤ))
   rw [Nat.modEq_iff_dvd, dvd_sub_comm]
+
+/-- `SN.dvd` matches the `Int.beq'` residue test, bridging the `Nat` checker to the `ℤ` form. -/
+theorem dvd_eq_beq' (a : ℕ × ℕ) (m : ℕ) : dvd a m = Int.beq' (value a % (m : ℤ)) 0 := by
+  have h1 : dvd a m = true ↔ value a % (m : ℤ) = 0 := by rw [dvd_iff, Int.dvd_iff_emod_eq_zero]
+  have h2 : Int.beq' (value a % (m : ℤ)) 0 = true ↔ value a % (m : ℤ) = 0 := by rw [Int.beq'_eq]
+  cases hd : dvd a m <;> cases hb : Int.beq' (value a % (m : ℤ)) 0 <;> simp_all
 
 end ECCompute.SN
