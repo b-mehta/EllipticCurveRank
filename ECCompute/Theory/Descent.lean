@@ -7,9 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Theory.Descent.Reduction.Def
-import ECCompute.Theory.Descent.Reduction.Hom
-import ECCompute.Theory.Descent.Reduction.EpsFinite
+import ECCompute.Theory.Descent.Reduction
 
 /-!
 # The descent character: additivity
