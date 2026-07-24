@@ -6,6 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Check.Fold
 import ECCompute.Check.Primes
+import ECCompute.Check.SignedNat
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -34,6 +35,8 @@ open WeierstrassCurve
 
 namespace ECCompute
 
+open scoped ECCompute.SN
+
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the case `a₁ = a₃ = 0`), matching
 `WeierstrassCurve.Δ`. -/
 def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
@@ -52,27 +55,81 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
     (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
+/-- `discrInt` over signed-`Nat` pairs, so the kernel evaluates the discriminant in `Nat`. -/
+noncomputable def discrIntSN (a₂ a₄ a₆ : ℤ) : ℕ × ℕ :=
+  SN.neg ((SN.ofNat 4 *ₛ SN.ofInt a₂) ^ₛ 2
+      *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₂ *ₛ SN.ofInt a₆ -ₛ SN.ofInt a₄ ^ₛ 2))
+    -ₛ SN.ofNat 8 *ₛ (SN.ofNat 2 *ₛ SN.ofInt a₄) ^ₛ 3
+    -ₛ SN.ofNat 27 *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₆) ^ₛ 2
+    +ₛ SN.ofNat 9 *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₂) *ₛ (SN.ofNat 2 *ₛ SN.ofInt a₄)
+        *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₆)
+
+theorem discrIntSN_value (a₂ a₄ a₆ : ℤ) :
+    SN.value (discrIntSN a₂ a₄ a₆) = discrInt a₂ a₄ a₆ := by
+  simp only [discrIntSN, discrInt, SN.value_add, SN.value_sub, SN.value_neg, SN.value_mul,
+    SN.value_pow, SN.value_ofInt, SN.value_ofNat, Nat.cast_ofNat]
+  ring
+
+/-- Reducing the coefficients mod `p` before `discrIntSN` gives the same value in `ZMod p` (so the
+kernel builds the discriminant on small residues, not the full integer). -/
+theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
+    ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
+  have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a => by
+    rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
+  simp only [discrInt]
+  push_cast [h]
+  ring
+
+/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
+coefficients reduced to residues first). -/
+noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
+  Nat.mod (Nat.add (Nat.add (Nat.add
+    (Nat.mul (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat) (θ % (p : ℤ)).toNat)
+    (Nat.mul (a₂ % (p : ℤ)).toNat (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)))
+    (Nat.mul (a₄ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)) (a₆ % (p : ℤ)).toNat) p
+
+theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
+    Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
+      ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
+  haveI : NeZero p := ⟨hp.ne'⟩
+  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
+  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
+  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
+  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
+  have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
+      = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
+    simp only [fvalModP, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
+      SN.intResNat_cast hp]
+    push_cast; ring
+  have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
+    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
+  rw [Nat.beq_eq, ← hnz, hcast]
+
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
-`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`. -/
-def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
-  (6 % p != 0) &&
-  (discrInt a₂ a₄ a₆ % (p : ℤ) != 0) &&
-  ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆) % (p : ℤ) == 0)
+`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, all in `Nat`. -/
+noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
+  ((Nat.beq (6 % p) 0).not').and'
+    (((SN.dvd (discrIntSN (a₂ % p) (a₄ % p) (a₆ % p)) p).not').and'
+      (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     (h : checkLabel a₂ a₄ a₆ p θ = true) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
-  rw [checkLabel, Bool.and_eq_true, Bool.and_eq_true] at h
-  obtain ⟨⟨h6, hΔ⟩, hf⟩ := h
+  rw [checkLabel] at h
+  simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not] at h
+  obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rwa [bne_iff_ne, ne_eq, ← Nat.dvd_iff_mod_eq_zero] at h6
+    rw [Nat.dvd_iff_mod_eq_zero]
+    simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    rwa [bne_iff_ne, ne_eq, ← Int.dvd_iff_emod_eq_zero] at hΔ
+    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ZMod.intCast_zmod_eq_zero_iff_dvd,
+      ← discrIntSN_value, ← SN.dvd_iff]
+    simpa using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
-    rw [beq_iff_eq, ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd] at hf
+    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
+      (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf
     rw [fval]
     grind
 
