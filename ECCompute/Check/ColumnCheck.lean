@@ -70,6 +70,16 @@ theorem discrIntSN_value (a₂ a₄ a₆ : ℤ) :
     SN.value_pow, SN.value_ofInt, SN.value_ofNat, Nat.cast_ofNat]
   ring
 
+/-- Reducing the coefficients mod `p` before `discrIntSN` gives the same value in `ZMod p` (so the
+kernel builds the discriminant on small residues, not the full integer). -/
+theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
+    ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
+  have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a => by
+    rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
+  simp only [discrInt]
+  push_cast [h]
+  ring
+
 /-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
 coefficients reduced to residues first). -/
 noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
@@ -99,7 +109,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, all in `Nat`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   ((Nat.beq (6 % p) 0).not').and'
-    (((SN.dvd (discrIntSN a₂ a₄ a₆) p).not').and' (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
+    (((SN.dvd (discrIntSN (a₂ % p) (a₄ % p) (a₆ % p)) p).not').and'
+      (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
@@ -113,7 +124,8 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [Nat.dvd_iff_mod_eq_zero]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd, ← discrIntSN_value, ← SN.dvd_iff]
+    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ZMod.intCast_zmod_eq_zero_iff_dvd,
+      ← discrIntSN_value, ← SN.dvd_iff]
     simpa using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
