@@ -52,12 +52,6 @@ theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   rw [hx, hy]
   exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
 
-/-- The correctness lemma phrased with the raw Weierstrass equation rather than `Equation`. -/
-theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
-    chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
-      y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
-  simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff]
-
 /-- Check that every point in a list lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
   allList (fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
