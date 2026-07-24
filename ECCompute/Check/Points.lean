@@ -16,7 +16,7 @@ import ECCompute.Check.SignedNat
 `checkPoints` lifts the check to a list of points.
 -/
 
-namespace ECCompute.ModelIso
+namespace ECCompute
 
 open WeierstrassCurve
 open scoped ECCompute.SN
@@ -74,4 +74,4 @@ example : chkZ 1 0 1 0 0 0 0 = true := rfl
 example : (⟨1, 0, 1, 0, 0⟩ : WeierstrassCurve ℚ).toAffine.Equation 0 0 :=
   (chkZ_iff 1 0 1 0 0 0 0).mp rfl
 
-end ECCompute.ModelIso
+end ECCompute
