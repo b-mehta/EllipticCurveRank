@@ -55,7 +55,7 @@ theorem checkBGo_cons_cons (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ)) (b
 noncomputable def checkB (a₂ a₄ _a₆ : ℤ) (lab : List (ℕ × ℤ)) (matB : List ℕ)
     (pt : List (ℚ × ℚ)) : Bool :=
   checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
-    (lab.map fun l => (l.1, (l.2 % (l.1 : ℤ)).toNat)) matB pt
+    (lab.map fun l => (l.1, (Int.emod l.2 (l.1 : ℤ)).toNat)) matB pt
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
@@ -108,6 +108,7 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
       (f := fun l => (l.1, (l.2 % (l.1 : ℤ)).toNat))
     simpa [hL] using hm
   rw [checkB] at h
+  simp only [show ∀ z w : ℤ, Int.emod z w = z % w from fun _ _ => rfl] at h
   have hrow := checkBGo_row h i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
   have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
