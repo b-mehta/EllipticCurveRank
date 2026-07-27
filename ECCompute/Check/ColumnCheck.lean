@@ -84,9 +84,9 @@ theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
 coefficients reduced to residues first). -/
 noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
   Nat.mod (Nat.add (Nat.add (Nat.add
-    (Nat.mul (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat) (θ % (p : ℤ)).toNat)
-    (Nat.mul (a₂ % (p : ℤ)).toNat (Nat.mul (θ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)))
-    (Nat.mul (a₄ % (p : ℤ)).toNat (θ % (p : ℤ)).toNat)) (a₆ % (p : ℤ)).toNat) p
+    (Nat.mul (Nat.mul (Int.emod θ p).toNat (Int.emod θ p).toNat) (Int.emod θ p).toNat)
+    (Nat.mul (Int.emod a₂ p).toNat (Nat.mul (Int.emod θ p).toNat (Int.emod θ p).toNat)))
+    (Nat.mul (Int.emod a₄ p).toNat (Int.emod θ p).toNat)) (Int.emod a₆ p).toNat) p
 
 theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
@@ -98,7 +98,7 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
   have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
   have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
-    simp only [fvalModP, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
+    simp only [fvalModP, em, ea, el, ← Int.mod_def', ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
       SN.intResNat_cast hp]
     push_cast; ring
   have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
@@ -108,8 +108,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, all in `Nat`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
-  ((Nat.beq (6 % p) 0).not').and'
-    (((SN.dvd (discrIntSN (a₂ % p) (a₄ % p) (a₆ % p)) p).not').and'
+  ((Nat.beq (Nat.mod 6 p) 0).not').and'
+    (((SN.dvd (discrIntSN (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p).not').and'
       (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
@@ -121,9 +121,10 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rw [Nat.dvd_iff_mod_eq_zero]
+    rw [Nat.dvd_iff_mod_eq_zero, show 6 % p = Nat.mod 6 p from rfl]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
+    simp only [← Int.mod_def'] at hΔ
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ZMod.intCast_zmod_eq_zero_iff_dvd,
       ← discrIntSN_value, ← SN.dvd_iff]
     simpa using hΔ
