@@ -16,7 +16,7 @@ import ECCompute.Check.SignedNat
 `checkPoints` lifts the check to a list of points.
 -/
 
-namespace ECCompute.ModelIso
+namespace ECCompute
 
 open WeierstrassCurve
 open scoped ECCompute.SN
@@ -52,12 +52,6 @@ theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   rw [hx, hy]
   exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
 
-/-- The correctness lemma phrased with the raw Weierstrass equation rather than `Equation`. -/
-theorem chkZ_iff_raw (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
-    chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
-      y ^ 2 + (a₁ : ℚ) * x * y + a₃ * y = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
-  simp only [chkZ_iff, WeierstrassCurve.Affine.equation_iff]
-
 /-- Check that every point in a list lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
   allList (fun p => chkZ a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
@@ -80,4 +74,4 @@ example : chkZ 1 0 1 0 0 0 0 = true := rfl
 example : (⟨1, 0, 1, 0, 0⟩ : WeierstrassCurve ℚ).toAffine.Equation 0 0 :=
   (chkZ_iff 1 0 1 0 0 0 0).mp rfl
 
-end ECCompute.ModelIso
+end ECCompute
