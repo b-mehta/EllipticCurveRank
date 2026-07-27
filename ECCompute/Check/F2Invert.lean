@@ -68,12 +68,13 @@ over the columns of `M`, comparing the parity of `bi &&& mₖ` against the diago
 `i == k`. -/
 noncomputable def checkInvRow (bi i n k : Nat) (M : List Nat) : Bool :=
   M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
-    (fun m _ ih k => (beqBool (popParityK n (Nat.land bi m)) (Nat.beq i k)).and' (ih k.succ)) k
+    (fun m _ ih k => ((popParityK n (Nat.land bi m)).rec (motive := fun _ => Bool)
+      (Nat.beq i k).not' (Nat.beq i k)).and' (ih k.succ)) k
 
 theorem checkInvRow_cons (bi i n k m : Nat) (ms : List Nat) :
     checkInvRow bi i n k (m :: ms) =
-      (beqBool (popParityK n (Nat.land bi m)) (Nat.beq i k)).and'
-        (checkInvRow bi i n k.succ ms) := rfl
+      ((popParityK n (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
+        (Nat.beq i k)).and' (checkInvRow bi i n k.succ ms) := rfl
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
 noncomputable def checkInvGo (n : Nat) (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
@@ -130,7 +131,9 @@ theorem checkInvRow_true {bi i n : Nat} :
     simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
-    | zero => simpa [beqBool_eq, ← natBeqEq] using h0
+    | zero =>
+      have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
+      simpa [← natBeqEq, beq_iff_eq] using hbe
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]
