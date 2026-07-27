@@ -96,10 +96,9 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
   have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
-  have ei : ∀ z : ℤ, Int.emod z (p : ℤ) = z % (p : ℤ) := fun _ => rfl
   have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
-    simp only [fvalModP, em, ea, el, ei, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
+    simp only [fvalModP, em, ea, el, ← Int.mod_def', ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
       SN.intResNat_cast hp]
     push_cast; ring
   have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
@@ -125,8 +124,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [Nat.dvd_iff_mod_eq_zero, show 6 % p = Nat.mod 6 p from rfl]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    have ei : ∀ z : ℤ, Int.emod z (p : ℤ) = z % (p : ℤ) := fun _ => rfl
-    simp only [ei] at hΔ
+    simp only [← Int.mod_def'] at hΔ
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ZMod.intCast_zmod_eq_zero_iff_dvd,
       ← discrIntSN_value, ← SN.dvd_iff]
     simpa using hΔ

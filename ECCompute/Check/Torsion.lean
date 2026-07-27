@@ -85,8 +85,7 @@ theorem hasRootMod_eq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
   rw [hasRootMod]
   congr 1
   funext r
-  have ei : ∀ z : ℤ, Int.emod z (ℓ : ℤ) = z % (ℓ : ℤ) := fun _ => rfl
-  rw [ei, ei, ei, cubicModL_beq c₂ c₁ c₀ hℓ r]
+  rw [← Int.mod_def', ← Int.mod_def', ← Int.mod_def', cubicModL_beq c₂ c₁ c₀ hℓ r]
 
 /-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -171,8 +170,7 @@ theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
   rw [quadHasRootMod]
   congr 1
   funext r
-  have ei : ∀ z : ℤ, Int.emod z (ℓ : ℤ) = z % (ℓ : ℤ) := fun _ => rfl
-  rw [ei, ei, quadModL_beq b c hℓ r]
+  rw [← Int.mod_def', ← Int.mod_def', quadModL_beq b c hℓ r]
 
 /-- `quadEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :

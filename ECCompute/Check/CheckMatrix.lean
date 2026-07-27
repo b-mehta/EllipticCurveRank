@@ -113,7 +113,7 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
       (f := fun l => (l.1, (l.2 % (l.1 : ℤ)).toNat))
     simpa [hL] using hm
   rw [checkB] at h
-  simp only [show ∀ z w : ℤ, Int.emod z w = z % w from fun _ _ => rfl] at h
+  simp only [← Int.mod_def'] at h
   have hrow := checkBGo_row h i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
   have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
