@@ -312,7 +312,8 @@ theorem jacobiLookup_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha :
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
   have hmask := qrMask_testBit p hp2 a ha
   rw [jacobiFastOne_eq, jacobiFast_eq _ _ hpp.pos hodd, ← jacobiSym.legendreSym.to_jacobiSym]
-  have hlhs : (((qrMask p).shiftRight a).land 1).beq 1 = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
+  have hlhs : (((qrMask p).shiftRight a).land 1).beq 1
+      = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
     rcases eq_or_ne (((qrMask p).shiftRight a).land 1) 1 with h | h
     · rw [h, Nat.beq_refl]
       exact (decide_eq_true (hmask.mp h)).symm
