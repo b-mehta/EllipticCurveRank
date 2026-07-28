@@ -161,9 +161,10 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
+  let qms := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
-      toExpr ls.toList, toExpr matB, toExpr matM, toExpr t, toExpr tp]
+      toExpr ls.toList, toExpr matB, toExpr matM, toExpr qms, toExpr t, toExpr tp]
 
 /-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
 `WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the four length obligations, and the
@@ -189,6 +190,7 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
     natTy (mkConst ``Int))
   let hlenB := hlenOf ``Certificate.matB natTy
   let hlenM := hlenOf ``Certificate.matM natTy
+  let hlenQ := hlenOf ``Certificate.qrMasks natTy
   -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curve c.a₂ …`.
   let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
   let a4C := mkApp (mkConst ``Certificate.a₄) cExpr
@@ -203,7 +205,7 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
     #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW,
-      hmodel, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, htors]
+      hmodel, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
