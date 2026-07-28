@@ -334,6 +334,14 @@ theorem jacobiLookup_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha :
     rw [legendreSym.eq_one_iff p hne, Int.cast_natCast]
     simp only [ne_eq, ha0, not_false_eq_true, true_and]
 
+/-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
+set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `J(a | p) = 1`. Two native ops. -/
+noncomputable def jacobiLookupBool (qmask a : ℕ) : Bool := ((qmask.shiftRight a).land 1).beq 1
+
+theorem jacobiLookupBool_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+    jacobiLookupBool (qrMask p) a = jacobiFastOne a p :=
+  jacobiLookup_eq p hp2 a ha
+
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
 /-- Kernel-reducible replacement for `ECCompute.psi`. Uses `jacobiFast` on a representative of
@@ -444,6 +452,34 @@ noncomputable def lambdaComputeBoolNat (c2p c2m c4p c4m p tval xp xm xden : ℕ)
       ((jacobiFastOne (alphaResNat p tval xp xm xden) p).not')
       ((jacobiFastOne (fderivResNat c2p c2m c4p c4m p tval) p).not'))
     false
+
+/-- Mask variant of `lambdaComputeBoolNat`: the two `jacobiFastOne · p` reciprocity evaluations are
+replaced by native bit tests against a supplied quadratic-residue mask `qmask`. For `qmask = qrMask
+p` (`p` an odd prime) it agrees with `lambdaComputeBoolNat` (see `lambdaComputeBoolNatMask_eq`); the
+mask is built and checked once per prime, so each of these evaluations is recursion-free. -/
+noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : ℕ) : Bool :=
+  ((Nat.mod xden p).beq 0).rec
+    (((alphaResNat p tval xp xm xden).beq 0).rec
+      ((jacobiLookupBool qmask (alphaResNat p tval xp xm xden)).not')
+      ((jacobiLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
+    false
+
+/-- With the correct mask (`qmask = qrMask p`, `p` an odd prime) the mask variant computes the same
+`Bool` as `lambdaComputeBoolNat`. -/
+theorem lambdaComputeBoolNatMask_eq (p qmask : ℕ) [Fact p.Prime] (hp2 : p ≠ 2)
+    (hq : qmask = qrMask p) (c2p c2m c4p c4m tval xp xm xden : ℕ) :
+    lambdaComputeBoolNatMask c2p c2m c4p c4m p qmask tval xp xm xden
+      = lambdaComputeBoolNat c2p c2m c4p c4m p tval xp xm xden := by
+  have hp : 0 < p := (Fact.out : p.Prime).pos
+  subst hq
+  have h1 : jacobiLookupBool (qrMask p) (alphaResNat p tval xp xm xden)
+      = jacobiFastOne (alphaResNat p tval xp xm xden) p :=
+    jacobiLookupBool_eq p hp2 _ (Nat.mod_lt _ hp)
+  have h2 : jacobiLookupBool (qrMask p) (fderivResNat c2p c2m c4p c4m p tval)
+      = jacobiFastOne (fderivResNat c2p c2m c4p c4m p tval) p :=
+    jacobiLookupBool_eq p hp2 _ (Nat.mod_lt _ hp)
+  unfold lambdaComputeBoolNatMask lambdaComputeBoolNat
+  rw [h1, h2]
 
 private theorem natPrim (x y : ℕ) :
     Nat.mod x y = x % y ∧ Nat.add x y = x + y ∧ Nat.sub x y = x - y ∧ Nat.mul x y = x * y :=
