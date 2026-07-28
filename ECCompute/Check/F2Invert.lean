@@ -10,6 +10,7 @@ import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
 import ECCompute.Check.Fold
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 
 /-!
 # Kernel-reducible 𝔽₂ matrix invertibility certificates
@@ -43,37 +44,96 @@ def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
-/-- Kernel-reducible variant of `popParity`, phrased with `Nat.rec` and `Bool.rec` so the kernel
-peels the low bit and flips the running result. Equal to `popParity` (see
-`popParityK_eq_popParity`). -/
-noncomputable def popParityK : Nat → Nat → Bool :=
-  Nat.rec (fun _ ↦ false)
-    fun _ r a ↦ ((a.land 1).beq 0).rec (r (a.div 2)).not' (r (a.div 2))
+/-- Kernel-reducible parity of the low 32 bits, as a straight-line XOR-fold: for `v < 2 ^ 32` the
+low bit accumulates `⊕_{j < 32} bit j`. Five shift-xor stages (16, 8, 4, 2, 1) collapse all 32 bits
+into bit 0, reduced by the kernel with native `Nat.xor` / `Nat.shiftRight` / `Nat.land` (no
+recursion). Sound only against the low `n` bits when the input `< 2 ^ n`, which `checkInv` enforces
+via `maskBelow`; equals the spec `popParity` there (see `popParityK_eq`). -/
+noncomputable def popParityK (v : Nat) : Bool :=
+  let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
+  let v := v.xor (v.shiftRight 4);  let v := v.xor (v.shiftRight 2);  let v := v.xor (v.shiftRight 1)
+  (v.land 1).beq 1
 
-/-- `popParityK` computes the same bit-parity as `popParity`. -/
-theorem popParityK_eq_popParity (fuel a : Nat) : popParityK fuel a = popParity fuel a := by
+/-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
+private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
+  rw [Nat.testBit_zero, show x.land 1 = x &&& 1 from rfl, Nat.and_one_is_mod]
+  rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
+
+/-- The XOR over `v.testBit j` for `j` in a list. -/
+private def xorBits (v : Nat) (l : List Nat) : Bool :=
+  l.foldr (fun j r => Bool.xor (v.testBit j) r) false
+
+/-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
+theorem popParity_eq_xorBits (fuel a : Nat) :
+    popParity fuel a = xorBits a (List.range fuel) := by
   induction fuel generalizing a with
   | zero => rfl
   | succ f ih =>
-    change ((a.land 1).beq 0).rec (popParityK f (a.div 2)).not' (popParityK f (a.div 2))
-        = Bool.xor (a.testBit 0) (popParity f (a / 2))
-    have hdiv : a.div 2 = a / 2 := rfl
-    have hland : a.land 1 = a % 2 := Nat.and_one_is_mod a
-    rw [ih, Bool.not'_eq_not, Nat.testBit_zero, hdiv, hland]
-    rcases Nat.mod_two_eq_zero_or_one a with h | h <;> rw [h] <;>
-      cases popParity f (a / 2) <;> rfl
+    rw [popParity, ih, List.range_succ_eq_map]
+    simp only [xorBits, List.foldr_cons, List.foldr_map, Nat.testBit_zero, Nat.testBit_succ]
+
+/-- `ZMod 2` image of a `Bool`; injective and turns `Bool.xor` into `+`. -/
+private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
+
+private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
+  cases a <;> cases b <;> simp_all [bId] <;> exact absurd h (by decide)
+
+private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
+  cases a <;> cases b <;> decide
+
+/-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
+theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
+  rw [popParity_eq_xorBits]
+  apply bId_inj
+  have hxor : ∀ a b : Nat, a.xor b = a ^^^ b := fun _ _ => rfl
+  have hshr : ∀ a b : Nat, a.shiftRight b = a >>> b := fun _ _ => rfl
+  simp only [popParityK, land_one_beq_one, hxor, hshr, Nat.testBit_xor,
+    Nat.testBit_shiftRight]
+  simp only [xorBits, List.range, List.range.loop, List.foldr_cons, List.foldr_nil]
+  -- both sides are explicit XOR trees over `v.testBit c`; push into `ZMod 2` and `ring`
+  simp only [Bool.xor_false, bId_xor]
+  ring
+
+/-- Dropping trailing indices whose bit is `false` does not change the XOR. -/
+private theorem xorBits_range_hi {v n : Nat} (hzero : ∀ j, n ≤ j → v.testBit j = false) :
+    ∀ m, n ≤ m → xorBits v (List.range m) = xorBits v (List.range n) := by
+  intro m
+  induction m with
+  | zero => intro h; rw [Nat.le_zero.1 h]
+  | succ k ih =>
+    intro h
+    rcases Nat.lt_or_ge n (k + 1) with hlt | hge
+    · rw [List.range_succ]
+      simp only [xorBits, List.foldr_append, List.foldr_cons, List.foldr_nil,
+        hzero k (by omega), Bool.xor_false]
+      exact ih (by omega)
+    · have : k + 1 = n := by omega
+      rw [this]
+
+/-- Extra high bits (`≥ n`) are zero when `v < 2 ^ n`, so they drop out of the XOR. -/
+theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
+    popParity 32 v = popParity n v := by
+  rw [popParity_eq_xorBits, popParity_eq_xorBits]
+  refine xorBits_range_hi (fun j hj => ?_) 32 hn
+  exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
+
+/-- Bridge: for `v < 2 ^ n` with `n ≤ 32`, the fold matches the `n`-bit `popParityK`. -/
+theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
+    popParityK v = popParity n v := by
+  rw [popParityK_eq32, popParity_hi_eq hv hn]
 
 /-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-over the columns of `M`, comparing the parity of `bi &&& mₖ` against the diagonal indicator
-`i == k`. -/
+over the columns of `M`, comparing the parity of `bi &&& mₖ` (via the fast `popParityK`)
+against the diagonal indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with
+`n ≤ 32`, which `checkInv` verifies separately. -/
 noncomputable def checkInvRow (bi i n k : Nat) (M : List Nat) : Bool :=
   M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
-    (fun m _ ih k => ((popParityK n (Nat.land bi m)).rec (motive := fun _ => Bool)
+    (fun m _ ih k => ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool)
       (Nat.beq i k).not' (Nat.beq i k)).and' (ih k.succ)) k
 
 theorem checkInvRow_cons (bi i n k m : Nat) (ms : List Nat) :
     checkInvRow bi i n k (m :: ms) =
-      ((popParityK n (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
+      ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
         (Nat.beq i k)).and' (checkInvRow bi i n k.succ ms) := rfl
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
@@ -85,10 +145,15 @@ theorem checkInvGo_cons (n : Nat) (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo n M i (b :: bs) =
       (checkInvRow b i n 0 M).and' (checkInvGo n M i.succ bs) := rfl
 
+/-- Every mask in `L` fits in `n` bits (`< 2 ^ n`), using native `Nat.blt` / `Nat.shiftLeft`. -/
+noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
+  allList (fun x => Nat.blt x (Nat.shiftLeft 1 n)) L
+
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
-rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. -/
+rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
+masks fit in `n ≤ 32` bits, which the fast `popParityK` parity relies on for soundness. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  checkInvGo n M 0 B
+  (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo n M 0 B)))
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -120,51 +185,70 @@ theorem popParity_sum (fuel a : Nat) :
 
 /-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
-theorem checkInvRow_true {bi i n : Nat} :
-    ∀ {k : Nat} {M : List Nat}, checkInvRow bi i n k M = true →
-      ∀ k', k' < M.length → (popParityK n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
+theorem checkInvRow_true {bi i n : Nat} (hbi : bi < 2 ^ n) (hn : n ≤ 32) :
+    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i n k M = true →
+      ∀ k', k' < M.length → (popParity n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
   intro k M
   induction M generalizing k with
-  | nil => intro _ k' hk'; simp at hk'
+  | nil => intro _ _ k' hk'; simp at hk'
   | cons m ms ih =>
-    intro hc k' hk'
+    intro hM hc k' hk'
     simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
     | zero =>
+      have hbnd : bi &&& m < 2 ^ n := Nat.and_lt_two_pow bi (hM m (by simp))
+      rw [show bi.land m = bi &&& m from rfl, popParityK_eq hbnd hn] at h0
       have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
       simpa [← natBeqEq, beq_iff_eq] using hbe
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]
-      exact ih hrec k'' (by simpa using hk')
+      exact ih (fun m hm => hM m (by simp [hm])) hrec k'' (by simpa using hk')
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
-theorem checkInvGo_true {n : Nat} {M : List Nat} :
-    ∀ {i : Nat} {B : List Nat}, checkInvGo n M i B = true →
+theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) :
+    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo n M i B = true →
       ∀ i', i' < B.length → ∀ k', k' < M.length →
-        (popParityK n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
+        (popParity n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
   intro i B
   induction B generalizing i with
-  | nil => intro _ i' hi'; simp at hi'
+  | nil => intro _ _ i' hi'; simp at hi'
   | cons b bs ih =>
-    intro hc i' hi' k' hk'
+    intro hB hc i' hi' k' hk'
     simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨hrow, hrec⟩ := hc
     cases i' with
-    | zero => simpa using checkInvRow_true hrow k' hk'
+    | zero => simpa using checkInvRow_true (hB b (by simp)) hn hM hrow k' hk'
     | succ i'' =>
       have hidx : i + (i'' + 1) = i + 1 + i'' := by lia
       rw [hidx]
-      exact ih hrec i'' (by simpa using hi') k' hk'
+      exact ih (fun b hb => hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
+
+/-- `Nat.shiftLeft 1 n` is `2 ^ n`, restated in the def's primitive `Nat.shiftLeft` form. -/
+private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := Nat.one_shiftLeft n
+
+/-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
+theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
+    maskBelow n L = true ↔ ∀ x ∈ L, x < 2 ^ n := by
+  rw [maskBelow, allList_eq_true]
+  simp only [shiftLeft_one, Nat.blt_eq]
+
+/-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
+theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
+    (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo n M 0 B = true := by
+  simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
+  obtain ⟨hB, hMask, hle, hgo⟩ := h
+  exact ⟨maskBelow_eq_true.1 hB, maskBelow_eq_true.1 hMask, by simpa using hle, hgo⟩
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
 theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
     ∀ i k, i < B.length → k < M.length →
-      (popParityK n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
+      (popParity n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
   intro i k hi hk
-  have hgo := checkInvGo_true (n := n) (M := M) (i := 0) (B := B) h i hi k hk
+  obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
+  have hgo := checkInvGo_true (n := n) (M := M) hn hM (i := 0) (B := B) hB hgo i hi k hk
   simpa using hgo
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
@@ -182,7 +266,6 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
     -- Read off the `(i, k)` certificate; `grind` matches it against the diagonal.
     have hb := checkInv_true h i.val k.val
       (by rw [hBlen]; exact i.isLt) (by rw [hMlen]; exact k.isLt)
-    rw [popParityK_eq_popParity] at hb
     grind
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact IsUnit.of_mul_eq_one (toMatCols M n) key
