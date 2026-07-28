@@ -226,10 +226,8 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈
       rw [hidx]
       exact ih (fun b hb => hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
 
-/-- `Nat.shiftLeft 1 n` is `2 ^ n`. -/
-private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := by
-  show (1 : Nat) <<< n = 2 ^ n
-  rw [Nat.shiftLeft_eq, one_mul]
+/-- `Nat.shiftLeft 1 n` is `2 ^ n`, restated in the def's primitive `Nat.shiftLeft` form. -/
+private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := Nat.one_shiftLeft n
 
 /-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
 theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
