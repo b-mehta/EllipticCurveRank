@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
+import Mathlib.Data.Nat.Bitwise
 
 /-!
 # A kernel-reducible descent character
@@ -186,6 +187,152 @@ theorem jacobiFastOne_eq (a p : Nat) : jacobiFastOne a p = decide (jacobiFast (a
   have hmn : a.mod p = a % p := rfl
   rw [jacobiFastOne, jOddNat_eq, jacobiFast, hmod, hmn, sgn]
   simp
+
+/-! ### Quadratic-residue bitmask: `O(1)` kernel evaluation of the Legendre character
+
+For a fixed odd prime `p`, `jacobiFastOne · p` runs the reciprocity recursion (`~log p` `Nat.rec`
+steps) on every call. Since the descent uses a small set of primes each many times, we instead
+precompute, once per prime, a `Nat` bitmask `Q` whose bit `a` is set exactly on the nonzero
+quadratic residues `a` mod `p`. Each character evaluation is then the native bit test
+`((Q >>> a) &&& 1).beq 1` with no recursion. `qrMask` is the reference builder the certificate's
+supplied mask is checked against; `jacobiLookup_eq` shows the bit test agrees with `jacobiFastOne`.
+-/
+
+/-- Reference quadratic-residue-mask builder: OR together `1 <<< (j² % p)` for `j = 1 .. fuel`. With
+`fuel = (p-1)/2` this sets exactly the bits at the nonzero quadratic residues mod an odd prime `p`.
+Nat primitives only, so it reduces in the kernel. -/
+noncomputable def qrMaskGo : Nat → Nat → Nat :=
+  Nat.rec (fun _ => 0)
+    (fun k ih p => (ih p).lor (Nat.shiftLeft 1 (Nat.mod (Nat.mul (Nat.succ k) (Nat.succ k)) p)))
+
+/-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
+noncomputable def qrMask (p : Nat) : Nat := qrMaskGo (Nat.div (Nat.sub p 1) 2) p
+
+/-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
+theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
+    (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
+  rw [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq, Nat.and_one_is_mod,
+    Nat.testBit_eq_decide_div_mod_eq]
+  constructor
+  · intro h; simp [h]
+  · intro h; simpa using of_decide_eq_true h
+
+/-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
+theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
+    ∀ f : ℕ, Nat.testBit (qrMaskGo f p) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
+  intro f
+  induction f with
+  | zero =>
+    simp only [qrMaskGo]
+    constructor
+    · rintro h; simp at h
+    · rintro ⟨j, hj, hj0, _⟩; omega
+  | succ k ih =>
+    have hunfold : qrMaskGo (k + 1) p =
+        (qrMaskGo k p).lor (Nat.shiftLeft 1 (Nat.mod (Nat.mul (Nat.succ k) (Nat.succ k)) p)) := rfl
+    rw [hunfold, Nat.lor_eq, Nat.testBit_lor, Nat.shiftLeft_eq', Nat.shiftLeft_eq,
+      Nat.one_mul, Nat.testBit_two_pow, Bool.or_eq_true, ih]
+    constructor
+    · rintro (⟨j, hj1, hjk, hja⟩ | hb)
+      · exact ⟨j, hj1, by omega, hja⟩
+      · exact ⟨k + 1, by omega, by omega, of_decide_eq_true hb⟩
+    · rintro ⟨j, hj1, hjk, hja⟩
+      rcases Nat.lt_succ_iff_lt_or_eq.mp (Nat.lt_succ_of_le hjk) with h | h
+      · exact Or.inl ⟨j, hj1, by omega, hja⟩
+      · subst h
+        refine Or.inr ?_
+        simp only [decide_eq_true_eq]
+        exact hja
+
+/-- For `0 < a < p`, `p` an odd prime: `a` is a residue witnessed in the lower half `[1, (p-1)/2]`
+iff it is a nonzero square in `ZMod p`. -/
+theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+    (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
+  have hpp : p.Prime := hp.out
+  have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
+  have hp3 : 3 ≤ p := by
+    rcases hpp.two_le.lt_or_eq with h | h
+    · omega
+    · omega
+  constructor
+  · rintro ⟨j, hj1, hjk, hja⟩
+    have hjp : j < p := by omega
+    have hcast : (a : ZMod p) = (j : ZMod p) * (j : ZMod p) := by
+      rw [← Nat.cast_mul, ← hja, ZMod.natCast_mod, Nat.cast_mul]
+    refine ⟨?_, ⟨(j : ZMod p), hcast⟩⟩
+    intro h0
+    rw [h0] at hja
+    have hdvd : p ∣ j * j := Nat.dvd_of_mod_eq_zero hja
+    rcases (Nat.Prime.dvd_mul hpp).mp hdvd with hd | hd <;>
+      exact absurd (Nat.le_of_dvd (by omega) hd) (by omega)
+  · rintro ⟨ha0, ⟨x, hx⟩⟩
+    have hxne : x ≠ 0 := by
+      rintro rfl
+      apply ha0
+      have hz : (a : ZMod p) = 0 := by rw [hx]; ring
+      have := (ZMod.natCast_eq_zero_iff a p).mp hz
+      exact Nat.eq_zero_of_dvd_of_lt this ha
+    set v := x.val with hv
+    have hv1 : 1 ≤ v := by
+      rcases Nat.eq_zero_or_pos v with h | h
+      · exact absurd (by rw [hv] at h; exact ZMod.val_eq_zero x |>.mp h) hxne
+      · exact h
+    have hvp : v < p := ZMod.val_lt x
+    have hxcast : (v : ZMod p) = x := ZMod.natCast_zmod_val x
+    have haeq : v * v % p = a := by
+      have hc : (a : ZMod p) = ((v * v : ℕ) : ZMod p) := by
+        rw [hx, Nat.cast_mul, hxcast]
+      have hmod := (ZMod.natCast_eq_natCast_iff' a (v * v) p).mp hc
+      rw [Nat.mod_eq_of_lt ha] at hmod
+      omega
+    by_cases hlow : v ≤ (p - 1) / 2
+    · exact ⟨v, hv1, hlow, haeq⟩
+    · refine ⟨p - v, by omega, by omega, ?_⟩
+      have hsq : (p - v) * (p - v) % p = v * v % p := by
+        have hkey : (((p - v) * (p - v) : ℕ) : ZMod p) = ((v * v : ℕ) : ZMod p) := by
+          push_cast [Nat.cast_sub (by omega : v ≤ p)]
+          ring_nf
+          rw [ZMod.natCast_self]
+          ring
+        exact (ZMod.natCast_eq_natCast_iff' _ _ p).mp hkey
+      rw [hsq, haeq]
+
+/-- Bit `a` of `qrMask p` is set iff `a` is a nonzero square mod the odd prime `p` (for `a < p`). -/
+theorem qrMask_testBit (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+    ((qrMask p).shiftRight a).land 1 = 1 ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
+  rw [shiftRight_land_one_eq_one_iff, qrMask, testBit_qrMaskGo]
+  exact exists_sq_iff p hp2 a ha
+
+/-- The mask bit test agrees with `jacobiFastOne` for `a < p`, `p` an odd prime: both report whether
+`a` is a nonzero quadratic residue mod `p`. This is what lets a verified mask replace the
+reciprocity evaluation at each descent-character call site. -/
+theorem jacobiLookup_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+    (((qrMask p).shiftRight a).land 1).beq 1 = jacobiFastOne a p := by
+  have hpp : p.Prime := Fact.out
+  have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
+  have hmask := qrMask_testBit p hp2 a ha
+  rw [jacobiFastOne_eq, jacobiFast_eq _ _ hpp.pos hodd, ← jacobiSym.legendreSym.to_jacobiSym]
+  have hlhs : (((qrMask p).shiftRight a).land 1).beq 1 = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
+    rcases eq_or_ne (((qrMask p).shiftRight a).land 1) 1 with h | h
+    · rw [h, Nat.beq_refl]
+      exact (decide_eq_true (hmask.mp h)).symm
+    · have hbf : (((qrMask p).shiftRight a).land 1).beq 1 = false := by
+        rw [Bool.eq_false_iff, ne_eq, Nat.beq_eq]; exact h
+      rw [hbf]
+      symm
+      simp only [decide_eq_false_iff_not]
+      exact fun hc => h (hmask.mpr hc)
+  rw [hlhs]
+  congr 1
+  by_cases ha0 : a = 0
+  · subst ha0
+    simp only [ne_eq, not_true_eq_false, false_and, Nat.cast_zero, legendreSym.at_zero]
+    decide
+  · have hne : ((a : ℤ) : ZMod p) ≠ 0 := by
+      rw [Int.cast_natCast, Ne, ZMod.natCast_eq_zero_iff]
+      exact fun hd => ha0 (Nat.eq_zero_of_dvd_of_lt hd ha)
+    rw [legendreSym.eq_one_iff p hne, Int.cast_natCast]
+    simp only [ne_eq, ha0, not_false_eq_true, true_and]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
