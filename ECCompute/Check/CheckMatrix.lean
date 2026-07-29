@@ -173,12 +173,12 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hrow := checkBGo_row hgo i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
   have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
-  -- mask cell equals the reciprocity cell, then bridge that to `lambdaComputeBool`
-  rw [lambdaComputeBoolNatMask_eq L.1 _ (hp2 j) hqok.symm] at hcell
-  have hbridge : lambdaComputeBoolNat a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
-      L.1 (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
+  -- rewrite the supplied mask to `qrMask L.1`, then bridge the mask cell to `lambdaComputeBool`
+  rw [← hqok] at hcell
+  have hbridge : lambdaComputeBoolNatMask a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
+      L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
       = lambdaComputeBool a₂ a₄ a₆ L.1 (L.2 : ZMod L.1) P.1 :=
-    lambdaComputeBoolNat_eq a₂ a₄ a₆ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
+    lambdaComputeBoolNatMask_eq a₂ a₄ a₆ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
       (int_toNat_sub a₂) (int_toNat_sub a₄) (intModToNat_cast hp L.2)
       (int_toNat_sub P.1.num) rfl
   rw [F2Invert.toMat, hcell, hbridge, lambdaCompute_eq_bool]
