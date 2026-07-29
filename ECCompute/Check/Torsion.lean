@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
-import ECCompute.Check.SignedNat
+import ECCompute.ForMathlib.IntResNat
 import ECCompute.Theory.ModelIso
 import ECCompute.Theory.Descent.Defs
 
@@ -28,7 +28,6 @@ cubic has no root modulo some prime `ℓ`, then `W` has no nonzero rational 2-to
 namespace ECCompute
 
 open WeierstrassCurve
-open scoped ECCompute.SN
 
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
@@ -51,7 +50,7 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
   have hcast : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
       = (cubicEval c₂ c₁ c₀ (r : ℤ) : ZMod ℓ) := by
     simp only [cubicModL, cubicEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add,
-      Nat.cast_mul, SN.intResNat_cast hℓ]
+      Nat.cast_mul, intResNat_cast hℓ]
     push_cast; ring
   have hnz : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
       ↔ cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r = 0 := by
@@ -138,7 +137,7 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
   have hcast : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
       = (quadEval b c (r : ℤ) : ZMod ℓ) := by
     simp only [quadModL, quadEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      SN.intResNat_cast hℓ]
+      intResNat_cast hℓ]
     push_cast; ring
   have hnz : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
       ↔ quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r = 0 := by

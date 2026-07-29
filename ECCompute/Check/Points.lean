@@ -5,7 +5,6 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.ModelIso
 import ECCompute.Check.Fold
-import ECCompute.Check.SignedNat
 
 /-!
 # Point-on-curve check
@@ -19,7 +18,6 @@ import ECCompute.Check.SignedNat
 namespace ECCompute
 
 open WeierstrassCurve
-open scoped ECCompute.SN
 
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
