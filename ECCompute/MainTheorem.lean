@@ -188,10 +188,11 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hlenL : c.labels.length = c.rho)
     (hlenB : c.matB.length = c.rho)
     (hlenM : c.matM.length = c.rho)
+    (hlenQ : c.qrMasks.length = c.rho)
     (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
     (hlabP : checkPrimes c.labels = true)
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
-    (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.matB c.points = true)
+    (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.qrMasks c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE W (c.rho - c.t) := by
@@ -217,10 +218,13 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
       (c.labels.getD j.val (0, 0)).1 (c.labels.getD j.val (0, 0)).2 = true :=
     fun j => checkLabels_true hlabC _ (hmemL j)
+  -- Each label's prime divides `6` nowhere, so it is `≠ 2` (needed for the residue-mask lookup).
+  have hp2' : ∀ j : Fin c.rho, (c.labels.getD j.val (0, 0)).1 ≠ 2 := fun j he =>
+    (descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ _ _ (hlabC' j) (hlabP' j)).ne_six (he ▸ ⟨3, rfl⟩)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points.getD i.val (0, 0))
       (fun j => c.labels.getD j.val (0, 0)) hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL (fun j => (hlabP' j).pos) hB) hlenB hlenM hinv htors
+      (checkB_true hlenB hlenP hlenL hlenQ hlabP' hp2' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

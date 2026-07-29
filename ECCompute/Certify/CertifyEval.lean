@@ -62,6 +62,12 @@ def computeMatB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × 
   xs.map fun x =>
     bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
+/-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
+`p`. Mirrors `ECCompute.qrMask` (OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`); the certificate
+carries this so each Legendre-character check is a native bit test. -/
+def qrMaskNat (p : Nat) : Nat :=
+  (List.range ((p - 1) / 2)).foldl (fun acc k => acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
+
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `matM`). Returns
 `none` if the matrix is singular. -/

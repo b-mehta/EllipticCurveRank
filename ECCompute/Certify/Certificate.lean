@@ -50,6 +50,10 @@ structure Certificate where
   matB : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   matM : List Nat
+  /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
+  set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee; lets
+  each Legendre-character evaluation be a native bit test instead of a reciprocity recursion. -/
+  qrMasks : List Nat
   /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
   `rank ≥ ρ - t`. -/
   t : ℕ
