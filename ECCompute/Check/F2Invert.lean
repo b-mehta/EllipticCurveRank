@@ -51,7 +51,8 @@ recursion). Sound only against the low `n` bits when the input `< 2 ^ n`, which 
 via `maskBelow`; equals the spec `popParity` there (see `popParityK_eq`). -/
 noncomputable def popParityK (v : Nat) : Bool :=
   let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
-  let v := v.xor (v.shiftRight 4);  let v := v.xor (v.shiftRight 2);  let v := v.xor (v.shiftRight 1)
+  let v := v.xor (v.shiftRight 4); let v := v.xor (v.shiftRight 2)
+  let v := v.xor (v.shiftRight 1)
   (v.land 1).beq 1
 
 /-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
@@ -76,7 +77,7 @@ theorem popParity_eq_xorBits (fuel a : Nat) :
 private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
 private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
-  cases a <;> cases b <;> simp_all [bId] <;> exact absurd h (by decide)
+  cases a <;> cases b <;> simp_all [bId]
 
 private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
   cases a <;> cases b <;> decide
@@ -126,24 +127,24 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 over the columns of `M`, comparing the parity of `bi &&& mₖ` (via the fast `popParityK`)
 against the diagonal indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with
 `n ≤ 32`, which `checkInv` verifies separately. -/
-noncomputable def checkInvRow (bi i n k : Nat) (M : List Nat) : Bool :=
+noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
   M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
     (fun m _ ih k => ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool)
       (Nat.beq i k).not' (Nat.beq i k)).and' (ih k.succ)) k
 
-theorem checkInvRow_cons (bi i n k m : Nat) (ms : List Nat) :
-    checkInvRow bi i n k (m :: ms) =
+theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
+    checkInvRow bi i k (m :: ms) =
       ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
-        (Nat.beq i k)).and' (checkInvRow bi i n k.succ ms) := rfl
+        (Nat.beq i k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
-noncomputable def checkInvGo (n : Nat) (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
+noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
   B.rec (motive := fun _ => Nat → Bool) (fun _ => true)
-    (fun b _ ih i => (checkInvRow b i n 0 M).and' (ih i.succ)) i
+    (fun b _ ih i => (checkInvRow b i 0 M).and' (ih i.succ)) i
 
-theorem checkInvGo_cons (n : Nat) (M : List Nat) (i b : Nat) (bs : List Nat) :
-    checkInvGo n M i (b :: bs) =
-      (checkInvRow b i n 0 M).and' (checkInvGo n M i.succ bs) := rfl
+theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
+    checkInvGo M i (b :: bs) =
+      (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Every mask in `L` fits in `n` bits (`< 2 ^ n`), using native `Nat.blt` / `Nat.shiftLeft`. -/
 noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
@@ -153,7 +154,7 @@ noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
 masks fit in `n ≤ 32` bits, which the fast `popParityK` parity relies on for soundness. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo n M 0 B)))
+  (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo M 0 B)))
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -185,8 +186,8 @@ theorem popParity_sum (fuel a : Nat) :
 
 /-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
-theorem checkInvRow_true {bi i n : Nat} (hbi : bi < 2 ^ n) (hn : n ≤ 32) :
-    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i n k M = true →
+theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
+    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i k M = true →
       ∀ k', k' < M.length → (popParity n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
   intro k M
   induction M generalizing k with
@@ -209,7 +210,7 @@ theorem checkInvRow_true {bi i n : Nat} (hbi : bi < 2 ^ n) (hn : n ≤ 32) :
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
 theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) :
-    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo n M i B = true →
+    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo M i B = true →
       ∀ i', i' < B.length → ∀ k', k' < M.length →
         (popParity n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
   intro i B
@@ -220,7 +221,7 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈
     simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨hrow, hrec⟩ := hc
     cases i' with
-    | zero => simpa using checkInvRow_true (hB b (by simp)) hn hM hrow k' hk'
+    | zero => simpa using checkInvRow_true hn hM hrow k' hk'
     | succ i'' =>
       have hidx : i + (i'' + 1) = i + 1 + i'' := by lia
       rw [hidx]
@@ -237,7 +238,7 @@ theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
 
 /-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
 theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
-    (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo n M 0 B = true := by
+    (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B = true := by
   simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hB, hMask, hle, hgo⟩ := h
   exact ⟨maskBelow_eq_true.1 hB, maskBelow_eq_true.1 hMask, by simpa using hle, hgo⟩
