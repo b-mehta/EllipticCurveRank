@@ -55,22 +55,7 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
     (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
-/-- `discrInt` over signed-`Nat` pairs, so the kernel evaluates the discriminant in `Nat`. -/
-noncomputable def discrIntSN (a₂ a₄ a₆ : ℤ) : ℕ × ℕ :=
-  SN.neg ((SN.ofNat 4 *ₛ SN.ofInt a₂) ^ₛ 2
-      *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₂ *ₛ SN.ofInt a₆ -ₛ SN.ofInt a₄ ^ₛ 2))
-    -ₛ SN.ofNat 8 *ₛ (SN.ofNat 2 *ₛ SN.ofInt a₄) ^ₛ 3
-    -ₛ SN.ofNat 27 *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₆) ^ₛ 2
-    +ₛ SN.ofNat 9 *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₂) *ₛ (SN.ofNat 2 *ₛ SN.ofInt a₄)
-        *ₛ (SN.ofNat 4 *ₛ SN.ofInt a₆)
-
-theorem discrIntSN_value (a₂ a₄ a₆ : ℤ) :
-    SN.value (discrIntSN a₂ a₄ a₆) = discrInt a₂ a₄ a₆ := by
-  simp only [discrIntSN, discrInt, SN.value_add, SN.value_sub, SN.value_neg, SN.value_mul,
-    SN.value_pow, SN.value_ofInt, SN.value_ofNat, Nat.cast_ofNat]
-  ring
-
-/-- Reducing the coefficients mod `p` before `discrIntSN` gives the same value in `ZMod p` (so the
+/-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p` (so the
 kernel builds the discriminant on small residues, not the full integer). -/
 theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
     ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
@@ -109,7 +94,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, all in `Nat`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   ((Nat.beq (Nat.mod 6 p) 0).not').and'
-    (((SN.dvd (discrIntSN (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p).not').and'
+    (((Int.beq' (Int.emod
+      (discrInt (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
       (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
@@ -124,10 +110,9 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [Nat.dvd_iff_mod_eq_zero, show 6 % p = Nat.mod 6 p from rfl]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    simp only [← Int.mod_def'] at hΔ
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ZMod.intCast_zmod_eq_zero_iff_dvd,
-      ← discrIntSN_value, ← SN.dvd_iff]
-    simpa using hΔ
+      Int.dvd_iff_emod_eq_zero]
+    simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
       (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf

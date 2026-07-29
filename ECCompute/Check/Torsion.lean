@@ -33,14 +33,6 @@ open scoped ECCompute.SN
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
-/-- `cubicEval` over signed-`Nat` pairs, so the kernel evaluates the cubic in `Nat`. -/
-noncomputable def cubicEvalSN (c₂ c₁ c₀ u : ℤ) : ℕ × ℕ :=
-  SN.ofInt u ^ₛ 3 +ₛ SN.ofInt c₂ *ₛ SN.ofInt u ^ₛ 2 +ₛ SN.ofInt c₁ *ₛ SN.ofInt u +ₛ SN.ofInt c₀
-
-theorem cubicEvalSN_value (c₂ c₁ c₀ u : ℤ) :
-    SN.value (cubicEvalSN c₂ c₁ c₀ u) = cubicEval c₂ c₁ c₀ u := by
-  simp only [cubicEvalSN, cubicEval, SN.value_add, SN.value_mul, SN.value_pow, SN.value_ofInt]
-
 /-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
 residues `d₂ d₁ d₀ ∈ [0, ℓ)`. -/
 noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
@@ -470,12 +462,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : SN.beq (cubicEvalSN a₂ a₄ a₆ R) (SN.ofNat 0) = true)
+    (hR : Int.beq' (cubicEval a₂ a₄ a₆ R) 0 = true)
     (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa [SN.beq_iff, cubicEvalSN_value, SN.value_ofNat] using hR)
+    (by simpa [Int.beq'_eq] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
