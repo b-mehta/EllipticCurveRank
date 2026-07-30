@@ -51,9 +51,8 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 def fval (θ : ZMod p) : ZMod p :=
   θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
 
-/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. (The coefficient `_a₆` is unused, but
-kept in the signature so `fval` and `fderiv` share the same interface.) -/
-def fderiv (b₂ b₄ _b₆ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
+/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
+def fderiv (b₂ b₄ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
   3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)
 
 /-- The descent character as a raw function. -/
@@ -63,7 +62,7 @@ noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point �
     if (x.den : ZMod p) = 0 then 0
     else
       let α : ZMod p := x.num - θ * x.den
-      if α = 0 then psi p (fderiv a₂ a₄ a₆ p θ) else psi p α
+      if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
 
 @[simp]
 theorem lambda_zero (θ : ZMod p) :

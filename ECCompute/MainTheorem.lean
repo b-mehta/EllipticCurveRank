@@ -78,7 +78,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     (pt : Fin c.rho → ℚ × ℚ)
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.matB c.rho i j
-        = lambdaCompute c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+        = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
     (hBlen : c.matB.length = c.rho) (hMlen : c.matM.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2))
@@ -131,7 +131,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 = true)
     (hB : ∀ i j : Fin c.rho,
         F2Invert.toMat c.matB c.rho i j
-          = lambdaCompute c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+          = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
     (hBlen : c.matB.length = c.rho)
     (hMlen : c.matM.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
@@ -169,12 +169,6 @@ theorem rank_ge_of_certificate (c : Certificate)
   -- Assemble the deduction: `ρ ≤ finrank H + t`, hence `ρ - t ≤ finrank H`.
   have hbound : c.rho ≤ Module.finrank ℤ H + c.t := RankDeduction.rank_ge_le gH φH hindep htorH
   exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
-
-/-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
-private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
-    l.getD n d ∈ l := by
-  rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem h, Option.getD_some]
-  exact List.getElem_mem h
 
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
 target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`

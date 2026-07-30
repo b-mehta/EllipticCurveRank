@@ -97,7 +97,7 @@ theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 `disc(f) = f'(θ)² · (B² - 4C)` for the complementary factor `x² + Bx + C = f(x)/(x - θ)`, and
 `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
 theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
-    fderiv a₂ a₄ a₆ p θ ≠ 0 := by
+    fderiv a₂ a₄ p θ ≠ 0 := by
   have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
     simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
