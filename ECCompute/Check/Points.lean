@@ -25,16 +25,27 @@ integers, which `chkZ` tests. -/
 noncomputable def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
   let xn := x.num; let xd := (x.den : ℤ)
   let yn := y.num; let yd := (y.den : ℤ)
+  let xd2 := Int.mul xd xd; let xd3 := Int.mul xd2 xd
+  let yd2 := Int.mul yd yd
+  let xn2 := Int.mul xn xn; let xn3 := Int.mul xn2 xn
+  let yn2 := Int.mul yn yn
   Int.beq'
-    (yn ^ 2 * xd ^ 3 + a₁ * xn * yn * xd ^ 2 * yd + a₃ * yn * xd ^ 3 * yd)
-    (xn ^ 3 * yd ^ 2 + a₂ * xn ^ 2 * xd * yd ^ 2 + a₄ * xn * xd ^ 2 * yd ^ 2 + a₆ * xd ^ 3 * yd ^ 2)
+    (Int.add (Int.add (Int.mul yn2 xd3)
+        (Int.mul (Int.mul (Int.mul (Int.mul a₁ xn) yn) xd2) yd))
+      (Int.mul (Int.mul (Int.mul a₃ yn) xd3) yd))
+    (Int.add (Int.add (Int.add (Int.mul xn3 yd2)
+        (Int.mul (Int.mul (Int.mul a₂ xn2) xd) yd2))
+        (Int.mul (Int.mul (Int.mul a₄ xn) xd2) yd2))
+      (Int.mul (Int.mul a₆ xd3) yd2))
 
 /-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
 the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq]
+  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
+  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq, hmul, hadd]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)

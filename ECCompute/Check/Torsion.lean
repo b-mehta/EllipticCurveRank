@@ -32,6 +32,17 @@ open WeierstrassCurve
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
+/-- `cubicEval` with the raw `Int.mul`/`Int.add` primitives (powers expanded), for kernel use. -/
+def cubicEvalRaw (c₂ c₁ c₀ u : ℤ) : ℤ :=
+  Int.add (Int.add (Int.add (Int.mul (Int.mul u u) u) (Int.mul c₂ (Int.mul u u)))
+    (Int.mul c₁ u)) c₀
+
+theorem cubicEvalRaw_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalRaw c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
+  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
+  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
+  simp only [cubicEvalRaw, cubicEval, hmul, hadd]
+  ring
+
 /-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
 residues `d₂ d₁ d₀ ∈ [0, ℓ)`. -/
 noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
@@ -461,12 +472,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : Int.beq' (cubicEval a₂ a₄ a₆ R) 0 = true)
+    (hR : Int.beq' (cubicEvalRaw a₂ a₄ a₆ R) 0 = true)
     (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa [Int.beq'_eq] using hR)
+    (by simpa [Int.beq'_eq, cubicEvalRaw_eq] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
