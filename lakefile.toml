@@ -12,7 +12,7 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "01cceef4309e0b28bde5dd951c72960f5282a1ac"
+rev = "6f1ef4e5dd604a435bddba4747b13970cd65d2a1"
 
 [[lean_lib]]
 name = "ECCompute"
