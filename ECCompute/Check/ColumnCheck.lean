@@ -148,7 +148,7 @@ example : checkLabel 0 (-1) 0 7 1 = true := rfl
 
 /-- Assembling a `DescentHyp` from the kernel check (`rfl`) and `norm_num` primality: the pattern
 the certificate tactic emits for each column. -/
-theorem example_descentHyp : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
+example : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
   descentHyp_of_checkLabel 0 (-1) 0 7 1 rfl (by norm_num)
 
 /-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
