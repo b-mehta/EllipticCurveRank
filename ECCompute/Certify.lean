@@ -167,7 +167,7 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
-    (h : (l.length == n) = true) : l.length = n := Nat.eq_of_beq_eq_true h
+    (h : l.length.beq n = true) : l.length = n := Nat.eq_of_beq_eq_true h
 
 /-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
 `WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the five length obligations, and the
