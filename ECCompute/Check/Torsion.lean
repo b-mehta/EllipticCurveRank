@@ -214,15 +214,6 @@ theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : �
 
 /-! ## The t = 0 lemma -/
 
-/-- The scaled coordinate `4x` of a nonzero 2-torsion point is a root of the monic 2-division
-cubic, written as an identity in the curve coefficients. -/
-private theorem cubic_fourX_eq_zero (W : WeierstrassCurve ℚ) {x y : ℚ}
-    (heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)
-    (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
-    (4 * x) ^ 3 + (W.a₁ ^ 2 + 4 * W.a₂) * (4 * x) ^ 2
-      + 8 * (2 * W.a₄ + W.a₁ * W.a₃) * (4 * x) + 16 * (W.a₃ ^ 2 + 4 * W.a₆) = 0 := by
-  grind
-
 open Polynomial in
 /-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
 `4x` is an integer root of the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/

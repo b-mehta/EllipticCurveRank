@@ -27,7 +27,7 @@ namespace ECCompute
 open Matrix Finset
 
 /-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
-private theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
+theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
     l.getD n d ∈ l := by
   rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem h, Option.getD_some]
   exact List.getElem_mem h
@@ -142,7 +142,7 @@ theorem checkMaskList_true {labN : List (ℕ × ℕ × ℕ)} (h : checkMaskList 
   exact Nat.eq_of_beq_eq_true (h _ (getD_mem_of_lt hj))
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
-theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
+theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
     {lab : List (ℕ × ℤ)} {qms : List ℕ} {pt : List (ℚ × ℚ)}
     (hBlen : matB.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
     (hqlen : qms.length = rho)
@@ -150,7 +150,7 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
     (hp2 : ∀ j : Fin rho, (lab.getD j.val (0, 0)).1 ≠ 2)
     (h : checkB a₂ a₄ lab qms matB pt = true) :
     ∀ i j : Fin rho, F2Invert.toMat matB rho i j =
-      lambdaCompute a₂ a₄ a₆ (lab.getD j.val (0, 0)).1
+      lambdaCompute a₂ a₄ (lab.getD j.val (0, 0)).1
         ((lab.getD j.val (0, 0)).2 : ZMod (lab.getD j.val (0, 0)).1) (pt.getD i.val (0, 0)).1 := by
   intro i j
   set L : ℕ × ℤ := lab.getD j.val (0, 0) with hL
@@ -177,8 +177,8 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
   rw [← hqok] at hcell
   have hbridge : lambdaComputeBoolNatMask a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
       L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
-      = lambdaComputeBool a₂ a₄ a₆ L.1 (L.2 : ZMod L.1) P.1 :=
-    lambdaComputeBoolNatMask_eq a₂ a₄ a₆ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
+      = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
+    lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
       (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast hp L.2)
       (int_toNat_sub P.1.num) rfl
   rw [F2Invert.toMat, hcell, hbridge, lambdaCompute_eq_bool]

@@ -200,9 +200,9 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
 /-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
 `x`-coordinate `x`. This is `ECCompute.lambda` with `psi` replaced by the mask-based
 `psiCompute`. -/
-noncomputable def lambdaCompute (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
+noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if (x.den : ZMod p) = 0 then 0
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiCompute p (fderiv a₂ a₄ a₆ p θ)
+  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiCompute p (fderiv a₂ a₄ p θ)
        else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
@@ -210,13 +210,13 @@ an affine point. -/
 theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
-    lambdaCompute a₂ a₄ a₆ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
+    lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have hfd : fderiv a₂ a₄ a₆ p θ ≠ 0 := fderiv_ne_zero hyp
+  have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
       if (x.den : ZMod p) = 0 then 0
-      else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ a₆ p θ)
+      else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ p θ)
            else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p)) := rfl
   rw [lambdaCompute, hlam]
   grind [psiCompute_eq]
@@ -228,9 +228,9 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
 result back into `ZMod 2`. -/
 
 /-- `Bool` mirror of `lambdaCompute`, with `false`/`true` in place of `0`/`1 : ZMod 2`. -/
-noncomputable def lambdaComputeBool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
   if (x.den : ZMod p) = 0 then false
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ a₆ p θ)
+  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ p θ)
        else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- `psiCompute` is `psiComputeBool` read into `ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
@@ -239,8 +239,8 @@ theorem psiCompute_eq_bool (p : ℕ) (a : ZMod p) :
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
 character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
-theorem lambdaCompute_eq_bool (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
-    lambdaCompute a₂ a₄ a₆ p θ x = if lambdaComputeBool a₂ a₄ a₆ p θ x then 1 else 0 := by
+theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
   rw [lambdaCompute, lambdaComputeBool]
   grind [psiCompute_eq_bool]
 
@@ -294,10 +294,10 @@ private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) 
   ring
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ a₆ : ℤ) (θ : ZMod p)
+private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p)
     (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) :
-    ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ a₆ p θ := by
+    ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ p θ := by
   have hle : (2 * c2m * tval + c4m) % p ≤ p := (Nat.mod_lt _ hp).le
   simp only [fderivResNat, (natPrim _ _).1, (natPrim _ _).2.1, (natPrim _ _).2.2.1,
     (natPrim _ _).2.2.2, ZMod.natCast_mod, Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self,
@@ -319,23 +319,23 @@ private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ
   rw [← hcast, ZMod.val_cast_of_lt (show alphaResNat p tval xp xm xden < p from Nat.mod_lt _ hp)]
 
 /-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
-private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ a₆ : ℤ) (θ : ZMod p)
+private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p)
     (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) :
-    fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ a₆ p θ).val := by
-  rw [← fderivResNat_cast hp a₂ a₄ a₆ θ c2p c2m c4p c4m tval hc2 hc4 htval,
+    fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ p θ).val := by
+  rw [← fderivResNat_cast hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval,
     ZMod.val_cast_of_lt (show fderivResNat c2p c2m c4p c4m p tval < p from Nat.mod_lt _ hp)]
 
 /-- The mask-based `Nat` mirror agrees with `lambdaComputeBool` when `0 < p` and the pairs represent
 the inputs (`a₂ = c2p - c2m`, `a₄ = c4p - c4m`, `θ = tval`, `x.num = xp - xm`, `xden = x.den`). The
 mask is fixed to `qrMask p`, matching the character used by `psiComputeBool`. -/
-theorem lambdaComputeBoolNatMask_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
+theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
     (c2p c2m c4p c4m tval xp xm xden : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     lambdaComputeBoolNatMask c2p c2m c4p c4m p (qrMask p) tval xp xm xden
-      = lambdaComputeBool a₂ a₄ a₆ p θ x := by
+      = lambdaComputeBool a₂ a₄ p θ x := by
   have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
-  have hfd := fderivResNat_eq_val hp a₂ a₄ a₆ θ c2p c2m c4p c4m tval hc2 hc4 htval
+  have hfd := fderivResNat_eq_val hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval
   have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, (natPrim _ _).1, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff,
       ZMod.natCast_eq_zero_iff]
