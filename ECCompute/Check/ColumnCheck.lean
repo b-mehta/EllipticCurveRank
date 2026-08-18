@@ -82,7 +82,7 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
   have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
     simp only [fvalModP, em, ea, el, ← Int.mod_def', ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      intResNat_cast hp]
+      intResNat_cast]
     push_cast; ring
   have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
     rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
