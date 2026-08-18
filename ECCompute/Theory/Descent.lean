@@ -75,40 +75,16 @@ Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
 (`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εp_finite : E(𝔽ₚ) → ZMod 2` is the
 finite-field descent character (`ECCompute.Descent.Reduction.EpsFinite`, also an
 `AddMonoidHom`). Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
-The reduction map lands in `((curveℤ …).map (ℤ → ZMod p)).toAffine.Point`, which is the same
-curve as `reducedCurve … p` up to the definitional equality `map_eq_reducedCurve`; we transport
-across it with `Point.congr`. -/
+The reduction map and `εp_finite` share the point type
+`((curveℤ …).map (Int.castRingHom (ZMod p))).toAffine.Point`, so the composition is direct. -/
 
-section Congr
-
-variable {F : Type*} [Field F] [DecidableEq F] {W₁ W₂ : WeierstrassCurve F}
-
-/-- Transport affine points along an equality of Weierstrass curves, as an additive
-homomorphism `W₁.toAffine.Point →+ W₂.toAffine.Point`. -/
-def Point.congr (hce : W₁ = W₂) : W₁.toAffine.Point →+ W₂.toAffine.Point where
-  toFun P := hce ▸ P
-  map_zero' := by cases hce; rfl
-  map_add' _ _ := by cases hce; rfl
-
-@[simp]
-theorem Point.congr_some (hce : W₁ = W₂) {X Y : F} (hns : W₁.toAffine.Nonsingular X Y) :
-    Point.congr hce (Affine.Point.some X Y hns) = Affine.Point.some X Y (hce ▸ hns) := by
-  cases hce; rfl
-
-end Congr
-
-/-- The reduction of the integral model mod `p` is the reduced curve `reducedCurve … p`. -/
-theorem map_eq_reducedCurve :
-    (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p)) = reducedCurve a₂ a₄ a₆ p := by
-  rw [map_curveℤ_zmod]; rfl
-
-/-- The descent character `λ_{p,θ}` presented as the composition
-`εp_finite θ ∘ (transport) ∘ red_p`, packaged as an `AddMonoidHom E(ℚ) → ZMod 2`. This is the
-factorization that makes additivity of `λ` free (see `lambda_map_add`). -/
+/-- The descent character `λ_{p,θ}` presented as the composition `εp_finite θ ∘ red_p`, packaged
+as an `AddMonoidHom E(ℚ) → ZMod 2`. This is the factorization that makes additivity of `λ` free
+(see `lambda_map_add`). -/
 noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
-  (εpHom h).comp ((Point.congr (map_eq_reducedCurve a₂ a₄ a₆ p)).comp (redHom a₂ a₄ a₆ p hΔ))
+  (εpHom h).comp (redHom a₂ a₄ a₆ p hΔ)
 
 /-- On each point, `λ_{p,θ}` agrees with the reduction composition `εp_finite θ ∘ red_p`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
@@ -117,12 +93,12 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
   cases P with
   | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
   | some x y hns =>
-    rw [redCharHom, AddMonoidHom.comp_apply, AddMonoidHom.comp_apply, redHom_apply]
+    rw [redCharHom, AddMonoidHom.comp_apply, redHom_apply]
     by_cases hd : (x.den : ZMod p) = 0
     · rw [lambda_some_of_den_zero hns hd, red_p_of_den_zero a₂ a₄ a₆ p hΔ hns hd,
         map_zero, εpHom_apply, εp_finite_zero]
     · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd]
-      simp only [Point.congr_some, εpHom_apply, εp_finite_some, xbar]
+      simp only [εpHom_apply, εp_finite_some, xbar]
       rfl
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
