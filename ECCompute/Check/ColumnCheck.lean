@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Check.Fold
 import ECCompute.Check.Primes
 import ECCompute.ForMathlib.IntResNat
+
 import Mathlib.Tactic.NormNum.Prime
 
 /-!

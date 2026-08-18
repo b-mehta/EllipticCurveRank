@@ -9,8 +9,8 @@ import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
-import ECCompute.Check.Fold
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import ECCompute.Check.Fold
 
 /-!
 # Kernel-reducible 𝔽₂ matrix invertibility certificates
