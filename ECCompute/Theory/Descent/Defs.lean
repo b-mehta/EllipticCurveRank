@@ -52,8 +52,8 @@ def fval (θ : ZMod p) : ZMod p :=
   θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-def fderiv (b₂ b₄ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
-  3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)
+def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
+  3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p)
 
 /-- The descent character as a raw function. -/
 noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
