@@ -12,11 +12,11 @@ import ECCompute.Check.Fold
 
 The j-invariant `j = c₄³ / Δ` is an isomorphism invariant: it is the same for every Weierstrass
 model of a curve (mathlib's `WeierstrassCurve.variableChange_j`), so it can be read off any integral
-model `⟨a₁, …, a₆⟩` with no minimal model needed.
+model `⟨a₁, …, a₆⟩`.
 
-`j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`, avoiding division; the
-per-curve obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true`, discharged
-by `j_eq_of_beq`.
+`j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`; the per-curve
+obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true`, discharged by
+`j_eq_of_beq`.
 -/
 
 namespace ECCompute
@@ -32,8 +32,7 @@ theorem j_eq_iff (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ) :
 theorem isElliptic_of_Δ_ne_zero {W : WeierstrassCurve ℚ} (hΔ : W.Δ ≠ 0) : W.IsElliptic :=
   ⟨isUnit_iff_ne_zero.mpr hΔ⟩
 
-/-- Kernel-reducible `ℚ` equality via `Int.beq'`/`Nat.beq` on the numerator and denominator,
-avoiding the `BEq` typeclass dispatch of `==`. -/
+/-- Kernel-reducible `ℚ` equality: `Int.beq'` on numerators and `Nat.beq` on denominators. -/
 noncomputable def ratBeq' (a b : ℚ) : Bool := (Int.beq' a.num b.num).and' (Nat.beq a.den b.den)
 
 /-- `ratBeq'` agrees with `==` on `ℚ`. -/

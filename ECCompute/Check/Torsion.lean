@@ -53,7 +53,7 @@ noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
 theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0
       = Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  haveI : NeZero ℓ := ⟨hℓ.ne'⟩
+  have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
@@ -140,7 +140,7 @@ noncomputable def quadModL (d₁ d₀ ℓ r : ℕ) : ℕ :=
 theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0
       = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
-  haveI : NeZero ℓ := ⟨hℓ.ne'⟩
+  have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
@@ -345,7 +345,9 @@ private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finse
     · simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone]
       exact hx x y h hP
   refine ⟨Set.Finite.of_finite_image (S.finite_toSet.subset himg) hinj, ?_⟩
-  rw [show Nat.card {P : W.toAffine.Point // P + P = 0} = T.ncard from (Nat.card_coe_set_eq T).symm]
+  have hcard : Nat.card {P : W.toAffine.Point // P + P = 0} = T.ncard :=
+    (Nat.card_coe_set_eq T).symm
+  rw [hcard]
   calc T.ncard
       = (ι '' T).ncard := (hinj.ncard_image).symm
     _ ≤ (↑S : Set (Option ℚ)).ncard := Set.ncard_le_ncard himg S.finite_toSet
@@ -446,9 +448,10 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
 
 /-! ## Certificate-facing torsion bounds
 
-These two wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
+These three wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
 `|E(ℚ)[2]| ≤ 2^t` bound the certificate soundness theorem consumes: `t = 0` from a no-root witness,
-`t = 2` unconditionally (the universal `≤ 4` bound). -/
+`t = 1` from an integer root whose cofactor has no root mod `ℓ`, and `t = 2` unconditionally (the
+universal `≤ 4` bound). -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
 theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
@@ -481,8 +484,7 @@ theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
 
 We exhibit the `t = 0` certificate on a concrete integral Weierstrass model whose 2-division cubic
 has no root modulo the witness prime `ℓ = 29`. (The rank-23 running curve of the project uses the
-same `ℓ = 29`; its integer coefficients are not stored in this repository, so we use a stand-in
-curve with the identical certificate shape here.)
+same `ℓ = 29`; this stand-in curve has the identical certificate shape.)
 
 For `a₁ = 1, a₂ = -3, a₃ = 1, a₄ = -3, a₆ = -2`, the monic 2-division cubic is
 `u³ - 11 u² - 40 u - 112`, and the kernel-reducible check confirms it has no root mod `29`. -/

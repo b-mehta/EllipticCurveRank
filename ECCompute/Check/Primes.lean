@@ -4,16 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Nat.Prime.Defs
-import Mathlib.Tactic.IntervalCases
 import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.NormNum
 
 /-!
-# A cheap kernel-reducible primality test for small numbers
+# A kernel-reducible primality test for small numbers
 
 `passes` is a trial-division fold, and `Nat.prime_of_passes` certifies that if `n < 23² = 529`
-survives trial division by the primes below `23`, then `n` is prime. This gives a fast primality
-certificate for the small label primes used by the rank certificates.
+survives trial division by the primes below `23`, then `n` is prime. It certifies the small label
+primes used by the rank certificates.
 
 ## Main results
 
