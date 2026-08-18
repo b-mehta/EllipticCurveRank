@@ -309,15 +309,17 @@ private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ
     rw [alphaResNat_cast hp, ← htval, ← hxden]
     have : (x.num : ZMod p) = (xp : ZMod p) - (xm : ZMod p) := by rw [hxnum]; push_cast; ring
     rw [this]; ring
-  rw [← hcast, ZMod.val_cast_of_lt (Nat.mod_lt _ hp : alphaResNat p tval xp xm xden < p)]
+  have hlt : alphaResNat p tval xp xm xden < p := Nat.mod_lt _ hp
+  rw [← hcast, ZMod.val_cast_of_lt hlt]
 
 /-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
 private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p)
     (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) :
     fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ p θ).val := by
+  have hlt : fderivResNat c2p c2m c4p c4m p tval < p := Nat.mod_lt _ hp
   rw [← fderivResNat_cast hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval,
-    ZMod.val_cast_of_lt (Nat.mod_lt _ hp : fderivResNat c2p c2m c4p c4m p tval < p)]
+    ZMod.val_cast_of_lt hlt]
 
 /-- The mask-based `Nat` mirror agrees with `lambdaComputeBool` when `0 < p` and the pairs represent
 the inputs (`a₂ = c2p - c2m`, `a₄ = c4p - c4m`, `θ = tval`, `x.num = xp - xm`, `xden = x.den`). The
