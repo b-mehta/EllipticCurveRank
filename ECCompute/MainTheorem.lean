@@ -186,7 +186,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
     (hlabP : checkPrimes c.labels = true)
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
-    (hB : checkB c.a₂ c.a₄ c.a₆ c.labels c.qrMasks c.matB c.points = true)
+    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.matB c.points = true)
     (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE W (c.rho - c.t) := by
