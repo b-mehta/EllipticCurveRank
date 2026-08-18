@@ -61,10 +61,10 @@ private def parseCoord (s : String) : Int × Nat :=
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
-private def parseLine (line : String) : Int × Nat × Int × Nat :=
+private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   match ((strTrim line).splitOn " ").filter (· ≠ "") with
-  | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; (xn, xd, yn, yd)
-  | _ => (0, 1, 0, 1)
+  | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
+  | _ => none
 
 /-- `ℚ` Expr for `num / den` (reduced) via the proof-free `mkRat`; normalization is kernel
 computation, so no `Coprime`/`den ≠ 0` proof is constructed. -/
@@ -72,10 +72,10 @@ private def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
-private def parseLabel (line : String) : Nat × Int :=
+private def parseLabel (line : String) : Option (Nat × Int) :=
   match ((strTrim line).splitOn " ").filter (· ≠ "") with
-  | [p, t] => ((strTrim p).toNat!, (strTrim t).toInt!)
-  | _ => (0, 0)
+  | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
+  | _ => none
 
 /-- Syntax of the `certify_curve` tactic; see the module docstring. The `torsion ℓ` form concedes
 `t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `oneTorsion root R witness ℓ`
@@ -121,10 +121,14 @@ private def readGoal (goal : MVarId) :
 `rho` entries. -/
 private def readData (path lpath : String) (rho : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
-  let pts := ((← IO.FS.readFile path).splitOn "\n").filterMap fun l =>
-    if (strTrim l).isEmpty then none else some (parseLine l)
-  let lbls := ((← IO.FS.readFile lpath).splitOn "\n").filterMap fun l =>
-    if (strTrim l).isEmpty then none else some (parseLabel l)
+  let pts ← (((← IO.FS.readFile path).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
+    fun l => match parseLine l with
+      | some p => pure p
+      | none => throwError "certify_curve: malformed points line: {l}"
+  let lbls ← (((← IO.FS.readFile lpath).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
+    fun l => match parseLabel l with
+      | some x => pure x
+      | none => throwError "certify_curve: malformed labels line: {l}"
   if pts.length ≠ rho then
     throwError "certify_curve: points file has {pts.length} points but the goal rank is {rho}"
   if lbls.length ≠ rho then
