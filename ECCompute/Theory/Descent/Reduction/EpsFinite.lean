@@ -64,7 +64,7 @@ private theorem reduced_equation {X Y : ZMod p}
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
   have := (WeierstrassCurve.Affine.equation_iff
     (W := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine) X Y).mp h.1
-  simpa [curveℤ] using this
+  simpa [map_curveℤ_zmod] using this
 
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
@@ -79,7 +79,7 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
 private theorem reduced_negY (x y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curveℤ]) (by simp [curveℤ]) x y
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) x y
 
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
@@ -158,7 +158,7 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
       = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
     rw [hm2]; exact reduced_equation h₂
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
-    grind [WeierstrassCurve.Affine.addX, curveℤ]
+    grind [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
@@ -216,7 +216,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
     have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
-    simp [curveℤ]
+    simp [map_curveℤ_zmod]
     grind
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
@@ -226,7 +226,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
     grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
-    rw [hX3def]; simp [WeierstrassCurve.Affine.addX, curveℤ]; ring
+    rw [hX3def]; simp [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
     ℓ m x X₃ hpt htan hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
