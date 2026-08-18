@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
+import ECCompute.ForMathlib.IntResNat
 import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 import Mathlib.Data.Nat.Bitwise
 
@@ -344,13 +345,5 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) (hp : 0 < p
 /-- Any integer is the difference of the `Nat`s `v.toNat` and `(-v).toNat` (one of them zero). This
 is how a signed input is fed to `lambdaComputeBoolNatMask` as an `mp - mn` pair. -/
 theorem int_toNat_sub (v : ℤ) : v = (v.toNat : ℤ) - ((-v).toNat : ℤ) := by omega
-
-/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p` (`0 < p`); this is how a label
-representative `θ : ℤ` becomes the `Nat` residue `tval` fed to `lambdaComputeBoolNatMask`. -/
-theorem intModToNat_cast {p : ℕ} (hp : 0 < p) (z : ℤ) :
-    (((z % (p : ℤ)).toNat : ℕ) : ZMod p) = (z : ZMod p) := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast hp.ne')
-  rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
-  exact Int.emod_emod_of_dvd z dvd_rfl
 
 end ECCompute

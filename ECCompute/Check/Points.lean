@@ -5,7 +5,6 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.ModelIso
 import ECCompute.Check.Fold
-import ECCompute.Check.SignedNat
 
 /-!
 # Point-on-curve check
@@ -19,28 +18,34 @@ import ECCompute.Check.SignedNat
 namespace ECCompute
 
 open WeierstrassCurve
-open scoped ECCompute.SN
 
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
 integers, which `chkZ` tests. -/
 noncomputable def chkZ (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool :=
-  let xn := SN.ofInt x.num; let xd := SN.ofNat x.den
-  let yn := SN.ofInt y.num; let yd := SN.ofNat y.den
-  let b₁ := SN.ofInt a₁; let b₂ := SN.ofInt a₂; let b₃ := SN.ofInt a₃
-  let b₄ := SN.ofInt a₄; let b₆ := SN.ofInt a₆
-  SN.beq
-    (yn ^ₛ 2 *ₛ xd ^ₛ 3 +ₛ b₁ *ₛ xn *ₛ yn *ₛ xd ^ₛ 2 *ₛ yd +ₛ b₃ *ₛ yn *ₛ xd ^ₛ 3 *ₛ yd)
-    (xn ^ₛ 3 *ₛ yd ^ₛ 2 +ₛ b₂ *ₛ xn ^ₛ 2 *ₛ xd *ₛ yd ^ₛ 2 +ₛ b₄ *ₛ xn *ₛ xd ^ₛ 2 *ₛ yd ^ₛ 2
-      +ₛ b₆ *ₛ xd ^ₛ 3 *ₛ yd ^ₛ 2)
+  let xn := x.num; let xd := (x.den : ℤ)
+  let yn := y.num; let yd := (y.den : ℤ)
+  let xd2 := Int.mul xd xd; let xd3 := Int.mul xd2 xd
+  let yd2 := Int.mul yd yd
+  let xn2 := Int.mul xn xn; let xn3 := Int.mul xn2 xn
+  let yn2 := Int.mul yn yn
+  Int.beq'
+    (Int.add (Int.add (Int.mul yn2 xd3)
+        (Int.mul (Int.mul (Int.mul (Int.mul a₁ xn) yn) xd2) yd))
+      (Int.mul (Int.mul (Int.mul a₃ yn) xd3) yd))
+    (Int.add (Int.add (Int.add (Int.mul xn3 yd2)
+        (Int.mul (Int.mul (Int.mul a₂ xn2) xd) yd2))
+        (Int.mul (Int.mul (Int.mul a₄ xn) xd2) yd2))
+      (Int.mul (Int.mul a₆ xd3) yd2))
 
 /-- The kernel-reducible checker `chkZ` returns `true` if and only if the point `(x, y)` satisfies
 the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, SN.beq_iff, SN.value_add, SN.value_mul,
-    SN.value_pow, SN.value_ofInt, SN.value_ofNat]
+  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
+  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq, hmul, hadd]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)

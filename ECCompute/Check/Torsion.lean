@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
-import ECCompute.Check.SignedNat
+import ECCompute.ForMathlib.IntResNat
 import ECCompute.Theory.ModelIso
 import ECCompute.Theory.Descent.Defs
 
@@ -28,18 +28,20 @@ cubic has no root modulo some prime `ℓ`, then `W` has no nonzero rational 2-to
 namespace ECCompute
 
 open WeierstrassCurve
-open scoped ECCompute.SN
 
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
-/-- `cubicEval` over signed-`Nat` pairs, so the kernel evaluates the cubic in `Nat`. -/
-noncomputable def cubicEvalSN (c₂ c₁ c₀ u : ℤ) : ℕ × ℕ :=
-  SN.ofInt u ^ₛ 3 +ₛ SN.ofInt c₂ *ₛ SN.ofInt u ^ₛ 2 +ₛ SN.ofInt c₁ *ₛ SN.ofInt u +ₛ SN.ofInt c₀
+/-- `cubicEval` with the raw `Int.mul`/`Int.add` primitives (powers expanded), for kernel use. -/
+def cubicEvalRaw (c₂ c₁ c₀ u : ℤ) : ℤ :=
+  Int.add (Int.add (Int.add (Int.mul (Int.mul u u) u) (Int.mul c₂ (Int.mul u u)))
+    (Int.mul c₁ u)) c₀
 
-theorem cubicEvalSN_value (c₂ c₁ c₀ u : ℤ) :
-    SN.value (cubicEvalSN c₂ c₁ c₀ u) = cubicEval c₂ c₁ c₀ u := by
-  simp only [cubicEvalSN, cubicEval, SN.value_add, SN.value_mul, SN.value_pow, SN.value_ofInt]
+theorem cubicEvalRaw_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalRaw c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
+  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
+  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
+  simp only [cubicEvalRaw, cubicEval, hmul, hadd]
+  ring
 
 /-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
 residues `d₂ d₁ d₀ ∈ [0, ℓ)`. -/
@@ -59,7 +61,7 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
   have hcast : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
       = (cubicEval c₂ c₁ c₀ (r : ℤ) : ZMod ℓ) := by
     simp only [cubicModL, cubicEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add,
-      Nat.cast_mul, SN.intResNat_cast hℓ]
+      Nat.cast_mul, intResNat_cast hℓ]
     push_cast; ring
   have hnz : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
       ↔ cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r = 0 := by
@@ -146,7 +148,7 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
   have hcast : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
       = (quadEval b c (r : ℤ) : ZMod ℓ) := by
     simp only [quadModL, quadEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      SN.intResNat_cast hℓ]
+      intResNat_cast hℓ]
     push_cast; ring
   have hnz : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
       ↔ quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r = 0 := by
@@ -470,12 +472,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : SN.beq (cubicEvalSN a₂ a₄ a₆ R) (SN.ofNat 0) = true)
+    (hR : Int.beq' (cubicEvalRaw a₂ a₄ a₆ R) 0 = true)
     (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa [SN.beq_iff, cubicEvalSN_value, SN.value_ofNat] using hR)
+    (by simpa [Int.beq'_eq, cubicEvalRaw_eq] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
