@@ -74,7 +74,7 @@ noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
 theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  haveI : NeZero p := ⟨hp.ne'⟩
+  have : NeZero p := ⟨hp.ne'⟩
   have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
@@ -126,7 +126,8 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rw [Nat.dvd_iff_mod_eq_zero, show 6 % p = Nat.mod 6 p from rfl]
+    have h6m : 6 % p = Nat.mod 6 p := rfl
+    rw [Nat.dvd_iff_mod_eq_zero, h6m]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntRaw_eq,

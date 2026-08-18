@@ -55,7 +55,8 @@ noncomputable def popParityK (v : Nat) : Bool :=
 
 /-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
 private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
-  rw [Nat.testBit_zero, show x.land 1 = x &&& 1 from rfl, Nat.and_one_is_mod]
+  have hl : x.land 1 = x &&& 1 := rfl
+  rw [Nat.testBit_zero, hl, Nat.and_one_is_mod]
   rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
 
 /-- The XOR over `v.testBit j` for `j` in a list. -/
@@ -197,7 +198,8 @@ theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
     cases k' with
     | zero =>
       have hbnd : bi &&& m < 2 ^ n := Nat.and_lt_two_pow bi (hM m (by simp))
-      rw [show bi.land m = bi &&& m from rfl, popParityK_eq hbnd hn] at h0
+      have hlm : bi.land m = bi &&& m := rfl
+      rw [hlm, popParityK_eq hbnd hn] at h0
       have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
       simpa [← natBeqEq, beq_iff_eq] using hbe
     | succ k'' =>

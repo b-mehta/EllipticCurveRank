@@ -154,7 +154,7 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   set L : ℕ × ℤ := lab.getD j.val (0, 0) with hL
   set P : ℚ × ℚ := pt.getD i.val (0, 0) with hP
   have hp : 0 < L.1 := (hpr j).pos
-  haveI : Fact L.1.Prime := ⟨hpr j⟩
+  have : Fact L.1.Prime := ⟨hpr j⟩
   set labN := toLabN lab qms with hlabNdef
   have hlabN : labN.length = rho := by
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
