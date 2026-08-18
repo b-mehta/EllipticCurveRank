@@ -79,7 +79,8 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
 private theorem reduced_negY (x y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) x y
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _
+    (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) x y
 
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
