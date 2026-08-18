@@ -12,8 +12,7 @@ import Mathlib.Algebra.Field.ZMod
 
 For a prime `p`, the "good denominator" predicate `(q.den : ZMod p) ≠ 0` on `ℚ` is closed under
 the field operations. These lemmas transfer that survival through addition, subtraction,
-multiplication, powers and division, using the denominator divisibility bounds `Rat.add_den_dvd`
-and friends.
+multiplication, powers and division.
 
 ## Main results
 
@@ -37,7 +36,7 @@ theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
     (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
   rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
 
-/-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0` (else the denominator would vanish). -/
+/-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0`. -/
 theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) : w ≠ 0 := by
   rintro rfl; rw [zero_pow hk] at hden; exact q.den_nz hden
 

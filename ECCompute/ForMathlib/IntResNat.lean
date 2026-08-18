@@ -9,9 +9,7 @@ import Mathlib.Data.ZMod.Basic
 /-!
 # Reducing an integer to a `Nat` residue before casting to `ZMod p`
 
-`intResNat_cast` says the `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. The kernel
-checks reduce a signed coefficient to `[0, p)` in `Nat` before evaluating a polynomial mod `p`, and
-this lemma bridges that `Nat` residue to the intended `ZMod p` value.
+`intResNat_cast` says the `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`.
 -/
 
 namespace ECCompute
