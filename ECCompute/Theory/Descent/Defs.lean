@@ -31,10 +31,10 @@ open WeierstrassCurve
 
 namespace ECCompute
 
+open Classical in
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
 non-squares. -/
 noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  haveI := Classical.propDecidable (IsSquare a)
   if IsSquare a then 0 else 1
 
 /-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
