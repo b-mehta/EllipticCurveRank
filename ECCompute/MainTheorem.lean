@@ -15,7 +15,6 @@ import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.ModelChange
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
-import Mathlib.Tactic.NormNum.Prime
 
 /-!
 # The main theory: a rank lower bound from a certificate
