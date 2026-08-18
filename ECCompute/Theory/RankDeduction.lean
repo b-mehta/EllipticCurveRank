@@ -151,7 +151,7 @@ variable {R : Type*} [Ring R] {M N : Type*} [AddCommGroup M] [Module R M]
 Stated over a general ring to avoid the `ℤ`-module diamond on quotient types. -/
 def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
     HasQuotient.Quotient (M × N) (P.prod Q) ≃ₗ[R] (M ⧸ P) × (N ⧸ Q) := by
-  refine LinearEquiv.ofLinear
+  refine LinearEquiv.ofLinearMap
     ((P.prod Q).liftQ (LinearMap.prodMap P.mkQ Q.mkQ) ?_)
     (LinearMap.coprod
       (P.liftQ ((P.prod Q).mkQ.comp (LinearMap.inl R M N)) ?_)
@@ -226,8 +226,8 @@ end Prod
 lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ D = 0 := by
   have : Module.Finite ℤ D := Module.Finite.of_finite
-  rw [Module.finrank_eq_zero_iff_isTorsion, ← AddMonoid.isTorsion_iff_isTorsion_int]
-  exact is_add_torsion_of_finite
+  rw [Module.finrank_eq_zero_iff_isTorsion, ← isAddTorsion_iff_isTorsion_int]
+  exact isAddTorsion_of_finite
 
 /-- A torsion-free module has trivial 2-torsion. -/
 lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]

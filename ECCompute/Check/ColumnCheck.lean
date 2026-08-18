@@ -74,7 +74,7 @@ noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
 theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  haveI : NeZero p := ⟨hp.ne'⟩
+  have : NeZero p := ⟨hp.ne'⟩
   have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl

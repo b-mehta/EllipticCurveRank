@@ -53,7 +53,7 @@ noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
 theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0
       = Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  haveI : NeZero ℓ := ⟨hℓ.ne'⟩
+  have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
@@ -140,7 +140,7 @@ noncomputable def quadModL (d₁ d₀ ℓ r : ℕ) : ℕ :=
 theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0
       = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
-  haveI : NeZero ℓ := ⟨hℓ.ne'⟩
+  have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
