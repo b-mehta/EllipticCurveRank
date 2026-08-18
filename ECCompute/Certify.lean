@@ -165,8 +165,12 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
     #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
       toExpr ls.toList, toExpr matB, toExpr matM, toExpr qms, toExpr t, toExpr tp]
 
+/-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
+private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
+    (h : (l.length == n) = true) : l.length = n := Nat.eq_of_beq_eq_true h
+
 /-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
-`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the four length obligations, and the
+`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the five length obligations, and the
 five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`. The torsion obligation
 `|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
 `certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
@@ -182,8 +186,8 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let rhoE := mkApp (mkConst ``Certificate.rho) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
-    let lenE := mkAppN (mkConst ``List.length [Level.zero]) #[elemTy, mkApp (mkConst field) cExpr]
-    mkAppN (mkConst ``Nat.eq_of_beq_eq_true) #[lenE, rhoE, rb]
+    mkAppN (mkConst ``List.length_beq_eq [Level.zero])
+      #[elemTy, mkApp (mkConst field) cExpr, rhoE, rb]
   let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))
