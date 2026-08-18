@@ -95,7 +95,7 @@ noncomputable def checkMaskList (labN : List (ℕ × ℕ × ℕ)) : Bool :=
 /-- The aggregate descent-matrix check. The coefficients become `mp - mn` pairs and the labels their
 `Nat` residues and masks once, up front; the masks are verified by `checkMaskList` and then
 `checkBGo` folds the rows entirely in `Nat`. -/
-noncomputable def checkB (a₂ a₄ _a₆ : ℤ) (lab : List (ℕ × ℤ)) (qms : List ℕ) (matB : List ℕ)
+noncomputable def checkB (a₂ a₄ : ℤ) (lab : List (ℕ × ℤ)) (qms : List ℕ) (matB : List ℕ)
     (pt : List (ℚ × ℚ)) : Bool :=
   (checkMaskList (toLabN lab qms)).and'
     (checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat (toLabN lab qms) matB pt)
@@ -148,7 +148,7 @@ theorem checkB_true {a₂ a₄ a₆ : ℤ} {matB : List ℕ} {rho : ℕ}
     (hqlen : qms.length = rho)
     (hpr : ∀ j : Fin rho, ((lab.getD j.val (0, 0)).1).Prime)
     (hp2 : ∀ j : Fin rho, (lab.getD j.val (0, 0)).1 ≠ 2)
-    (h : checkB a₂ a₄ a₆ lab qms matB pt = true) :
+    (h : checkB a₂ a₄ lab qms matB pt = true) :
     ∀ i j : Fin rho, F2Invert.toMat matB rho i j =
       lambdaCompute a₂ a₄ a₆ (lab.getD j.val (0, 0)).1
         ((lab.getD j.val (0, 0)).2 : ZMod (lab.getD j.val (0, 0)).1) (pt.getD i.val (0, 0)).1 := by
