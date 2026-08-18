@@ -53,8 +53,7 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
     (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
-/-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p` (so the
-kernel builds the discriminant on small residues, not the full integer). -/
+/-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
     ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
   have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a => by
@@ -88,8 +87,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
   rw [Nat.beq_eq, ← hnz, hcast]
 
-/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives (powers
-expanded), so the discriminant reduces in the kernel without the arithmetic-notation layer. -/
+/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
+expanded. -/
 def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄

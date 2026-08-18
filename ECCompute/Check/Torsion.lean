@@ -446,9 +446,10 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
 
 /-! ## Certificate-facing torsion bounds
 
-These two wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
+These three wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
 `|E(ℚ)[2]| ≤ 2^t` bound the certificate soundness theorem consumes: `t = 0` from a no-root witness,
-`t = 2` unconditionally (the universal `≤ 4` bound). -/
+`t = 1` from an integer root whose cofactor has no root mod `ℓ`, and `t = 2` unconditionally (the
+universal `≤ 4` bound). -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
 theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
@@ -481,8 +482,7 @@ theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
 
 We exhibit the `t = 0` certificate on a concrete integral Weierstrass model whose 2-division cubic
 has no root modulo the witness prime `ℓ = 29`. (The rank-23 running curve of the project uses the
-same `ℓ = 29`; its integer coefficients are not stored in this repository, so we use a stand-in
-curve with the identical certificate shape here.)
+same `ℓ = 29`; this stand-in curve has the identical certificate shape.)
 
 For `a₁ = 1, a₂ = -3, a₃ = 1, a₄ = -3, a₆ = -2`, the monic 2-division cubic is
 `u³ - 11 u² - 40 u - 112`, and the kernel-reducible check confirms it has no root mod `29`. -/

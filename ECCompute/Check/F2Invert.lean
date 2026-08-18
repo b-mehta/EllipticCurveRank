@@ -44,11 +44,9 @@ def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
-/-- Kernel-reducible parity of the low 32 bits, as a straight-line XOR-fold: for `v < 2 ^ 32` the
-low bit accumulates `⊕_{j < 32} bit j`. Five shift-xor stages (16, 8, 4, 2, 1) collapse all 32 bits
-into bit 0, reduced by the kernel with native `Nat.xor` / `Nat.shiftRight` / `Nat.land` (no
-recursion). Sound only against the low `n` bits when the input `< 2 ^ n`, which `checkInv` enforces
-via `maskBelow`; equals the spec `popParity` there (see `popParityK_eq`). -/
+/-- XOR of the low 32 bits of `v`, folded into bit 0 by five shift-xor stages (16, 8, 4, 2, 1).
+For input `v < 2 ^ n` this equals the spec `popParity n v` (`popParityK_eq`), the range `checkInv`
+enforces through `maskBelow`. -/
 noncomputable def popParityK (v : Nat) : Bool :=
   let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
   let v := v.xor (v.shiftRight 4); let v := v.xor (v.shiftRight 2)
@@ -124,7 +122,7 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
 /-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-over the columns of `M`, comparing the parity of `bi &&& mₖ` (via the fast `popParityK`)
+over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`)
 against the diagonal indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with
 `n ≤ 32`, which `checkInv` verifies separately. -/
 noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
@@ -146,13 +144,13 @@ theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) =
       (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
-/-- Every mask in `L` fits in `n` bits (`< 2 ^ n`), using native `Nat.blt` / `Nat.shiftLeft`. -/
+/-- Every mask in `L` fits in `n` bits (`< 2 ^ n`). -/
 noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
   allList (fun x => Nat.blt x (Nat.shiftLeft 1 n)) L
 
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
-masks fit in `n ≤ 32` bits, which the fast `popParityK` parity relies on for soundness. -/
+masks fit in `n ≤ 32` bits, which `popParityK` relies on for soundness. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
   (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo M 0 B)))
 
