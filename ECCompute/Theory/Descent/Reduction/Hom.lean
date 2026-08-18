@@ -960,7 +960,7 @@ theorem red_p_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   | some x₂ y₂ h₂ => exact red_p_map_add_some a₂ a₄ a₆ p hΔ h₁ h₂
 
 /-- The reduction map bundled as an additive homomorphism
-`(curve …).toAffine.Point →+ (reducedCurve …).toAffine.Point`. -/
+`(curve …).toAffine.Point →+ ((curveℤ …).map (Int.castRingHom (ZMod p))).toAffine.Point`. -/
 @[simps]
 noncomputable def redHom (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+

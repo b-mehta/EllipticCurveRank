@@ -31,10 +31,10 @@ open WeierstrassCurve
 
 namespace ECCompute
 
+open Classical in
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
 non-squares. -/
 noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  haveI := Classical.propDecidable (IsSquare a)
   if IsSquare a then 0 else 1
 
 /-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
@@ -52,8 +52,8 @@ def fval (θ : ZMod p) : ZMod p :=
   θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-def fderiv (b₂ b₄ : ℤ) (q : ℕ) (θ : ZMod q) : ZMod q :=
-  3 * θ ^ 2 + 2 * (b₂ : ZMod q) * θ + (b₄ : ZMod q)
+def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
+  3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p)
 
 /-- The descent character as a raw function. -/
 noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
