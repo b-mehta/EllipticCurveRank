@@ -5,7 +5,6 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.ForMathlib.IntResNat
-import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 import Mathlib.Data.Nat.Bitwise
 
 /-!
