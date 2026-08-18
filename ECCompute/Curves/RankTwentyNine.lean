@@ -25,19 +25,19 @@ namespace ECCompute
 open WeierstrassCurve
 
 /-- The `a₄` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
-abbrev ekA₄ : ℚ := -27006183241630922218434652145297453784768054621836357954737385
+abbrev ek29A₄ : ℚ := -27006183241630922218434652145297453784768054621836357954737385
 
 /-- The `a₆` coefficient of the Elkies-Klagsbrun rank-29 curve (general model). -/
-abbrev ekA₆ : ℚ :=
+abbrev ek29A₆ : ℚ :=
   55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497
 
 /-- The Elkies-Klagsbrun rank-29 elliptic curve over `ℚ`. Certified rank ≥ 29 in
 `elkiesKlagsbrun_hasRankGE_29`. -/
-def curveElkiesKlagsbrun : WeierstrassCurve ℚ := ⟨1, 0, 0, ekA₄, ekA₆⟩
+def curveElkiesKlagsbrun29 : WeierstrassCurve ℚ := ⟨1, 0, 0, ek29A₄, ek29A₆⟩
 
 /-- The Elkies-Klagsbrun curve has Mordell-Weil rank at least `29`. -/
-theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun 29 := by
-  unfold curveElkiesKlagsbrun ekA₄ ekA₆
+theorem elkiesKlagsbrun_hasRankGE_29 : HasRankGE curveElkiesKlagsbrun29 29 := by
+  unfold curveElkiesKlagsbrun29 ek29A₄ ek29A₆
   certify_curve torsion 67 points "data/rank29.txt" labels "data/rank29-labels.txt"
 
 end ECCompute

@@ -23,17 +23,17 @@ namespace ECCompute
 open WeierstrassCurve
 
 /-- The `a₄` coefficient of the Martin-McMillen curve (general model). -/
-abbrev mmA₄ : ℚ := -19252966408674012828065964616418441723
+abbrev mm23A₄ : ℚ := -19252966408674012828065964616418441723
 
 /-- The `a₆` coefficient of the Martin-McMillen curve (general model). -/
-abbrev mmA₆ : ℚ := 32685500727716376257923347071452044295907443056345614006
+abbrev mm23A₆ : ℚ := 32685500727716376257923347071452044295907443056345614006
 
 /-- The Martin-McMillen curve over `ℚ`. Certified rank ≥ 23 in `martinMcMillen_hasRankGE_23`. -/
-def curveMartinMcMillen : WeierstrassCurve ℚ := ⟨1, 0, 1, mmA₄, mmA₆⟩
+def curveMartinMcMillen23 : WeierstrassCurve ℚ := ⟨1, 0, 1, mm23A₄, mm23A₆⟩
 
 /-- The Martin-McMillen curve has Mordell-Weil rank at least `23`. -/
-theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen 23 := by
-  unfold curveMartinMcMillen mmA₄ mmA₆
+theorem martinMcMillen_hasRankGE_23 : HasRankGE curveMartinMcMillen23 23 := by
+  unfold curveMartinMcMillen23 mm23A₄ mm23A₆
   certify_curve torsion 29 points "data/rank23.txt" labels "data/rank23-labels.txt"
 
 end ECCompute
