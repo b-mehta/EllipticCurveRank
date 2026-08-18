@@ -47,8 +47,7 @@ private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValu
 /-- Extract the `Int` value of a numeral `Expr`; see `getNatE`. -/
 private def getIntE (e : Expr) : MetaM Int := getLitE "Int" (·.int?) getIntValue? e
 
-/-- ASCII-trim, returning a `String`. `String.trim` is deprecated in favour of `String.trimAscii`,
-which returns a `String.Slice`, so we convert back. -/
+/-- ASCII-trim `s`, returning a `String`. -/
 private def strTrim (s : String) : String := s.trimAscii.toString
 
 /-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`. -/
