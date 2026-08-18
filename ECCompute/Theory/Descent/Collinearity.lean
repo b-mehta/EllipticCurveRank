@@ -15,17 +15,14 @@ Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` yields
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square, used in the descent-character
 additivity proof.
 
-The factorization is stated as an equation of values `∀ x, …` rather than of polynomials, which
-is what the `θ`-corollary needs. Its content is the three Vieta relations between `(ℓ, m)` and
-the symmetric functions of `x₁, x₂, x₃`.
+The factorization is stated as an equation of values `∀ x, …`, the form the `θ`-corollary needs.
+Its content is the three Vieta relations between `(ℓ, m)` and the symmetric functions of
+`x₁, x₂, x₃`.
 
 ## Main declarations
 
 * `ECCompute.cubic_sub_lineSq_eq_prod`: the collinearity identity from the Vieta relations.
 * `ECCompute.prod_sub_theta_eq_lineSq`: the `θ`-evaluation corollary (perfect square).
-* `ECCompute.cubic_sub_lineSq_eq_prod_of_roots`: the identity over a field from two points
-  on the curve and line with distinct `x`-coordinates.
-* `ECCompute.prod_sub_theta_eq_lineSq_of_roots`: the corollary from the same field data.
 * `ECCompute.prod_sub_theta_eq_lineSq_zmod`: the corollary phrased with `fval` for the
   mod-`p` descent application.
 -/
