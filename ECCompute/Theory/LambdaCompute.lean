@@ -229,16 +229,12 @@ noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x
   else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ p θ)
        else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
-/-- `psiCompute` is `psiComputeBool` read into `ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
-theorem psiCompute_eq_bool (p : ℕ) (a : ZMod p) :
-    psiCompute p a = if psiComputeBool p a then 1 else 0 := rfl
-
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
 character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
 theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
     lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
   rw [lambdaCompute, lambdaComputeBool]
-  grind [psiCompute_eq_bool]
+  grind [psiCompute]
 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
