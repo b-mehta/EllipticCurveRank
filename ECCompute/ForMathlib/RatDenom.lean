@@ -22,14 +22,20 @@ multiplication, powers and division.
   `q.den = w ^ k`.
 -/
 
-namespace Rat
+namespace ZMod
 
 variable {p : ℕ}
 
 /-- If `a ∣ b` and `b`'s reduction mod `p` is nonzero, so is `a`'s. -/
-theorem den_ne_zero_of_dvd {a b : ℕ} (h : a ∣ b) (hb : (b : ZMod p) ≠ 0) :
+theorem natCast_ne_zero_of_dvd {a b : ℕ} (h : a ∣ b) (hb : (b : ZMod p) ≠ 0) :
     (a : ZMod p) ≠ 0 := fun ha =>
   hb ((ZMod.natCast_eq_zero_iff b p).mpr (((ZMod.natCast_eq_zero_iff a p).mp ha).trans h))
+
+end ZMod
+
+namespace Rat
+
+variable {p : ℕ}
 
 /-- With `q.den = w ^ k` (`k ≠ 0`), the denominator vanishes mod `p` iff `w` does. -/
 theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
@@ -43,17 +49,17 @@ theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den
 /-- Good denominators are closed under addition. -/
 theorem den_add_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x + y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.add_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
+  ZMod.natCast_ne_zero_of_dvd (Rat.add_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- Good denominators are closed under subtraction. -/
 theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x - y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.sub_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
+  ZMod.natCast_ne_zero_of_dvd (Rat.sub_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- Good denominators are closed under multiplication. -/
 theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
-  den_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
+  ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- Good denominators are closed under powers. -/
 theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
@@ -75,7 +81,7 @@ theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
     rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
     exact (ZMod.natCast_eq_zero_iff _ _).mp h
   rw [div_eq_mul_inv]
-  refine den_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
+  refine ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
   rw [Nat.cast_mul, Rat.den_inv_of_ne_zero ha']
   exact mul_ne_zero hb hnatabs
 
