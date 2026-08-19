@@ -14,10 +14,10 @@ import Mathlib.Data.ZMod.Basic
 
 namespace ECCompute
 
-/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p` (for `0 < p`). -/
-theorem intResNat_cast {p : ℕ} (hp : 0 < p) (z : ℤ) :
+/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
+theorem intResNat_cast {p : ℕ} [NeZero p] (z : ℤ) :
     (((z % (p : ℤ)).toNat : ℕ) : ZMod p) = (z : ZMod p) := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast hp.ne')
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast (NeZero.ne p))
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 

@@ -155,6 +155,7 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   set P : ℚ × ℚ := pt.getD i.val (0, 0) with hP
   have hp : 0 < L.1 := (hpr j).pos
   have : Fact L.1.Prime := ⟨hpr j⟩
+  have : NeZero L.1 := ⟨hp.ne'⟩
   set labN := toLabN lab qms with hlabNdef
   have hlabN : labN.length = rho := by
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
@@ -177,7 +178,7 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
       L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
       = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
     lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
-      (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast hp L.2)
+      (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast L.2)
       (int_toNat_sub P.1.num) rfl
   rw [F2Invert.toMat, hcell, hbridge, lambdaCompute_eq_bool]
 
