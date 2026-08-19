@@ -9,20 +9,14 @@ import ECCompute.Check.JInvariant
 /-!
 # A rank-3 curve with a single rational 2-torsion point
 
-The elliptic curve
+The elliptic curve `E : y² = x³ - 82 x` over `ℚ` has Mordell-Weil rank at least `3`.
+Its `2`-division cubic factors as `x (x² - 82)`, and `x² - 82` is irreducible over `ℚ`,
+so the only nonzero rational `2`-torsion point is `(0, 0)` and `t = dim_𝔽₂ E(ℚ)[2] = 1`.
 
-  `E : y² = x³ - 82 x`
-
-over `ℚ` has Mordell-Weil rank at least `3`. Its `2`-division cubic `x³ - 82 x = x (x² - 82)`
-has the single rational root `x = 0` (the quadratic cofactor `x² - 82` is irreducible over `ℚ`),
-so `E` has exactly one nonzero rational `2`-torsion point `(0, 0)`, i.e. `t = dim_𝔽₂ E(ℚ)[2] = 1`.
-
-The certificate exhibits `ρ = 4` points with `𝔽₂`-independent descent images, and concedes the one
-torsion dimension *sharply*: rather than the universal `|E(ℚ)[2]| ≤ 4` bound (which would only give
-`rank ≥ ρ - 2 = 2`), it certifies `|E(ℚ)[2]| ≤ 2` by naming the short-model root `R = 0` and the
-witness prime `ℓ = 5` at which the cofactor `x² - 1312` has no root, giving the full
-`rank ≥ ρ - t = 4 - 1 = 3`. Points (in short-model coordinates) in `data/rank13.txt`, descent
-labels in `data/rank13-labels.txt`.
+The certificate gives `ρ = 4` points with `𝔽₂`-independent descent images and bounds
+`|E(ℚ)[2]| ≤ 2` from the root `R = 0` and the witness prime `ℓ = 5`, at which `x² - 82`
+has no root mod `5`. These combine to `rank ≥ ρ - t = 4 - 1 = 3`. Points (short-model
+coordinates) are in `data/rank13.txt`, descent labels in `data/rank13-labels.txt`.
 -/
 
 namespace ECCompute

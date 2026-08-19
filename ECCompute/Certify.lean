@@ -47,8 +47,7 @@ private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValu
 /-- Extract the `Int` value of a numeral `Expr`; see `getNatE`. -/
 private def getIntE (e : Expr) : MetaM Int := getLitE "Int" (·.int?) getIntValue? e
 
-/-- ASCII-trim, returning a `String`. `String.trim` is deprecated in favour of `String.trimAscii`,
-which returns a `String.Slice`, so we convert back. -/
+/-- ASCII-trim `s`, returning a `String`. -/
 private def strTrim (s : String) : String := s.trimAscii.toString
 
 /-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`. -/
@@ -62,10 +61,10 @@ private def parseCoord (s : String) : Int × Nat :=
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
-private def parseLine (line : String) : Int × Nat × Int × Nat :=
+private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   match ((strTrim line).splitOn " ").filter (· ≠ "") with
-  | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; (xn, xd, yn, yd)
-  | _ => (0, 1, 0, 1)
+  | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
+  | _ => none
 
 /-- `ℚ` Expr for `num / den` (reduced) via the proof-free `mkRat`; normalization is kernel
 computation, so no `Coprime`/`den ≠ 0` proof is constructed. -/
@@ -73,10 +72,10 @@ private def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
-private def parseLabel (line : String) : Nat × Int :=
+private def parseLabel (line : String) : Option (Nat × Int) :=
   match ((strTrim line).splitOn " ").filter (· ≠ "") with
-  | [p, t] => ((strTrim p).toNat!, (strTrim t).toInt!)
-  | _ => (0, 0)
+  | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
+  | _ => none
 
 /-- Syntax of the `certify_curve` tactic; see the module docstring. The `torsion ℓ` form concedes
 `t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `oneTorsion root R witness ℓ`
@@ -122,10 +121,14 @@ private def readGoal (goal : MVarId) :
 `rho` entries. -/
 private def readData (path lpath : String) (rho : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
-  let pts := ((← IO.FS.readFile path).splitOn "\n").filterMap fun l =>
-    if (strTrim l).isEmpty then none else some (parseLine l)
-  let lbls := ((← IO.FS.readFile lpath).splitOn "\n").filterMap fun l =>
-    if (strTrim l).isEmpty then none else some (parseLabel l)
+  let pts ← (((← IO.FS.readFile path).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
+    fun l => match parseLine l with
+      | some p => pure p
+      | none => throwError "certify_curve: malformed points line: {l}"
+  let lbls ← (((← IO.FS.readFile lpath).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
+    fun l => match parseLabel l with
+      | some x => pure x
+      | none => throwError "certify_curve: malformed labels line: {l}"
   if pts.length ≠ rho then
     throwError "certify_curve: points file has {pts.length} points but the goal rank is {rho}"
   if lbls.length ≠ rho then
@@ -166,8 +169,12 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
     #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
       toExpr ls.toList, toExpr matB, toExpr matM, toExpr qms, toExpr t, toExpr tp]
 
+/-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
+private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
+    (h : l.length.beq n = true) : l.length = n := Nat.eq_of_beq_eq_true h
+
 /-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
-`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the four length obligations, and the
+`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the five length obligations, and the
 five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`. The torsion obligation
 `|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
 `certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
@@ -183,8 +190,8 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let rhoE := mkApp (mkConst ``Certificate.rho) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
-    let lenE := mkAppN (mkConst ``List.length [Level.zero]) #[elemTy, mkApp (mkConst field) cExpr]
-    mkAppN (mkConst ``Nat.eq_of_beq_eq_true) #[lenE, rhoE, rb]
+    mkAppN (mkConst ``List.length_beq_eq [Level.zero])
+      #[elemTy, mkApp (mkConst field) cExpr, rhoE, rb]
   let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))

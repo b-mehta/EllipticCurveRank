@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Check.Fold
 import ECCompute.Check.Primes
 import ECCompute.ForMathlib.IntResNat
+
 import Mathlib.Tactic.NormNum.Prime
 
 /-!
@@ -53,8 +54,7 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
     (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
-/-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p` (so the
-kernel builds the discriminant on small residues, not the full integer). -/
+/-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
     ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
   have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a => by
@@ -88,8 +88,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
   rw [Nat.beq_eq, ← hnz, hcast]
 
-/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives (powers
-expanded), so the discriminant reduces in the kernel without the arithmetic-notation layer. -/
+/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
+expanded. -/
 def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄
@@ -126,7 +126,8 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rw [Nat.dvd_iff_mod_eq_zero, show 6 % p = Nat.mod 6 p from rfl]
+    have h6m : 6 % p = Nat.mod 6 p := rfl
+    rw [Nat.dvd_iff_mod_eq_zero, h6m]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntRaw_eq,
@@ -148,7 +149,7 @@ example : checkLabel 0 (-1) 0 7 1 = true := rfl
 
 /-- Assembling a `DescentHyp` from the kernel check (`rfl`) and `norm_num` primality: the pattern
 the certificate tactic emits for each column. -/
-theorem example_descentHyp : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
+example : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
   descentHyp_of_checkLabel 0 (-1) 0 7 1 rfl (by norm_num)
 
 /-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/

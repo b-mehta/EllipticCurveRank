@@ -13,9 +13,8 @@ import ECCompute.Theory.LambdaCompute
 computed descent character; `checkB_true` recovers the individual entry equalities from
 `checkB … = true`.
 
-The kernel-reduced work runs through `lambdaComputeBoolNatMask`, so every entry is evaluated in
-`Nat` with no `ZMod` or `Int` arithmetic, and the Legendre character of each label is a native
-bit test against a precomputed quadratic-residue mask rather than a reciprocity recursion. The
+The kernel-reduced work runs through `lambdaComputeBoolNatMask`, evaluating every entry in `Nat`
+and reading each label's Legendre character from a precomputed quadratic-residue mask. The
 signed inputs are turned into `Nat` pieces once: the coefficients `a₂`, `a₄` and each point's
 numerator become `mp - mn` pairs via `Int.toNat`, each label representative `θ : ℤ` becomes its
 residue `(θ % p).toNat`, and each label carries its quadratic-residue mask `q`. `checkMaskList`
@@ -87,8 +86,7 @@ theorem checkBGo_cons_cons (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ × �
       (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (checkBGo c2p c2m c4p c4m labN bs ps) := rfl
 
-/-- Verify every supplied mask: for each label triple `(p, _, q)`, `q` must equal `qrMask p`. Run
-once (independently of the matrix fold), so each `qrMask p` is built at most once per label. -/
+/-- Verify every supplied mask: for each label triple `(p, _, q)`, `q` must equal `qrMask p`. -/
 noncomputable def checkMaskList (labN : List (ℕ × ℕ × ℕ)) : Bool :=
   allList (fun l => (qrMask l.1).beq l.2.2) labN
 

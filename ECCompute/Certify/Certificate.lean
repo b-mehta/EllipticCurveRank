@@ -10,9 +10,8 @@ import ECCompute.Check.F2Invert
 # The rank-bound certificate data type
 
 `Certificate` bundles the data a referee audits to accept a lower bound on the Mordell-Weil rank
-of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. It is pure data; downstream checkers audit each
-field. The intended witness is the integral Weierstrass model
-`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
+of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. The intended witness is the integral
+Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
 
 ## Main definitions
 
@@ -51,8 +50,8 @@ structure Certificate where
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   matM : List Nat
   /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
-  set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee; lets
-  each Legendre-character evaluation be a native bit test instead of a reciprocity recursion. -/
+  set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee, so
+  each Legendre-character check is a bitmask lookup. -/
   qrMasks : List Nat
   /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
   `rank ≥ ρ - t`. -/

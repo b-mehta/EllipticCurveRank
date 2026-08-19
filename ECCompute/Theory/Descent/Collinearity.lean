@@ -15,17 +15,14 @@ Evaluating at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` yields
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a perfect square, used in the descent-character
 additivity proof.
 
-The factorization is stated as an equation of values `∀ x, …` rather than of polynomials, which
-is what the `θ`-corollary needs. Its content is the three Vieta relations between `(ℓ, m)` and
-the symmetric functions of `x₁, x₂, x₃`.
+The factorization is stated as an equation of values `∀ x, …`, the form the `θ`-corollary needs.
+Its content is the three Vieta relations between `(ℓ, m)` and the symmetric functions of
+`x₁, x₂, x₃`.
 
 ## Main declarations
 
 * `ECCompute.cubic_sub_lineSq_eq_prod`: the collinearity identity from the Vieta relations.
 * `ECCompute.prod_sub_theta_eq_lineSq`: the `θ`-evaluation corollary (perfect square).
-* `ECCompute.cubic_sub_lineSq_eq_prod_of_roots`: the identity over a field from two points
-  on the curve and line with distinct `x`-coordinates.
-* `ECCompute.prod_sub_theta_eq_lineSq_of_roots`: the corollary from the same field data.
 * `ECCompute.prod_sub_theta_eq_lineSq_zmod`: the corollary phrased with `fval` for the
   mod-`p` descent application.
 -/
@@ -85,27 +82,6 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
       x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧
         x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
   grind (ringSteps := 200000)
-
-/-- Two points `(x₁, ℓx₁ + m)`, `(x₂, ℓx₂ + m)` on `E` with `x₁ ≠ x₂` and the group-law third
-coordinate `x₃ = ℓ² - a₂ - x₁ - x₂` factor the cubic-minus-line-squared as
-`(x - x₁)(x - x₂)(x - x₃)`. -/
-theorem cubic_sub_lineSq_eq_prod_of_roots (hne : x₁ ≠ x₂)
-    (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
-    (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
-    (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆) (x : F) :
-    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2
-      = (x - x₁) * (x - x₂) * (x - x₃) := by
-  grind [vieta_of_roots, cubic_sub_lineSq_eq_prod]
-
-/-- From two points on `E` and the line (distinct `x`), together with `f(θ) = 0`, the third
-value `x₃ = ℓ² - a₂ - x₁ - x₂` gives `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
-theorem prod_sub_theta_eq_lineSq_of_roots (hne : x₁ ≠ x₂)
-    (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
-    (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
-    (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆)
-    (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) :
-    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
-  grind [vieta_of_roots, prod_sub_theta_eq_lineSq]
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion

@@ -26,6 +26,7 @@ namespace WeierstrassCurve
 variable {F : Type*} [Field F] (W : WeierstrassCurve F)
 
 /-- Evaluate the 2-torsion polynomial at `x`, expanded via the `bᵢ` coefficients. -/
+@[grind =]
 lemma eval_twoTorsionPolynomial_toPoly (x : F) :
     W.twoTorsionPolynomial.toPoly.eval x = 4 * x ^ 3 + W.b₂ * x ^ 2 + 2 * W.b₄ * x + W.b₆ := by
   simp [twoTorsionPolynomial, Cubic.toPoly]
