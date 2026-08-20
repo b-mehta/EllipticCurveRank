@@ -32,16 +32,16 @@ import ECCompute.Certify.CertifyEval
 import ECCompute.Certify
 
 -- Certified curves
-import ECCompute.Curves.CurveThirteen
-import ECCompute.Curves.CurveFourteen
-import ECCompute.Curves.RankTwenty
-import ECCompute.Curves.RankTwentyOne
-import ECCompute.Curves.RankTwentyTwo
-import ECCompute.Curves.RankTwentyThree
-import ECCompute.Curves.RankTwentyFour
-import ECCompute.Curves.RankTwentyEight
-import ECCompute.Curves.RankTwentyNine
-import ECCompute.Curves.RankThirty
+import ECCompute.Curves.Curve7
+import ECCompute.Curves.Curve8
+import ECCompute.Curves.Curve9
+import ECCompute.Curves.Curve10
+import ECCompute.Curves.Curve11
+import ECCompute.Curves.Curve12
+import ECCompute.Curves.Curve13
+import ECCompute.Curves.Curve14
+import ECCompute.Curves.Curve74
+import ECCompute.Curves.Curve273
 
 -- Upstream candidates
 import ECCompute.ForMathlib.PadicValInt
