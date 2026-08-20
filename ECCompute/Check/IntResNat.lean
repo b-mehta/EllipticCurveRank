@@ -17,14 +17,10 @@ checker's `Nat` residue computation to a statement about the integer it stands f
 notation.
 -/
 
-/-- Takes the `Nat.mod` a checker is written in to the `%` that `push_cast` and `ring` act on.
-The name `Nat.mod_eq` belongs to the recursion equation. -/
 theorem Nat.mod_eq_mod (a b : ℕ) : Nat.mod a b = a % b := rfl
 
-/-- Takes the `Int.sub` a checker is written in to the `-` that `push_cast` and `ring` act on. -/
 theorem Int.sub_eq (a b : ℤ) : Int.sub a b = a - b := rfl
 
-/-- Takes the `Int.neg` a checker is written in to the `-` that `push_cast` and `ring` act on. -/
 theorem Int.neg_eq (a : ℤ) : Int.neg a = -a := rfl
 
 namespace ECCompute
