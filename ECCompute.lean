@@ -45,6 +45,7 @@ import ECCompute.Curves.Curve74
 import ECCompute.Curves.Curve273
 
 -- Upstream candidates
+import ECCompute.ForMathlib.ModuleTorsionQuotient
 import ECCompute.ForMathlib.PadicValInt
 import ECCompute.ForMathlib.RatDenom
 import ECCompute.ForMathlib.TwoTorsion

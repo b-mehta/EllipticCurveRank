@@ -50,10 +50,4 @@ theorem j_eq_of_beq (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ)
     (h : ratBeq' (W.c₄ ^ 3) (W.Δ * q) = true) : W.j = q :=
   (j_eq_iff W q).mpr (eq_of_beq (by rwa [ratBeq'_eq] at h))
 
-/-- The example curve `y² = x³ - 82x` is elliptic, so `.j` is well-formed for it. -/
-instance : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).IsElliptic := isElliptic_of_bne (by quickRfl)
-
-/-- Worked example: `y² = x³ - 82x` has `j = 1728`, via the kernel check `c₄³ == Δ · 1728`. -/
-example : (⟨0, 0, 0, -82, 0⟩ : WeierstrassCurve ℚ).j = 1728 := j_eq_of_beq _ 1728 (by quickRfl)
-
 end ECCompute
