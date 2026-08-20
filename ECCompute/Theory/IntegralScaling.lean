@@ -165,10 +165,7 @@ theorem scaleFwd_map_add (P Q : W.toAffine.Point) :
       rw [negY_scale s] at hy
       exact mul_left_cancel₀ (pow_ne_zero 3 s.ne) hy
     have hℓ := slope_scale s x₁ x₂ y₁ y₂
-    rw [Point.add_some hxy]
-    simp only [scaleFwd_some]
-    rw [Point.add_some hxy']
-    exact point_some_congr (by rw [hℓ, addX_scale s]) (by rw [hℓ, addY_scale s])
+    grind [Point.add_some, scaleFwd_some, point_some_congr, addX_scale, addY_scale]
 
 /-- If `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, then `(x, y) ↦ (v²x, v³y)` is a group isomorphism
 `W.Point ≃+ W'.Point`. -/

@@ -158,7 +158,8 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
     have hy' : y₁ + (W.a₁ * x₁ + W.a₃) / 2
         ≠ (shortModel W).toAffine.negY x₁ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) := by
       rw [negY_completeSquare]
-      exact fun hcontra => hy (add_right_cancel hcontra)
+      intro hcontra
+      exact hy (add_right_cancel hcontra)
     have hDval : y₁ - W.toAffine.negY x₁ y₁ = 2 * y₁ + W.a₁ * x₁ + W.a₃ := by
       grind [WeierstrassCurve.Affine.negY]
     have hDval' : (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
@@ -223,10 +224,7 @@ theorem fwd_map_add (P Q : W.toAffine.Point) :
       rw [negY_completeSquare, hx] at hy
       exact add_right_cancel hy
     have hℓ := slope_completeSquare W x₁ x₂ y₁ y₂ h₁.left h₂.left hxy
-    rw [Point.add_some hxy]
-    simp only [fwd_some]
-    rw [Point.add_some hxy']
-    exact point_some_congr (by rw [hℓ, addX_completeSquare]) (by rw [hℓ, addY_completeSquare])
+    grind [Point.add_some, fwd_some, point_some_congr, addX_completeSquare, addY_completeSquare]
 
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
 isomorphism between the Mordell-Weil groups of the general model `W` and the short model
