@@ -4,9 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Reduction.Repr
-import ECCompute.ForMathlib.RatDenom
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import Mathlib.Algebra.Field.ZMod
 
 /-!
@@ -122,6 +120,7 @@ noncomputable def red_p (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2)⟩
 
+/-- The reduction map sends the origin to the origin. -/
 @[simp]
 theorem red_p_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     red_p a₂ a₄ a₆ p hΔ 0 = 0 :=

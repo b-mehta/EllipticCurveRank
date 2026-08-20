@@ -1,35 +1,51 @@
--- Foundations
-import ECCompute.Check.Fold
-import ECCompute.ForMathlib.IntResNat
-import ECCompute.Certify.Certificate
+-- Upstream candidates
+import ECCompute.ForMathlib.ListGetD
+import ECCompute.ForMathlib.ModuleTorsionQuotient
+import ECCompute.ForMathlib.PadicValInt
+import ECCompute.ForMathlib.RatDenom
+import ECCompute.ForMathlib.TwoTorsion
+import ECCompute.ForMathlib.WeierstrassCurveAffine
+import ECCompute.ForMathlib.WeierstrassCurveProjective
 
 -- Pure mathematics
+import ECCompute.Theory.CompleteSquare
 import ECCompute.Theory.Descent
-import ECCompute.Theory.Descent.Defs
-import ECCompute.Theory.Descent.ReducedArith
-import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
+import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Theory.LambdaCompute
+import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.Theory.Descent.Reduction.EpsFinite
+import ECCompute.Theory.Descent.Reduction.Hom
+import ECCompute.Theory.Descent.Reduction.IntModel
+import ECCompute.Theory.Descent.Reduction.KernelClosure
+import ECCompute.Theory.Descent.Reduction.RedP
+import ECCompute.Theory.Descent.Reduction.ReducedSlope
+import ECCompute.Theory.Descent.Reduction.Repr
+import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.ModelChange
-import ECCompute.Theory.ModelIso
 
 -- Certification checkers
+import ECCompute.Check.DescentMatrix
 import ECCompute.Check.F2Invert
-import ECCompute.Check.CheckMatrix
-import ECCompute.Check.Primes
-import ECCompute.Check.ColumnCheck
-import ECCompute.Check.Torsion
-import ECCompute.Check.Points
+import ECCompute.Check.Fold
+import ECCompute.Check.IntResNat
 import ECCompute.Check.JInvariant
+import ECCompute.Check.Labels
+import ECCompute.Check.LambdaCompute
+import ECCompute.Check.Points
+import ECCompute.Check.Primes
+import ECCompute.Check.RootMod
+import ECCompute.Check.Torsion
 
--- Main theory
+-- The certificate and the soundness theorem
+import ECCompute.Certificate
 import ECCompute.MainTheorem
 
--- Certificate tactic
-import ECCompute.Certify.CertifyEval
-import ECCompute.Certify
+-- Tactics
+import ECCompute.Tactic.CertifyCurve
+import ECCompute.Tactic.CertifyEval
+import ECCompute.Tactic.QuickRfl
 
 -- Certified curves
 import ECCompute.Curves.Curve7
@@ -42,9 +58,3 @@ import ECCompute.Curves.Curve13
 import ECCompute.Curves.Curve14
 import ECCompute.Curves.Curve74
 import ECCompute.Curves.Curve273
-
--- Upstream candidates
-import ECCompute.ForMathlib.PadicValInt
-import ECCompute.ForMathlib.RatDenom
-import ECCompute.ForMathlib.TwoTorsion
-import ECCompute.ForMathlib.WeierstrassCurveAffine

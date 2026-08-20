@@ -4,6 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
+import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Data.ZMod.Basic
 
 /-!
@@ -11,7 +12,8 @@ import Mathlib.Data.ZMod.Basic
 
 The descent character works with the curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ` whose
 coefficients are integers. This file records the corresponding curve over `ℤ`,
-`curveℤ a₂ a₄ a₆`, together with the two structural facts used to build the reduction map.
+`curveℤ a₂ a₄ a₆`, together with the structural facts used to build the reduction map and the
+shape of negation on the rational and reduced models.
 
 ## Main declarations
 
@@ -19,6 +21,8 @@ coefficients are integers. This file records the corresponding curve over `ℤ`,
 * `ECCompute.baseChange_curveℤ_ℚ`: `(curveℤ …).baseChange ℚ = curve …`.
 * `ECCompute.map_curveℤ_zmod`: `(curveℤ …).map (Int.castRingHom (ZMod p))` has coefficients
   the images of `a₂, a₄, a₆` in `ZMod p`.
+* `ECCompute.negY_curve`, `ECCompute.reduced_negY`: negation is `y ↦ -y` on `curve a₂ a₄ a₆`
+  and on its reduction mod `p`.
 -/
 
 open WeierstrassCurve
@@ -45,5 +49,24 @@ theorem map_curveℤ_zmod (p : ℕ) :
     (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p)) =
       { a₁ := 0, a₂ := (a₂ : ZMod p), a₃ := 0, a₄ := (a₄ : ZMod p), a₆ := (a₆ : ZMod p) } := by
   ext <;> simp [curveℤ]
+
+/-! ### Negation on the rational and reduced models -/
+
+/-- Negation on the reduced curve is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
+@[grind =]
+theorem reduced_negY (p : ℕ) (X Y : ZMod p) :
+    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _
+    (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) X Y
+
+section RationalNegY
+
+variable {a₂ a₄ a₆}
+
+/-- Negation on `curve a₂ a₄ a₆` is `y ↦ -y`, since `a₁ = a₃ = 0`. -/
+theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
+  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x y
+
+end RationalNegY
 
 end ECCompute

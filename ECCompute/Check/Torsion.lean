@@ -3,216 +3,35 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Check.F2Invert
-import ECCompute.ForMathlib.IntResNat
-import ECCompute.Theory.ModelIso
+import ECCompute.Check.RootMod
 import ECCompute.Theory.Descent.Defs
 
 /-!
-# Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
+# Bounding the rational `2`-torsion `|E(ℚ)[2]| ≤ 2 ^ t`
 
-For a Weierstrass curve `W` over `ℚ`, the `x`-coordinate of a nonzero rational 2-torsion point
-scales (`u = 4x`) to an integer root of the monic cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. So if this
-cubic has no root modulo some prime `ℓ`, then `W` has no nonzero rational 2-torsion and
-`dim_𝔽₂ E(ℚ)[2] = 0`.
+A nonzero rational `2`-torsion point of a Weierstrass curve has `x`-coordinate a rational root of
+the `2`-division cubic, so counting `2`-torsion is counting roots of that cubic. Three bounds come
+out of that: `≤ 4` unconditionally, `≤ 2` from an integer root whose cofactor quadratic has no root
+modulo a prime `ℓ`, and `≤ 1` from the cubic itself having no root modulo `ℓ`. The residue searches
+are `ECCompute.Check.RootMod`.
 
-## Main definitions and results
+## Main results
 
-* `ECCompute.hasRootMod c₂ c₁ c₀ ℓ` : a kernel-reducible `Bool`, `true` iff the monic cubic
-  `u³ + c₂u² + c₁u + c₀` has a root modulo `ℓ` (checked over residues `0, …, ℓ-1`).
-* `ECCompute.no_nonzero_twoTorsion_of_hasRootMod_eq_false` : the t = 0 lemma. If
-  `hasRootMod W.b₂ (8 * W.b₄) (16 * W.b₆) ℓ = false`, then every 2-torsion point of `W` is `0`.
+* `ECCompute.no_nonzero_twoTorsion_of_cubicHasRootMod_eq_false`: on a general integral model, a
+  no-root-mod-`ℓ` witness for the `2`-division cubic forces every `2`-torsion point to be `0`.
+* `ECCompute.card_twoTorsion_le_four`, `ECCompute.card_twoTorsion_le_two_of_root_cofactor`,
+  `ECCompute.card_twoTorsion_le_one_of_cubicHasRootMod`: the three counts on the short model
+  `curve a₂ a₄ a₆`.
+* `ECCompute.certTorsionBound_zero`, `ECCompute.certTorsionBound_one`,
+  `ECCompute.certTorsionBound_two`: those three bounds stated as `|E(ℚ)[2]| ≤ 2 ^ t` and driven by
+  kernel `Bool` witnesses, the form the certificate soundness theorem consumes.
 -/
 
 namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
-def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
-
-/-- `cubicEval` with the raw `Int.mul`/`Int.add` primitives (powers expanded), for kernel use. -/
-def cubicEvalRaw (c₂ c₁ c₀ u : ℤ) : ℤ :=
-  Int.add (Int.add (Int.add (Int.mul (Int.mul u u) u) (Int.mul c₂ (Int.mul u u)))
-    (Int.mul c₁ u)) c₀
-
-theorem cubicEvalRaw_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalRaw c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
-  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
-  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
-  simp only [cubicEvalRaw, cubicEval, hmul, hadd]
-  ring
-
-/-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
-residues `d₂ d₁ d₀ ∈ [0, ℓ)`. -/
-noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
-  Nat.mod (Nat.add (Nat.add (Nat.add (Nat.mul (Nat.mul r r) r) (Nat.mul d₂ (Nat.mul r r)))
-    (Nat.mul d₁ r)) d₀) ℓ
-
-/-- The mod-`ℓ` `Nat` cubic test matches the `ℤ` residue test (`ℓ > 0`). -/
-theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
-    Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0
-      = Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  have : NeZero ℓ := ⟨hℓ.ne'⟩
-  have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
-  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
-  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
-  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
-  have hcast : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
-      = (cubicEval c₂ c₁ c₀ (r : ℤ) : ZMod ℓ) := by
-    simp only [cubicModL, cubicEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add,
-      Nat.cast_mul, intResNat_cast]
-    push_cast; ring
-  have hnz : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
-      ↔ cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r = 0 := by
-    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
-  have h1 : Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0 = true
-      ↔ (ℓ : ℤ) ∣ cubicEval c₂ c₁ c₀ (r : ℤ) := by
-    rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-  have h2 : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 = true
-      ↔ (ℓ : ℤ) ∣ cubicEval c₂ c₁ c₀ (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
-
-/-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
-modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r =>
-    Nat.beq (cubicModL (Int.emod c₂ ℓ).toNat (Int.emod c₁ ℓ).toNat (Int.emod c₀ ℓ).toNat ℓ r) 0
-
-/-- The `Nat` test agrees with the `ℤ` residue test, bridging to the `ℤ` no-root argument. -/
-theorem hasRootMod_eq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
-    hasRootMod c₂ c₁ c₀ ℓ
-      = anyBelow ℓ fun r => Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  rw [hasRootMod]
-  congr 1
-  funext r
-  rw [← Int.mod_def', ← Int.mod_def', ← Int.mod_def', cubicModL_beq c₂ c₁ c₀ hℓ r]
-
-/-- `cubicEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
-theorem cubicEval_modEq {c₂ c₁ c₀ : ℤ} (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
-    cubicEval c₂ c₁ c₀ a ≡ cubicEval c₂ c₁ c₀ b [ZMOD n] := by
-  unfold cubicEval
-  gcongr
-
-/-- If a `ℤ → ℤ` map that is invariant mod `ℓ` (`hmod`) fails the `anyBelow ℓ` residue test (`h`),
-then it has no integer root. Shared core of the cubic and quadratic no-root lemmas. -/
-private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (hmod : ∀ {a b : ℤ}, a ≡ b [ZMOD (ℓ : ℤ)] → eval a ≡ eval b [ZMOD (ℓ : ℤ)])
-    (h : anyBelow ℓ (fun r => Int.beq' (eval (r : ℤ) % (ℓ : ℤ)) 0) = false) (u : ℤ) :
-    eval u ≠ 0 := by
-  intro hu
-  -- reduce `u` to its residue `r = u % ℓ ∈ {0, …, ℓ-1}`
-  set r : ℤ := u % (ℓ : ℤ) with hr
-  have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
-  have hr0 : 0 ≤ r := Int.emod_nonneg u (by exact_mod_cast hℓ)
-  have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
-  -- `r.toNat` is congruent to `u` mod `ℓ`, and `eval` at `u` is `0`, so the residue is a root
-  have hcong : eval (r.toNat : ℤ) % (ℓ : ℤ) = 0 := by
-    have huv : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr0
-    have hmodEq : (r.toNat : ℤ) ≡ u [ZMOD (ℓ : ℤ)] := by rw [huv, hr]; exact Int.mod_modEq u _
-    have hthis : eval (r.toNat : ℤ) % (ℓ : ℤ) = eval u % (ℓ : ℤ) := hmod hmodEq
-    rw [hthis, hu, Int.zero_emod]
-  -- but the test is `false`, i.e. no tested residue is a root, a contradiction
-  rw [anyBelow_eq_false] at h
-  grind [Int.beq'_ne]
-
-/-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
-theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 := by
-  rw [hasRootMod_eq _ _ _ (Nat.pos_of_ne_zero hℓ)] at h
-  exact no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
-
-/-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
-
-For the `t = 1` bound the `2`-division cubic factors as `(X - R) · q` with `q = X² + bX + c` an
-irreducible quadratic; certifying that `q` has no rational root is done exactly as for the cubic,
-by exhibiting a prime `ℓ` modulo which `q` has no root. -/
-
-/-- The value of the monic quadratic `u² + b u + c` at an integer `u`. -/
-def quadEval (b c u : ℤ) : ℤ := u ^ 2 + b * u + c
-
-/-- The quadratic evaluated at `r`, reduced mod `ℓ` in `Nat`, from residues `d₁ d₀ ∈ [0, ℓ)`. -/
-noncomputable def quadModL (d₁ d₀ ℓ r : ℕ) : ℕ :=
-  Nat.mod (Nat.add (Nat.add (Nat.mul r r) (Nat.mul d₁ r)) d₀) ℓ
-
-/-- The mod-`ℓ` `Nat` quadratic test matches the `ℤ` residue test (`ℓ > 0`). -/
-theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
-    Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0
-      = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
-  have : NeZero ℓ := ⟨hℓ.ne'⟩
-  have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
-  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
-  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
-  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
-  have hcast : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
-      = (quadEval b c (r : ℤ) : ZMod ℓ) := by
-    simp only [quadModL, quadEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      intResNat_cast]
-    push_cast; ring
-  have hnz : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
-      ↔ quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r = 0 := by
-    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
-  have h1 : Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0 = true
-      ↔ (ℓ : ℤ) ∣ quadEval b c (r : ℤ) := by
-    rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-  have h2 : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 = true
-      ↔ (ℓ : ℤ) ∣ quadEval b c (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
-
-/-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
-`ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => Nat.beq (quadModL (Int.emod b ℓ).toNat (Int.emod c ℓ).toNat ℓ r) 0
-
-/-- The `Nat` quadratic test agrees with the `ℤ` residue test. -/
-theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
-    quadHasRootMod b c ℓ = anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
-  rw [quadHasRootMod]
-  congr 1
-  funext r
-  rw [← Int.mod_def', ← Int.mod_def', quadModL_beq b c hℓ r]
-
-/-- `quadEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
-theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :
-    quadEval b c a ≡ quadEval b c a' [ZMOD n] := by
-  unfold quadEval
-  gcongr
-
-/-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
-theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 := by
-  rw [quadHasRootMod_eq _ _ (Nat.pos_of_ne_zero hℓ)] at h
-  exact no_int_root_of_anyBelow hℓ (quadEval_modEq (ℓ : ℤ)) h u
-
-open Polynomial in
-/-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
-root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
-theorem no_rat_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : quadHasRootMod b c ℓ = false) (x : ℚ)
-    (hx : x ^ 2 + (b : ℚ) * x + (c : ℚ) = 0) : False := by
-  set p : ℤ[X] := X ^ 2 + (C b * X + C c) with hp
-  have hdeg : (C b * X + C c).degree < 2 := by
-    refine lt_of_le_of_lt (degree_add_le _ _) ?_
-    rw [max_lt_iff]
-    exact ⟨lt_of_le_of_lt (degree_C_mul_X_le b) (by decide),
-      lt_of_le_of_lt degree_C_le (by decide)⟩
-  have hmonic : p.Monic := monic_X_pow_add hdeg
-  have haeval : aeval x p = x ^ 2 + (b : ℚ) * x + (c : ℚ) := by
-    simp only [hp, map_add, map_mul, map_pow, aeval_X, map_intCast, eq_intCast]
-    ring
-  have hroot : aeval x p = 0 := by rw [haeval, hx]
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  have hzcast : x = (z : ℚ) := by simp [hz]
-  refine no_int_root_of_quadHasRootMod_eq_false hℓ h z ?_
-  have hQ : ((quadEval b c z : ℤ) : ℚ) = 0 := by
-    simp only [quadEval]
-    push_cast
-    grind
-  exact_mod_cast hQ
-
-/-! ## The t = 0 lemma -/
+/-! ## The `t = 0` lemma -/
 
 open Polynomial in
 /-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
@@ -252,11 +71,12 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `ℓ ≠ 0`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
 `W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
-theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
+theorem no_nonzero_twoTorsion_of_cubicHasRootMod_eq_false
     (a₁ a₂ a₃ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (W : WeierstrassCurve ℚ)
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
-    (h : hasRootMod (a₁ ^ 2 + 4 * a₂) (8 * (2 * a₄ + a₁ * a₃)) (16 * (a₃ ^ 2 + 4 * a₆)) ℓ = false)
+    (h : cubicHasRootMod (a₁ ^ 2 + 4 * a₂) (8 * (2 * a₄ + a₁ * a₃))
+      (16 * (a₃ ^ 2 + 4 * a₆)) ℓ = false)
     (P : W.toAffine.Point) (hP : P + P = 0) : P = 0 := by
   -- eliminate the point-at-infinity case; work with `P = some x y h`
   obtain _ | ⟨x, y, hns⟩ := P
@@ -274,7 +94,7 @@ theorem no_nonzero_twoTorsion_of_hasRootMod_eq_false
   -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
   obtain ⟨z, hz⟩ :=
     exists_intRoot_of_twoTorsion a₁ a₂ a₃ a₄ a₆ W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
-  exact no_int_root_of_hasRootMod_eq_false hℓ h z hz
+  exact no_int_root_of_cubicHasRootMod_eq_false hℓ h z hz
 
 /-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
 
@@ -308,8 +128,7 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
 
 /-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
 `2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
-`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`). Each concrete bound
-just supplies an `Sx`: the cubic's roots (`≤ 3`) for the universal case, a singleton for `t = 1`. -/
+`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`). -/
 private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finset ℚ)
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
@@ -379,12 +198,12 @@ theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
 /-- The `t = 0` witness: if the monic `2`-division cubic of the short model has no root modulo a
 witness prime `ℓ ≠ 0`, then the only rational `2`-torsion point is the identity, so the `2`-torsion
 has at most one element. -/
-theorem card_twoTorsion_le_one_of_hasRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ = false) :
+theorem card_twoTorsion_le_one_of_cubicHasRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : cubicHasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ = false) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
   have hnn : ∀ P : (curve a₂ a₄ a₆).toAffine.Point, P + P = 0 → P = 0 := by
     intro P hP
-    refine no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 a₂ 0 a₄ a₆ hℓ _
+    refine no_nonzero_twoTorsion_of_cubicHasRootMod_eq_false 0 a₂ 0 a₄ a₆ hℓ _
       rfl rfl rfl rfl rfl ?_ P hP
     have e1 : (0 : ℤ) ^ 2 + 4 * a₂ = 4 * a₂ := by ring
     have e2 : 8 * (2 * a₄ + 0 * 0) = 16 * a₄ := by ring
@@ -455,10 +274,10 @@ universal `≤ 4` bound). -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
 theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (h : (hasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ).not' = true) :
+    (h : (cubicHasRootMod (4 * a₂) (16 * a₄) (64 * a₆) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 := by
   rw [pow_zero]
-  exact card_twoTorsion_le_one_of_hasRootMod a₂ a₄ a₆
+  exact card_twoTorsion_le_one_of_cubicHasRootMod a₂ a₄ a₆
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using h)
 
@@ -466,12 +285,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`cubicEval a₂ a₄ a₆ R == 0`) whose cofactor quadratic has no root modulo a prime
 `ℓ ≠ 0` (`!quadHasRootMod …`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : Int.beq' (cubicEvalRaw a₂ a₄ a₆ R) 0 = true)
+    (hR : Int.beq' (cubicEvalK a₂ a₄ a₆ R) 0 = true)
     (hq : (quadHasRootMod (a₂ + R) (a₄ + R * (a₂ + R)) ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa [Int.beq'_eq, cubicEvalRaw_eq] using hR)
+    (by simpa [Int.beq'_eq, cubicEvalK_eq] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
@@ -483,19 +302,18 @@ theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
 /-! ## Worked example: a `t = 0` certificate
 
 We exhibit the `t = 0` certificate on a concrete integral Weierstrass model whose 2-division cubic
-has no root modulo the witness prime `ℓ = 29`. (The rank-23 running curve of the project uses the
-same `ℓ = 29`; this stand-in curve has the identical certificate shape.)
+has no root modulo the witness prime `ℓ = 29`.
 
 For `a₁ = 1, a₂ = -3, a₃ = 1, a₄ = -3, a₆ = -2`, the monic 2-division cubic is
 `u³ - 11 u² - 40 u - 112`, and the kernel-reducible check confirms it has no root mod `29`. -/
 
 /-- The kernel check: the monic 2-division cubic of the example curve has no root mod `29`. -/
-example : hasRootMod (-11) (-40) (-112) 29 = false := rfl
+example : cubicHasRootMod (-11) (-40) (-112) 29 = false := rfl
 
 /-- Assembled `t = 0`: the example curve has no nonzero rational 2-torsion. -/
 example (P : (⟨1, -3, 1, -3, -2⟩ : WeierstrassCurve ℚ).toAffine.Point) (hP : P + P = 0) :
     P = 0 :=
-  no_nonzero_twoTorsion_of_hasRootMod_eq_false 1 (-3) 1 (-3) (-2) (ℓ := 29) (by norm_num)
+  no_nonzero_twoTorsion_of_cubicHasRootMod_eq_false 1 (-3) 1 (-3) (-2) (ℓ := 29) (by norm_num)
     ⟨1, -3, 1, -3, -2⟩ rfl rfl rfl rfl rfl rfl P hP
 
 end ECCompute

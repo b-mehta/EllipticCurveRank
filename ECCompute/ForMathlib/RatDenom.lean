@@ -68,21 +68,21 @@ theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (
   exact pow_ne_zero n hx
 
 /-- Good denominators are closed under division by a rational whose reduction is nonzero. -/
-theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
-    (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
-    ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
-  have hnum : (a.num : ZMod p) ≠ 0 := by
-    have hval : (a.num : ZMod p) = (a : ZMod p) * (a.den : ZMod p) := by
-      rw [Rat.cast_def, div_mul_cancel₀ _ ha]
+theorem den_div_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
+    (hy : (y.den : ZMod p) ≠ 0) (hy0 : (y : ZMod p) ≠ 0) :
+    ((x / y).den : ZMod p) ≠ 0 := by
+  have hy' : y ≠ 0 := fun h => hy0 (by rw [h, Rat.cast_zero])
+  have hnum : (y.num : ZMod p) ≠ 0 := by
+    have hval : (y.num : ZMod p) = (y : ZMod p) * (y.den : ZMod p) := by
+      rw [Rat.cast_def, div_mul_cancel₀ _ hy]
     rw [hval]
-    exact mul_ne_zero ha0 ha
-  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h => hnum <| by
+    exact mul_ne_zero hy0 hy
+  have hnatabs : ((y.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h => hnum <| by
     rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
     exact (ZMod.natCast_eq_zero_iff _ _).mp h
   rw [div_eq_mul_inv]
-  refine ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd b a⁻¹) ?_
-  rw [Nat.cast_mul, Rat.den_inv_of_ne_zero ha']
-  exact mul_ne_zero hb hnatabs
+  refine ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd x y⁻¹) ?_
+  rw [Nat.cast_mul, Rat.den_inv_of_ne_zero hy']
+  exact mul_ne_zero hx hnatabs
 
 end Rat

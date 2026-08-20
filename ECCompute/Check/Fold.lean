@@ -6,11 +6,22 @@ Authors: Bhavik Mehta
 import Mathlib.Data.List.Basic
 
 /-!
-# Kernel-reducible bounded and structural `Bool` folds
+# Kernel-reducible `Bool` primitives for the certificate checkers
 
-`anyBelow` folds a `Bool` predicate over `{m | m < n}` (via `Nat.rec`); `allList` folds a predicate
-over the members of a `List` (via `List.rec`). These are the building blocks the certificate
-checkers (`checkB`, `checkInv`, `checkPoints`, …) fold over.
+`anyBelow` folds a `Bool` predicate over `{m | m < n}` (via `Nat.rec`), `allList` folds a predicate
+over the members of a `List` (via `List.rec`), and `natBeqEq` identifies the kernel-cheap `Nat.beq`
+with the `BEq`-dispatched `==`. The certificate checkers (`checkB`, `checkInv`, `checkPoints`, …)
+are built from these.
+
+## Main definitions
+
+* `ECCompute.anyBelow`: the bounded `∃` fold.
+* `ECCompute.allList`: the `∀`-over-a-list fold.
+
+## Main results
+
+* `ECCompute.anyBelow_eq_false`, `ECCompute.allList_eq_true`: each fold computes its quantifier.
+* `ECCompute.natBeqEq`: `(a == b) = Nat.beq a b` on `ℕ`.
 -/
 
 namespace ECCompute
@@ -20,7 +31,7 @@ noncomputable def anyBelow (n : Nat) (p : Nat → Bool) : Bool :=
   Nat.rec false (fun m r => (p m).or' r) n
 
 /-- `anyBelow (n + 1) p` peels the top index: it folds `p n` into `anyBelow n p`. -/
-theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
+private theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
     anyBelow (n + 1) p = (p n).or' (anyBelow n p) := rfl
 
 /-- `anyBelow` is `false` exactly when `p` fails at every `m < n`. -/
@@ -37,7 +48,7 @@ noncomputable def allList {α : Type*} (p : α → Bool) : List α → Bool :=
   List.rec true (fun a _ r => (p a).and' r)
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
-theorem allList_cons {α : Type*} (p : α → Bool) (a : α) (l : List α) :
+private theorem allList_cons {α : Type*} (p : α → Bool) (a : α) (l : List α) :
     allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/

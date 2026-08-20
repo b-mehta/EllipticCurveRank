@@ -8,8 +8,6 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
-import Mathlib.Data.List.Range
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import ECCompute.Check.Fold
 
 /-!
@@ -29,9 +27,13 @@ where bit `j` of the `i`-th entry is the `(i, j)` matrix entry.
 With this layout the `(i, k)` entry of `B * M` is the parity of the popcount of
 `B.getD i 0 &&& M.getD k 0`.
 
-## Main results
+## Main definitions
 
 * `checkInv` : the `Bool` certificate checker.
+* `toMat`, `toMatCols` : the matrices the bitmask lists stand for.
+
+## Main results
+
 * `checkInv_isUnit` : the correctness lemma, `checkInv n B M = true → IsUnit (toMat B n)`.
 -/
 
@@ -44,9 +46,9 @@ def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
-/-- XOR of the low 32 bits of `v`, folded into bit 0 by five shift-xor stages (16, 8, 4, 2, 1).
-For input `v < 2 ^ n` this equals the spec `popParity n v` (`popParityK_eq`), the range `checkInv`
-enforces through `maskBelow`. -/
+/-- Parity of the popcount of the low 32 bits of `v`. For `v < 2 ^ n` with `n ≤ 32` this is the
+`n`-bit parity `popParity n v`, the range `checkInv` enforces through `maskBelow`. Spec:
+`popParityK_eq`. -/
 noncomputable def popParityK (v : Nat) : Bool :=
   let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
   let v := v.xor (v.shiftRight 4); let v := v.xor (v.shiftRight 2)
@@ -72,7 +74,7 @@ theorem popParity_eq_xorBits (fuel a : Nat) :
     rw [popParity, ih, List.range_succ_eq_map]
     simp only [xorBits, List.foldr_cons, List.foldr_map, Nat.testBit_zero, Nat.testBit_succ]
 
-/-- `ZMod 2` image of a `Bool`; injective and turns `Bool.xor` into `+`. -/
+/-- The `ZMod 2` value of a `Bool`: `1` for `true`, `0` for `false`. -/
 private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
 private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
@@ -81,7 +83,7 @@ private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
 private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
   cases a <;> cases b <;> decide
 
-/-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
+/-- For every `v`, `popParityK v` is the XOR over the low 32 bits of `v`. -/
 theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
@@ -117,21 +119,20 @@ theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
   refine xorBits_range_hi (fun j hj => ?_) 32 hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
-/-- Bridge: for `v < 2 ^ n` with `n ≤ 32`, the fold matches the `n`-bit `popParityK`. -/
+/-- For `v < 2 ^ n` with `n ≤ 32`, `popParityK v` is the `n`-bit parity `popParity n v`. -/
 theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
-/-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`)
-against the diagonal indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with
-`n ≤ 32`, which `checkInv` verifies separately. -/
+/-- One row of the inverse check: `true` iff at every column `k'` of `M` the parity of
+`bi &&& M[k']` is the diagonal indicator `i == k + k'`. Sound for `bi < 2 ^ n` and every mask of `M`
+below `2 ^ n` with `n ≤ 32`. Spec: `checkInvRow_true`. -/
 noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
   M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
     (fun m _ ih k => ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool)
       (Nat.beq i k).not' (Nat.beq i k)).and' (ih k.succ)) k
 
-theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
+private theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
       ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
         (Nat.beq i k)).and' (checkInvRow bi i k.succ ms) := rfl
@@ -141,7 +142,7 @@ noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
   B.rec (motive := fun _ => Nat → Bool) (fun _ => true)
     (fun b _ ih i => (checkInvRow b i 0 M).and' (ih i.succ)) i
 
-theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
+private theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) =
       (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
@@ -149,9 +150,9 @@ theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
 noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
   allList (fun x => Nat.blt x (Nat.shiftLeft 1 n)) L
 
-/-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
-rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
-masks fit in `n ≤ 32` bits, which `popParityK` relies on for soundness. -/
+/-- Kernel-reducible certificate checker: `true` iff every mask of `B` and `M` is below `2 ^ n`,
+`n ≤ 32`, and `B * M = I` over `𝔽₂` for the `n × n` matrices given by the row bitmasks `B` and the
+column bitmasks `M`. Spec: `checkInv_isUnit`. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
   (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo M 0 B)))
 
@@ -236,7 +237,7 @@ theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
   rw [maskBelow, allList_eq_true]
   simp only [shiftLeft_one, Nat.blt_eq]
 
-/-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
+/-- A passing `checkInv` yields the bounds on `B` and on `M`, `n ≤ 32`, and `checkInvGo M 0 B`. -/
 theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
     (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B = true := by
   simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
