@@ -158,7 +158,6 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
     lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
       (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast L.2)
       (int_toNat_sub P.1.num) rfl
-  rw [F2Invert.toMat, List.getD_eq_getElem (hn := by rw [hBlen]; exact i.isLt), hcell, hbridge,
-    lambdaCompute_eq_bool]
+  rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), hcell, hbridge, lambdaCompute_eq_bool]
 
 end ECCompute
