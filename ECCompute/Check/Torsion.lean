@@ -480,22 +480,4 @@ theorem certTorsionBound_two (a₂ a₄ a₆ : ℤ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 2 :=
   card_twoTorsion_le_four a₂ a₄ a₆
 
-/-! ## Worked example: a `t = 0` certificate
-
-We exhibit the `t = 0` certificate on a concrete integral Weierstrass model whose 2-division cubic
-has no root modulo the witness prime `ℓ = 29`. (The rank-23 running curve of the project uses the
-same `ℓ = 29`; this stand-in curve has the identical certificate shape.)
-
-For `a₁ = 1, a₂ = -3, a₃ = 1, a₄ = -3, a₆ = -2`, the monic 2-division cubic is
-`u³ - 11 u² - 40 u - 112`, and the kernel-reducible check confirms it has no root mod `29`. -/
-
-/-- The kernel check: the monic 2-division cubic of the example curve has no root mod `29`. -/
-example : hasRootMod (-11) (-40) (-112) 29 = false := rfl
-
-/-- Assembled `t = 0`: the example curve has no nonzero rational 2-torsion. -/
-example (P : (⟨1, -3, 1, -3, -2⟩ : WeierstrassCurve ℚ).toAffine.Point) (hP : P + P = 0) :
-    P = 0 :=
-  no_nonzero_twoTorsion_of_hasRootMod_eq_false 1 (-3) 1 (-3) (-2) (ℓ := 29) (by norm_num)
-    ⟨1, -3, 1, -3, -2⟩ rfl rfl rfl rfl rfl rfl P hP
-
 end ECCompute

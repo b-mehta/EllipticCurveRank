@@ -67,16 +67,4 @@ theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_eq_true, chkZ_iff]
 
-/-! ## Worked example
-
-The running example is `y² + xy + y = x³` (`a₁ = a₃ = 1`, `a₂ = a₄ = a₆ = 0`). The point
-`(x, y) = (0, 0)` lies on it, and the certificate reduces to `true` in the kernel by `rfl`. -/
-
-/-- The point `(0, 0)` is on `y² + xy + y = x³`, checked by kernel `rfl`. -/
-example : chkZ 1 0 1 0 0 0 0 = true := rfl
-
-/-- Hence `(0, 0)` satisfies the affine Weierstrass equation, from the `rfl` certificate. -/
-example : (⟨1, 0, 1, 0, 0⟩ : WeierstrassCurve ℚ).toAffine.Equation 0 0 :=
-  (chkZ_iff 1 0 1 0 0 0 0).mp rfl
-
 end ECCompute

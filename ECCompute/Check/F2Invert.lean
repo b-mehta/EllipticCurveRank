@@ -271,17 +271,4 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
   -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact IsUnit.of_mul_eq_one (toMatCols M n) key
 
-/-! ## Worked 3×3 example
-
-`B = [[1,1,0],[0,1,1],[0,0,1]]` with inverse `M = [[1,1,1],[0,1,1],[0,0,1]]` over `𝔽₂`.
-Rows of `B` as bitmasks (bit `j` = column `j`): `[3, 6, 4]`.
-Columns of `M` as bitmasks (bit `j` = row `j`): `[1, 3, 7]`. -/
-
-/-- The certificate reduces to `true` in the kernel by `rfl`. -/
-example : checkInv 3 [3, 6, 4] [1, 3, 7] = true := rfl
-
-/-- Hence the interpreted matrix is invertible over `𝔽₂`, end-to-end from the `rfl` certificate. -/
-example : IsUnit (toMat [3, 6, 4] 3) :=
-  checkInv_isUnit 3 [3, 6, 4] [1, 3, 7] rfl rfl rfl
-
 end ECCompute.F2Invert

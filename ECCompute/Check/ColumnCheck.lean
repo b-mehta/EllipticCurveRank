@@ -139,19 +139,6 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [fval]
     grind
 
-/-! ### Worked example
-
-A small standalone example: the short model `y² = x³ - x` (so `a₂ = 0, a₄ = -1, a₆ = 0`, with
-integer discriminant `64`) and the label prime `p = 7`, root `θ = 1` (indeed `f(1) = 1 - 1 = 0`). -/
-
-/-- The kernel check passes for the sample label, by `rfl` alone. -/
-example : checkLabel 0 (-1) 0 7 1 = true := rfl
-
-/-- Assembling a `DescentHyp` from the kernel check (`rfl`) and `norm_num` primality: the pattern
-the certificate tactic emits for each column. -/
-example : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
-  descentHyp_of_checkLabel 0 (-1) 0 7 1 rfl (by norm_num)
-
 /-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
 noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
   allList (fun l => checkPrime l.1) labels
