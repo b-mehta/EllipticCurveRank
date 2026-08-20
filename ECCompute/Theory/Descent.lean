@@ -107,7 +107,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
   have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
-      rw [← baseChange_curveℤ_ℚ, baseChange, algebraMap_int_eq, map_Δ, eq_intCast]
+      rw [← map_curveℤ_ℚ, map_Δ, eq_intCast]
     rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ]
     grind
   simp only [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, map_add]

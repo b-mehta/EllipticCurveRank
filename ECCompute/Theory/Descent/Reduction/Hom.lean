@@ -62,9 +62,8 @@ theorem Projective.equiv_of_toAffine_eq {F : Type*} [Field F] {W : Projective F}
   have hVl : W.NonsingularLift ⟦V⟧ := (Projective.nonsingularLift_iff V).mpr hV
   have hmk : (⟨hUl⟩ : W.Point) = ⟨hVl⟩ := by
     apply (Projective.Point.toAffineAddEquiv W).injective
-    rw [Projective.Point.toAffineAddEquiv_apply, Projective.Point.toAffineAddEquiv_apply,
+    rwa [Projective.Point.toAffineAddEquiv_apply, Projective.Point.toAffineAddEquiv_apply,
       Projective.Point.toAffineLift_eq, Projective.Point.toAffineLift_eq]
-    exact h
   exact Quotient.exact (congrArg Projective.Point.point hmk)
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
@@ -212,11 +211,6 @@ theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {V 
 
 /-! ### Additivity -/
 
-/-- The integral model maps to the rational curve under `ℤ → ℚ`. -/
-private theorem map_curveℤ_ℚ :
-    (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
-
 /-- The rational curve equation in cleared form `y² = x³ + a₂x² + a₄x + a₆`. -/
 private theorem curve_equation_iff {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
@@ -309,23 +303,21 @@ private theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
       grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
-    rw [Rat.cast_pow,
+    rwa [Rat.cast_pow,
       Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
       Rat.cast_add_of_ne_zero (den_add_ne_zero hd3 (by simp)) hd1,
       Rat.cast_add_of_ne_zero hd3 (by simp), Rat.cast_intCast] at hc
-    exact hc
   · have hℓmul : ℓ * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
       rw [hℓdef]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
-    rw [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
+    rwa [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
       Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
-    exact hc
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
 private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
-  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
+  rw [← Rat.mul_den_eq_num, hd]; push_cast; ring
 
 /-- The numerator of a rational with square denominator `w²` is prime to any `p ∣ w`: since
 `num`, `den` are coprime and `w² = den`, a prime dividing both `num` and `w` would be a unit. -/
@@ -446,7 +438,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
     exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
-    rw [eq_div_iff hDen3Q]; exact hMain
+    rwa [eq_div_iff hDen3Q]
   have hx3neg : padicValRat p x₃ < 0 := by
     rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
@@ -562,13 +554,6 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
     y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
   have := WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
   grind [Affine.Point.some.injEq]
-
-/-- Reduced-curve negation is `Y ↦ -Y`, since `a₁ = a₃ = 0` for the integral model. -/
-@[grind =]
-private theorem reduced_negY (X Y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
-    (by simp [WeierstrassCurve.map, curveℤ]) X Y
 
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` survives reduction, so does the slope:
 from `ℓ² = addX + a₂ + x₁ + x₂` a nonzero `addX`-denominator forces a nonzero `ℓ`-denominator. -/

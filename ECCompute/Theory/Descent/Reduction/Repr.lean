@@ -40,17 +40,15 @@ def Trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, (w : ℤ) 
 private theorem map_curveℤ_toProjective :
     (curveℤ a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curve a₂ a₄ a₆).toProjective := by
   change (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
+  exact map_curveℤ_ℚ a₂ a₄ a₆
 
 variable {x y : ℚ} {w : ℕ}
 
 /-- Over `ℚ`, the integer representative equals `w³ • [x : y : 1]`. -/
 theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (Int.castRingHom ℚ) ∘ Trep x y w = (w : ℚ) ^ 3 • ![x, y, 1] := by
-  have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
-    (div_eq_iff (by exact_mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
-  have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
-    (div_eq_iff (by exact_mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
+  have hx : (x.num : ℚ) = x * (x.den : ℚ) := (Rat.mul_den_eq_num x).symm
+  have hy : (y.num : ℚ) = y * (y.den : ℚ) := (Rat.mul_den_eq_num y).symm
   have e0 : (Int.castRingHom ℚ) (x.num * (w : ℤ)) = (w : ℚ) ^ 3 * x := by
     rw [eq_intCast]; push_cast; rw [hx, hden]; grind
   have e1 : (Int.castRingHom ℚ) (y.num) = (w : ℚ) ^ 3 * y := by
