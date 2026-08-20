@@ -43,9 +43,7 @@ the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩
 theorem chkZ_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
     chkZ a₁ a₂ a₃ a₄ a₆ x y = true ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
-  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
-  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq, hmul, hadd]
+  simp only [WeierstrassCurve.Affine.equation_iff, chkZ, Int.beq'_eq, Int.mul_def, Int.add_def]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
