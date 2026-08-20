@@ -3,14 +3,13 @@
 Certified lower bounds on the Mordell-Weil rank of elliptic curves over `ℚ`, in Lean 4 on top of
 mathlib.
 
-For a Weierstrass curve `E/ℚ` and an integer `ρ`, ECCompute produces a term of `HasRankGE E ρ`,
-the statement that `E(ℚ)` contains a finitely generated subgroup of rank at least `ρ`. Every
-computational obligation reduces in the Lean kernel via `Lean.reflBoolTrue`, so each certificate is
-trusted at the level of Lean's own type theory.
+For a Weierstrass curve `E/ℚ` and an integer `ρ`, ECCompute produces a term of `HasRankGE E ρ`:
+`E(ℚ)` contains a finitely generated subgroup of rank at least `ρ`. Every check reduces in the Lean
+kernel via `Lean.reflBoolTrue`.
 
 The headline result is
 [curve 273](https://elliptic-rank.icarm.cloud/curve/273) of the ICARM Elliptic Curve Rank
-Leaderboard, certified at rank at least `30`:
+Leaderboard, at rank at least `30`:
 
 ```lean
 def curve273 : WeierstrassCurve ℚ :=
@@ -22,10 +21,9 @@ theorem curve273_hasRankGE_30 : HasRankGE curve273 30 := by
   certify_curve torsion 23 points "data/curve273.txt" labels "data/curve273-labels.txt"
 ```
 
-The 30 witness points from the leaderboard, transported to the integral short model, live in
-`data/curve273.txt`; their descent labels in `data/curve273-labels.txt`. `torsion 23` concedes an
-upper bound on the 2-torsion dimension `t`; `certify_curve fullTorsion` is the form that certifies
-`t` in full.
+The 30 points and their descent labels live in `data/curve273.txt` and `data/curve273-labels.txt`.
+`torsion 23` concedes an upper bound on the 2-torsion dimension `t`; `fullTorsion` certifies `t`
+instead.
 
 ## How it works
 
@@ -69,7 +67,6 @@ The descent method is Section 2 of J. E. Cremona, *On the computation of Mordell
 groups of elliptic curves*, [johncremona.github.io/papers/filter.pdf](https://johncremona.github.io/papers/filter.pdf).
 
 Much of this work was done at the
-[Lean for the LMFDB](https://multramate.github.io/lean-lmfdb/) workshop, funded through the project
-[Scalable Theorem Proving via Mathematical Databases](https://www.renaissancephilanthropy.org/scalable-theorem-proving),
-supported by the AI for Math Fund managed by Renaissance Philanthropy in partnership with founding
-donor XTX Markets.
+[Lean for the LMFDB](https://multramate.github.io/lean-lmfdb/) workshop, funded by the project
+[Scalable Theorem Proving via Mathematical Databases](https://www.renaissancephilanthropy.org/scalable-theorem-proving)
+through the AI for Math Fund, managed by Renaissance Philanthropy with founding donor XTX Markets.
