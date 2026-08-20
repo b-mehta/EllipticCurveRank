@@ -332,8 +332,7 @@ private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
 private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
     ¬ (p : ℤ) ∣ q.num := by
   intro hdvd
-  have hcop : IsCoprime q.num (w ^ 2) := by
-    rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
+  have hcop : IsCoprime q.num (w ^ 2) := hd ▸ Rat.isCoprime_num_den q
   exact absurd (Int.isUnit_iff.mp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
     (by have := (Fact.out : p.Prime).two_le; lia)

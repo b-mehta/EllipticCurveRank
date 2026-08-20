@@ -85,8 +85,7 @@ theorem Trep_nonsingular (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
 /-- The `y`- and `z`-coordinates of the representative are coprime; in particular the
 representative is primitive. -/
 theorem Trep_primitive (hden' : y.den = w ^ 3) : IsCoprime (y.num) ((w : ℤ) ^ 3) := by
-  have : IsCoprime (y.num) (y.den : ℤ) :=
-    Int.isCoprime_iff_nat_coprime.mpr (by simpa using y.reduced)
+  have : IsCoprime (y.num) (y.den : ℤ) := Rat.isCoprime_num_den y
   rwa [hden', Nat.cast_pow] at this
 
 end ECCompute

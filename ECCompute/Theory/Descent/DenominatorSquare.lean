@@ -72,10 +72,8 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     exact_mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3
-  have hcx : IsCoprime x.num (x.den : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using x.reduced
-  have hcy : IsCoprime y.num (y.den : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
+  have hcx : IsCoprime x.num (x.den : ℤ) := Rat.isCoprime_num_den x
+  have hcy : IsCoprime y.num (y.den : ℤ) := Rat.isCoprime_num_den y
   have hcN : IsCoprime N (x.den : ℤ) := by
     have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
         (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by grind
