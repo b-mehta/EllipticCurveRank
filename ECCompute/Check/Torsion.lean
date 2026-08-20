@@ -29,6 +29,14 @@ namespace ECCompute
 
 open WeierstrassCurve
 
+/-- A `Nat` residue `n < ℓ` whose `ZMod ℓ` image is that of `z` tests zero exactly when `z % ℓ`
+does. -/
+private theorem natBeq_zero_eq_intBeq' {ℓ n : ℕ} {z : ℤ} (hlt : n < ℓ)
+    (hcast : ((n : ℕ) : ZMod ℓ) = (z : ZMod ℓ)) :
+    Nat.beq n 0 = Int.beq' (z % (ℓ : ℤ)) 0 := by
+  rw [Bool.eq_iff_iff, Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast,
+    ZMod.intCast_zmod_eq_zero_iff_dvd, Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
+
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
@@ -38,9 +46,7 @@ def cubicEvalRaw (c₂ c₁ c₀ u : ℤ) : ℤ :=
     (Int.mul c₁ u)) c₀
 
 theorem cubicEvalRaw_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalRaw c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
-  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
-  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
-  simp only [cubicEvalRaw, cubicEval, hmul, hadd]
+  simp only [cubicEvalRaw, cubicEval, Int.mul_def, Int.add_def]
   ring
 
 /-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
@@ -55,24 +61,11 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
       = Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
   have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
-  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
-  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
-  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
-  have hcast : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
-      = (cubicEval c₂ c₁ c₀ (r : ℤ) : ZMod ℓ) := by
-    simp only [cubicModL, cubicEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add,
-      Nat.cast_mul, intResNat_cast]
-    push_cast; ring
-  have hnz : ((cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
-      ↔ cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r = 0 := by
-    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
-  have h1 : Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0 = true
-      ↔ (ℓ : ℤ) ∣ cubicEval c₂ c₁ c₀ (r : ℤ) := by
-    rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-  have h2 : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 = true
-      ↔ (ℓ : ℤ) ∣ cubicEval c₂ c₁ c₀ (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
+  refine natBeq_zero_eq_intBeq' hlt ?_
+  simp only [cubicModL, cubicEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
+    Nat.cast_add, Nat.cast_mul, intResNat_cast]
+  push_cast
+  ring
 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
 modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
@@ -142,24 +135,11 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
       = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
   have : NeZero ℓ := ⟨hℓ.ne'⟩
   have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
-  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
-  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
-  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
-  have hcast : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ)
-      = (quadEval b c (r : ℤ) : ZMod ℓ) := by
-    simp only [quadModL, quadEval, em, ea, el, ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      intResNat_cast]
-    push_cast; ring
-  have hnz : ((quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r : ℕ) : ZMod ℓ) = 0
-      ↔ quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r = 0 := by
-    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
-  have h1 : Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0 = true
-      ↔ (ℓ : ℤ) ∣ quadEval b c (r : ℤ) := by
-    rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-  have h2 : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 = true
-      ↔ (ℓ : ℤ) ∣ quadEval b c (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
+  refine natBeq_zero_eq_intBeq' hlt ?_
+  simp only [quadModL, quadEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
+    Nat.cast_add, Nat.cast_mul, intResNat_cast]
+  push_cast
+  ring
 
 /-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
 `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
