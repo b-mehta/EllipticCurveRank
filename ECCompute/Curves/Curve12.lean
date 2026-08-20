@@ -4,6 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Tactic.CertifyCurve
+import ECCompute.Check.JInvariant
 
 /-!
 # Curve 12 has rank at least 29
@@ -35,5 +36,13 @@ def curve12 : WeierstrassCurve ℚ :=
 theorem curve12_hasRankGE_29 : HasRankGE curve12 29 := by
   unfold curve12
   certify_curve torsion 67 points "data/curve12.txt" labels "data/curve12-labels.txt"
+
+/-- Curve 12 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curve12.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve 12. -/
+theorem curve12_j : curve12.j = -2178278186417661901253576189103582365997935396472623778840162578414756885078160008166998745534482953456950649575682874999212260264866779577866068298184392291373758903459432104260760768986641 / 58514056884179895803252795545068205623215359270190478217393508483140281138663769634024489915971980794469429246265449489823479442097938729025702174957426421151737866434992604323840000000 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

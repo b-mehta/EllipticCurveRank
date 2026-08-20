@@ -36,9 +36,9 @@ theorem curve13_hasRankGE_3 : HasRankGE curve13 3 := by
     points "data/curve13.txt" labels "data/curve13-labels.txt"
 
 /-- Curve 13 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
-instance : curve13.IsElliptic := isElliptic_of_bne (by quickRfl)
+instance : curve13.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
 /-- The `j`-invariant of curve 13 is `1728` (it has complex multiplication by `ℤ[i]`). -/
-theorem curve13_j : curve13.j = 1728 := j_eq_of_beq _ 1728 (by quickRfl)
+theorem curve13_j : curve13.j = 1728 := j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

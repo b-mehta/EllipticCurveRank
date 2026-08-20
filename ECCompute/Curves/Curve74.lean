@@ -4,6 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Tactic.CertifyCurve
+import ECCompute.Check.JInvariant
 
 /-!
 # Curve 74 has rank at least 21
@@ -33,5 +34,13 @@ def curve74 : WeierstrassCurve ℚ :=
 theorem curve74_hasRankGE_21 : HasRankGE curve74 21 := by
   unfold curve74
   certify_curve torsion 11 points "data/curve74.txt" labels "data/curve74-labels.txt"
+
+/-- Curve 74 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curve74.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve 74. -/
+theorem curve74_j : curve74.j = 1112096004752851462729397594359132384395809315460462776640080386721422130341804188923888915794608773116288507441 / 479737754043767746536923774462246533556793859277365678757052823009411494064048885744243744500948985175040000 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
