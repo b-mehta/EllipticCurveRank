@@ -194,26 +194,26 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
   -- by index. Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
-  have hmemP : ∀ i : Fin c.rho, c.points[i.val] ∈ c.points := fun i => List.getElem_mem _
-  have hmemL : ∀ j : Fin c.rho, c.labels[j.val] ∈ c.labels := fun j => List.getElem_mem _
+  have hmemP : ∀ i : Fin c.rho, c.points[i] ∈ c.points := fun i => List.getElem_mem _
+  have hmemL : ∀ j : Fin c.rho, c.labels[j] ∈ c.labels := fun j => List.getElem_mem _
   have hcurve : curve c.a₂ c.a₄ c.a₆ = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
     simp only [curve]
   rw [checkPoints_iff] at hpt
   have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation
-      c.points[i.val].1 c.points[i.val].2 := by
+      c.points[i].1 c.points[i].2 := by
     intro i
     rw [hcurve]
     exact hpt _ (hmemP i)
-  have hlabP' : ∀ j : Fin c.rho, (c.labels[j.val].1).Prime :=
+  have hlabP' : ∀ j : Fin c.rho, (c.labels[j].1).Prime :=
     fun j => checkPrimes_true hlabP _ (hmemL j)
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
-      c.labels[j.val].1 c.labels[j.val].2 = true :=
+      c.labels[j].1 c.labels[j].2 = true :=
     fun j => checkLabels_true hlabC _ (hmemL j)
   -- Each label's prime divides `6` nowhere, so it is `≠ 2` (needed for the residue-mask lookup).
-  have hp2' : ∀ j : Fin c.rho, c.labels[j.val].1 ≠ 2 := fun j he =>
+  have hp2' : ∀ j : Fin c.rho, c.labels[j].1 ≠ 2 := fun j he =>
     (descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ _ _ (hlabC' j) (hlabP' j)).ne_six (he ▸ ⟨3, rfl⟩)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
-    rank_ge_of_certificate c (fun i => c.points[i.val]) (fun j => c.labels[j.val])
+    rank_ge_of_certificate c (fun i => c.points[i]) (fun j => c.labels[j])
       hpt' hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hlabP' hp2' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)

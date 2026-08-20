@@ -121,12 +121,14 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
     {lab : List (ℕ × ℤ)} {qms : List ℕ} {pt : List (ℚ × ℚ)}
     (hBlen : matB.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
     (hqlen : qms.length = rho)
-    (hpr : ∀ j : Fin rho, (lab[j.val].1).Prime)
-    (hp2 : ∀ j : Fin rho, lab[j.val].1 ≠ 2)
+    (hpr : ∀ j : Fin rho, (lab[j].1).Prime)
+    (hp2 : ∀ j : Fin rho, lab[j].1 ≠ 2)
     (h : checkB a₂ a₄ lab qms matB pt = true) :
     ∀ i j : Fin rho, F2Invert.toMat matB rho i j =
-      lambdaCompute a₂ a₄ lab[j.val].1 ((lab[j.val].2 : ZMod lab[j.val].1)) pt[i.val].1 := by
+      lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by
   intro i j
+  -- The row and column lemmas below index by `ℕ`, so read every entry through `Fin.val`.
+  simp only [Fin.getElem_fin]
   set L : ℕ × ℤ := lab[j.val] with hL
   set P : ℚ × ℚ := pt[i.val] with hP
   have hp : 0 < L.1 := (hpr j).pos
