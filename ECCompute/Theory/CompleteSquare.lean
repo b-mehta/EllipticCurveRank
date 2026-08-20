@@ -14,14 +14,10 @@ Over `ℚ` (characteristic `≠ 2`) the substitution `y ↦ y - (a₁x + a₃)/2
 `y² = x³ + a₂'x² + a₄'x + a₆'`, on which the descent character is stated. Rank is an isomorphism
 invariant, so a rank lower bound on the short model transfers back; see `pointAddEquiv`.
 
-The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism lives in
-`ECCompute.Check.Points`.
-
 ## Main results
 
-* `CompleteSquare.completeSquare`, `CompleteSquare.shortModel`: the
-  `⟨1, 0, -a₁/2, -a₃/2⟩` change of variables and the resulting short model
-  `y² = x³ + a₂'x² + a₄'x + a₆'`.
+* `CompleteSquare.completeSquare`, `CompleteSquare.shortModel`: the `⟨1, 0, -a₁/2, -a₃/2⟩` change
+  of variables and the resulting short model `y² = x³ + a₂'x² + a₄'x + a₆'`.
 * `CompleteSquare.pointAddEquiv`: this change of variables as a group isomorphism `W.Point ≃+
   (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
@@ -43,10 +39,12 @@ def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ :=
 def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
   completeSquare W • W
 
+/-- The short model has `a₁ = 0`. -/
 @[simp]
 theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₁]
 
+/-- The `a₂` coefficient of the short model is `a₂ + a₁²/4`. -/
 @[simp]
 theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
@@ -54,10 +52,12 @@ theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
     Units.val_one, one_pow]
   ring
 
+/-- The short model has `a₃ = 0`. -/
 @[simp]
 theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₃]
 
+/-- The `a₄` coefficient of the short model is `a₄ + a₁a₃/2`. -/
 @[simp]
 theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
@@ -65,6 +65,7 @@ theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
     Units.val_one, one_pow]
   ring
 
+/-- The `a₆` coefficient of the short model is `a₆ + a₃²/4`. -/
 @[simp]
 theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
@@ -190,6 +191,7 @@ def bwd :
       ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
         (by simpa using h))
 
+/-- The forward map on an affine point, unfolded. -/
 @[simp] theorem fwd_some (x y : ℚ)
     (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h)
@@ -197,6 +199,7 @@ def bwd :
         ((nonsingular_completeSquare W x y).mp h) :=
   rfl
 
+/-- The inverse map on an affine point, unfolded. -/
 @[simp] theorem bwd_some (x y : ℚ)
     (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)

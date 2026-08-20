@@ -29,12 +29,6 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
-@[grind =]
-private theorem reduced_negY (X Y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
-    (by simp [WeierstrassCurve.map, curveℤ]) X Y
-
 /-! ### The fixed projective representative -/
 
 /-- The fixed `ZMod p`-projective representative of an affine point used to compute `red_p`:

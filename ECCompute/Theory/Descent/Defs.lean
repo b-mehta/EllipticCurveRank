@@ -23,6 +23,7 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 
 * `ECCompute.psi`: the Legendre symbol into `ZMod 2`.
 * `ECCompute.curve`: the Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
+* `ECCompute.equation_curve`: its affine equation in cleared form.
 * `ECCompute.lambda`: the raw function `E(ℚ) → ZMod 2`.
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
@@ -69,6 +70,7 @@ noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point �
       let α : ZMod p := x.num - θ * x.den
       if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
 
+/-- The descent character vanishes at the origin. -/
 @[simp]
 theorem lambda_zero (θ : ZMod p) :
     lambda a₂ a₄ a₆ p θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 :=
@@ -91,5 +93,16 @@ structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where
   root : fval a₂ a₄ a₆ p θ = 0
 
 attribute [grind →] DescentHyp.discr DescentHyp.root
+
+variable {a₂ a₄ a₆ p} {θ : ZMod p}
+
+/-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
+theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
+  fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
+
+/-- The root hypothesis `f(θ) = 0` in expanded form. -/
+theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
+    θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
+  simpa [fval] using h.root
 
 end ECCompute

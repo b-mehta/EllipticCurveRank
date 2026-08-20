@@ -45,6 +45,10 @@ theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
   simp only [WeierstrassCurve.mk.injEq]
   exact ⟨eq_of_beq h₁, eq_of_beq h₂, eq_of_beq h₃, eq_of_beq h₄, eq_of_beq h₆⟩
 
+/-- A `List.length` equality from a kernel-reducible `Nat.beq` check on the length. -/
+theorem length_eq_of_beq {α : Type*} {l : List α} {n : ℕ} (h : l.length.beq n = true) :
+    l.length = n := Nat.eq_of_beq_eq_true h
+
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
 def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
@@ -172,7 +176,7 @@ theorem rank_ge_of_certificate (c : Certificate)
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
 target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`
 equal to that model (`hW`), and the referee facts of `rank_ge_of_certificate`, the Mordell-Weil
-rank of `W` over `ℚ` is at least `c.rho`. -/
+rank of `W` over `ℚ` is at least `c.rho - c.t`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)

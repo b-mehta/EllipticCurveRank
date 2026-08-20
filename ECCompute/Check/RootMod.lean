@@ -11,12 +11,12 @@ import ECCompute.Check.IntResNat
 # Ruling out roots of a monic integer polynomial by a residue search
 
 For a monic integer cubic `u³ + c₂u² + c₁u + c₀` or quadratic `u² + bu + c` and a modulus `ℓ`,
-`hasRootMod` and `quadHasRootMod` try every residue `0, …, ℓ - 1` in `Nat` arithmetic. A `false`
-result rules out an integer root, and for the quadratic a rational one.
+`cubicHasRootMod` and `quadHasRootMod` try every residue `0, …, ℓ - 1` in `Nat` arithmetic. A
+`false` result rules out an integer root, and for the quadratic a rational one.
 
 ## Main results
 
-* `ECCompute.no_int_root_of_hasRootMod_eq_false`: a failed cubic search rules out an integer root.
+* `ECCompute.no_int_root_of_cubicHasRootMod_eq_false`: a failed search rules out an integer root.
 * `ECCompute.no_int_root_of_quadHasRootMod_eq_false`,
   `ECCompute.no_rat_root_of_quadHasRootMod_eq_false`: the same for the quadratic.
 -/
@@ -33,12 +33,12 @@ private theorem natBeq_zero_eq_intBeq' {ℓ n : ℕ} {z : ℤ} (hlt : n < ℓ)
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
 
 /-- `cubicEval` with the raw `Int.mul`/`Int.add` primitives (powers expanded), for kernel use. -/
-def cubicEvalRaw (c₂ c₁ c₀ u : ℤ) : ℤ :=
+def cubicEvalK (c₂ c₁ c₀ u : ℤ) : ℤ :=
   Int.add (Int.add (Int.add (Int.mul (Int.mul u u) u) (Int.mul c₂ (Int.mul u u)))
     (Int.mul c₁ u)) c₀
 
-theorem cubicEvalRaw_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalRaw c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
-  simp only [cubicEvalRaw, cubicEval, Int.mul_def, Int.add_def]
+theorem cubicEvalK_eq (c₂ c₁ c₀ u : ℤ) : cubicEvalK c₂ c₁ c₀ u = cubicEval c₂ c₁ c₀ u := by
+  simp only [cubicEvalK, cubicEval, Int.mul_def, Int.add_def]
   ring
 
 /-- The cubic evaluated at `r`, reduced mod `ℓ` in `Nat`, from coefficients already reduced to the
@@ -48,11 +48,12 @@ noncomputable def cubicModL (d₂ d₁ d₀ ℓ r : ℕ) : ℕ :=
     (Nat.mul d₁ r)) d₀) ℓ
 
 /-- The mod-`ℓ` `Nat` cubic test matches the `ℤ` residue test (`ℓ > 0`). -/
-theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
+theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) (r : ℕ) :
     Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0
       = Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  have : NeZero ℓ := ⟨hℓ.ne'⟩
-  have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
+  have : NeZero ℓ := ⟨hℓ⟩
+  have hlt : cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r < ℓ :=
+    Nat.mod_lt _ (Nat.pos_of_ne_zero hℓ)
   refine natBeq_zero_eq_intBeq' hlt ?_
   simp only [cubicModL, cubicEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_mul, intResNat_cast]
@@ -61,15 +62,15 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
 modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def hasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
+noncomputable def cubicHasRootMod (c₂ c₁ c₀ : ℤ) (ℓ : ℕ) : Bool :=
   anyBelow ℓ fun r =>
     Nat.beq (cubicModL (Int.emod c₂ ℓ).toNat (Int.emod c₁ ℓ).toNat (Int.emod c₀ ℓ).toNat ℓ r) 0
 
 /-- The `Nat` test agrees with the `ℤ` residue test, bridging to the `ℤ` no-root argument. -/
-theorem hasRootMod_eq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
-    hasRootMod c₂ c₁ c₀ ℓ
+theorem cubicHasRootMod_eq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) :
+    cubicHasRootMod c₂ c₁ c₀ ℓ
       = anyBelow ℓ fun r => Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 := by
-  rw [hasRootMod]
+  rw [cubicHasRootMod]
   congr 1
   funext r
   rw [← Int.mod_def', ← Int.mod_def', ← Int.mod_def', cubicModL_beq c₂ c₁ c₀ hℓ r]
@@ -103,9 +104,9 @@ private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ :
   grind [Int.beq'_ne]
 
 /-- If the monic cubic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
-theorem no_int_root_of_hasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : hasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 := by
-  rw [hasRootMod_eq _ _ _ (Nat.pos_of_ne_zero hℓ)] at h
+theorem no_int_root_of_cubicHasRootMod_eq_false {c₂ c₁ c₀ : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : cubicHasRootMod c₂ c₁ c₀ ℓ = false) (u : ℤ) : cubicEval c₂ c₁ c₀ u ≠ 0 := by
+  rw [cubicHasRootMod_eq _ _ _ hℓ] at h
   exact no_int_root_of_anyBelow hℓ (cubicEval_modEq (ℓ : ℤ)) h u
 
 /-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
@@ -122,11 +123,11 @@ noncomputable def quadModL (d₁ d₀ ℓ r : ℕ) : ℕ :=
   Nat.mod (Nat.add (Nat.add (Nat.mul r r) (Nat.mul d₁ r)) d₀) ℓ
 
 /-- The mod-`ℓ` `Nat` quadratic test matches the `ℤ` residue test (`ℓ > 0`). -/
-theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
+theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) (r : ℕ) :
     Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0
       = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
-  have : NeZero ℓ := ⟨hℓ.ne'⟩
-  have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ hℓ
+  have : NeZero ℓ := ⟨hℓ⟩
+  have hlt : quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r < ℓ := Nat.mod_lt _ (Nat.pos_of_ne_zero hℓ)
   refine natBeq_zero_eq_intBeq' hlt ?_
   simp only [quadModL, quadEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_mul, intResNat_cast]
@@ -139,7 +140,7 @@ noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
   anyBelow ℓ fun r => Nat.beq (quadModL (Int.emod b ℓ).toNat (Int.emod c ℓ).toNat ℓ r) 0
 
 /-- The `Nat` quadratic test agrees with the `ℤ` residue test. -/
-theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
+theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) :
     quadHasRootMod b c ℓ = anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
   rw [quadHasRootMod]
   congr 1
@@ -155,7 +156,7 @@ theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]
 /-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 := by
-  rw [quadHasRootMod_eq _ _ (Nat.pos_of_ne_zero hℓ)] at h
+  rw [quadHasRootMod_eq _ _ hℓ] at h
   exact no_int_root_of_anyBelow hℓ (quadEval_modEq (ℓ : ℤ)) h u
 
 open Polynomial in
