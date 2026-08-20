@@ -25,16 +25,13 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 13. -/
-abbrev curve13A₄ : ℚ := -82
-
 /-- ICARM leaderboard curve 13, `y² = x³ - 82 x` over `ℚ`. -/
-def curve13 : WeierstrassCurve ℚ := ⟨0, 0, 0, curve13A₄, 0⟩
+def curve13 : WeierstrassCurve ℚ := ⟨0, 0, 0, -82, 0⟩
 
 /-- ICARM leaderboard curve 13 has Mordell-Weil rank at least `3`, with a single rational
 `2`-torsion point. -/
 theorem curve13_hasRankGE_3 : HasRankGE curve13 3 := by
-  unfold curve13 curve13A₄
+  unfold curve13
   certify_curve oneTorsion root 0 witness 5
     points "data/curve13.txt" labels "data/curve13-labels.txt"
 
