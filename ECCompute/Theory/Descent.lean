@@ -95,10 +95,8 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
   | some x y hns =>
     rw [redCharHom, AddMonoidHom.comp_apply, redHom_apply]
     by_cases hd : (x.den : ZMod p) = 0
-    · rw [lambda_some_of_den_zero hns hd, red_p_of_den_zero a₂ a₄ a₆ p hΔ hns hd, map_zero]
-    · rw [lambda_some_of_den_ne hns hd, red_p_of_den_ne a₂ a₄ a₆ p hΔ hns hd]
-      simp only [εpHom_apply, εp_finite_some, xbar]
-      rfl
+    · grind [lambda_some_of_den_zero, red_p_of_den_zero]
+    · grind [lambda_some_of_den_ne, red_p_of_den_ne, εpHom_apply, εp_finite_some, xbar]
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
