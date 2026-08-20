@@ -30,9 +30,8 @@ open Lean Elab Tactic Meta
 
 namespace ECCompute
 
-/-- Generic literal extractor: try the raw expression first (for `0`/`1` and `OfNat` numerals via
-`parse`), then its `whnf` (which unfolds abbreviations and projections), then the metaprogramming
-`fallback` (for `OfNat` numerals behind a projection). `kind` names the type in the error. -/
+/-- Extract a literal from `e`: try `parse` on the raw term, then on its `whnf`, then `fallback`.
+`kind` names the expected type in the error. -/
 private def getLitE {α} (kind : String) (parse : Expr → Option α)
     (fallback : Expr → MetaM (Option α)) (e : Expr) : MetaM α := do
   if let some n := parse (← whnfR e) then return n
@@ -77,11 +76,11 @@ private def parseLabel (line : String) : Option (Nat × Int) :=
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
 
-/-- Syntax of the `certify_curve` tactic; see the module docstring. The `torsion ℓ` form concedes
-`t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `oneTorsion root R witness ℓ`
-form concedes `t = 1` by naming the short-model root `R` of the `2`-division cubic and a prime `ℓ`
-at which the quadratic cofactor has no root; the `fullTorsion` form concedes `t = 2` (full rational
-`2`-torsion, e.g. square-discriminant curves) via the universal bound. -/
+/-- Syntax of the `certify_curve` tactic (see the module docstring). There are three torsion forms.
+`torsion ℓ` handles `t = 0` via a witness prime `ℓ` at which the `2`-division cubic has no root.
+`oneTorsion` handles `t = 1`, taking a short-model root `R` and a prime `ℓ` where the quadratic
+cofactor has no root. `fullTorsion` handles `t = 2` (e.g. square-discriminant curves) through the
+universal bound. -/
 syntax (name := certifyCurve) "certify_curve" " torsion " term:max " points " str
   " labels " str : tactic
 
@@ -232,8 +231,7 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
   let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
   let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
-  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`:
-  -- pure `Expr`, no side goals.
+  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=
     mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) aE

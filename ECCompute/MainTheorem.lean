@@ -110,19 +110,11 @@ private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
   have h := congrArg Subtype.val hab
   exact Subtype.coe_injective (Subtype.coe_injective h)
 
-/-- The soundness theorem on the short integral model. Let `c` be a certificate whose curve is the
-short integral model `curve c.a₂ c.a₄ c.a₆` (i.e. `a₁ = a₃ = 0`), and suppose every referee check
-passes:
-
-* `hpt`: each listed point `pt i` lies on the curve;
-* `hlabP`, `hlabC`: each label `lab j = (pⱼ, θⱼ)` is a prime `pⱼ` passing `checkLabel`, so it is a
-  legitimate descent column;
-* `hB`: the `(i, j)` entry of the character matrix `B` is the computed descent character
-  `λ_{pⱼ,θⱼ}(pt i)` (via the kernel-reducible `lambdaCompute`);
-* `hinv`: the supplied inverse certifies `B` is invertible over `𝔽₂`;
-* `htors`: the torsion witness bounds the rational `2`-torsion of the curve, `|E(ℚ)[2]| ≤ 2^t`.
-
-Then the Mordell-Weil rank of `curve c.a₂ c.a₄ c.a₆` over `ℚ` is at least `c.rho - c.t`. -/
+/-- Soundness on the short integral model `curve c.a₂ c.a₄ c.a₆` (`a₁ = a₃ = 0`). When a
+certificate's points, labels, character matrix `B`, its claimed `𝔽₂`-inverse and its torsion
+witness all pass their checks (the hypotheses `hpt` through `htors`), the rank is at least
+`c.rho - c.t`. The proof reads `B` as `c.rho` descent images that invertibility makes
+`𝔽₂`-independent, then feeds them to `RankDeduction.rank_ge_le`. -/
 theorem rank_ge_of_certificate (c : Certificate)
     (pt : Fin c.rho → ℚ × ℚ) (lab : Fin c.rho → ℕ × ℤ)
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
@@ -138,41 +130,32 @@ theorem rank_ge_of_certificate (c : Certificate)
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
-  -- Each label gives the descent hypotheses `DescentHyp`.
   have hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) :=
     fun j => descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 (hlabC j) (hlabP j)
-  -- The bundled descent character `φ : E →+ (Fin ρ → ZMod 2)`.
   set φ : E →+ (Fin c.rho → ZMod 2) :=
     AddMonoidHom.pi (fun j => lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)) with hφ
-  -- Handle `ρ = 0` (empty certificate) separately: the bound `0 ≤ finrank` is trivial.
   rcases Nat.eq_zero_or_pos c.rho with hrho0 | hrhopos
   · exact ⟨⊥, inferInstance, by simp [hrho0]⟩
-  -- With `ρ ≥ 1`, pick a label to extract `Δ ≠ 0` (turns `Equation` into `Nonsingular`).
   obtain ⟨j₀⟩ : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
-  -- Turn each on-curve point into an actual Mordell-Weil group element.
   have hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 := fun i =>
     (WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   set g : Fin c.rho → E := fun i => .some (pt i).1 (pt i).2 (hns i) with hg
-  -- The certified points are `𝔽₂`-independent under `φ` (they are the rows of the unit matrix `B`).
+  -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
   have hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)) :=
     linearIndependent_descent hyp pt hns hB hBlen hMlen hinv φ hφ g hg
-  -- The finitely generated subgroup `H = ⟨P₁, …, P_ρ⟩` and the restricted data.
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   set gH : Fin c.rho → H := fun i => ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩
   set φH : H →+ (Fin c.rho → ZMod 2) := φ.comp H.subtype.toAddMonoidHom
-  -- The `2`-torsion of `H` is bounded by the curve's, hence by `2^t`.
   have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
     (card_torsionBy_le c.a₂ c.a₄ c.a₆ H).trans htors
-  -- Assemble the deduction: `ρ ≤ finrank H + t`, hence `ρ - t ≤ finrank H`.
   have hbound : c.rho ≤ Module.finrank ℤ H + c.t := RankDeduction.rank_ge_le gH φH hindep htorH
   exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
 
-/-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
-target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`
-equal to that model (`hW`), and the referee facts of `rank_ge_of_certificate`, the Mordell-Weil
-rank of `W` over `ℚ` is at least `c.rho`. -/
+/-- The same bound for a general integral model. Given `W = ⟨a₁, …, a₆⟩` (`hW`) whose short-model
+change of variables is the certificate's curve (`hmodel`), transporting `rank_ge_of_certificate`
+along `generalToShortEquiv` gives `rank W ≥ c.rho - c.t`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
