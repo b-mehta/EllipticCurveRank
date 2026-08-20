@@ -71,7 +71,6 @@ noncomputable def checkPrime (p : ℕ) : Bool :=
 
 theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
   simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
-  obtain ⟨h2, hle, hpass⟩ := h
-  exact Nat.prime_of_passes p h2 (by lia) hpass
+  exact Nat.prime_of_passes p h.1 (by lia) h.2.2
 
 end ECCompute
