@@ -127,10 +127,10 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
     ∀ i j : Fin rho, F2Invert.toMat matB rho i j =
       lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by
   intro i j
-  -- The row and column lemmas below index by `ℕ`, so read every entry through `Fin.val`.
-  simp only [Fin.getElem_fin]
-  set L : ℕ × ℤ := lab[j.val] with hL
-  set P : ℚ × ℚ := pt[i.val] with hP
+  set L : ℕ × ℤ := lab[j] with hL
+  set P : ℚ × ℚ := pt[i] with hP
+  -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
+  simp only [Fin.getElem_fin] at hL hP
   have hp : 0 < L.1 := (hpr j).pos
   have : Fact L.1.Prime := ⟨hpr j⟩
   have : NeZero L.1 := ⟨hp.ne'⟩
@@ -138,12 +138,12 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hlabN : labN.length = rho := by
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : labN[j.val]'(by rw [hlabN]; exact j.isLt)
-      = (L.1, (L.2 % (L.1 : ℤ)).toNat, qms[j.val]) := by
-    simp only [hlabNdef, toLabN, List.getElem_zipWith, ← Int.mod_def', ← hL]
+      = (L.1, (L.2 % (L.1 : ℤ)).toNat, qms[j]) := by
+    simp only [hlabNdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
-  have hqok : qrMask L.1 = qms[j.val] := by
+  have hqok : qrMask L.1 = qms[j] := by
     have := checkMaskList_true hmask j.val (by rw [hlabN]; exact j.isLt)
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
@@ -151,13 +151,14 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
   -- rewrite the supplied mask to `qrMask L.1`, then bridge the mask cell to `lambdaComputeBool`
-  rw [← hqok] at hcell
+  rw [← hqok, ← hP] at hcell
   have hbridge : lambdaComputeBoolNatMask a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
       L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
       = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
     lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
       (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast L.2)
       (int_toNat_sub P.1.num) rfl
-  rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), hcell, hbridge, lambdaCompute_eq_bool]
+  rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), Fin.getElem_fin, hcell, hbridge,
+    lambdaCompute_eq_bool]
 
 end ECCompute
