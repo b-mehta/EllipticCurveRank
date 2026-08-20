@@ -80,7 +80,7 @@ noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
 theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
-    ∀ l ∈ labels, (l.1).Prime := by
+    ∀ l ∈ labels, l.1.Prime := by
   rw [checkPrimes, allList_eq_true] at h
   exact fun l hl => checkPrime_true (h l hl)
 
