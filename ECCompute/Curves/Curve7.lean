@@ -31,7 +31,7 @@ def curve7 : WeierstrassCurve ℚ :=
 /-- ICARM leaderboard curve 7 has Mordell-Weil rank at least `20`. -/
 theorem curve7_hasRankGE_20 : HasRankGE curve7 20 := by
   unfold curve7
-  certify_curve torsion 23 points "data/curve7.txt" labels "data/curve7-labels.txt"
+  certify_curve torsion 23 "data/curve7.txt" "data/curve7-labels.txt"
 
 /-- Curve 7 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 instance : curve7.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
