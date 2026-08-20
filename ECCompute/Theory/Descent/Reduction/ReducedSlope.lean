@@ -49,17 +49,17 @@ private theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.d
   have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [Rat.den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2
   have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero hd1 hd2
+  have esum : ((x₁ + x₂ : ℚ).den : ZMod p) ≠ 0 := den_add_ne_zero hd1 hd2
+  have e1 := den_add_ne_zero hx1sq hprod
+  have e2 := den_add_ne_zero e1 hx2sq
+  have e3 : (((a₂ : ℚ) * (x₁ + x₂)).den : ZMod p) ≠ 0 := den_mul_ne_zero (by simp) esum
+  have e4 := den_add_ne_zero e2 e3
   have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)).den : ZMod p) ≠ 0 :=
-    den_add_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
-      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp)
+    den_add_ne_zero e4 (by simp)
   refine ⟨hd, ?_⟩
-  rw [Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
-        (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2))) (by simp),
-    Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq)
-      (den_mul_ne_zero (by simp) (den_add_ne_zero hd1 hd2)),
-    Rat.cast_add_of_ne_zero (den_add_ne_zero hx1sq hprod) hx2sq,
-    Rat.cast_add_of_ne_zero hx1sq hprod, Rat.cast_pow, Rat.cast_mul_of_ne_zero hd1 hd2,
-    Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) (den_add_ne_zero hd1 hd2),
+  rw [Rat.cast_add_of_ne_zero e4 (by simp), Rat.cast_add_of_ne_zero e2 e3,
+    Rat.cast_add_of_ne_zero e1 hx2sq, Rat.cast_add_of_ne_zero hx1sq hprod, Rat.cast_pow,
+    Rat.cast_mul_of_ne_zero hd1 hd2, Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) esum,
     Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast]
 
 /-- The reduced secant slope times `y₁ + y₂` equals the secant numerator: clearing the denominator
