@@ -26,8 +26,9 @@ labels from two data files, recomputes the matrix, and discharges the referee ob
 * `Check/` - the `Bool`-valued checkers the kernel reduces (matrix inverse over `𝔽₂`, primality,
   2-torsion, points on the curve).
 * `Certify/` and `Certify.lean` - the certificate type and the `certify_curve` tactic.
-* `Curves/` - certified curves, with rank records from `20` to `29` (Nagao, Fermigier,
-  Martin-McMillen, Elkies, Elkies-Klagsbrun) and two small worked examples.
+* `Curves/` - certified curves, with rank records from `20` to `30` (Nagao, Fermigier,
+  Martin-McMillen, Elkies, Elkies-Klagsbrun, and ICARM leaderboard curve 273) and two small
+  worked examples.
 * `data/` - the points and labels each certificate reads.
 
 ## Building

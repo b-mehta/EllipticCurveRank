@@ -41,6 +41,7 @@ import ECCompute.Curves.RankTwentyThree
 import ECCompute.Curves.RankTwentyFour
 import ECCompute.Curves.RankTwentyEight
 import ECCompute.Curves.RankTwentyNine
+import ECCompute.Curves.RankThirty
 
 -- Upstream candidates
 import ECCompute.ForMathlib.PadicValInt
