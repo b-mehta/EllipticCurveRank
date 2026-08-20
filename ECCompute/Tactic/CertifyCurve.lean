@@ -59,9 +59,13 @@ private def parseCoord (s : String) : Int × Nat :=
     if g == 0 then (num, den) else (num / (g : Int), den / g)
   | _ => ((strTrim s).toInt!, 1)
 
+/-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
+private def fields (line : String) : List String :=
+  ((strTrim line).splitOn " ").filter (· ≠ "")
+
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
 private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
-  match ((strTrim line).splitOn " ").filter (· ≠ "") with
+  match fields line with
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
@@ -72,7 +76,7 @@ private def coordExpr (num : Int) (den : Nat) : Expr :=
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 private def parseLabel (line : String) : Option (Nat × Int) :=
-  match ((strTrim line).splitOn " ").filter (· ≠ "") with
+  match fields line with
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
 

@@ -19,8 +19,8 @@ the bit test `((Q >>> a) &&& 1).beq 1`.
 ## Main declarations
 
 * `ECCompute.qrMask`: reference quadratic-residue-mask builder for a prime `p`.
-* `ECCompute.jacobiLookupBool`: the bit test against a supplied mask.
-* `ECCompute.jacobiLookupBool_spec`: the bit test decides `a ≠ 0 ∧ IsSquare (a : ZMod p)`.
+* `ECCompute.qrLookupBool`: the bit test against a supplied mask.
+* `ECCompute.qrLookupBool_spec`: the bit test decides `a ≠ 0 ∧ IsSquare (a : ZMod p)`.
 * `ECCompute.psiCompute`: kernel-reducible replacement for `psi`.
 * `ECCompute.psiCompute_eq`: `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
 * `ECCompute.lambdaCompute`: kernel-reducible evaluation of `λ` on an affine point.
@@ -34,7 +34,7 @@ namespace ECCompute
 For a fixed odd prime `p`, we precompute, once per prime, a `Nat` bitmask `Q` whose bit `a` is set
 exactly on the nonzero quadratic residues `a` mod `p`. Each character evaluation is then the bit
 test `((Q >>> a) &&& 1).beq 1`. `qrMask` is the reference builder the certificate's supplied mask
-is checked against; `jacobiLookupBool_spec` shows the bit test decides whether `a` is a nonzero
+is checked against; `qrLookupBool_spec` shows the bit test decides whether `a` is a nonzero
 square mod `p`.
 -/
 
@@ -53,9 +53,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
   rw [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq, Nat.and_one_is_mod,
     Nat.testBit_eq_decide_div_mod_eq]
-  constructor
-  · intro h; simp [h]
-  · intro h; simpa using of_decide_eq_true h
+  simp
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
 theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
@@ -90,10 +88,7 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
     (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   have hpp : p.Prime := hp.out
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
-  have hp3 : 3 ≤ p := by
-    rcases hpp.two_le.lt_or_eq with h | h
-    · omega
-    · omega
+  have hp3 : 3 ≤ p := by have := hpp.two_le; omega
   constructor
   · rintro ⟨j, hj1, hjk, hja⟩
     have hjp : j < p := by omega
@@ -145,14 +140,14 @@ theorem qrMask_testBit (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : 
 
 /-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
 set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def jacobiLookupBool (qmask a : ℕ) : Bool := ((qmask.shiftRight a).land 1).beq 1
+noncomputable def qrLookupBool (qmask a : ℕ) : Bool := ((qmask.shiftRight a).land 1).beq 1
 
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
 prime). This is what lets a verified mask evaluate the descent character at each call site. -/
-theorem jacobiLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
-    jacobiLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
+theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+    qrLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
   have hmask := qrMask_testBit p hp2 a ha
-  rw [jacobiLookupBool]
+  rw [qrLookupBool]
   rcases eq_or_ne (((qrMask p).shiftRight a).land 1) 1 with h | h
   · rw [h, Nat.beq_refl]
     exact (decide_eq_true (hmask.mp h)).symm
@@ -168,7 +163,7 @@ theorem jacobiLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ)
 /-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
 residues (where `psiCompute = 0`). Evaluated via the quadratic-residue mask of `p`. -/
 noncomputable def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
-  (jacobiLookupBool (qrMask p) a.val).not'
+  (qrLookupBool (qrMask p) a.val).not'
 
 /-- Kernel-reducible replacement for `ECCompute.psi`. Reads the quadratic-residue mask of `p` at the
 representative `a.val`: the symbol is `0` on quadratic residues and `1` on non-residues. -/
@@ -179,15 +174,12 @@ noncomputable def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
 `psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
-  have hp : p.Prime := Fact.out
   -- the natural-number value `a.val` casts back to `a`, and is `< p`
-  have hval : ((a.val : ℤ) : ZMod p) = a := by
-    rw [Int.cast_natCast, ZMod.natCast_zmod_val]
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
   have ha0 : a.val ≠ 0 := fun h => ha (by rw [← hval', h, Nat.cast_zero])
   -- the mask bit test decides `IsSquare a`
-  have hspec := jacobiLookupBool_spec p hp2 a.val hvlt
+  have hspec := qrLookupBool_spec p hp2 a.val hvlt
   rw [hval'] at hspec
   rw [psiCompute, psiComputeBool, hspec]
   simp only [ne_eq, ha0, not_false_eq_true, true_and, Bool.not'_eq_not, psi]
@@ -264,8 +256,8 @@ evaluations bit tests against a supplied quadratic-residue mask `qmask`. For `qm
 noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : ℕ) : Bool :=
   ((Nat.mod xden p).beq 0).rec
     (((alphaResNat p tval xp xm xden).beq 0).rec
-      ((jacobiLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((jacobiLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
+      ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
+      ((qrLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
     false
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/

@@ -21,7 +21,6 @@ file records it as `Trep x y w` together with the facts used to reduce it modulo
 * `ECCompute.Trep`: the integer representative `![x.num·w, y.num, w³]`.
 * `ECCompute.Trep_map_ℚ`: over `ℚ`, `Trep x y w = w³ • [x : y : 1]`.
 * `ECCompute.Trep_equation`: `Trep x y w` satisfies the projective equation of `curveℤ`.
-* `ECCompute.Trep_nonsingular`: `Trep x y w` is a nonsingular projective point of `curveℤ`.
 * `ECCompute.Trep_primitive`: `y.num` and `w³` are coprime.
 -/
 
@@ -40,17 +39,15 @@ def Trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, (w : ℤ) 
 private theorem map_curveℤ_toProjective :
     (curveℤ a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curve a₂ a₄ a₆).toProjective := by
   change (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
+  exact map_curveℤ_ℚ a₂ a₄ a₆
 
 variable {x y : ℚ} {w : ℕ}
 
 /-- Over `ℚ`, the integer representative equals `w³ • [x : y : 1]`. -/
 theorem Trep_map_ℚ (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (Int.castRingHom ℚ) ∘ Trep x y w = (w : ℚ) ^ 3 • ![x, y, 1] := by
-  have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
-    (div_eq_iff (by exact_mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
-  have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
-    (div_eq_iff (by exact_mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
+  have hx : (x.num : ℚ) = x * (x.den : ℚ) := (Rat.mul_den_eq_num x).symm
+  have hy : (y.num : ℚ) = y * (y.den : ℚ) := (Rat.mul_den_eq_num y).symm
   have e0 : (Int.castRingHom ℚ) (x.num * (w : ℤ)) = (w : ℚ) ^ 3 * x := by
     rw [eq_intCast]; push_cast; rw [hx, hden]; grind
   have e1 : (Int.castRingHom ℚ) (y.num) = (w : ℚ) ^ 3 * y := by
@@ -72,21 +69,10 @@ theorem Trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
     Projective.equation_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
     Projective.equation_some, map_curveℤ_toProjective]
 
-/-- The integer representative is a nonsingular projective point of the integral curve. -/
-theorem Trep_nonsingular (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
-    (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
-    (curveℤ a₂ a₄ a₆).toProjective.Nonsingular (Trep x y w) := by
-  have hw : (w : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hden)
-  rwa [← Projective.map_nonsingular (W' := (curveℤ a₂ a₄ a₆).toProjective)
-      (f := Int.castRingHom ℚ) (Int.castRingHom ℚ).injective_int, Trep_map_ℚ hden hden',
-    Projective.nonsingular_smul _ (isUnit_iff_ne_zero.2 (pow_ne_zero 3 hw)),
-    Projective.nonsingular_some, map_curveℤ_toProjective]
-
 /-- The `y`- and `z`-coordinates of the representative are coprime; in particular the
 representative is primitive. -/
 theorem Trep_primitive (hden' : y.den = w ^ 3) : IsCoprime (y.num) ((w : ℤ) ^ 3) := by
-  have : IsCoprime (y.num) (y.den : ℤ) :=
-    Int.isCoprime_iff_nat_coprime.mpr (by simpa using y.reduced)
+  have : IsCoprime (y.num) (y.den : ℤ) := Rat.isCoprime_num_den y
   rwa [hden', Nat.cast_pow] at this
 
 end ECCompute

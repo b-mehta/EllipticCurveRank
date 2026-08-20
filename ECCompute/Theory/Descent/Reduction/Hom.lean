@@ -29,12 +29,6 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
-@[grind =]
-private theorem reduced_negY (X Y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
-    (by simp [WeierstrassCurve.map, curveℤ]) X Y
-
 /-! ### The fixed projective representative -/
 
 /-- The fixed `ZMod p`-projective representative of an affine point used to compute `red_p`:
@@ -183,11 +177,6 @@ private theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
       = P + Q := by rw [hgadd, Projective.Point.toAffine_add hnsA hnsB, haffA, haffB]
   exact repr_equiv_of_toAffine a₂ a₄ a₆ p hΔ _ hnsp hnsq hTℚ
 
-/-- The integral model maps to the rational curve under `ℤ → ℚ`. -/
-private theorem map_curveℤ_ℚ :
-    (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
-
 /-! ### Case analysis for the group law -/
 
 /-- Distinct points sharing an `x`-coordinate are mutually negative: if `x₁ = x₂` but
@@ -256,8 +245,7 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
-  have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by
-    grind
+  have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
@@ -268,19 +256,12 @@ private theorem red_p_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
   obtain ⟨hS2, htan⟩ :=
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
-  have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by
-    grind
+  have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
-  have hxeq : ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p)
-      = (ℓ : ZMod p) ^ 2 - (a₂ : ZMod p) - (x₁ : ZMod p) - (x₁ : ZMod p) := by
-    grind
   have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
-  rw [Affine.Point.add_of_X_ne hne,
-    red_p_of_den_ne a₂ a₄ a₆ p hΔ
-      (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy => hne hxy.left)) hd3_s,
-    red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1, Affine.Point.add_of_Y_ne hYneg, Affine.Point.some.injEq]
-  refine ⟨by rw [hslX, hℓd, hxeq, reduced_addX_eq], ?_⟩
-  rw [hslX, hy3cast, hℓd, reduced_addY_eq, reduced_addX_eq, hxeq]
+  have hns3 := WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy => hne hxy.left)
+  grind [Affine.Point.add_of_X_ne, red_p_of_den_ne, Affine.Point.add_of_Y_ne,
+    Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum
 reduces to `O` too. If `x₁ = x₂` then `Q = -P` and `P + Q = 0`; otherwise `x₁ ≠ x₂` and the

@@ -20,6 +20,7 @@ import ECCompute.Check.F2Invert
 import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Primes
 import ECCompute.Check.Labels
+import ECCompute.Check.RootMod
 import ECCompute.Check.Torsion
 import ECCompute.Check.Points
 import ECCompute.Check.JInvariant
@@ -44,6 +45,7 @@ import ECCompute.Curves.Curve74
 import ECCompute.Curves.Curve273
 
 -- Upstream candidates
+import ECCompute.ForMathlib.ModuleTorsionQuotient
 import ECCompute.ForMathlib.PadicValInt
 import ECCompute.ForMathlib.RatDenom
 import ECCompute.ForMathlib.TwoTorsion
