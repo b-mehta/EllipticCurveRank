@@ -76,17 +76,12 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have : NeZero p := ⟨hp.ne'⟩
   have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
-  have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
-  have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
-  have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
   have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
-    simp only [fvalModP, em, ea, el, ← Int.mod_def', ZMod.natCast_mod, Nat.cast_add, Nat.cast_mul,
-      intResNat_cast]
+    simp only [fvalModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ← Int.mod_def', ZMod.natCast_mod,
+      Nat.cast_add, Nat.cast_mul, intResNat_cast]
     push_cast; ring
-  have hnz : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p) = 0 ↔ fvalModP a₂ a₄ a₆ θ p = 0 := by
-    rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
-  rw [Nat.beq_eq, ← hnz, hcast]
+  rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast]
 
 /-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
 expanded. -/
@@ -102,11 +97,7 @@ def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
     (Int.mul (Int.mul (Int.mul 9 b2) b4) b6)
 
 theorem discrIntRaw_eq (a₂ a₄ a₆ : ℤ) : discrIntRaw a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
-  have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
-  have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
-  have hsub : ∀ a b : ℤ, Int.sub a b = a - b := fun _ _ => rfl
-  have hneg : ∀ a : ℤ, Int.neg a = -a := fun _ => rfl
-  simp only [discrIntRaw, discrInt, hmul, hadd, hsub, hneg]
+  simp only [discrIntRaw, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
   ring
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
