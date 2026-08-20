@@ -47,6 +47,11 @@ def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
+/-- The affine equation of `curve a₂ a₄ a₆` in cleared form. -/
+theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
+  grind [WeierstrassCurve.Affine.equation_iff, curve]
+
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
 def fval (θ : ZMod p) : ZMod p :=
   θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)

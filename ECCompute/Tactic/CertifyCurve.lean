@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.MainTheorem
-import ECCompute.Certify.CertifyEval
+import ECCompute.Tactic.CertifyEval
 
 /-!
 # The `certify_curve` tactic
@@ -30,9 +30,8 @@ open Lean Elab Tactic Meta
 
 namespace ECCompute
 
-/-- Generic literal extractor: try the raw expression first (for `0`/`1` and `OfNat` numerals via
-`parse`), then its `whnf` (which unfolds abbreviations and projections), then the metaprogramming
-`fallback` (for `OfNat` numerals behind a projection). `kind` names the type in the error. -/
+/-- Extract a literal from `e`: try `parse` on the raw term, then on its `whnf`, then `fallback`.
+`kind` names the expected type in the error. -/
 private def getLitE {α} (kind : String) (parse : Expr → Option α)
     (fallback : Expr → MetaM (Option α)) (e : Expr) : MetaM α := do
   if let some n := parse (← whnfR e) then return n
@@ -60,9 +59,13 @@ private def parseCoord (s : String) : Int × Nat :=
     if g == 0 then (num, den) else (num / (g : Int), den / g)
   | _ => ((strTrim s).toInt!, 1)
 
+/-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
+private def fields (line : String) : List String :=
+  ((strTrim line).splitOn " ").filter (· ≠ "")
+
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
 private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
-  match ((strTrim line).splitOn " ").filter (· ≠ "") with
+  match fields line with
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
@@ -73,15 +76,15 @@ private def coordExpr (num : Int) (den : Nat) : Expr :=
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 private def parseLabel (line : String) : Option (Nat × Int) :=
-  match ((strTrim line).splitOn " ").filter (· ≠ "") with
+  match fields line with
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
 
-/-- Syntax of the `certify_curve` tactic; see the module docstring. The `torsion ℓ` form concedes
-`t = 0` with witness prime `ℓ` (trivial rational `2`-torsion); the `oneTorsion root R witness ℓ`
-form concedes `t = 1` by naming the short-model root `R` of the `2`-division cubic and a prime `ℓ`
-at which the quadratic cofactor has no root; the `fullTorsion` form concedes `t = 2` (full rational
-`2`-torsion, e.g. square-discriminant curves) via the universal bound. -/
+/-- Syntax of the `certify_curve` tactic (see the module docstring). There are three torsion forms.
+`torsion ℓ` handles `t = 0` via a witness prime `ℓ` at which the `2`-division cubic has no root.
+`oneTorsion` handles `t = 1`, taking a short-model root `R` and a prime `ℓ` where the quadratic
+cofactor has no root. `fullTorsion` handles `t = 2` (e.g. square-discriminant curves) through the
+universal bound. -/
 syntax (name := certifyCurve) "certify_curve" " torsion " term:max " points " str
   " labels " str : tactic
 
@@ -148,11 +151,11 @@ private def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
 
 /-- The short-model coefficient Exprs `(a₂, a₄, a₆)` built from the integer coefficient Exprs
-`a₁…a₆` via `ModelChange.intShortA₂/₄/₆`. -/
+`a₁…a₆` via `IntegralScaling.intShortA₂/₄/₆`. -/
 private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr :=
-  (mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E,
-    mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
-    mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E)
+  (mkApp2 (mkConst ``IntegralScaling.intShortA₂) a1E a2E,
+    mkApp3 (mkConst ``IntegralScaling.intShortA₄) a1E a3E a4E,
+    mkApp2 (mkConst ``IntegralScaling.intShortA₆) a3E a6E)
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
@@ -182,7 +185,7 @@ universal `certTorsionBound_two` for `t = 2`. `torsRoot` supplies the `t = 1` ro
 private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
-  let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
+  let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
   let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
@@ -232,8 +235,7 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
   let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
   let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
-  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`:
-  -- pure `Expr`, no side goals.
+  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=
     mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) aE

@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Certify
+import ECCompute.Tactic.CertifyCurve
 
 /-!
 # Curve 10 has rank at least 24

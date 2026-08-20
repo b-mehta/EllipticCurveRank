@@ -28,14 +28,12 @@ Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-
 
 ## Main results
 
-* `RankDeduction.natCard_modN_two`: the cardinality identity
-  `Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card H[2]`.
-* `RankDeduction.finrank_modN_two`: the dimension formula
-  `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`.
-* `RankDeduction.rho_le_finrank_modN_two`: if `ρ` elements have `𝔽₂`-linearly independent images
-  under some additive hom `φ : H →+ (Fin ρ → ZMod 2)`, then `ρ ≤ dim_{𝔽₂}(H ⧸ 2H)`.
-* `RankDeduction.rank_ge`: the packaged deduction, `ρ ≤ rank H + t` whenever `Nat.card H[2] = 2 ^ t`
-  and there are `ρ` independent descent-character values, i.e. `rank H ≥ ρ - t`.
+* `RankDeduction.natCard_modN_two`: `Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card H[2]`.
+* `RankDeduction.finrank_modN_two`: `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`.
+* `RankDeduction.rho_le_finrank_modN_two`: `ρ` elements with `𝔽₂`-independent images under some
+  `φ : H →+ (Fin ρ → ZMod 2)` force `ρ ≤ dim_{𝔽₂}(H ⧸ 2H)`.
+* `RankDeduction.rank_ge`: `ρ ≤ rank H + t` when `Nat.card H[2] = 2 ^ t` and there are `ρ`
+  independent descent-character values.
 
 An invertible `ρ × ρ` matrix over `𝔽₂` supplies the linear-independence hypothesis.
 -/
@@ -332,10 +330,9 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
     Nat.pow_right_injective (le_refl 2) key
   lia
 
-/-- The bound with only an *upper* bound on the 2-torsion: if `ρ` group elements have
-`𝔽₂`-linearly independent images under `φ`, and `|H[2]| ≤ 2 ^ t`, then `ρ ≤ rank H + t`. This is
-what a certificate needs when it concedes `t` torsion dimensions without pinning down the exact
-2-torsion of the generated subgroup. -/
+/-- Like `rank_ge` but assuming only `|H[2]| ≤ 2 ^ t`, not equality: `ρ` group elements with
+`𝔽₂`-linearly independent images under `φ` give `ρ ≤ rank H + t`. The certificate uses this form,
+since it bounds the generated subgroup's torsion rather than computing it. -/
 theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :

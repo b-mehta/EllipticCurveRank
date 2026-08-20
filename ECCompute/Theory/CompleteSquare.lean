@@ -19,13 +19,14 @@ The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism li
 
 ## Main results
 
-* `ModelIso.completeSquare`, `ModelIso.shortModel`: the `⟨1, 0, -a₁/2, -a₃/2⟩` change of variables
-  and the resulting short model `y² = x³ + a₂'x² + a₄'x + a₆'`.
-* `ModelIso.pointAddEquiv`: this change of variables as a group isomorphism `W.Point ≃+
+* `CompleteSquare.completeSquare`, `CompleteSquare.shortModel`: the
+  `⟨1, 0, -a₁/2, -a₃/2⟩` change of variables and the resulting short model
+  `y² = x³ + a₂'x² + a₄'x + a₆'`.
+* `CompleteSquare.pointAddEquiv`: this change of variables as a group isomorphism `W.Point ≃+
   (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
 
-namespace ECCompute.ModelIso
+namespace ECCompute.CompleteSquare
 
 open WeierstrassCurve
 
@@ -246,4 +247,4 @@ def pointAddEquiv :
 
 end GroupIso
 
-end ECCompute.ModelIso
+end ECCompute.CompleteSquare

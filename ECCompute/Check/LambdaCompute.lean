@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.ForMathlib.IntResNat
+import ECCompute.Check.IntResNat
 import Mathlib.Data.Nat.Bitwise
 
 /-!
@@ -260,18 +260,13 @@ noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm x
       ((jacobiLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
     false
 
-private theorem natPrim (x y : ℕ) :
-    Nat.mod x y = x % y ∧ Nat.add x y = x + y ∧ Nat.sub x y = x - y ∧ Nat.mul x y = x * y :=
-  ⟨rfl, rfl, rfl, rfl⟩
-
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
 private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
     ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
       = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
   have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le
-  simp only [alphaResNat, (natPrim _ _).1, (natPrim _ _).2.1, (natPrim _ _).2.2.1,
-    (natPrim _ _).2.2.2, ZMod.natCast_mod, Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self,
-    Nat.cast_mul]
+  simp only [alphaResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
+    Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self, Nat.cast_mul]
   ring
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
@@ -280,9 +275,8 @@ private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ :
     (htval : (tval : ZMod p) = θ) :
     ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ p θ := by
   have hle : (2 * c2m * tval + c4m) % p ≤ p := (Nat.mod_lt _ hp).le
-  simp only [fderivResNat, (natPrim _ _).1, (natPrim _ _).2.1, (natPrim _ _).2.2.1,
-    (natPrim _ _).2.2.2, ZMod.natCast_mod, Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self,
-    Nat.cast_mul, Nat.cast_ofNat]
+  simp only [fderivResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
+    Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self, Nat.cast_mul, Nat.cast_ofNat]
   subst hc2 hc4 htval
   unfold fderiv
   push_cast
@@ -320,8 +314,7 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
   have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
   have hfd := fderivResNat_eq_val hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval
   have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
-    rw [hxden, (natPrim _ _).1, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff,
-      ZMod.natCast_eq_zero_iff]
+    rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
 
