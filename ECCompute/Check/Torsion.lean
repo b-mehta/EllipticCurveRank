@@ -129,7 +129,7 @@ def quadEval (b c u : ℤ) : ℤ := u ^ 2 + b * u + c
 noncomputable def quadModL (d₁ d₀ ℓ r : ℕ) : ℕ :=
   Nat.mod (Nat.add (Nat.add (Nat.mul r r) (Nat.mul d₁ r)) d₀) ℓ
 
-/-- The mod-`ℓ` `Nat` quadratic test matches the `ℤ` residue test (`ℓ > 0`). -/
+/-- As `cubicModL_beq`, for the quadratic `quadModL`. -/
 theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0
       = Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
@@ -141,12 +141,11 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
   push_cast
   ring
 
-/-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
-`ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
+/-- The quadratic counterpart of `hasRootMod`: `true` iff `u² + b u + c` has a root mod `ℓ`. -/
 noncomputable def quadHasRootMod (b c : ℤ) (ℓ : ℕ) : Bool :=
   anyBelow ℓ fun r => Nat.beq (quadModL (Int.emod b ℓ).toNat (Int.emod c ℓ).toNat ℓ r) 0
 
-/-- The `Nat` quadratic test agrees with the `ℤ` residue test. -/
+/-- `hasRootMod_eq` for the quadratic. -/
 theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
     quadHasRootMod b c ℓ = anyBelow ℓ fun r => Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 := by
   rw [quadHasRootMod]
@@ -154,13 +153,13 @@ theorem quadHasRootMod_eq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
   funext r
   rw [← Int.mod_def', ← Int.mod_def', quadModL_beq b c hℓ r]
 
-/-- `quadEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
+/-- Same invariance as `cubicEval_modEq`, for `quadEval`. -/
 theorem quadEval_modEq {b c : ℤ} (n : ℤ) {a a' : ℤ} (h : a ≡ a' [ZMOD n]) :
     quadEval b c a ≡ quadEval b c a' [ZMOD n] := by
   unfold quadEval
   gcongr
 
-/-- If the monic quadratic has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
+/-- The quadratic version of `no_int_root_of_hasRootMod_eq_false`. -/
 theorem no_int_root_of_quadHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (h : quadHasRootMod b c ℓ = false) (u : ℤ) : quadEval b c u ≠ 0 := by
   rw [quadHasRootMod_eq _ _ (Nat.pos_of_ne_zero hℓ)] at h
