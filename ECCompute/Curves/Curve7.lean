@@ -4,6 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Tactic.CertifyCurve
+import ECCompute.Check.JInvariant
 
 /-!
 # Curve 7 has rank at least 20
@@ -31,5 +32,13 @@ def curve7 : WeierstrassCurve ℚ :=
 theorem curve7_hasRankGE_20 : HasRankGE curve7 20 := by
   unfold curve7
   certify_curve torsion 23 points "data/curve7.txt" labels "data/curve7-labels.txt"
+
+/-- Curve 7 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curve7.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve 7. -/
+theorem curve7_j : curve7.j = -8860058038489051327873505830623232453040740421940383732399828276783671172005754085165404926579435178209 / 6358347962741427332351207823555533236599280133229903044072065747055673142684922784840133195530240000 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
