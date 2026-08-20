@@ -29,22 +29,13 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₂` coefficient of ICARM leaderboard curve 14. -/
-abbrev curve14A₂ : ℚ := -1
-
-/-- The `a₄` coefficient of ICARM leaderboard curve 14. -/
-abbrev curve14A₄ : ℚ := -24649
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 14. -/
-abbrev curve14A₆ : ℚ := 1355209
-
 /-- ICARM leaderboard curve 14, `y² = x³ - x² - 24649 x + 1355209` over `ℚ`. -/
-def curve14 : WeierstrassCurve ℚ := ⟨0, curve14A₂, 0, curve14A₄, curve14A₆⟩
+def curve14 : WeierstrassCurve ℚ := ⟨0, -1, 0, -24649, 1355209⟩
 
-/-- ICARM leaderboard curve 14 has Mordell-Weil rank at least `4`, despite full rational
+/-- ICARM leaderboard curve 14 has Mordell-Weil rank at least `4`, with full rational
 `2`-torsion. -/
 theorem curve14_hasRankGE_4 : HasRankGE curve14 4 := by
-  unfold curve14 curve14A₂ curve14A₄ curve14A₆
+  unfold curve14
   certify_curve fullTorsion points "data/curve14.txt" labels "data/curve14-labels.txt"
 
 /-- Curve 14 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/

@@ -23,18 +23,13 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 8 (general model). -/
-abbrev curve8A₄ : ℚ := -940299517776391362903023121165864
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 8 (general model). -/
-abbrev curve8A₆ : ℚ := 10707363070719743033425295515449274534651125011362
-
 /-- ICARM leaderboard curve 8, Fermigier's rank-22 curve over `ℚ`. -/
-def curve8 : WeierstrassCurve ℚ := ⟨1, 0, 1, curve8A₄, curve8A₆⟩
+def curve8 : WeierstrassCurve ℚ :=
+  ⟨1, 0, 1, -940299517776391362903023121165864, 10707363070719743033425295515449274534651125011362⟩
 
 /-- ICARM leaderboard curve 8 has Mordell-Weil rank at least `22`. -/
 theorem curve8_hasRankGE_22 : HasRankGE curve8 22 := by
-  unfold curve8 curve8A₄ curve8A₆
+  unfold curve8
   certify_curve torsion 31 points "data/curve8.txt" labels "data/curve8-labels.txt"
 
 end ECCompute

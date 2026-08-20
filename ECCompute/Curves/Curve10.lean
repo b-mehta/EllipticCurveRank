@@ -24,18 +24,14 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 10 (general model). -/
-abbrev curve10A₄ : ℚ := -120039822036992245303534619191166796374
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 10 (general model). -/
-abbrev curve10A₆ : ℚ := 504224992484910670010801799168082726759443756222911415116
-
 /-- ICARM leaderboard curve 10, the Martin-McMillen rank-24 curve over `ℚ`. -/
-def curve10 : WeierstrassCurve ℚ := ⟨1, 0, 1, curve10A₄, curve10A₆⟩
+def curve10 : WeierstrassCurve ℚ :=
+  ⟨1, 0, 1, -120039822036992245303534619191166796374,
+    504224992484910670010801799168082726759443756222911415116⟩
 
 /-- ICARM leaderboard curve 10 has Mordell-Weil rank at least `24`. -/
 theorem curve10_hasRankGE_24 : HasRankGE curve10 24 := by
-  unfold curve10 curve10A₄ curve10A₆
+  unfold curve10
   certify_curve torsion 71 points "data/curve10.txt" labels "data/curve10-labels.txt"
 
 end ECCompute

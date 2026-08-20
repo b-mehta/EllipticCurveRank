@@ -17,7 +17,7 @@ Leaderboard is
   `a₆ = 1151107939141058565733479426024323225135665982951300586808823640527729578307`
   `     228357301072889377`
 
-over `ℚ`. It has Mordell–Weil rank at least `30`. The witness points from the leaderboard,
+over `ℚ`. It has Mordell-Weil rank at least `30`. The witness points from the leaderboard,
 transported to the integral short model, are in `data/curve273.txt`; descent labels are in
 `data/curve273-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
 -/
@@ -26,20 +26,14 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 273 (general model). -/
-abbrev curve273A₄ : ℚ :=
-  -201769035260418549083594900060734240952308696994802735114305555
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 273 (general model). -/
-abbrev curve273A₆ : ℚ :=
-  1151107939141058565733479426024323225135665982951300586808823640527729578307228357301072889377
-
 /-- ICARM leaderboard curve 273 over `ℚ`. -/
-def curve273 : WeierstrassCurve ℚ := ⟨1, 0, 0, curve273A₄, curve273A₆⟩
+def curve273 : WeierstrassCurve ℚ :=
+  ⟨1, 0, 0, -201769035260418549083594900060734240952308696994802735114305555,
+    1151107939141058565733479426024323225135665982951300586808823640527729578307228357301072889377⟩
 
-/-- ICARM leaderboard curve 273 has Mordell–Weil rank at least `30`. -/
+/-- ICARM leaderboard curve 273 has Mordell-Weil rank at least `30`. -/
 theorem curve273_hasRankGE_30 : HasRankGE curve273 30 := by
-  unfold curve273 curve273A₄ curve273A₆
+  unfold curve273
   certify_curve torsion 23 points "data/curve273.txt" labels "data/curve273-labels.txt"
 
 end ECCompute

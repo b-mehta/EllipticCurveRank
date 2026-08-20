@@ -26,19 +26,14 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 12 (general model). -/
-abbrev curve12A₄ : ℚ := -27006183241630922218434652145297453784768054621836357954737385
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 12 (general model). -/
-abbrev curve12A₆ : ℚ :=
-  55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497
-
 /-- ICARM leaderboard curve 12, the Elkies-Klagsbrun rank-29 curve over `ℚ`. -/
-def curve12 : WeierstrassCurve ℚ := ⟨1, 0, 0, curve12A₄, curve12A₆⟩
+def curve12 : WeierstrassCurve ℚ :=
+  ⟨1, 0, 0, -27006183241630922218434652145297453784768054621836357954737385,
+    55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497⟩
 
 /-- ICARM leaderboard curve 12 has Mordell-Weil rank at least `29`. -/
 theorem curve12_hasRankGE_29 : HasRankGE curve12 29 := by
-  unfold curve12 curve12A₄ curve12A₆
+  unfold curve12
   certify_curve torsion 67 points "data/curve12.txt" labels "data/curve12-labels.txt"
 
 end ECCompute

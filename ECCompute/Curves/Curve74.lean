@@ -24,18 +24,14 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The `a₄` coefficient of ICARM leaderboard curve 74 (general model). -/
-abbrev curve74A₄ : ℚ := -215843772422443922015169952702159835
-
-/-- The `a₆` coefficient of ICARM leaderboard curve 74 (general model). -/
-abbrev curve74A₆ : ℚ := -19474361277787151947255961435459054151501792241320535
-
 /-- ICARM leaderboard curve 74, the Nagao-Kouya rank-21 curve over `ℚ`. -/
-def curve74 : WeierstrassCurve ℚ := ⟨1, 1, 1, curve74A₄, curve74A₆⟩
+def curve74 : WeierstrassCurve ℚ :=
+  ⟨1, 1, 1, -215843772422443922015169952702159835,
+    -19474361277787151947255961435459054151501792241320535⟩
 
 /-- ICARM leaderboard curve 74 has Mordell-Weil rank at least `21`. -/
 theorem curve74_hasRankGE_21 : HasRankGE curve74 21 := by
-  unfold curve74 curve74A₄ curve74A₆
+  unfold curve74
   certify_curve torsion 11 points "data/curve74.txt" labels "data/curve74-labels.txt"
 
 end ECCompute
