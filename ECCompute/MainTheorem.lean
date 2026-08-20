@@ -3,16 +3,16 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Certify.Certificate
-import ECCompute.Check.ColumnCheck
+import ECCompute.Certificate
+import ECCompute.Check.Labels
 import ECCompute.Check.Points
 import ECCompute.Check.Primes
-import ECCompute.Check.CheckMatrix
+import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Torsion
 import ECCompute.Theory.Descent
-import ECCompute.Theory.LambdaCompute
+import ECCompute.Check.LambdaCompute
 import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.ModelChange
+import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
 
@@ -29,12 +29,12 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
   descent character lives.
 * `hasRankGE_of_certificate`: the bound for an arbitrary curve `W` whose coefficients are the
   integers `a₁ … a₆`, obtained by transporting the short-model bound along
-  `ModelChange.generalToShortEquiv`.
+  `IntegralScaling.generalToShortEquiv`.
 -/
 
 namespace ECCompute
 
-open WeierstrassCurve Module ModelIso ModelChange
+open WeierstrassCurve Module CompleteSquare IntegralScaling
 
 /-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified
 by a kernel-reducible `BEq` check. -/
@@ -44,6 +44,10 @@ theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
   cases W; cases W'
   simp only [WeierstrassCurve.mk.injEq]
   exact ⟨eq_of_beq h₁, eq_of_beq h₂, eq_of_beq h₃, eq_of_beq h₄, eq_of_beq h₆⟩
+
+/-- A `List.length` equality from a kernel-reducible `Nat.beq` check on the length. -/
+theorem length_eq_of_beq {α : Type*} {l : List α} {n : ℕ} (h : l.length.beq n = true) :
+    l.length = n := Nat.eq_of_beq_eq_true h
 
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
@@ -172,7 +176,7 @@ theorem rank_ge_of_certificate (c : Certificate)
 /-- Given a certificate `c` whose short model `curve c.a₂ c.a₄ c.a₆` is the change-of-variables
 target of the general integral model `⟨a₁, a₂, a₃, a₄, a₆⟩` (the equation `hmodel`), a curve `W`
 equal to that model (`hW`), and the referee facts of `rank_ge_of_certificate`, the Mordell-Weil
-rank of `W` over `ℚ` is at least `c.rho`. -/
+rank of `W` over `ℚ` is at least `c.rho - c.t`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
@@ -195,9 +199,9 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   -- by `getD`. Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
   have hmemP : ∀ i : Fin c.rho, c.points.getD i.val (0, 0) ∈ c.points :=
-    fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
+    fun i => List.getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
   have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
-    fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
+    fun j => List.getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
   have hcurve : curve c.a₂ c.a₄ c.a₆ = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
     simp only [curve]
   rw [checkPoints_iff] at hpt

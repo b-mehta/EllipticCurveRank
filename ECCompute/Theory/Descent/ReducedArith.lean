@@ -3,10 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.ForMathlib.RatDenom
-import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod
@@ -15,14 +13,13 @@ import Mathlib.Algebra.Field.ZMod
 # Elementary reduction arithmetic
 
 Elementary lemmas for reducing an affine point of `curve a₂ a₄ a₆` mod `p`: the cast of the
-`x`-coordinate, and survival of denominators under reduction, shared between `ECCompute.Descent`
-and `ECCompute.Descent.Reduction.Hom`.
+`x`-coordinate, and survival of denominators under reduction, shared between
+`ECCompute.Theory.Descent` and `ECCompute.Theory.Descent.Reduction.Hom`.
 
 ## Main declarations
 
 * `ECCompute.xbar`: the reduced `x`-coordinate `(x : ZMod p)` as a plain field element.
 * `ECCompute.num_eq_xbar_mul_den`: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`.
-* `ECCompute.negY_curve`: `negY x y = -y` on `curve a₂ a₄ a₆`.
 * `ECCompute.ydenom_ne_zero`: the `y`-denominator survives reduction when the `x`-denominator does.
 -/
 
@@ -49,12 +46,7 @@ theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 
 
 /-! ### Elementary reduction mod `p`
 
-On `curve a₂ a₄ a₆` (which has `a₁ = a₃ = 0`), `negY x y = -y`, and when `p ∤ x.den` the
-`y`-denominator survives reduction, since `x.den = w²` and `y.den = w³`. -/
-
-/-- On `curve a₂ a₄ a₆`, `negY x y = -y` (the curve has `a₁ = a₃ = 0`). -/
-theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x y
+When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` and `y.den = w³`. -/
 
 /-- The `y`-denominator reduces well whenever the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/

@@ -4,17 +4,17 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Theory.ModelIso
+import ECCompute.Theory.CompleteSquare
 
 /-!
 # The general-to-integer-short-model change of variables
 
 The certified rank bound (`ECCompute.rank_ge_of_certificate`) lives on the integer short model
 `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character `lambda`
-is defined. A general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`
-(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.pointAddEquiv`
-completes the square but only to a *rational*-coefficient short model; this file adds the integral
-scaling step.
+is defined. This file carries a general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`
+(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) to that model, by composing
+`CompleteSquare.pointAddEquiv` with the scaling `(x, y) ↦ (4x, 8y)` that clears the denominators
+of the resulting rational short model.
 
 The change of variables `⟨u, r, s, t⟩ = ⟨1/2, 0, -a₁/2, -a₃/2⟩` carries `⟨a₁, a₂, a₃, a₄, a₆⟩`
 to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invariants `b₂ = a₁² + 4a₂`,
@@ -26,18 +26,18 @@ to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invarian
 
 ## Main results
 
-* `ModelChange.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an `(x, y) ↦ (v²x,
-  v³y)` rescaling.
-* `ModelChange.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
-* `ModelChange.intShortModel`, `ModelChange.genModel`: the integral short model and the general
-  integral Weierstrass curve over `ℚ`.
-* `ModelChange.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of variables, a
-  group isomorphism from the general model to its integral short model.
+* `IntegralScaling.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an
+  `(x, y) ↦ (v²x, v³y)` rescaling.
+* `IntegralScaling.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
+* `IntegralScaling.intShortModel`, `IntegralScaling.genModel`: the integral short model and the
+  general integral Weierstrass curve over `ℚ`.
+* `IntegralScaling.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of
+  variables, a group isomorphism from the general model to its integral short model.
 -/
 
-namespace ECCompute.ModelChange
+namespace ECCompute.IntegralScaling
 
-open WeierstrassCurve WeierstrassCurve.Affine ModelIso
+open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 
 /-! ## The scaling isomorphism `(x, y) ↦ (v²x, v³y)`
 
@@ -46,12 +46,18 @@ group isomorphism. Each affine-addition ingredient scales by a fixed power of `v
 
 /-- `W'` is the `(x, y) ↦ (v²x, v³y)` rescaling of `W`: `W'.aᵢ = vⁱ · W.aᵢ`, with `v ≠ 0`. -/
 structure IsScaling (W W' : WeierstrassCurve ℚ) (v : ℚ) : Prop where
+  /-- The scaling factor is nonzero. -/
   ne : v ≠ 0
-  a1 : W'.a₁ = v * W.a₁
-  a2 : W'.a₂ = v ^ 2 * W.a₂
-  a3 : W'.a₃ = v ^ 3 * W.a₃
-  a4 : W'.a₄ = v ^ 4 * W.a₄
-  a6 : W'.a₆ = v ^ 6 * W.a₆
+  /-- The `a₁` coefficient scales by `v`. -/
+  a₁ : W'.a₁ = v * W.a₁
+  /-- The `a₂` coefficient scales by `v²`. -/
+  a₂ : W'.a₂ = v ^ 2 * W.a₂
+  /-- The `a₃` coefficient scales by `v³`. -/
+  a₃ : W'.a₃ = v ^ 3 * W.a₃
+  /-- The `a₄` coefficient scales by `v⁴`. -/
+  a₄ : W'.a₄ = v ^ 4 * W.a₄
+  /-- The `a₆` coefficient scales by `v⁶`. -/
+  a₆ : W'.a₆ = v ^ 6 * W.a₆
 
 section Scaling
 
@@ -62,7 +68,7 @@ include s
 theorem equation_scale (x y : ℚ) :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff,
-    s.a1, s.a2, s.a3, s.a4, s.a6]
+    s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
   exact ⟨fun h => by grind,
     fun h => mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
 
@@ -73,9 +79,9 @@ theorem nonsingular_scale (x y : ℚ) :
   refine and_congr (equation_scale s x y) ?_
   have eX : W'.a₁ * (v ^ 3 * y) - (3 * (v ^ 2 * x) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x) + W'.a₄)
       = v ^ 4 * (W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄)) := by
-    grind [IsScaling.a1, IsScaling.a2, IsScaling.a4]
+    grind [IsScaling.a₁, IsScaling.a₂, IsScaling.a₄]
   have eY : 2 * (v ^ 3 * y) + W'.a₁ * (v ^ 2 * x) + W'.a₃
-      = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by grind [s.a1, s.a3]
+      = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by grind [s.a₁, s.a₃]
   rw [eX, eY, mul_ne_zero_iff_left (pow_ne_zero 4 s.ne), mul_ne_zero_iff_left (pow_ne_zero 3 s.ne)]
 
 /-- Nonsingularity transfers along the inverse scaling `(X, Y) ↦ (X/v², Y/v³)`. -/
@@ -87,12 +93,12 @@ theorem nonsingular_scale' (X Y : ℚ) :
 /-- The `Y`-negation scales by `v³`. -/
 theorem negY_scale (x y : ℚ) :
     W'.toAffine.negY (v ^ 2 * x) (v ^ 3 * y) = v ^ 3 * W.toAffine.negY x y := by
-  grind [WeierstrassCurve.Affine.negY, IsScaling.a1, IsScaling.a3]
+  grind [WeierstrassCurve.Affine.negY, IsScaling.a₁, IsScaling.a₃]
 
 /-- The `X`-coordinate of the sum scales by `v²` (the slope scales by `v`). -/
 theorem addX_scale (x₁ x₂ ℓ : ℚ) :
     W'.toAffine.addX (v ^ 2 * x₁) (v ^ 2 * x₂) (v * ℓ) = v ^ 2 * W.toAffine.addX x₁ x₂ ℓ := by
-  grind [WeierstrassCurve.Affine.addX, IsScaling.a1, IsScaling.a2]
+  grind [WeierstrassCurve.Affine.addX, IsScaling.a₁, IsScaling.a₂]
 
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
 theorem negAddY_scale (x₁ x₂ y₁ ℓ : ℚ) :
@@ -119,7 +125,7 @@ theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
         exact fun hc => hy (mul_left_cancel₀ (pow_ne_zero 3 s.ne) hc)
       have enum : 3 * (v ^ 2 * x₁) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x₁) + W'.a₄ - W'.a₁ * (v ^ 3 * y₁)
           = v ^ 3 * (v * (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)) := by
-        grind [IsScaling.a1, IsScaling.a2, IsScaling.a4]
+        grind [IsScaling.a₁, IsScaling.a₂, IsScaling.a₄]
       have eden : v ^ 3 * y₁ - v ^ 3 * W.toAffine.negY x₁ y₁
           = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by grind
       rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, negY_scale s, enum, eden,
@@ -140,10 +146,12 @@ def scaleBwd : W'.toAffine.Point → W.toAffine.Point
   | .zero => .zero
   | .some X Y h => .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s X Y).mp h)
 
+/-- The forward scaling on an affine point, unfolded. -/
 @[simp] theorem scaleFwd_some (x y : ℚ) (h : W.toAffine.Nonsingular x y) :
     scaleFwd s (.some x y h) = .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s x y).mp h) :=
   rfl
 
+/-- The inverse scaling on an affine point, unfolded. -/
 @[simp] theorem scaleBwd_some (X Y : ℚ) (h : W'.toAffine.Nonsingular X Y) :
     scaleBwd s (.some X Y h) = .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s X Y).mp h) :=
   rfl
@@ -211,16 +219,19 @@ def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   ⟨a₁, a₂, a₃, a₄, a₆⟩
 
+/-- The integral short model has `a₂` four times that of the rational short model. -/
 private lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
   simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
   grind
 
+/-- The integral short model has `a₄` sixteen times that of the rational short model. -/
 private lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
   simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
   grind
 
+/-- The integral short model has `a₆` sixty-four times that of the rational short model. -/
 private lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
   simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
@@ -241,4 +252,4 @@ def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
         intShortModel_a₄ a₁ a₂ a₃ a₄ a₆,
         intShortModel_a₆ a₁ a₂ a₃ a₄ a₆⟩
 
-end ECCompute.ModelChange
+end ECCompute.IntegralScaling

@@ -5,8 +5,6 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Theory.Descent.Reduction.IntModel
-import ECCompute.ForMathlib.WeierstrassCurveAffine
-import Mathlib.Algebra.Field.ZMod
 
 /-!
 # The finite-field descent character `εp_finite` and its additivity
@@ -36,6 +34,8 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 variable [Fact p.Prime]
 
+/-! ### The character -/
+
 /-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
 noncomputable def εp_finite (θ : ZMod p) :
@@ -43,12 +43,14 @@ noncomputable def εp_finite (θ : ZMod p) :
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
+/-- The finite-field descent character vanishes at the origin. -/
 @[simp]
 theorem εp_finite_zero (θ : ZMod p) :
     εp_finite a₂ a₄ a₆ p θ
       (0 : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) = 0 :=
   rfl
 
+/-- The finite-field descent character on an affine point, unfolded. -/
 theorem εp_finite_some (θ : ZMod p) {X Y : ZMod p}
     (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
     εp_finite a₂ a₄ a₆ p θ (.some X Y h)
@@ -66,22 +68,6 @@ private theorem reduced_equation {X Y : ZMod p}
     (W := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine) X Y).mp h.1
   simpa [map_curveℤ_zmod] using this
 
-omit [Fact p.Prime] in
-/-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
-private theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
-  fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
-
-/-- The root hypothesis `f(θ) = 0` in expanded form. -/
-private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
-    θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
-  simpa [fval] using h.root
-
-/-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
-private theorem reduced_negY (x y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _
-    (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) x y
-
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁}
@@ -89,6 +75,8 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     (hx : x₁ = x₂) :
     εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
+
+/-! ### The secant case -/
 
 /-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
 whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
@@ -164,6 +152,8 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
+/-! ### The doubling case -/
+
 /-- The descent character vanishes at the double point of a tangent line: given the Vieta
 relations for the double-root triple `x, x, X₃` at a root `θ ≠ x`, the value at `X₃` is `0`.
 The `𝔽ₚ`-arithmetic core of the doubling case, split off from the group-law setup in
@@ -203,7 +193,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
-  have hneg := reduced_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
+  have hneg := reduced_negY a₂ a₄ a₆ p x y
   have hyne : y ≠ ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
@@ -232,6 +222,8 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     ℓ m x X₃ hpt htan hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
+/-! ### Additivity and the bundled homomorphism -/
+
 /-- Additivity of `εp_finite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
 theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
@@ -249,7 +241,7 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
-      have hyne' : y₁ ≠ -y₂ := by grind [reduced_negY]
+      have hyne' : y₁ ≠ -y₂ := by grind
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
         rw [reduced_equation h₁, reduced_equation h₂]
       have hyeq : y₁ = y₂ := by grind
@@ -270,11 +262,5 @@ noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
   toFun := εp_finite a₂ a₄ a₆ p θ
   map_zero' := εp_finite_zero a₂ a₄ a₆ p θ
   map_add' := εp_finite_map_add h
-
-/-- `εp_finite` vanishes on `2·E(𝔽ₚ)`, immediate from being a homomorphism into `ZMod 2`. -/
-theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) :
-    εpHom h (2 • P) = 0 := by
-  rw [map_nsmul, CharTwo.two_nsmul]
 
 end ECCompute

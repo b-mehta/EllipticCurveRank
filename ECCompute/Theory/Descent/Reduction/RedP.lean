@@ -4,9 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Reduction.Repr
-import ECCompute.ForMathlib.RatDenom
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import Mathlib.Algebra.Field.ZMod
 
 /-!
@@ -34,16 +32,19 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
 variable {x y : ℚ} {w : ℕ}
 
+/-- The reduced `X`-coordinate of `Trep x y w` is `x.num · w`. -/
 private theorem Trep_map_zero :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
   simp only [Function.comp_apply, Trep, Matrix.cons_val_zero, eq_intCast]
   push_cast
   grind
 
+/-- The reduced `Y`-coordinate of `Trep x y w` is `y.num`. -/
 private theorem Trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 = (y.num : ZMod p) := by
   simp only [Function.comp_apply, Trep, Matrix.cons_val_one, Matrix.cons_val_zero, eq_intCast]
 
+/-- The reduced `Z`-coordinate of `Trep x y w` is `w³`. -/
 private theorem Trep_map_two :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2 = (w : ZMod p) ^ 3 := by
   simp only [Function.comp_apply, Trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons,
@@ -51,12 +52,14 @@ private theorem Trep_map_two :
   push_cast
   grind
 
+/-- The affine `x`-coordinate of the reduced representative is `(x : ZMod p)`. -/
 private theorem Trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2
       = (x : ZMod p) := by
   rw [Trep_map_zero, Trep_map_two, Rat.cast_def, hden]
   grind
 
+/-- The affine `y`-coordinate of the reduced representative is `(y : ZMod p)`. -/
 private theorem Trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 1 / ((Int.castRingHom (ZMod p)) ∘ Trep x y w) 2
       = (y : ZMod p) := by
@@ -122,6 +125,7 @@ noncomputable def red_p (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
             (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2)⟩
 
+/-- The reduction map sends the origin to the origin. -/
 @[simp]
 theorem red_p_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     red_p a₂ a₄ a₆ p hΔ 0 = 0 :=

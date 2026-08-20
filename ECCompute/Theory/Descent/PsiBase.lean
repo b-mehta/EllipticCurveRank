@@ -3,7 +3,6 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.Collinearity
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
@@ -12,8 +11,9 @@ import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 # The Legendre character `ψ_p` and the simple-root fact (shared base)
 
 The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, shared between the two sides of
-the descent factorization `λ = εp_finite ∘ red_p`: `ECCompute.Descent` (the rational character
-`λ`) and `ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εp_finite`).
+the descent factorization `λ = εp_finite ∘ red_p`: `ECCompute.Theory.Descent` (the rational
+character `λ`) and `ECCompute.Theory.Descent.Reduction.EpsFinite` (the finite-field character
+`εp_finite`).
 
 ## Main declarations
 
@@ -98,8 +98,7 @@ theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
 theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ p θ ≠ 0 := by
-  have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
-    simpa [fval] using h.root
+  have hroot := h.root'
   have hΔ : (curve a₂ a₄ a₆).Δ.num
       = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
         + 18 * a₂ * a₄ * a₆) := by

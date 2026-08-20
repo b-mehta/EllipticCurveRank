@@ -3,8 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.ModelIso
-import ECCompute.QuickRfl
+import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import ECCompute.Tactic.QuickRfl
 import ECCompute.Check.Fold
 
 /-!
@@ -17,6 +17,16 @@ model `⟨a₁, …, a₆⟩`.
 `j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`; the per-curve
 obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true`, discharged by
 `j_eq_of_beq`.
+
+## Main definitions
+
+* `ECCompute.ratBeq'`: kernel-reducible equality of rationals.
+
+## Main results
+
+* `ECCompute.j_eq_iff`: `j = q` iff `c₄³ = Δ · q`.
+* `ECCompute.isElliptic_of_bne`: `IsElliptic` from a kernel `Bool` witness that `Δ ≠ 0`.
+* `ECCompute.j_eq_of_beq`: `j = q` from a kernel `Bool` witness.
 -/
 
 namespace ECCompute

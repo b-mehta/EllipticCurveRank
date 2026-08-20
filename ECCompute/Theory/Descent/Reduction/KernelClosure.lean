@@ -1,0 +1,279 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+import ECCompute.Theory.Descent.Reduction.RedP
+import ECCompute.ForMathlib.PadicValInt
+
+/-!
+# The kernel of reduction is closed under the group law
+
+For an integral curve `y² = x³ + a₂x² + a₄x + a₆` and a prime `p`, two affine points that both
+reduce to the origin mod `p` and are distinct over `ℚ` have a sum that again reduces to the
+origin. This is the one genuinely `p`-adic step of `red_p` additivity.
+
+The proof is an explicit single-fraction certificate. Writing `x_i = A_i / w_i²`,
+`y_i = B_i / w_i³` (`den_isSquare`) with `E = w₁`, `G = w₂`, `p ∣ E`, `p ∣ G`, the group law gives
+the integer identity `x₃ = (N² - a₆E²G²K²) / (A·C·K²)` where `K = A·G² - C·E²` and
+`N = A·D·E - B·C·G`. The secant intercept `ν = N / (E·G·K)` satisfies `N·(A·D·E + B·C·G) = K·W`
+with `W ≡ -A²C²` a `p`-unit (both integer identities follow from the two curve relations), so
+`v_p(N) < v_p(K)`. Tracking `padicValRat` through the fraction yields
+`padicValRat p x₃ = 2·(v_p N - v_p K) < 0`, i.e. `p ∣ x₃.den`.
+
+## Main declarations
+
+* `ECCompute.den_addX_both_kernel`: the `x`-coordinate of the sum has `p`-divisible denominator.
+-/
+
+open WeierstrassCurve
+
+namespace ECCompute
+
+variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
+
+/-! ### Integer data attached to a kernel point -/
+
+/-- From the integer identity `N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and all factors nonzero,
+conclude `v_p(N) < v_p(K)`. -/
+private theorem padicValInt_lt_of_mul_eq {N S K W : ℤ} (hid : N * S = K * W)
+    (hpS : (p : ℤ) ∣ S) (hpW : ¬ (p : ℤ) ∣ W)
+    (hN0 : N ≠ 0) (hS0 : S ≠ 0) (hK0 : K ≠ 0) (hW0 : W ≠ 0) :
+    padicValInt p N < padicValInt p K := by
+  have hSval : 1 ≤ padicValInt p S :=
+    one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
+      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
+  have e1 := padicValInt.mul (p := p) hN0 hS0
+  rw [hid, padicValInt.mul (p := p) hK0 hW0, padicValInt.eq_zero_of_not_dvd hpW] at e1
+  lia
+
+/-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
+private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
+    (q.num : ℚ) = q * (w : ℚ) ^ k := by
+  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
+
+/-- The numerator of a rational with square denominator `w²` is prime to any `p ∣ w`: since
+`num`, `den` are coprime and `w² = den`, a prime dividing both `num` and `w` would be a unit. -/
+private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
+    ¬ (p : ℤ) ∣ q.num := by
+  intro hdvd
+  have hcop : IsCoprime q.num (w ^ 2) := by
+    rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
+  exact absurd (Int.isUnit_iff.mp
+    (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
+    (by have := (Fact.out : p.Prime).two_le; lia)
+
+/-- Coordinate data for a kernel point. If `(x, y)` satisfies the curve equation and reduces to
+the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
+`w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
+private theorem kernel_point_data {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
+    ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
+      ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
+  have hp : p.Prime := Fact.out
+  obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
+  have hpw : (p : ℤ) ∣ (w : ℤ) := by
+    exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
+  have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
+  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
+    not_dvd_num p (by grind) hpw, hwne⟩
+
+/-- Integer form of the curve relation for a point `(A/E², B/E³)`: clearing denominators of
+`y² = x³ + a₂x² + a₄x + a₆` gives `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
+private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
+    (hcv : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ))
+    (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
+    B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
+  have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
+      + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
+    grind
+  exact_mod_cast hq
+
+/-! ### The certificate scalars -/
+
+omit [Fact p.Prime] in
+/-- The certificate scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit: it is
+`≡ -A²C²` mod `p` (the other terms carry the factor `E`), and `A`, `C` are `p`-units. -/
+private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C) (hpE : (p : ℤ) ∣ E) :
+    ¬ (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+      + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2)) := by
+  intro hdvd
+  have hrest : (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+      + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2) := by
+    have heq : -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+          + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) + A ^ 2 * C ^ 2
+        = E ^ 2 * G ^ 2 * (a₄ * A * C + a₆ * (A * G ^ 2 + C * E ^ 2)) := by grind
+    rw [heq]
+    exact ((hpE.trans (dvd_pow_self E two_ne_zero)).mul_right (G ^ 2)).mul_right _
+  have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
+  grind [Prime.dvd_of_dvd_pow, Prime.dvd_mul]
+
+/-- The certificate scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`: `K = 0` forces
+`x₁·E²G² = x₂·E²G²` and hence `x₁ = x₂`. -/
+private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
+    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
+    A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h => hne <| by
+  have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
+  push_cast at h0
+  grind [mul_right_cancel₀, pow_ne_zero]
+
+/-- The single-fraction identity `x₃·(A·C·K²) = N² - a₆E²G²K²` for the doubled `x`-coordinate,
+where `K = AG² - CE²`, `N = ADE - BCG`. It follows from the slope relation `hℓ` and the two
+curve relations by clearing denominators. -/
+private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C D E G : ℤ}
+    (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂)
+    (hcv1 : y₁ ^ 2 = x₁ ^ 3 + (a₂ : ℚ) * x₁ ^ 2 + (a₄ : ℚ) * x₁ + (a₆ : ℚ))
+    (hcv2 : y₂ ^ 2 = x₂ ^ 3 + (a₂ : ℚ) * x₂ ^ 2 + (a₄ : ℚ) * x₂ + (a₆ : ℚ))
+    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3)
+    (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2) (hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3) :
+    x₃ * ((A * C * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ)
+      = (((A * D * E - B * C * G) ^ 2
+        - a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ) := by
+  rw [haddX]
+  push_cast
+  rw [hA, hB, hC, hD]
+  linear_combination
+    ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₁ * x₂ * (ℓ * x₁ - ℓ * x₂ + y₁ - y₂))) * hℓ
+      + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (x₂ * (x₁ - x₂))) * hcv1
+      + ((E : ℚ) ^ 6 * (G : ℚ) ^ 6 * (-x₁ * (x₁ - x₂))) * hcv2
+
+/-! ### The valuation argument -/
+
+/-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
+`N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation
+(`K²` alone already dominates `N²`). -/
+private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValInt p K)
+    (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
+    padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
+      ∧ (N ^ 2 - M * K ^ 2 : ℤ) ≠ 0 := by
+  have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
+    rw [pow_two, padicValInt.mul hK0 hK0]; grind
+  have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
+    rw [pow_two, padicValInt.mul hN0 hN0]; grind
+  have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
+    rw [padicValRat.of_int, hNval2]; grind
+  rcases eq_or_ne (M * K ^ 2 : ℤ) 0 with h0 | h0
+  · rw [h0, sub_zero]; exact ⟨hqv, pow_ne_zero 2 hN0⟩
+  · have hsplit : ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ)
+        = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by grind
+    have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
+    have hr0 : (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
+      have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
+      simpa using this
+    have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ)
+        < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
+      rw [hqv, padicValRat.neg, padicValRat.of_int]
+      have hle := padicValInt_le_padicValInt_of_dvd p (a := K ^ 2) (b := M * K ^ 2)
+        ⟨M, by ring⟩ h0
+      rw [hK2] at hle
+      lia
+    have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
+      have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
+      rw [heq, padicValRat.neg] at hlt
+      exact lt_irrefl _ hlt
+    refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
+    intro he
+    apply hqrne
+    rw [← hsplit]
+    exact_mod_cast he
+
+/-- Final valuation step of the kernel-closure certificate. Given the single-fraction
+`x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and the crux `v_p(N) < v_p(K)`, the `p`-adic
+valuation of `x₃` is `2·(v_p N - v_p K) < 0`, hence `p ∣ x₃.den`. -/
+private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
+    (hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ))
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
+    (hcrux : padicValInt p N < padicValInt p K)
+    (hA0 : A ≠ 0) (hC0 : C ≠ 0) (hK0 : K ≠ 0) (hN0 : N ≠ 0) :
+    (x₃.den : ZMod p) = 0 := by
+  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) p hcrux hN0 hK0
+  have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
+    rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
+      padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
+      pow_two, padicValInt.mul hK0 hK0]
+    grind
+  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
+    exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
+  have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
+    rw [eq_div_iff hDen3Q]; exact hMain
+  have hx3neg : padicValRat p x₃ < 0 := by
+    rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
+      hDenval]
+    grind
+  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
+  exact (ZMod.natCast_eq_zero_iff _ p).mpr
+    ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
+
+/-- The crux valuation inequality of the kernel-closure certificate, isolated from the integer
+curve relations. With `K = AG² - CE²`, `N = ADE - BCG` and the `p`-unit `W = -A²C² + …`, the
+identity `N·(ADE + BCG) = K·W` (from the two curve relations) together with `p ∣ E`, `p ∣ G` and
+`p`-unit `A`, `C` gives `N ≠ 0`, `K ≠ 0` and `v_p(N) < v_p(K)`. -/
+private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
+    (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hEne : (E : ℚ) ≠ 0) (hGne : (G : ℚ) ≠ 0) (hpE : (p : ℤ) ∣ E) (hpG : (p : ℤ) ∣ G)
+    (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
+    (hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6)
+    (hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6) :
+    padicValInt p (A * D * E - B * C * G) < padicValInt p (A * G ^ 2 - C * E ^ 2)
+      ∧ A * D * E - B * C * G ≠ 0 ∧ A * G ^ 2 - C * E ^ 2 ≠ 0 := by
+  set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
+  set N : ℤ := A * D * E - B * C * G with hNdef
+  set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
+    + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
+  have hI2 : N * (A * D * E + B * C * G) = K * W := by
+    grind
+  have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
+    dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
+  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
+  have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
+  have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
+  have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
+  have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
+  exact ⟨padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
+    hN0, hK0⟩
+
+/-! ### Closure of the kernel -/
+
+/-- If two affine points both reduce to the origin mod `p` (`p ∣ x₁.den`, `p ∣ x₂.den`) but are
+distinct over `ℚ`, the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of their sum satisfies
+`p ∣ x₃.den`, so the sum reduces to the origin as well. -/
+theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
+    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
+    (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
+    (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
+  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
+  have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
+    grind [WeierstrassCurve.Affine.slope_of_X_ne]
+  have haddX : x₃ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
+    rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; grind
+  have hcv1 := equation_curve a₂ a₄ a₆ h₁
+  have hcv2 := equation_curve a₂ a₄ a₆ h₂
+  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data a₂ a₄ a₆ p h₁ hd1
+  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data a₂ a₄ a₆ p h₂ hd2
+  set A : ℤ := x₁.num
+  set B : ℤ := y₁.num
+  set C : ℤ := x₂.num
+  set D : ℤ := y₂.num
+  -- integer curve relations
+  have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 :=
+    int_curve_relation a₂ a₄ a₆ hcv1 hA hB
+  have hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6 :=
+    int_curve_relation a₂ a₄ a₆ hcv2 hC hD
+  set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
+  set N : ℤ := A * D * E - B * C * G with hNdef
+  -- the single-fraction identity for the final valuation certificate
+  have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
+    rw [hKdef, hNdef]; exact addX_single_fraction a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
+  -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
+  obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations a₂ a₄ a₆ p hpZ hne hA hC
+    (by exact_mod_cast hEne) (by exact_mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
+  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC hcrux
+    (fun h => hpA (h ▸ dvd_zero _)) (fun h => hpC (h ▸ dvd_zero _)) hK0 hN0
+
+end ECCompute

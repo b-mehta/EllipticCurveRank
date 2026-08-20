@@ -3,11 +3,6 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
-import ECCompute.Theory.Descent.DenominatorSquare
-import ECCompute.Theory.Descent.ReducedArith
-import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Theory.Descent.Reduction.Def
 import ECCompute.Theory.Descent.Reduction.Hom
 import ECCompute.Theory.Descent.Reduction.EpsFinite
 
@@ -15,18 +10,19 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 # The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
+`ECCompute.Theory.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
 `red_p : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εp_finite`, both of which are
-additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
-`ECCompute.Descent.Reduction.EpsFinite`).
+additive homomorphisms (see `ECCompute.Theory.Descent.Reduction.Hom` and
+`ECCompute.Theory.Descent.Reduction.EpsFinite`).
 
 ## Main declarations
 
-* `ECCompute.psi_mul`: `ψ_p` is multiplicative-to-additive on nonzero elements.
-* `ECCompute.lambda_some_of_den_ne`: reduction of `λ` on an affine point to `ψ_p(X - θ)`.
+* `ECCompute.lambda_some_of_den_ne`, `ECCompute.lambda_some_of_den_zero`: the value of `λ` on an
+  affine point, split on whether `p` divides the `x`-denominator.
+* `ECCompute.redCharHom`: the composition `εp_finite θ ∘ red_p` as an `AddMonoidHom`.
+* `ECCompute.lambda_eq_εp_red`: `λ` agrees pointwise with that composition.
 * `ECCompute.lambda_map_add`: the trusted theorem, `λ` is additive.
 * `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
-* `ECCompute.lambdaHom_two_nsmul`: `λ` vanishes on `2·E(ℚ)` (automatic in `ZMod 2`).
 -/
 
 open WeierstrassCurve
@@ -36,6 +32,8 @@ namespace ECCompute
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate -/
+
+section Reduce
 
 variable {a₂ a₄ a₆ p}
 
@@ -62,25 +60,12 @@ theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
   simp only [lambda, if_pos hd]
 
-end ECCompute
+end Reduce
 
-namespace ECCompute
-
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
-
-/-! ### The trusted theorem: additivity via the reduction factorization
-
-Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
-`λ = εp_finite ∘ red_p`, where `red_p : E(ℚ) → E(𝔽ₚ)` is the reduction map
-(`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εp_finite : E(𝔽ₚ) → ZMod 2` is the
-finite-field descent character (`ECCompute.Descent.Reduction.EpsFinite`, also an
-`AddMonoidHom`). Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
-The reduction map and `εp_finite` share the point type
-`((curveℤ …).map (Int.castRingHom (ZMod p))).toAffine.Point`, so the composition is direct. -/
+/-! ### The trusted theorem: additivity via the reduction factorization -/
 
 /-- The descent character `λ_{p,θ}` presented as the composition `εp_finite θ ∘ red_p`, packaged
-as an `AddMonoidHom E(ℚ) → ZMod 2`. This is the factorization that makes additivity of `λ` free
-(see `lambda_map_add`). -/
+as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
@@ -119,11 +104,5 @@ noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero a₂ a₄ a₆ p θ
   map_add' := lambda_map_add a₂ a₄ a₆ p h
-
-/-- The descent character vanishes on `2·E(ℚ)`, hence factors through `E(ℚ)/2E(ℚ)`. -/
-theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  grind
 
 end ECCompute
