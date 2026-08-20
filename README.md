@@ -21,21 +21,18 @@ theorem curve273_hasRankGE_30 : HasRankGE curve273 30 := by
   certify_curve torsion 23 points "data/curve273.txt" labels "data/curve273-labels.txt"
 ```
 
-The 30 points and their descent labels live in `data/curve273.txt` and `data/curve273-labels.txt`.
-`torsion 23` concedes an upper bound on the 2-torsion dimension `t`; `fullTorsion` certifies `t`
-instead.
+The points and labels are read from `data/`. `torsion 23` concedes a bound on the 2-torsion
+dimension `t`; `fullTorsion` certifies `t` instead.
 
 ## How it works
 
 mathlib has no Mordell-Weil theorem, so the argument stays inside the finitely generated subgroup
-the given points span. Given `ρ` rational points, Cremona's descent character `λ_{p,θ}` maps that
-subgroup to `𝔽₂^ρ`. When the resulting `ρ × ρ` matrix is invertible over `𝔽₂`, the points are
-independent modulo `2·E(ℚ)`, giving `rank ≥ ρ - t` where `t = dim_{𝔽₂} E(ℚ)[2]` is the rational
-2-torsion dimension.
+the given points span. Cremona's descent character `λ_{p,θ}` maps that subgroup to `𝔽₂^ρ`; when the
+`ρ × ρ` matrix is invertible, the points are independent modulo `2·E(ℚ)`, giving `rank ≥ ρ - t` for
+`t = dim_{𝔽₂} E(ℚ)[2]`.
 
-A certificate lists the `ρ` points, the `ρ` descent labels `(p, θ)`, the character matrix and its
-inverse over `𝔽₂`, and a witness bounding `t`. The `certify_curve` tactic reads the points and
-labels from two data files, recomputes the matrix, and discharges the referee obligations of
+A certificate supplies the points, the labels `(p, θ)`, the matrix and its `𝔽₂`-inverse, and a
+bound on `t`. `certify_curve` recomputes the matrix and discharges the referee obligations of
 `hasRankGE_of_certificate`, each a kernel-reducible `Bool` check.
 
 ## Layout
@@ -64,9 +61,8 @@ lake build
 ## Acknowledgements
 
 The descent method is Section 2 of J. E. Cremona, *On the computation of Mordell-Weil and 2-Selmer
-groups of elliptic curves*, [johncremona.github.io/papers/filter.pdf](https://johncremona.github.io/papers/filter.pdf).
+groups of elliptic curves*, [filter.pdf](https://johncremona.github.io/papers/filter.pdf).
 
-Much of this work was done at the
-[Lean for the LMFDB](https://multramate.github.io/lean-lmfdb/) workshop, funded by the project
-[Scalable Theorem Proving via Mathematical Databases](https://www.renaissancephilanthropy.org/scalable-theorem-proving)
-through the AI for Math Fund, managed by Renaissance Philanthropy with founding donor XTX Markets.
+Much of this work was done at the [Lean for the LMFDB](https://multramate.github.io/lean-lmfdb/)
+workshop, funded by [Scalable Theorem Proving via Mathematical Databases](https://www.renaissancephilanthropy.org/scalable-theorem-proving)
+through the AI for Math Fund (Renaissance Philanthropy, founding donor XTX Markets).
