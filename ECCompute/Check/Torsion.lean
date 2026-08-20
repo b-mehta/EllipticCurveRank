@@ -5,8 +5,8 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.F2Invert
-import ECCompute.ForMathlib.IntResNat
-import ECCompute.Theory.ModelIso
+import ECCompute.Check.IntResNat
+import ECCompute.Theory.CompleteSquare
 import ECCompute.Theory.Descent.Defs
 
 /-!

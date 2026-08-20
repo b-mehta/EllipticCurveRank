@@ -3,16 +3,16 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Certify.Certificate
-import ECCompute.Check.ColumnCheck
+import ECCompute.Certificate
+import ECCompute.Check.Labels
 import ECCompute.Check.Points
 import ECCompute.Check.Primes
-import ECCompute.Check.CheckMatrix
+import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Torsion
 import ECCompute.Theory.Descent
-import ECCompute.Theory.LambdaCompute
+import ECCompute.Check.LambdaCompute
 import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.ModelChange
+import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
 
@@ -29,12 +29,12 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
   descent character lives.
 * `hasRankGE_of_certificate`: the bound for an arbitrary curve `W` whose coefficients are the
   integers `a₁ … a₆`, obtained by transporting the short-model bound along
-  `ModelChange.generalToShortEquiv`.
+  `IntegralScaling.generalToShortEquiv`.
 -/
 
 namespace ECCompute
 
-open WeierstrassCurve Module ModelIso ModelChange
+open WeierstrassCurve Module CompleteSquare IntegralScaling
 
 /-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified
 by a kernel-reducible `BEq` check. -/

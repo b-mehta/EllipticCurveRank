@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.ForMathlib.IntResNat
+import ECCompute.Check.IntResNat
 import Mathlib.Data.Nat.Bitwise
 
 /-!

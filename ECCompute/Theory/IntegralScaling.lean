@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Theory.ModelIso
+import ECCompute.Theory.CompleteSquare
 
 /-!
 # The general-to-integer-short-model change of variables
@@ -12,7 +12,7 @@ import ECCompute.Theory.ModelIso
 The certified rank bound (`ECCompute.rank_ge_of_certificate`) lives on the integer short model
 `curve A₂ A₄ A₆` (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character `lambda`
 is defined. A general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`
-(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `ModelIso.pointAddEquiv`
+(`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`) must be carried to it. `CompleteSquare.pointAddEquiv`
 completes the square but only to a *rational*-coefficient short model; this file adds the integral
 scaling step.
 
@@ -26,18 +26,18 @@ to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invarian
 
 ## Main results
 
-* `ModelChange.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an `(x, y) ↦ (v²x,
-  v³y)` rescaling.
-* `ModelChange.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
-* `ModelChange.intShortModel`, `ModelChange.genModel`: the integral short model and the general
-  integral Weierstrass curve over `ℚ`.
-* `ModelChange.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of variables, a
-  group isomorphism from the general model to its integral short model.
+* `IntegralScaling.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an
+  `(x, y) ↦ (v²x, v³y)` rescaling.
+* `IntegralScaling.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
+* `IntegralScaling.intShortModel`, `IntegralScaling.genModel`: the integral short model and the
+  general integral Weierstrass curve over `ℚ`.
+* `IntegralScaling.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of
+  variables, a group isomorphism from the general model to its integral short model.
 -/
 
-namespace ECCompute.ModelChange
+namespace ECCompute.IntegralScaling
 
-open WeierstrassCurve WeierstrassCurve.Affine ModelIso
+open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 
 /-! ## The scaling isomorphism `(x, y) ↦ (v²x, v³y)`
 
@@ -241,4 +241,4 @@ def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
         intShortModel_a₄ a₁ a₂ a₃ a₄ a₆,
         intShortModel_a₆ a₁ a₂ a₃ a₄ a₆⟩
 
-end ECCompute.ModelChange
+end ECCompute.IntegralScaling
