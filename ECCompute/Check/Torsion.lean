@@ -29,9 +29,8 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The step both residue searches take: a `Nat` residue `n < ℓ` standing for the integer `z`
-(`hcast`) tests zero exactly when `z % ℓ` does. Each search supplies its own `hcast`, which is where
-the shape of the polynomial enters. -/
+/-- A `Nat` residue `n < ℓ` whose `ZMod ℓ` image is that of `z` tests zero exactly when `z % ℓ`
+does. -/
 private theorem natBeq_zero_eq_intBeq' {ℓ n : ℕ} {z : ℤ} (hlt : n < ℓ)
     (hcast : ((n : ℕ) : ZMod ℓ) = (z : ZMod ℓ)) :
     Nat.beq n 0 = Int.beq' (z % (ℓ : ℤ)) 0 := by

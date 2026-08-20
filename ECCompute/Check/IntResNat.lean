@@ -13,20 +13,17 @@ import Mathlib.Data.ZMod.Basic
 `natCast_eq_zero_iff_of_lt` reads a vanishing cast back as an equation in `ℕ`. Together they take a
 checker's `Nat` residue computation to a statement about the integer it stands for.
 
-A checker is written in the raw arithmetic primitives, and its correctness proof works in the
-notation `push_cast` and `ring` act on. Core names `Nat.add_eq`, `Nat.sub_eq`, `Nat.mul_eq`,
-`Int.add_def` and `Int.mul_def` for the crossing; `Nat.mod_eq_mod`, `Int.sub_eq` and `Int.neg_eq`
-complete that set.
+`Nat.mod_eq_mod`, `Int.sub_eq` and `Int.neg_eq` rewrite three raw arithmetic primitives to their
+notation.
 -/
 
-/-- The `Nat.mod` primitive is `%`. Core's counterpart for `Nat.add`, `Nat.sub` and `Nat.mul` is
-`Nat.add_eq` and friends; `Nat.mod_eq` is the recursion equation, hence this name. -/
+/-- `Nat.mod a b` is `a % b`. -/
 theorem Nat.mod_eq_mod (a b : ℕ) : Nat.mod a b = a % b := rfl
 
-/-- The `Int.sub` primitive is `-`, matching `Nat.sub_eq` and core's own `Int.add_def`. -/
+/-- `Int.sub a b` is `a - b`. -/
 theorem Int.sub_eq (a b : ℤ) : Int.sub a b = a - b := rfl
 
-/-- The `Int.neg` primitive is unary `-`. -/
+/-- `Int.neg a` is `-a`. -/
 theorem Int.neg_eq (a : ℤ) : Int.neg a = -a := rfl
 
 namespace ECCompute
