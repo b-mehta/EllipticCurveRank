@@ -9,12 +9,8 @@ import Mathlib.Data.ZMod.Basic
 /-!
 # Reducing an integer to a `Nat` residue before casting to `ZMod p`
 
-`intResNat_cast` says the `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`, and
-`natCast_eq_zero_iff_of_lt` reads a vanishing cast back as an equation in `ℕ`. Together they take a
-checker's `Nat` residue computation to a statement about the integer it stands for.
-
-`Nat.mod_eq_mod`, `Int.sub_eq` and `Int.neg_eq` rewrite three raw arithmetic primitives to their
-notation.
+These lemmas take a checker's `Nat` residue computation to a statement about the integer it stands
+for, and its raw arithmetic primitives to their notation.
 -/
 
 theorem Nat.mod_eq_mod (a b : ℕ) : Nat.mod a b = a % b := rfl
