@@ -229,6 +229,23 @@ def frac(n, den):
     return str(n) if den == 1 else f"{n}/{den}"
 
 
+def j_invariant(a1, a2, a3, a4, a6):
+    """The j-invariant c₄³/Δ of the general model ⟨a₁,…,a₆⟩, as a reduced Fraction."""
+    a1, a2, a3, a4, a6 = map(Fraction, (a1, a2, a3, a4, a6))
+    b2 = a1 * a1 + 4 * a2
+    b4 = 2 * a4 + a1 * a3
+    b6 = a3 * a3 + 4 * a6
+    b8 = a1 * a1 * a6 + 4 * a2 * a6 - a1 * a3 * a4 + a2 * a3 * a3 - a4 * a4
+    c4 = b2 * b2 - 24 * b4
+    disc = -b2 * b2 * b8 - 8 * b4**3 - 27 * b6 * b6 + 9 * b2 * b4 * b6
+    return c4**3 / disc
+
+
+def j_lit(j):
+    """The j-invariant as a Lean ℚ literal: an integer, or `num / den`."""
+    return str(j.numerator) if j.denominator == 1 else f"{j.numerator} / {j.denominator}"
+
+
 def load(args):
     if args.json:
         with open(args.json) as fh:
@@ -285,6 +302,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certify
+import ECCompute.Check.JInvariant
 
 /-!
 # Curve {id} has rank at least {rank}
@@ -312,6 +330,13 @@ open WeierstrassCurve
 theorem curve{id}_hasRankGE_{rank} : HasRankGE curve{id} {rank} := by
   unfold curve{id}
   {tactic}
+
+/-- Curve {id} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+instance : curve{id}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve {id}. -/
+theorem curve{id}_j : curve{id}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
 '''
@@ -408,7 +433,8 @@ def main():
         for (p, th) in sorted(labels):
             fh.write(f"{p} {th}\n")
     lean = LEAN.format(id=cid, rank=rank_goal, tactic=tactic, eq=weier_eq(*ainvs[:3]),
-                       coeffs=coeff_block(ainvs[3], ainvs[4]), defblock=def_block(cid, ainvs))
+                       coeffs=coeff_block(ainvs[3], ainvs[4]), defblock=def_block(cid, ainvs),
+                       jinv=j_lit(j_invariant(*ainvs)))
     with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
