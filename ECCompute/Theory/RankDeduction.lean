@@ -124,9 +124,7 @@ lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
   constructor
   · rintro ⟨y, hy, rfl⟩
     rw [← map_smul, hy, map_zero]
-  · intro hz
-    refine ⟨e.symm z, ?_, by simp⟩
-    rw [← map_smul, hz, map_zero]
+  · exact fun hz => ⟨e.symm z, by rw [← map_smul, hz, map_zero], by simp⟩
 
 /-- `Nat.card (H ⧸ 2H)` is invariant under linear equivalences. -/
 lemma natCard_modN_two_congr (e : H ≃ₗ[ℤ] K) :
