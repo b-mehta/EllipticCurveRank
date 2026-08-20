@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.MainTheorem
-import ECCompute.Certify.CertifyEval
+import ECCompute.Tactic.CertifyEval
 
 /-!
 # The `certify_curve` tactic
@@ -148,11 +148,11 @@ private def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
 
 /-- The short-model coefficient Exprs `(a₂, a₄, a₆)` built from the integer coefficient Exprs
-`a₁…a₆` via `ModelChange.intShortA₂/₄/₆`. -/
+`a₁…a₆` via `IntegralScaling.intShortA₂/₄/₆`. -/
 private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr :=
-  (mkApp2 (mkConst ``ModelChange.intShortA₂) a1E a2E,
-    mkApp3 (mkConst ``ModelChange.intShortA₄) a1E a3E a4E,
-    mkApp2 (mkConst ``ModelChange.intShortA₆) a3E a6E)
+  (mkApp2 (mkConst ``IntegralScaling.intShortA₂) a1E a2E,
+    mkApp3 (mkConst ``IntegralScaling.intShortA₄) a1E a3E a4E,
+    mkApp2 (mkConst ``IntegralScaling.intShortA₆) a3E a6E)
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
@@ -182,7 +182,7 @@ universal `certTorsionBound_two` for `t = 2`. `torsRoot` supplies the `t = 1` ro
 private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
-  let wModel := mkAppN (mkConst ``ModelChange.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
+  let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
   let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
