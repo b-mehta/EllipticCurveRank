@@ -26,14 +26,15 @@ dimension `t`; `fullTorsion` certifies `t` instead.
 
 ## How it works
 
-mathlib has no Mordell-Weil theorem, so the argument stays inside the finitely generated subgroup
-the given points span. Cremona's descent character `λ_{p,θ}` maps that subgroup to `𝔽₂^ρ`; when the
-`ρ × ρ` matrix is invertible, the points are independent modulo `2·E(ℚ)`, giving `rank ≥ ρ - t` for
-`t = dim_{𝔽₂} E(ℚ)[2]`.
+mathlib has no Mordell-Weil theorem, so rather than compute the rank, we show that `ρ` given points
+are independent. Cremona's descent turns each point into a short bit-vector; when those vectors are
+independent, so are the points, and the rank is at least `ρ` (minus a small 2-torsion correction).
+Independence of the vectors is one invertible matrix over the two-element field, which a computer
+can check.
 
-A certificate supplies the points, the labels `(p, θ)`, the matrix and its `𝔽₂`-inverse, and a
-bound on `t`. `certify_curve` recomputes the matrix and discharges the referee obligations of
-`hasRankGE_of_certificate`, each a kernel-reducible `Bool` check.
+A certificate is that precomputed data: the points, the matrix and its inverse, and the torsion
+bound. `certify_curve` rechecks it inside the Lean kernel, so nothing outside Lean's core is
+trusted.
 
 ## Layout
 
