@@ -14,6 +14,8 @@ points is `y ↦ -y`.
 ## Main results
 
 * `WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero`: `negY x y = -y` when `a₁ = a₃ = 0`.
+
+Destination: `Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Formula.lean`.
 -/
 
 namespace WeierstrassCurve.Affine

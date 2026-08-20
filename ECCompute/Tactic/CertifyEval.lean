@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 
 /-!
-# Evaluator-side helpers for the `certify_curve` command
+# Evaluator-side helpers for the `certify_curve` tactic
 
 These functions reproduce the descent character and the `𝔽₂` matrix inverse using plain
 `Int`/`Nat` arithmetic (the Legendre symbol via quadratic reciprocity), written for the
@@ -18,10 +18,6 @@ character matrix `matB` and its inverse `matM`.
 * `lambdaEval`: evaluator-side value of the descent character `λ_{p,θ}`.
 * `computeMatB`: the descent-character matrix `matB` as `Nat` row bitmasks.
 * `invF2`: inverse of an `𝔽₂` matrix in the column-bitmask convention feeding `matM`.
-
-## Implementation notes
-
-This module has no imports.
 -/
 
 namespace ECCompute.CertifyEval

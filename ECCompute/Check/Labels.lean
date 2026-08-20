@@ -3,15 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import Mathlib.Tactic.NormNum.Prime
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Check.Fold
-import ECCompute.Check.Primes
-import ECCompute.ForMathlib.IntResNat
-
-import Mathlib.Tactic.NormNum.Prime
+import ECCompute.Check.IntResNat
 
 /-!
-# Column-legitimacy checks
+# Checking a descent label
 
 For a descent label `(p, θ)` the referee must verify, by exact integer arithmetic, the hypotheses
 of the descent lemma packaged as `ECCompute.DescentHyp`:
@@ -24,11 +22,15 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 `descentHyp_of_checkLabel` turns `checkLabel … = true` (with a separately supplied primality proof)
 into a `DescentHyp`.
 
-## Main declarations
+## Main definitions
 
 * `ECCompute.discrInt`: the integer discriminant of `curve a₂ a₄ a₆`.
+* `ECCompute.checkLabel`: the kernel-reducible boolean check for one label.
+* `ECCompute.checkLabels`: the same check across a list of labels.
+
+## Main results
+
 * `ECCompute.curve_Δ_num`: `(curve …).Δ.num = discrInt …`.
-* `ECCompute.checkLabel`: the kernel-reducible boolean check.
 * `ECCompute.descentHyp_of_checkLabel`: the passage to `DescentHyp`.
 -/
 
@@ -71,11 +73,12 @@ noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
     (Nat.mul (Int.emod a₂ p).toNat (Nat.mul (Int.emod θ p).toNat (Int.emod θ p).toNat)))
     (Nat.mul (Int.emod a₄ p).toNat (Int.emod θ p).toNat)) (Int.emod a₆ p).toNat) p
 
-theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
+/-- The `Nat` residue `fvalModP` vanishes exactly when `f(θ)` vanishes in `ZMod p`. -/
+theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : p ≠ 0) :
     Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  have : NeZero p := ⟨hp.ne'⟩
-  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
+  have : NeZero p := ⟨hp⟩
+  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ (Nat.pos_of_ne_zero hp)
   have em : ∀ x y : ℕ, Nat.mod x y = x % y := fun _ _ => rfl
   have ea : ∀ x y : ℕ, Nat.add x y = x + y := fun _ _ => rfl
   have el : ∀ x y : ℕ, Nat.mul x y = x * y := fun _ _ => rfl
@@ -88,9 +91,9 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
     rw [← ZMod.val_eq_zero, ZMod.val_cast_of_lt hlt]
   rw [Nat.beq_eq, ← hnz, hcast]
 
-/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
-expanded. -/
-def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
+/-- The integer discriminant `discrInt a₂ a₄ a₆`, computed with the raw `Int.mul`, `Int.add`,
+`Int.sub` and `Int.neg` primitives. Spec: `discrIntK_eq`. -/
+def discrIntK (a₂ a₄ a₆ : ℤ) : ℤ :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄
   let b6 := Int.mul 4 a₆
@@ -101,12 +104,13 @@ def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
       (Int.mul 27 (Int.mul b6 b6)))
     (Int.mul (Int.mul (Int.mul 9 b2) b4) b6)
 
-theorem discrIntRaw_eq (a₂ a₄ a₆ : ℤ) : discrIntRaw a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
+/-- The kernel twin computes `discrInt`. -/
+theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   have hmul : ∀ a b : ℤ, Int.mul a b = a * b := fun _ _ => rfl
   have hadd : ∀ a b : ℤ, Int.add a b = a + b := fun _ _ => rfl
   have hsub : ∀ a b : ℤ, Int.sub a b = a - b := fun _ _ => rfl
   have hneg : ∀ a : ℤ, Int.neg a = -a := fun _ => rfl
-  simp only [discrIntRaw, discrInt, hmul, hadd, hsub, hneg]
+  simp only [discrIntK, discrInt, hmul, hadd, hsub, hneg]
   ring
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
@@ -114,7 +118,7 @@ theorem discrIntRaw_eq (a₂ a₄ a₆ : ℤ) : discrIntRaw a₂ a₄ a₆ = dis
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   ((Nat.beq (Nat.mod 6 p) 0).not').and'
     (((Int.beq' (Int.emod
-      (discrIntRaw (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
+      (discrIntK (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
       (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
@@ -130,16 +134,26 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [Nat.dvd_iff_mod_eq_zero, h6m]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntRaw_eq,
+    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf
+      (fvalModP_iff a₂ a₄ a₆ θ hp.ne_zero).mp hf
     rw [fval]
     grind
 
-/-! ### Worked example
+/-- Kernel `Bool`: every label passes `checkLabel`. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
+  allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
+
+/-- If `checkLabels` passes, every label passes `checkLabel`. -/
+theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
+    (h : checkLabels a₂ a₄ a₆ labels = true) :
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
+  rwa [checkLabels, allList_eq_true] at h
+
+/-! ## Worked example
 
 A small standalone example: the short model `y² = x³ - x` (so `a₂ = 0, a₄ = -1, a₆ = 0`, with
 integer discriminant `64`) and the label prime `p = 7`, root `θ = 1` (indeed `f(1) = 1 - 1 = 0`). -/
@@ -151,25 +165,5 @@ example : checkLabel 0 (-1) 0 7 1 = true := rfl
 the certificate tactic emits for each column. -/
 example : DescentHyp 0 (-1) 0 7 ((1 : ℤ) : ZMod 7) :=
   descentHyp_of_checkLabel 0 (-1) 0 7 1 rfl (by norm_num)
-
-/-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
-noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
-  allList (fun l => checkPrime l.1) labels
-
-/-- If `checkPrimes` passes, every label's prime component really is prime. -/
-theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
-    ∀ l ∈ labels, (l.1).Prime := by
-  rw [checkPrimes, allList_eq_true] at h
-  exact fun l hl => checkPrime_true (h l hl)
-
-/-- Kernel `Bool`: every label passes `checkLabel`. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
-  allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
-
-/-- If `checkLabels` passes, every label passes `checkLabel`. -/
-theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
-    (h : checkLabels a₂ a₄ a₆ labels = true) :
-    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
-  rwa [checkLabels, allList_eq_true] at h
 
 end ECCompute

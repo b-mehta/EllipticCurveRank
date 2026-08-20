@@ -4,14 +4,14 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Rat.Defs
-import ECCompute.Check.F2Invert
 
 /-!
 # The rank-bound certificate data type
 
 `Certificate` bundles the data a referee audits to accept a lower bound on the Mordell-Weil rank
-of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. The intended witness is the integral
-Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
+of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. Its curve is the short integral Weierstrass
+model `y² = x³ + a₂x² + a₄x + a₆`; `ECCompute.hasRankGE_of_certificate` transports the bound to a
+general integral model.
 
 ## Main definitions
 
@@ -19,25 +19,21 @@ Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
 
 ## Implementation notes
 
-The four lists `points`, `labels`, `matB`, and `matM` all have length `rho`; the auditing checkers
-enforce this. `matB` / `matM` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`matB`
-by rows, `matM` by columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
+The five lists `points`, `labels`, `matB`, `matM` and `qrMasks` all have length `rho`; the auditing
+checkers enforce this. `matB` / `matM` follow the `List Nat` bitmask layout of `ECCompute.F2Invert`
+(`matB` by rows, `matM` by columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
 -/
 
 namespace ECCompute
 
-/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the integral
-Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`. -/
+/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the short integral
+Weierstrass model `y² = x³ + a₂x² + a₄x + a₆`. -/
 structure Certificate where
-  /-- The `x y` coefficient of the Weierstrass model. -/
-  a₁ : ℤ
-  /-- The `x²` coefficient of the Weierstrass model. -/
+  /-- The `x²` coefficient of the short model. -/
   a₂ : ℤ
-  /-- The `y` coefficient of the Weierstrass model. -/
-  a₃ : ℤ
-  /-- The `x` coefficient of the Weierstrass model. -/
+  /-- The `x` coefficient of the short model. -/
   a₄ : ℤ
-  /-- The constant coefficient of the Weierstrass model. -/
+  /-- The constant coefficient of the short model. -/
   a₆ : ℤ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   rho : ℕ
@@ -53,12 +49,12 @@ structure Certificate where
   set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee, so
   each Legendre-character check is a bitmask lookup. -/
   qrMasks : List Nat
-  /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
+  /-- The certified bound on the rational `2`-torsion, `|E(ℚ)[2]| ≤ 2 ^ t`; the target bound is
   `rank ≥ ρ - t`. -/
   t : ℕ
-  /-- A prime witnessing the `2`-torsion claim (for `t = 0`, one at which the `2`-division cubic has
-  no root). -/
+  /-- The prime witnessing the `2`-torsion bound: for `t = 0`, one at which the `2`-division cubic
+  has no root; for `t = 1`, one at which the quadratic cofactor has no root. Ignored for `t = 2`,
+  where the bound `|E(ℚ)[2]| ≤ 4` holds for every curve. -/
   torsionPrime : ℕ
-  deriving Repr, DecidableEq
 
 end ECCompute
