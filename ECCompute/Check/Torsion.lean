@@ -71,8 +71,7 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
     rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
   have h2 : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 = true
       ↔ (ℓ : ℤ) ∣ cubicEval c₂ c₁ c₀ (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (cubicModL (c₂ % ℓ).toNat (c₁ % ℓ).toNat (c₀ % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (cubicEval c₂ c₁ c₀ (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
+  grind
 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
 modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
@@ -158,8 +157,7 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
     rw [Nat.beq_eq, ← hnz, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
   have h2 : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 = true
       ↔ (ℓ : ℤ) ∣ quadEval b c (r : ℤ) := by rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq (quadModL (b % ℓ).toNat (c % ℓ).toNat ℓ r) 0 <;>
-    cases hi : Int.beq' (quadEval b c (r : ℤ) % (ℓ : ℤ)) 0 <;> simp_all
+  grind
 
 /-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
 `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
@@ -386,11 +384,7 @@ theorem card_twoTorsion_le_one_of_hasRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} 
     intro P hP
     refine no_nonzero_twoTorsion_of_hasRootMod_eq_false 0 a₂ 0 a₄ a₆ hℓ _
       rfl rfl rfl rfl rfl ?_ P hP
-    have e1 : (0 : ℤ) ^ 2 + 4 * a₂ = 4 * a₂ := by ring
-    have e2 : 8 * (2 * a₄ + 0 * 0) = 16 * a₄ := by ring
-    have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * a₆) = 64 * a₆ := by ring
-    rw [e1, e2, e3]
-    exact h
+    convert h using 2 <;> ring
   have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
     ⟨fun a b => Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
   exact Finite.card_le_one_iff_subsingleton.mpr this
@@ -407,9 +401,8 @@ identity in the coefficients, valid whenever `cubicEval a₂ a₄ a₆ R = 0`. -
 private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : cubicEval a₂ a₄ a₆ R = 0) (x : ℚ) :
     x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ)
       = (x - R) * (x ^ 2 + ((a₂ : ℚ) + R) * x + ((a₄ : ℚ) + R * ((a₂ : ℚ) + R))) := by
-  have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
-    have : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by simp [hR]
-    simpa only [cubicEval, Int.cast_add, Int.cast_mul, Int.cast_pow] using this
+  have hRQ : ((cubicEval a₂ a₄ a₆ R : ℤ) : ℚ) = 0 := by simp [hR]
+  simp only [cubicEval, Int.cast_add, Int.cast_mul, Int.cast_pow] at hRQ
   grind
 
 /-- If the `2`-division cubic `F` of the short model has integer root `R` and its cofactor quadratic
