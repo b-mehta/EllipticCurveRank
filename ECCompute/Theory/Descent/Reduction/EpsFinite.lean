@@ -264,10 +264,4 @@ noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
   map_zero' := εp_finite_zero a₂ a₄ a₆ p θ
   map_add' := εp_finite_map_add h
 
-/-- `εp_finite` vanishes on `2·E(𝔽ₚ)`, immediate from being a homomorphism into `ZMod 2`. -/
-theorem εpHom_two_nsmul (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) :
-    εpHom h (2 • P) = 0 := by
-  rw [map_nsmul, CharTwo.two_nsmul]
-
 end ECCompute

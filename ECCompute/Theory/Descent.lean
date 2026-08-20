@@ -26,7 +26,6 @@ additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 * `ECCompute.lambda_some_of_den_ne`: reduction of `λ` on an affine point to `ψ_p(X - θ)`.
 * `ECCompute.lambda_map_add`: the trusted theorem, `λ` is additive.
 * `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
-* `ECCompute.lambdaHom_two_nsmul`: `λ` vanishes on `2·E(ℚ)` (automatic in `ZMod 2`).
 -/
 
 open WeierstrassCurve
@@ -117,11 +116,5 @@ noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero a₂ a₄ a₆ p θ
   map_add' := lambda_map_add a₂ a₄ a₆ p h
-
-/-- The descent character vanishes on `2·E(ℚ)`, hence factors through `E(ℚ)/2E(ℚ)`. -/
-theorem lambdaHom_two_nsmul {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambdaHom a₂ a₄ a₆ p h (2 • P) = 0 := by
-  grind
 
 end ECCompute
