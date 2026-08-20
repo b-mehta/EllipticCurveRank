@@ -1,7 +1,7 @@
 -- Foundations
 import ECCompute.Check.Fold
-import ECCompute.ForMathlib.IntResNat
-import ECCompute.Certify.Certificate
+import ECCompute.Check.IntResNat
+import ECCompute.Certificate
 
 -- Pure mathematics
 import ECCompute.Theory.Descent
@@ -10,16 +10,16 @@ import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Theory.LambdaCompute
+import ECCompute.Check.LambdaCompute
 import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.ModelChange
-import ECCompute.Theory.ModelIso
+import ECCompute.Theory.IntegralScaling
+import ECCompute.Theory.CompleteSquare
 
 -- Certification checkers
 import ECCompute.Check.F2Invert
-import ECCompute.Check.CheckMatrix
+import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Primes
-import ECCompute.Check.ColumnCheck
+import ECCompute.Check.Labels
 import ECCompute.Check.Torsion
 import ECCompute.Check.Points
 import ECCompute.Check.JInvariant
@@ -28,8 +28,8 @@ import ECCompute.Check.JInvariant
 import ECCompute.MainTheorem
 
 -- Certificate tactic
-import ECCompute.Certify.CertifyEval
-import ECCompute.Certify
+import ECCompute.Tactic.CertifyEval
+import ECCompute.Tactic.CertifyCurve
 
 -- Certified curves
 import ECCompute.Curves.Curve7
