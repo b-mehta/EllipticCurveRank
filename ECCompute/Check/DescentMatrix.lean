@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Check.F2Invert
 import ECCompute.Check.LambdaCompute
+import ECCompute.ForMathlib.ListGetD
 
 /-!
 # Aggregate descent-character matrix check
@@ -23,29 +24,7 @@ verifies each supplied mask equals `qrMask p` once per prime.
 
 namespace ECCompute
 
-open Matrix Finset
-
-/-- `l.getD n d` is a genuine member of `l` when the index is in range. -/
-theorem getD_mem_of_lt {α : Type*} {l : List α} {n : ℕ} {d : α} (h : n < l.length) :
-    l.getD n d ∈ l := by
-  rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem h, Option.getD_some]
-  exact List.getElem_mem h
-
-/-- `getD` commutes with `zipWith` on equal-length lists in range. -/
-private theorem getD_zipWith {α β γ : Type*} (f : α → β → γ) (as : List α) (bs : List β) (n : ℕ)
-    (da : α) (db : β) (dc : γ) (hn : n < as.length) (hlen : as.length = bs.length) :
-    (List.zipWith f as bs).getD n dc = f (as.getD n da) (bs.getD n db) := by
-  induction as generalizing bs n with
-  | nil => simp at hn
-  | cons a as ih =>
-    cases bs with
-    | nil => simp at hlen
-    | cons b bs =>
-      cases n with
-      | zero => simp
-      | succ n =>
-        simp only [List.zipWith_cons_cons, List.getD_cons_succ]
-        exact ih bs n (by simpa using hn) (by simpa using hlen)
+open Matrix Finset List
 
 /-- Turn the `(prime, θ)` labels and their quadratic-residue masks into the `Nat` label triples
 `(p, (θ % p).toNat, q)` consumed by the kernel-reduced checker. -/

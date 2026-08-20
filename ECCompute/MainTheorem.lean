@@ -195,9 +195,9 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   -- by `getD`. Every kernel-checked hypothesis above is `List`-based; the families here appear
   -- only in the (non-computational) proof.
   have hmemP : ∀ i : Fin c.rho, c.points.getD i.val (0, 0) ∈ c.points :=
-    fun i => getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
+    fun i => List.getD_mem_of_lt (by rw [hlenP]; exact i.isLt)
   have hmemL : ∀ j : Fin c.rho, c.labels.getD j.val (0, 0) ∈ c.labels :=
-    fun j => getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
+    fun j => List.getD_mem_of_lt (by rw [hlenL]; exact j.isLt)
   have hcurve : curve c.a₂ c.a₄ c.a₆ = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
     simp only [curve]
   rw [checkPoints_iff] at hpt
