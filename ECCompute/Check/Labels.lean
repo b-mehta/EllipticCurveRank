@@ -86,7 +86,7 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
 
 /-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
 expanded. -/
-def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
+def discrIntK (a₂ a₄ a₆ : ℤ) : ℤ :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄
   let b6 := Int.mul 4 a₆
@@ -97,8 +97,8 @@ def discrIntRaw (a₂ a₄ a₆ : ℤ) : ℤ :=
       (Int.mul 27 (Int.mul b6 b6)))
     (Int.mul (Int.mul (Int.mul 9 b2) b4) b6)
 
-theorem discrIntRaw_eq (a₂ a₄ a₆ : ℤ) : discrIntRaw a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
-  simp only [discrIntRaw, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
+theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
+  simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
   ring
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
@@ -106,7 +106,7 @@ theorem discrIntRaw_eq (a₂ a₄ a₆ : ℤ) : discrIntRaw a₂ a₄ a₆ = dis
 noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
   ((Nat.beq (Nat.mod 6 p) 0).not').and'
     (((Int.beq' (Int.emod
-      (discrIntRaw (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
+      (discrIntK (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
       (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
@@ -122,7 +122,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [Nat.dvd_iff_mod_eq_zero, h6m]
     simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntRaw_eq,
+    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
