@@ -43,6 +43,6 @@ instance : curve14.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
 /-- The `j`-invariant of curve 14. -/
 theorem curve14_j : curve14.j = 404370344147392 / 42649271289 :=
-  (j_eq_iff curve14 _).mpr (by decide +kernel)
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

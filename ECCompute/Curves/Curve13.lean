@@ -39,6 +39,6 @@ theorem curve13_hasRankGE_3 : HasRankGE curve13 3 := by
 instance : curve13.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
 /-- The `j`-invariant of curve 13 is `1728` (it has complex multiplication by `ℤ[i]`). -/
-theorem curve13_j : curve13.j = 1728 := (j_eq_iff curve13 1728).mpr (by decide +kernel)
+theorem curve13_j : curve13.j = 1728 := j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

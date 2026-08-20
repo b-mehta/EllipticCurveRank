@@ -14,9 +14,9 @@ The j-invariant `j = c₄³ / Δ` is an isomorphism invariant: it is the same fo
 model of a curve (mathlib's `WeierstrassCurve.variableChange_j`), so it can be read off any integral
 model `⟨a₁, …, a₆⟩`.
 
-`j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`; the per-curve
-obligation is then the kernel-reducible `Bool` check `(c₄³ == Δ · q) = true`, discharged by
-`j_eq_of_beq`.
+`j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`, which each curve
+discharges by `decide +kernel`; `isElliptic_of_Δ_ne_zero` supplies the `IsElliptic` instance from
+a nonzero discriminant.
 -/
 
 namespace ECCompute
@@ -24,7 +24,7 @@ namespace ECCompute
 open WeierstrassCurve
 
 /-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ · q`. -/
-theorem j_eq_iff (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ) :
+theorem j_eq_iff {W : WeierstrassCurve ℚ} [W.IsElliptic] {q : ℚ} :
     W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
   rw [WeierstrassCurve.j, Units.inv_mul_eq_iff_eq_mul, coe_Δ']
 
