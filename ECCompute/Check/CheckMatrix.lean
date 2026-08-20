@@ -137,7 +137,7 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : labN[j.val]'(by rw [hlabN]; exact j.isLt)
       = (L.1, (L.2 % (L.1 : ℤ)).toNat, qms[j.val]) := by
-    rw [hlabNdef, toLabN, List.getElem_zipWith, ← Int.mod_def', ← hL]
+    simp only [hlabNdef, toLabN, List.getElem_zipWith, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
