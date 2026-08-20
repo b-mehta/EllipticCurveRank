@@ -75,7 +75,7 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
         (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by grind
     rw [hNfac]
-    exact isCoprime_add_mul_left_left hcx.pow_left _
+    exact hcx.pow_left.add_mul_left_left _
   have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 := by
     have hc : IsCoprime ((x.den : ℤ) ^ 3) N := hcN.symm.pow_left
     exact hc.dvd_of_dvd_mul_left ⟨y.num ^ 2, by grind⟩
