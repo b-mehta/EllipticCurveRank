@@ -28,8 +28,8 @@ labels from two data files, recomputes the matrix, and discharges the referee ob
 * `Certify/` and `Certify.lean` - the certificate type and the `certify_curve` tactic.
 * `Curves/` - certified curves, named by their id on the
   [ICARM Elliptic Curve Rank Leaderboard](https://elliptic-rank.icarm.cloud/): rank records from
-  `20` to `30` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun) and two small worked
-  examples.
+  `20` to `30` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, and curve `273` at
+  rank `30`) and two small worked examples.
 * `data/` - the points and labels each certificate reads.
 
 ## Building
