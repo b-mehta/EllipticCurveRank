@@ -123,18 +123,16 @@ theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + (a₂ : ℚ) + x₁ + x₂ := by
       grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
-    rw [Rat.cast_pow,
+    rwa [Rat.cast_pow,
       Rat.cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
       Rat.cast_add_of_ne_zero (den_add_ne_zero hd3 (by simp)) hd1,
       Rat.cast_add_of_ne_zero hd3 (by simp), Rat.cast_intCast] at hc
-    exact hc
   · have hℓmul : ℓ * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
       rw [hℓdef]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
-    rw [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
+    rwa [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
       Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
-    exact hc
 
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` survives reduction, so does the slope:
 from `ℓ² = addX + a₂ + x₁ + x₂` a nonzero `addX`-denominator forces a nonzero `ℓ`-denominator. -/
