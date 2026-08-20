@@ -18,8 +18,8 @@ Leaderboard is
   `     228357301072889377`
 
 over `ℚ`. It has Mordell–Weil rank at least `30`. The witness points from the leaderboard,
-transported to the integral short model, are in `data/rank30.txt`; descent labels are in
-`data/rank30-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
+transported to the integral short model, are in `data/curve273.txt`; descent labels are in
+`data/curve273-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
 -/
 
 namespace ECCompute
@@ -40,6 +40,6 @@ def curve273 : WeierstrassCurve ℚ := ⟨1, 0, 0, curve273A₄, curve273A₆⟩
 /-- ICARM leaderboard curve 273 has Mordell–Weil rank at least `30`. -/
 theorem curve273_hasRankGE_30 : HasRankGE curve273 30 := by
   unfold curve273 curve273A₄ curve273A₆
-  certify_curve torsion 23 points "data/rank30.txt" labels "data/rank30-labels.txt"
+  certify_curve torsion 23 points "data/curve273.txt" labels "data/curve273-labels.txt"
 
 end ECCompute
