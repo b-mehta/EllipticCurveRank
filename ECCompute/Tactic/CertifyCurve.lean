@@ -89,7 +89,7 @@ syntax "certify_curve" " torsion " term:max str str : tactic
 
 syntax "certify_curve" " fullTorsion " str str : tactic
 
-syntax "certify_curve" " oneTorsion " " root " term:max " witness " term:max str str : tactic
+syntax "certify_curve" " oneTorsion " term:max term:max str str : tactic
 
 /-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
 negation, or an `Int.cast` of an `ℤ` literal. Errors if the coefficient is not an integer. -/
@@ -249,7 +249,7 @@ elab_rules : tactic
     runCertify 0 tpNat 0 path.getString lpath.getString
   | `(tactic| certify_curve fullTorsion $path:str $lpath:str) => do
     runCertify 2 0 0 path.getString lpath.getString
-  | `(tactic| certify_curve oneTorsion root $r witness $l $path:str $lpath:str) => do
+  | `(tactic| certify_curve oneTorsion $r $l $path:str $lpath:str) => do
     let torsRoot ← getIntE (← elabTermEnsuringType r (mkConst ``Int))
     let tpNat ← getNatE (← elabTermEnsuringType l (mkConst ``Nat))
     runCertify 1 tpNat torsRoot path.getString lpath.getString
