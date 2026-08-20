@@ -32,22 +32,4 @@ theorem j_eq_iff (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ) :
 theorem isElliptic_of_Δ_ne_zero {W : WeierstrassCurve ℚ} (hΔ : W.Δ ≠ 0) : W.IsElliptic :=
   ⟨isUnit_iff_ne_zero.mpr hΔ⟩
 
-/-- Kernel-reducible `ℚ` equality: `Int.beq'` on numerators and `Nat.beq` on denominators. -/
-noncomputable def ratBeq' (a b : ℚ) : Bool := (Int.beq' a.num b.num).and' (Nat.beq a.den b.den)
-
-/-- `ratBeq'` agrees with `==` on `ℚ`. -/
-theorem ratBeq'_eq (a b : ℚ) : ratBeq' a b = (a == b) := by
-  rw [ratBeq', Bool.and'_eq_and, Int.beq'_eq_beq, ← natBeqEq]
-  grind [Rat.ext]
-
-/-- `IsElliptic` from a kernel-reducible `Bool` witness that `Δ ≠ 0`. -/
-theorem isElliptic_of_bne {W : WeierstrassCurve ℚ} (h : (ratBeq' W.Δ 0).not' = true) :
-    W.IsElliptic :=
-  isElliptic_of_Δ_ne_zero (by simpa [Bool.not'_eq_not, ratBeq'_eq] using h)
-
-/-- `j = q` from a kernel-reducible `Bool` witness that `c₄³ = Δ · q`. -/
-theorem j_eq_of_beq (W : WeierstrassCurve ℚ) [W.IsElliptic] (q : ℚ)
-    (h : ratBeq' (W.c₄ ^ 3) (W.Δ * q) = true) : W.j = q :=
-  (j_eq_iff W q).mpr (eq_of_beq (by rwa [ratBeq'_eq] at h))
-
 end ECCompute

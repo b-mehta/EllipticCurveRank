@@ -39,10 +39,10 @@ theorem curve14_hasRankGE_4 : HasRankGE curve14 4 := by
   certify_curve fullTorsion points "data/curve14.txt" labels "data/curve14-labels.txt"
 
 /-- Curve 14 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
-instance : curve14.IsElliptic := isElliptic_of_bne (by quickRfl)
+instance : curve14.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
 /-- The `j`-invariant of curve 14. -/
 theorem curve14_j : curve14.j = 404370344147392 / 42649271289 :=
-  j_eq_of_beq _ _ (by quickRfl)
+  (j_eq_iff curve14 _).mpr (by decide +kernel)
 
 end ECCompute
