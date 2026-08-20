@@ -36,11 +36,6 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ)
 
-private theorem isCoprime_add_mul_left_left {R : Type*} [CommRing R] {a b : R}
-    (h : IsCoprime a b) (c : R) : IsCoprime (a + b * c) b := by
-  obtain ⟨u, v, huv⟩ := h
-  exact ⟨u, v - u * c, by grind⟩
-
 private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
   have hQ : (d : ℚ) ^ 3 = (g : ℚ) ^ 2 := by exact_mod_cast hdg
