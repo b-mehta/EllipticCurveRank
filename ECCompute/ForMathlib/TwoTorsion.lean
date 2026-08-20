@@ -54,9 +54,8 @@ theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (h�
           - (x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)) = 0 := by
         linear_combination (2 * y + W.a₁ * x + W.a₃) * he - hroot
       linear_combination (mul_eq_zero.mp h4G).resolve_left h4
-    have hns : W.toAffine.Nonsingular x y :=
-      (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp heq
-    refine ⟨y, hns, Affine.Point.add_self_of_Y_eq ?_⟩
+    refine ⟨y, (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp heq,
+      Affine.Point.add_self_of_Y_eq ?_⟩
     rw [Affine.negY]
     linear_combination he
   · rintro ⟨y, hns, hP⟩

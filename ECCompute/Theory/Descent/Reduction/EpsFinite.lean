@@ -76,12 +76,6 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
     θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
   simpa [fval] using h.root
 
-/-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is just `-y`. -/
-private theorem reduced_negY (x y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _
-    (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod]) x y
-
 /-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁}
@@ -191,9 +185,8 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
     have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
     have hpm : psi p ((x - θ) * (x - θ) * (X₃ - θ)) = 0 := by
       rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
-    rw [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
+    rwa [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
       CharTwo.add_self_eq_zero, zero_add] at hpm
-    exact hpm
 
 /-- Additivity of `εp_finite` in the doubling case: `εp_finite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
@@ -203,7 +196,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
-  have hneg := reduced_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) x y
+  have hneg := reduced_negY a₂ a₄ a₆ p x y
   have hyne : y ≠ ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
@@ -249,7 +242,7 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
-      have hyne' : y₁ ≠ -y₂ := by grind [reduced_negY]
+      have hyne' : y₁ ≠ -y₂ := by grind
       have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
         rw [reduced_equation h₁, reduced_equation h₂]
       have hyeq : y₁ = y₂ := by grind

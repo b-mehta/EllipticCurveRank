@@ -67,18 +67,15 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
     exact_mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3
-  have hcx : IsCoprime x.num (x.den : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using x.reduced
-  have hcy : IsCoprime y.num (y.den : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using y.reduced
+  have hcx : IsCoprime x.num (x.den : ℤ) := Rat.isCoprime_num_den x
+  have hcy : IsCoprime y.num (y.den : ℤ) := Rat.isCoprime_num_den y
   have hcN : IsCoprime N (x.den : ℤ) := by
     have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
         (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by grind
     rw [hNfac]
     exact hcx.pow_left.add_mul_left_left _
-  have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 := by
-    have hc : IsCoprime ((x.den : ℤ) ^ 3) N := hcN.symm.pow_left
-    exact hc.dvd_of_dvd_mul_left ⟨y.num ^ 2, by grind⟩
+  have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 :=
+    hcN.symm.pow_left.dvd_of_dvd_mul_left ⟨y.num ^ 2, by grind⟩
   have hdvd2 : (y.den : ℤ) ^ 2 ∣ (x.den : ℤ) ^ 3 := by
     have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := hcy.symm.pow_left.pow_right
     exact hc.dvd_of_dvd_mul_left ⟨N, by grind⟩

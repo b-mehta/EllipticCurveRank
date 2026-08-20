@@ -29,12 +29,6 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
-@[grind =]
-private theorem reduced_negY (X Y : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY X Y = -Y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [WeierstrassCurve.map, curveℤ])
-    (by simp [WeierstrassCurve.map, curveℤ]) X Y
-
 /-! ### The fixed projective representative -/
 
 /-- The fixed `ZMod p`-projective representative of an affine point used to compute `red_p`:
@@ -182,11 +176,6 @@ private theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
   have hTℚ : Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ V)
       = P + Q := by rw [hgadd, Projective.Point.toAffine_add hnsA hnsB, haffA, haffB]
   exact repr_equiv_of_toAffine a₂ a₄ a₆ p hΔ _ hnsp hnsq hTℚ
-
-/-- The integral model maps to the rational curve under `ℤ → ℚ`. -/
-private theorem map_curveℤ_ℚ :
-    (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
 
 /-! ### Case analysis for the group law -/
 

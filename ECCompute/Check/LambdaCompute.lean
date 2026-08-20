@@ -53,9 +53,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
   rw [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq, Nat.and_one_is_mod,
     Nat.testBit_eq_decide_div_mod_eq]
-  constructor
-  · intro h; simp [h]
-  · intro h; simpa using of_decide_eq_true h
+  simp
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
 theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
@@ -90,10 +88,7 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
     (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   have hpp : p.Prime := hp.out
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
-  have hp3 : 3 ≤ p := by
-    rcases hpp.two_le.lt_or_eq with h | h
-    · omega
-    · omega
+  have hp3 : 3 ≤ p := by have := hpp.two_le; omega
   constructor
   · rintro ⟨j, hj1, hjk, hja⟩
     have hjp : j < p := by omega
@@ -179,10 +174,7 @@ noncomputable def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
 `psi`. -/
 theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     psiCompute p a = psi p a := by
-  have hp : p.Prime := Fact.out
   -- the natural-number value `a.val` casts back to `a`, and is `< p`
-  have hval : ((a.val : ℤ) : ZMod p) = a := by
-    rw [Int.cast_natCast, ZMod.natCast_zmod_val]
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
   have ha0 : a.val ≠ 0 := fun h => ha (by rw [← hval', h, Nat.cast_zero])

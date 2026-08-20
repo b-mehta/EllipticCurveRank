@@ -38,12 +38,7 @@ noncomputable def ratBeq' (a b : ℚ) : Bool := (Int.beq' a.num b.num).and' (Nat
 /-- `ratBeq'` agrees with `==` on `ℚ`. -/
 theorem ratBeq'_eq (a b : ℚ) : ratBeq' a b = (a == b) := by
   rw [ratBeq', Bool.and'_eq_and, Int.beq'_eq_beq, ← natBeqEq]
-  rcases eq_or_ne a b with h | h
-  · subst h; simp
-  · rw [beq_eq_false_iff_ne.mpr h, Bool.and_eq_false_iff]
-    by_contra hc
-    rw [not_or, Bool.not_eq_false, Bool.not_eq_false, beq_iff_eq, beq_iff_eq] at hc
-    exact h (Rat.ext hc.1 hc.2)
+  grind [Rat.ext]
 
 /-- `IsElliptic` from a kernel-reducible `Bool` witness that `Δ ≠ 0`. -/
 theorem isElliptic_of_bne {W : WeierstrassCurve ℚ} (h : (ratBeq' W.Δ 0).not' = true) :
