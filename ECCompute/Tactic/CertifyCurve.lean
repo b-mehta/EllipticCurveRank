@@ -22,7 +22,7 @@ of the 2-division cubic mod `p`.
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
   unfold curveExample exampleA₄ exampleA₆   -- expose the `WeierstrassCurve` literal in the goal
-  certify_curve torsion 67 points "data/example.txt" labels "data/example-labels.txt"
+  certify_curve torsion 67 "data/example.txt" "data/example-labels.txt"
 ```
 -/
 
@@ -85,12 +85,11 @@ private def parseLabel (line : String) : Option (Nat × Int) :=
 `oneTorsion` handles `t = 1`, taking a short-model root `R` and a prime `ℓ` where the quadratic
 cofactor has no root. `fullTorsion` handles `t = 2` (e.g. square-discriminant curves) through the
 universal bound. -/
-syntax "certify_curve" " torsion " term:max " points " str " labels " str : tactic
+syntax "certify_curve" " torsion " term:max str str : tactic
 
-syntax "certify_curve" " fullTorsion " " points " str " labels " str : tactic
+syntax "certify_curve" " fullTorsion " str str : tactic
 
-syntax "certify_curve" " oneTorsion " " root " term:max " witness " term:max
-  " points " str " labels " str : tactic
+syntax "certify_curve" " oneTorsion " " root " term:max " witness " term:max str str : tactic
 
 /-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
 negation, or an `Int.cast` of an `ℤ` literal. Errors if the coefficient is not an integer. -/
@@ -245,12 +244,12 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   replaceMainGoal []
 
 elab_rules : tactic
-  | `(tactic| certify_curve torsion $tp points $path:str labels $lpath:str) => do
+  | `(tactic| certify_curve torsion $tp $path:str $lpath:str) => do
     let tpNat ← getNatE (← elabTermEnsuringType tp (mkConst ``Nat))
     runCertify 0 tpNat 0 path.getString lpath.getString
-  | `(tactic| certify_curve fullTorsion points $path:str labels $lpath:str) => do
+  | `(tactic| certify_curve fullTorsion $path:str $lpath:str) => do
     runCertify 2 0 0 path.getString lpath.getString
-  | `(tactic| certify_curve oneTorsion root $r witness $l points $path:str labels $lpath:str) => do
+  | `(tactic| certify_curve oneTorsion root $r witness $l $path:str $lpath:str) => do
     let torsRoot ← getIntE (← elabTermEnsuringType r (mkConst ``Int))
     let tpNat ← getNatE (← elabTermEnsuringType l (mkConst ``Nat))
     runCertify 1 tpNat torsRoot path.getString lpath.getString
