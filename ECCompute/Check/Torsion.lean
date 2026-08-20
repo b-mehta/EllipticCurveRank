@@ -60,7 +60,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
   refine ⟨z, ?_⟩
   -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
   have hQ : ((monicEval [c₀, c₁, c₂, 1] z : ℤ) : ℚ) = 0 := by
-    simp only [monicEval, hc₂, hc₁, hc₀]
+    simp only [monicEval, Int.add_def, Int.mul_def, hc₂, hc₁, hc₀]
     push_cast
     grind
   exact_mod_cast hQ
@@ -227,7 +227,7 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : monicEval [a
       = (x - R) * (x ^ 2 + ((a₂ : ℚ) + R) * x + ((a₄ : ℚ) + R * ((a₂ : ℚ) + R))) := by
   have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
     have hz : ((monicEval [a₆, a₄, a₂, 1] R : ℤ) : ℚ) = 0 := by simp [hR]
-    simp only [monicEval] at hz
+    simp only [monicEval, Int.add_def, Int.mul_def] at hz
     push_cast at hz
     linear_combination hz
   grind
@@ -286,12 +286,12 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
 `2`-division cubic (`monicEval [a₆, a₄, a₂, 1] R == 0`) whose cofactor quadratic has no root modulo
 a prime `ℓ ≠ 0`. Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq ℓ 0).not' = true)
-    (hR : Int.beq' (cubicEvalRaw a₂ a₄ a₆ R) 0 = true)
+    (hR : Int.beq' (monicEval [a₆, a₄, a₂, 1] R) 0 = true)
     (hq : (monicHasRootMod [a₄ + R * (a₂ + R), a₂ + R, 1] ℓ).not' = true) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
-    (by simpa [Int.beq'_eq, cubicEvalRaw_eq] using hR)
+    (by simpa [Int.beq'_eq] using hR)
     (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
