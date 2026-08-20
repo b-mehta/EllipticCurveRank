@@ -47,10 +47,10 @@ noncomputable def monicModL (cs : List ℤ) (ℓ r : ℕ) : ℕ :=
   List.rec 0 (fun c _ acc => Nat.mod (Nat.add (Int.emod c ℓ).toNat (Nat.mul r acc)) ℓ) cs
 
 /-- A `monicModL` value is a residue mod `ℓ`. -/
-theorem monicModL_lt {ℓ : ℕ} (hℓ : 0 < ℓ) (cs : List ℤ) (r : ℕ) : monicModL cs ℓ r < ℓ := by
+theorem monicModL_lt {ℓ : ℕ} (hℓ : ℓ ≠ 0) (cs : List ℤ) (r : ℕ) : monicModL cs ℓ r < ℓ := by
   cases cs with
-  | nil => exact hℓ
-  | cons c t => exact Nat.mod_lt _ hℓ
+  | nil => exact Nat.pos_of_ne_zero hℓ
+  | cons c t => exact Nat.mod_lt _ (Nat.pos_of_ne_zero hℓ)
 
 /-- `monicModL` casts to `monicEval` in `ZMod ℓ`. -/
 theorem monicModL_cast {ℓ : ℕ} [NeZero ℓ] (cs : List ℤ) (r : ℕ) :
@@ -67,10 +67,10 @@ theorem monicModL_cast {ℓ : ℕ} [NeZero ℓ] (cs : List ℤ) (r : ℕ) :
     push_cast
     ring
 
-/-- The mod-`ℓ` `Nat` test matches the `ℤ` residue test (`ℓ > 0`). -/
-theorem monicModL_beq (cs : List ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
+/-- The mod-`ℓ` `Nat` test matches the `ℤ` residue test (`ℓ ≠ 0`). -/
+theorem monicModL_beq (cs : List ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) (r : ℕ) :
     Nat.beq (monicModL cs ℓ r) 0 = Int.beq' (monicEval cs (r : ℤ) % (ℓ : ℤ)) 0 := by
-  have : NeZero ℓ := ⟨hℓ.ne'⟩
+  have : NeZero ℓ := ⟨hℓ⟩
   exact natBeq_zero_eq_intBeq' (monicModL_lt hℓ cs r) (monicModL_cast cs r)
 
 /-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has a
@@ -79,7 +79,7 @@ noncomputable def monicHasRootMod (cs : List ℤ) (ℓ : ℕ) : Bool :=
   anyBelow ℓ fun r => Nat.beq (monicModL cs ℓ r) 0
 
 /-- The `Nat` search agrees with the `ℤ` residue search over `0, …, ℓ - 1`. -/
-theorem monicHasRootMod_eq (cs : List ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) :
+theorem monicHasRootMod_eq (cs : List ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) :
     monicHasRootMod cs ℓ = anyBelow ℓ fun r => Int.beq' (monicEval cs (r : ℤ) % (ℓ : ℤ)) 0 := by
   rw [monicHasRootMod]
   congr 1
@@ -132,7 +132,7 @@ private theorem no_int_root_of_anyBelow {eval : ℤ → ℤ} {ℓ : ℕ} (hℓ :
 /-- If the monic polynomial has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
 theorem no_int_root_of_monicHasRootMod_eq_false {cs : List ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
     (h : monicHasRootMod cs ℓ = false) (u : ℤ) : monicEval cs u ≠ 0 := by
-  rw [monicHasRootMod_eq _ (Nat.pos_of_ne_zero hℓ)] at h
+  rw [monicHasRootMod_eq _ hℓ] at h
   exact no_int_root_of_anyBelow hℓ (monicEval_modEq cs (ℓ : ℤ)) h u
 
 /-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
