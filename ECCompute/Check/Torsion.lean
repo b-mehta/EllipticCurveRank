@@ -34,11 +34,8 @@ does. -/
 private theorem natBeq_zero_eq_intBeq' {ℓ n : ℕ} {z : ℤ} (hlt : n < ℓ)
     (hcast : ((n : ℕ) : ZMod ℓ) = (z : ZMod ℓ)) :
     Nat.beq n 0 = Int.beq' (z % (ℓ : ℤ)) 0 := by
-  have h1 : Nat.beq n 0 = true ↔ (ℓ : ℤ) ∣ z := by
-    rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-  have h2 : Int.beq' (z % (ℓ : ℤ)) 0 = true ↔ (ℓ : ℤ) ∣ z := by
-    rw [Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
-  cases hn : Nat.beq n 0 <;> cases hi : Int.beq' (z % (ℓ : ℤ)) 0 <;> simp_all
+  rw [Bool.eq_iff_iff, Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast,
+    ZMod.intCast_zmod_eq_zero_iff_dvd, Int.beq'_eq, Int.dvd_iff_emod_eq_zero]
 
 /-- The value of the monic cubic `u³ + c₂u² + c₁u + c₀` at an integer `u`. -/
 def cubicEval (c₂ c₁ c₀ u : ℤ) : ℤ := u ^ 3 + c₂ * u ^ 2 + c₁ * u + c₀
@@ -67,7 +64,8 @@ theorem cubicModL_beq (c₂ c₁ c₀ : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : �
   refine natBeq_zero_eq_intBeq' hlt ?_
   simp only [cubicModL, cubicEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_mul, intResNat_cast]
-  push_cast; ring
+  push_cast
+  ring
 
 /-- Kernel-reducible test: `true` iff the monic integer cubic `u³ + c₂u² + c₁u + c₀` has a root
 modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
@@ -140,7 +138,8 @@ theorem quadModL_beq (b c : ℤ) {ℓ : ℕ} (hℓ : 0 < ℓ) (r : ℕ) :
   refine natBeq_zero_eq_intBeq' hlt ?_
   simp only [quadModL, quadEval, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_mul, intResNat_cast]
-  push_cast; ring
+  push_cast
+  ring
 
 /-- Kernel-reducible test: `true` iff the monic integer quadratic `u² + b u + c` has a root modulo
 `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/

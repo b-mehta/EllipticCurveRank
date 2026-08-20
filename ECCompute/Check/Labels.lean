@@ -80,7 +80,8 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
     simp only [fvalModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ← Int.mod_def', ZMod.natCast_mod,
       Nat.cast_add, Nat.cast_mul, intResNat_cast]
-    push_cast; ring
+    push_cast
+    ring
   rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast]
 
 /-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
