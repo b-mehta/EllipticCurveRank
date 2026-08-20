@@ -90,10 +90,7 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
     (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   have hpp : p.Prime := hp.out
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
-  have hp3 : 3 ≤ p := by
-    rcases hpp.two_le.lt_or_eq with h | h
-    · omega
-    · omega
+  have hp3 : 3 ≤ p := by have := hpp.two_le; omega
   constructor
   · rintro ⟨j, hj1, hjk, hja⟩
     have hjp : j < p := by omega
