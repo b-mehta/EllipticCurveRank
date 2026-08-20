@@ -131,16 +131,6 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     rw [fval]
     grind
 
-/-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
-noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
-  allList (fun l => checkPrime l.1) labels
-
-/-- If `checkPrimes` passes, every label's prime component really is prime. -/
-theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
-    ∀ l ∈ labels, (l.1).Prime := by
-  rw [checkPrimes, allList_eq_true] at h
-  exact fun l hl => checkPrime_true (h l hl)
-
 /-- Kernel `Bool`: every label passes `checkLabel`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
   allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels

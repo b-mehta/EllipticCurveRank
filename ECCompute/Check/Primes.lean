@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import ECCompute.Check.Fold
 import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Tactic.Linarith
 
@@ -72,5 +73,15 @@ noncomputable def checkPrime (p : ℕ) : Bool :=
 theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
   simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
   exact Nat.prime_of_passes p h.1 (by lia) h.2.2
+
+/-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
+noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
+  allList (fun l => checkPrime l.1) labels
+
+/-- If `checkPrimes` passes, every label's prime component really is prime. -/
+theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
+    ∀ l ∈ labels, (l.1).Prime := by
+  rw [checkPrimes, allList_eq_true] at h
+  exact fun l hl => checkPrime_true (h l hl)
 
 end ECCompute
