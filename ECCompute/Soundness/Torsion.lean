@@ -138,7 +138,7 @@ private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finse
   set W := curve a₂ a₄ a₆ with hW
   set T : Set W.toAffine.Point := {P | P + P = 0} with hT
   set ι : W.toAffine.Point → Option ℚ :=
-    fun P => match P with
+    fun P ↦ match P with
       | .zero => none
       | .some x _ _ => some x with hιdef
   set S : Finset (Option ℚ) := Sx.insertNone with hS
@@ -211,7 +211,7 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ 
     rw [e1, e2, e3]
     exact h
   have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
-    ⟨fun a b => Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
+    ⟨fun a b ↦ Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
   exact Finite.card_le_one_iff_subsingleton.mpr this
 
 /-! ## The `t = 1` bound `|E(ℚ)[2]| ≤ 2`
@@ -245,7 +245,7 @@ private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : monic
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
   rcases hx with h | h
   · grind
-  · refine absurd h fun hqx =>
+  · refine absurd h fun hqx ↦
       no_rat_root_of_monicHasNoRootMod hℓ hq x ?_
     grind
 

@@ -34,7 +34,7 @@ theorem checkPoint_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   rw [← @Int.cast_inj ℚ]
   push_cast
   rw [hx, hy]
-  exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
+  exact ⟨fun h ↦ mul_left_cancel₀ hD (by grind), fun h ↦ by grind⟩
 
 /-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
 theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :

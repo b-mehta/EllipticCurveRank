@@ -136,7 +136,7 @@ theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha
     rw [hbf]
     symm
     simp only [decide_eq_false_iff_not]
-    exact fun hc => h (hmask.mpr hc)
+    exact fun hc ↦ h (hmask.mpr hc)
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
@@ -156,7 +156,7 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
     psiCompute p a = psi p a := by
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
-  have ha0 : a.val ≠ 0 := fun h => ha (by rw [← hval', h, Nat.cast_zero])
+  have ha0 : a.val ≠ 0 := fun h ↦ ha (by rw [← hval', h, Nat.cast_zero])
   have hspec := qrLookupBool_spec p hp2 a.val hvlt
   rw [hval'] at hspec
   rw [psiCompute, psiComputeBool, hspec]
@@ -179,7 +179,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
-  have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
+  have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
       if (x.den : ZMod p) = 0 then 0

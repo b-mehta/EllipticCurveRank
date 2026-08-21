@@ -59,7 +59,7 @@ theorem monicEval_modEq (cs : List ℤ) (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD
   induction cs with
   | nil => rfl
   | cons c t ih =>
-    have hev : ∀ u : ℤ, monicEval (c :: t) u = c + u * monicEval t u := fun _ => rfl
+    have hev : ∀ u : ℤ, monicEval (c :: t) u = c + u * monicEval t u := fun _ ↦ rfl
     rw [hev, hev]
     exact Int.ModEq.add_left c (h.mul ih)
 
@@ -67,7 +67,7 @@ theorem monicEval_modEq (cs : List ℤ) (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD
 theorem no_int_root_of_monicHasNoRootMod {cs : List ℤ} {ℓ : ℕ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod cs ℓ = true) (u : ℤ) : monicEval cs u ≠ 0 := by
   rw [monicHasNoRootMod, allBelow_eq_true] at h
-  have hres : ∀ r : ℕ, r < ℓ → ((monicEval cs (r : ℤ) : ℤ) : ZMod ℓ) ≠ 0 := fun r hr => by
+  have hres : ∀ r : ℕ, r < ℓ → ((monicEval cs (r : ℤ) : ℤ) : ZMod ℓ) ≠ 0 := fun r hr ↦ by
     rw [ne_eq, ← monicModL_beq cs hℓ r, Bool.not_eq_true]
     simpa [Bool.not'_eq_not] using h r hr
   intro hu

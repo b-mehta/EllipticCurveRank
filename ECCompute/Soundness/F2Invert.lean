@@ -37,7 +37,7 @@ def popParity : Nat → Nat → Bool
 
 /-- The XOR over `v.testBit j` for `j` in a list. -/
 private def xorBits (v : Nat) (l : List Nat) : Bool :=
-  l.foldr (fun j r => Bool.xor (v.testBit j) r) false
+  l.foldr (fun j r ↦ Bool.xor (v.testBit j) r) false
 
 /-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
 private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
@@ -67,8 +67,8 @@ private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
 theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
-  have hxor : ∀ a b : Nat, a.xor b = a ^^^ b := fun _ _ => rfl
-  have hshr : ∀ a b : Nat, a.shiftRight b = a >>> b := fun _ _ => rfl
+  have hxor : ∀ a b : Nat, a.xor b = a ^^^ b := fun _ _ ↦ rfl
+  have hshr : ∀ a b : Nat, a.shiftRight b = a >>> b := fun _ _ ↦ rfl
   simp only [popParityK, land_one_beq_one, hxor, hshr, Nat.testBit_xor,
     Nat.testBit_shiftRight]
   simp only [xorBits, List.range, List.range.loop, List.foldr_cons, List.foldr_nil]
@@ -95,7 +95,7 @@ private theorem xorBits_range_hi {v n : Nat} (hzero : ∀ j, n ≤ j → v.testB
 theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParity 32 v = popParity n v := by
   rw [popParity_eq_xorBits, popParity_eq_xorBits]
-  refine xorBits_range_hi (fun j hj => ?_) 32 hn
+  refine xorBits_range_hi (fun j hj ↦ ?_) 32 hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
 /-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
@@ -105,8 +105,8 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 
 theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
-      ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
-        (Nat.beq i k)).and' (checkInvRow bi i k.succ ms) := rfl
+      ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
+        (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) =
@@ -114,7 +114,7 @@ theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
-  fun i j => if (B.getD i 0).testBit j then 1 else 0
+  fun i j ↦ if (B.getD i 0).testBit j then 1 else 0
 
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
 theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length) :
@@ -123,7 +123,7 @@ theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length
 
 /-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMatCols (M : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
-  fun j k => if (M.getD k 0).testBit j then 1 else 0
+  fun j k ↦ if (M.getD k 0).testBit j then 1 else 0
 
 /-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `Nat.land`. -/
 private theorem prodTerm (a b j : Nat) :
@@ -167,7 +167,7 @@ theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]
-      exact ih (fun m hm => hM m (by simp [hm])) hrec k'' (by simpa using hk')
+      exact ih (fun m hm ↦ hM m (by simp [hm])) hrec k'' (by simpa using hk')
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
@@ -187,7 +187,7 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈
     | succ i'' =>
       have hidx : i + (i'' + 1) = i + 1 + i'' := by lia
       rw [hidx]
-      exact ih (fun b hb => hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
+      exact ih (fun b hb ↦ hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
 
 /-- `Nat.shiftLeft 1 n` is `2 ^ n`, restated in the def's primitive `Nat.shiftLeft` form. -/
 private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := Nat.one_shiftLeft n
@@ -222,7 +222,7 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
     ext i k
     simp only [Matrix.mul_apply, toMat, toMatCols, prodTerm]
     rw [Fin.sum_univ_eq_sum_range
-        (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
+        (fun j ↦ if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
     have hb := checkInv_true h i.val k.val
       (by rw [hBlen]; exact i.isLt) (by rw [hMlen]; exact k.isLt)

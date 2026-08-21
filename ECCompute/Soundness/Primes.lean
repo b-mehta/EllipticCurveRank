@@ -29,7 +29,7 @@ namespace ECCompute
 @[simp] theorem passes_nil (x : ℕ) : passes x [] = true := rfl
 
 theorem passes_cons (x a : ℕ) (t : List ℕ) :
-    passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (Nat.ble x a)).and' (passes x t) := rfl
+    passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
 
 /-- `passes x L = true` exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
@@ -71,6 +71,6 @@ theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
 theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
     ∀ l ∈ labels, l.1.Prime := by
   rw [checkPrimes, allList_eq_true] at h
-  exact fun l hl => checkPrime_true (h l hl)
+  exact fun l hl ↦ checkPrime_true (h l hl)
 
 end ECCompute

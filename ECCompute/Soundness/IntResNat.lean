@@ -31,6 +31,6 @@ theorem intResNat_cast {p : ℕ} [NeZero p] (z : ℤ) :
 /-- A residue `n < p` is zero in `ZMod p` exactly when it is zero in `ℕ`. -/
 theorem natCast_eq_zero_iff_of_lt {p n : ℕ} (h : n < p) : ((n : ℕ) : ZMod p) = 0 ↔ n = 0 := by
   rw [ZMod.natCast_eq_zero_iff]
-  exact ⟨fun hd => Nat.eq_zero_of_dvd_of_lt hd h, fun hn => hn ▸ dvd_zero p⟩
+  exact ⟨fun hd ↦ Nat.eq_zero_of_dvd_of_lt hd h, fun hn ↦ hn ▸ dvd_zero p⟩
 
 end ECCompute

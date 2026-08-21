@@ -33,7 +33,7 @@ open Matrix Finset
 theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ × ℕ)
     (ls : List (ℕ × ℕ × ℕ)) :
     checkBRow c2p c2m c4p c4m xnp xnm xden b (l :: ls) =
-      ((Nat.beq (b % 2) 1).rec (motive := fun _ => Bool)
+      (((b % 2).beq 1).rec (motive := fun _ ↦ Bool)
         (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
         (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (checkBRow c2p c2m c4p c4m xnp xnm xden (b / 2) ls) := rfl
