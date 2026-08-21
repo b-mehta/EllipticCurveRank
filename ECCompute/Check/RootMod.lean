@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Soundness.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
 
 /-!
