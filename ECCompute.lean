@@ -1,6 +1,5 @@
 -- Foundations
 import ECCompute.Kernel
-import ECCompute.Check.IntResNat
 import ECCompute.Certificate
 
 -- Pure mathematics
@@ -10,24 +9,22 @@ import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Check.LambdaCompute
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare
 
--- Certification checkers
-import ECCompute.Check.F2Invert
-import ECCompute.Check.DescentMatrix
-import ECCompute.Check.Primes
-import ECCompute.Check.Labels
-import ECCompute.Check.RootMod
-import ECCompute.Check.Torsion
-import ECCompute.Check.Points
-import ECCompute.Check.JInvariant
-
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
+import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Points
+import ECCompute.Soundness.Primes
+import ECCompute.Soundness.RootMod
+import ECCompute.Soundness.LambdaCompute
+import ECCompute.Soundness.F2Invert
+import ECCompute.Soundness.Labels
+import ECCompute.Soundness.DescentMatrix
+import ECCompute.Soundness.Torsion
+import ECCompute.Soundness.JInvariant
 
 -- Main theory
 import ECCompute.MainTheorem

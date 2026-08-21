@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Tactic.Linarith
@@ -10,23 +11,20 @@ import Mathlib.Tactic.Linarith
 /-!
 # A kernel-reducible primality test for small numbers
 
-`passes` is a trial-division fold, and `Nat.prime_of_passes` certifies that if `n < 23² = 529`
-survives trial division by the primes below `23`, then `n` is prime. It certifies the small label
-primes used by the rank certificates.
+`ECCompute.passes` is a trial-division fold (defined in `ECCompute.Kernel`), and
+`Nat.prime_of_passes` certifies that if `n < 23² = 529` survives trial division by the primes below
+`23`, then `n` is prime. It certifies the small label primes used by the rank certificates.
 
 ## Main results
 
-* `Nat.primes_below_23`: the primes below `23` are exactly `[2,3,5,7,11,13,17,19]`.
+* `Nat.primes_below_23`: the primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`.
 * `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2,3,5,7,11,13,17,19] = true`, then
   `Nat.Prime n`.
+* `ECCompute.checkPrime_true` / `ECCompute.checkPrimes_true`: soundness of the kernel `Bool`
+  checkers `checkPrime` / `checkPrimes`.
 -/
 
 namespace ECCompute
-
-/-- Trial division as a `Bool`-valued fold: `passes x L = true` iff no `i ∈ L` with `i < x`
-divides `x`. -/
-noncomputable def passes (x : ℕ) : List ℕ → Bool :=
-  List.rec true (fun i _ r ↦ ((Nat.ble 1 (x.mod i)).or' (x.ble i)).and' r)
 
 @[simp] theorem passes_nil (x : ℕ) : passes x [] = true := rfl
 
@@ -65,18 +63,9 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
-/-- Kernel `Bool`: `p` is a prime below `529 = 23²`, certified by trial division by the primes below
-`23` (`ECCompute.passes`). -/
-noncomputable def checkPrime (p : ℕ) : Bool :=
-  (Nat.ble 2 p).and' ((Nat.ble p 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
-
 theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
   simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
   exact Nat.prime_of_passes p h.1 (by lia) h.2.2
-
-/-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
-noncomputable def checkPrimes (labels : List (ℕ × ℤ)) : Bool :=
-  allList (fun l => checkPrime l.1) labels
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
 theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :

@@ -22,7 +22,7 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ · q`. -/
+/-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ * q`. -/
 theorem j_eq_iff {W : WeierstrassCurve ℚ} [W.IsElliptic] {q : ℚ} :
     W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
   rw [WeierstrassCurve.j, Units.inv_mul_eq_iff_eq_mul, coe_Δ']

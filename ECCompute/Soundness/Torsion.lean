@@ -3,8 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Check.RootMod
-import ECCompute.Check.F2Invert
+import ECCompute.Kernel
+import ECCompute.Soundness.RootMod
+import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.Fold
 import ECCompute.Theory.CompleteSquare
 import ECCompute.Theory.Descent.Defs
@@ -14,7 +15,7 @@ import ECCompute.Theory.Descent.Defs
 
 For a Weierstrass curve `W` over `ℚ`, the `x`-coordinate of a nonzero rational 2-torsion point
 scales (`u = 4x`) to an integer root of the monic cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. So if this
-cubic has no root modulo some prime `ℓ` (via `ECCompute.monicHasNoRootMod` from `Check.RootMod`),
+cubic has no root modulo some prime `ℓ` (via `ECCompute.monicHasNoRootMod` from `Kernel`),
 then `W` has no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
 
 ## Main results

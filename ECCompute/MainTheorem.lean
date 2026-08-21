@@ -4,13 +4,13 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certificate
-import ECCompute.Check.Labels
+import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
-import ECCompute.Check.Primes
-import ECCompute.Check.DescentMatrix
-import ECCompute.Check.Torsion
+import ECCompute.Soundness.Primes
+import ECCompute.Soundness.DescentMatrix
+import ECCompute.Soundness.Torsion
 import ECCompute.Theory.Descent
-import ECCompute.Check.LambdaCompute
+import ECCompute.Soundness.LambdaCompute
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin

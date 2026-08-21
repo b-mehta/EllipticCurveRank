@@ -3,7 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Check.Points
+import ECCompute.Kernel
 import ECCompute.Theory.CompleteSquare
 import ECCompute.Soundness.Fold
 
@@ -11,7 +11,7 @@ import ECCompute.Soundness.Fold
 # Soundness of the point-on-curve check
 
 `checkPoint_iff` and `checkPoints_iff` show that the kernel checks `ECCompute.checkPoint` and
-`ECCompute.checkPoints` (from `Check.Points`) hold exactly when the point, respectively every point
+`ECCompute.checkPoints` (from `Kernel`) hold exactly when the point, respectively every point
 in a list, satisfies the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`.
 -/
 

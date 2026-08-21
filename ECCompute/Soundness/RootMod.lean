@@ -4,8 +4,9 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
+import ECCompute.Kernel
 import ECCompute.Soundness.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Soundness.IntResNat
 
 /-!
 # Ruling out roots of a monic integer polynomial by a residue search
@@ -23,22 +24,6 @@ none of them is a root. That rules out an integer root, and for a monic quadrati
 -/
 
 namespace ECCompute
-
-/-! ## The monic residue search
-
-One coefficient-list evaluator serves the cubic and the quadratic. A coefficient list `cs` gives the
-lower coefficients constant term first; the leading coefficient `1` is implicit, so `[c₀, c₁, c₂]`
-is `u³ + c₂u² + c₁u + c₀` and `[c₀, c₁]` is `u² + c₁u + c₀`. -/
-
-/-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
-coefficient `1`, evaluated at `u`. -/
-def monicEval (cs : List ℤ) (u : ℤ) : ℤ :=
-  List.rec 1 (fun c _ acc => Int.add c (Int.mul u acc)) cs
-
-/-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
-reaches it. -/
-noncomputable def monicModL (cs : List ℤ) (ℓ r : ℕ) : ℕ :=
-  List.rec 1 (fun c _ acc => Nat.mod (Nat.add (Int.emod c ℓ).toNat (Nat.mul r acc)) ℓ) cs
 
 /-- A `monicModL` value is a residue mod `ℓ`. -/
 theorem monicModL_lt {ℓ : ℕ} (hℓ : 1 < ℓ) (cs : List ℤ) (r : ℕ) : monicModL cs ℓ r < ℓ := by
@@ -67,11 +52,6 @@ theorem monicModL_beq (cs : List ℤ) {ℓ : ℕ} (hℓ : 1 < ℓ) (r : ℕ) :
     Nat.beq (monicModL cs ℓ r) 0 = true ↔ ((monicEval cs (r : ℤ) : ℤ) : ZMod ℓ) = 0 := by
   have : NeZero ℓ := ⟨by omega⟩
   rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt (monicModL_lt hℓ cs r), monicModL_cast cs r]
-
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
-root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def monicHasNoRootMod (cs : List ℤ) (ℓ : ℕ) : Bool :=
-  allBelow ℓ fun r => (Nat.beq (monicModL cs ℓ r) 0).not'
 
 /-- `monicEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
 theorem monicEval_modEq (cs : List ℤ) (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -102,12 +82,6 @@ theorem no_int_root_of_monicHasNoRootMod {cs : List ℤ} {ℓ : ℕ} (hℓ : 1 <
     (ZMod.intCast_eq_intCast_iff _ _ _).mpr (monicEval_modEq cs (ℓ : ℤ) hmodEq)
   rw [heq, hu]
   simp
-
-/-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
-
-For the `t = 1` bound the `2`-division cubic factors as `(X - R) · q` with `q = X² + bX + c` an
-irreducible quadratic; certifying that `q` has no rational root is done exactly as for the cubic,
-by exhibiting a prime `ℓ` modulo which `q` has no root. -/
 
 open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*

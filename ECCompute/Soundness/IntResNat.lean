@@ -9,8 +9,8 @@ import Mathlib.Data.ZMod.Basic
 /-!
 # Reducing an integer to a `Nat` residue before casting to `ZMod p`
 
-These lemmas take a checker's `Nat` residue computation to a statement about the integer it stands
-for, and its raw arithmetic primitives to their notation.
+These lemmas relate a checker's `Nat` residue computation to the integer it stands for, and its raw
+arithmetic primitives to their notation.
 -/
 
 theorem Nat.mod_eq_mod (a b : ℕ) : Nat.mod a b = a % b := rfl
