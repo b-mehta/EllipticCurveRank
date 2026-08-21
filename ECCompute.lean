@@ -1,7 +1,6 @@
 -- Foundations
 import ECCompute.Kernel
 import ECCompute.ForLean
-import ECCompute.Check.IntResNat
 import ECCompute.Certificate
 
 -- Pure mathematics
@@ -28,6 +27,7 @@ import ECCompute.Check.JInvariant
 
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
+import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Points
 
 -- Main theory

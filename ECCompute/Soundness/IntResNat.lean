@@ -10,7 +10,7 @@ import Mathlib.Data.ZMod.Basic
 # Reducing an integer to a `Nat` residue before casting to `ZMod p`
 
 These lemmas take a checker's `Nat` residue computation to a statement about the integer it stands
-for, and its raw arithmetic primitives to their notation.
+for.
 -/
 
 namespace ECCompute
@@ -25,6 +25,6 @@ theorem intResNat_cast {p : ℕ} (hp : p ≠ 0) (z : ℤ) :
 /-- A residue `n < p` is zero in `ZMod p` exactly when it is zero in `ℕ`. -/
 theorem natCast_eq_zero_iff_of_lt {p n : ℕ} (h : n < p) : ((n : ℕ) : ZMod p) = 0 ↔ n = 0 := by
   rw [ZMod.natCast_eq_zero_iff]
-  exact ⟨fun hd => Nat.eq_zero_of_dvd_of_lt hd h, fun hn => hn ▸ dvd_zero p⟩
+  exact ⟨fun hd ↦ Nat.eq_zero_of_dvd_of_lt hd h, fun hn ↦ hn ▸ dvd_zero p⟩
 
 end ECCompute
