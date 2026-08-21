@@ -39,9 +39,11 @@ def popParity : Nat → Nat → Bool
 private def xorBits (v : Nat) (l : List Nat) : Bool :=
   l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
-/-- `(x &&& 1) == 1` reads bit 0 of `x`. -/
-private theorem land_one_beq_one (x : Nat) : ((x &&& 1) == 1) = x.testBit 0 := by
-  rw [Nat.testBit_zero, Nat.and_one_is_mod]
+/-- `(x.land 1).beq 1` reads bit 0 of `x`. It is stated in the raw `.land`/`.beq` primitives, not
+`&&&`/`==`, so that `simp` can rewrite the form `popParityK` reduces to. -/
+private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
+  have hl : x.land 1 = x &&& 1 := rfl
+  rw [Nat.testBit_zero, hl, Nat.and_one_is_mod]
   rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
@@ -104,7 +106,7 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 
 theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
-      ((popParityK (bi.land m)).rec (i.beq k).not'
+      ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
         (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
