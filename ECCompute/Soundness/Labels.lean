@@ -4,14 +4,14 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Check.Fold
-import ECCompute.Check.Primes
-import ECCompute.Check.IntResNat
-
-import Mathlib.Tactic.NormNum.Prime
+import ECCompute.Kernel
+import ECCompute.Soundness.Fold
+import ECCompute.Soundness.IntResNat
+import ECCompute.Soundness.RootMod
+import ECCompute.ForLean
 
 /-!
-# Column-legitimacy checks
+# Soundness of the column-legitimacy check
 
 For a descent label `(p, θ)` the referee must verify, by exact integer arithmetic, the hypotheses
 of the descent lemma packaged as `ECCompute.DescentHyp`:
@@ -20,7 +20,7 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 * `p ∤ Δ`     where `Δ` is the integer discriminant of `y² = x³ + a₂x² + a₄x + a₆`;
 * `f(θ) ≡ 0 (mod p)`.
 
-`checkLabel` decides all three by `Int`/`Nat` `%` and `beq`, so a concrete instance closes by `rfl`;
+The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`) decides all three;
 `descentHyp_of_checkLabel` turns `checkLabel … = true` (with a separately supplied primality proof)
 into a `DescentHyp`.
 
@@ -28,11 +28,8 @@ into a `DescentHyp`.
 
 * `ECCompute.discrInt`: the integer discriminant of `curve a₂ a₄ a₆`.
 * `ECCompute.curve_Δ_num`: `(curve …).Δ.num = discrInt …`.
-* `ECCompute.checkLabel`: the kernel-reducible boolean check.
 * `ECCompute.descentHyp_of_checkLabel`: the passage to `DescentHyp`.
 -/
-
-open WeierstrassCurve
 
 namespace ECCompute
 
@@ -57,57 +54,28 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
     ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
-  have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a => by
+  have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a ↦ by
     rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
   simp only [discrInt]
   push_cast [h]
   ring
 
-/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
-coefficients reduced to residues first). -/
-noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
-  Nat.mod (Nat.add (Nat.add (Nat.add
-    (Nat.mul (Nat.mul (Int.emod θ p).toNat (Int.emod θ p).toNat) (Int.emod θ p).toNat)
-    (Nat.mul (Int.emod a₂ p).toNat (Nat.mul (Int.emod θ p).toNat (Int.emod θ p).toNat)))
-    (Nat.mul (Int.emod a₄ p).toNat (Int.emod θ p).toNat)) (Int.emod a₆ p).toNat) p
-
-theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
-    Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
+/-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
+theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
+    Nat.beq (monicModL [a₆, a₄, a₂] p (θ.emod p).toNat) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  have : NeZero p := ⟨hp.ne'⟩
-  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
-  have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
-      = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
-    simp only [fvalModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ← Int.mod_def', ZMod.natCast_mod,
-      Nat.cast_add, Nat.cast_mul, intResNat_cast]
-    push_cast
-    ring
-  rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast]
-
-/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
-expanded. -/
-def discrIntK (a₂ a₄ a₆ : ℤ) : ℤ :=
-  let b2 := Int.mul 4 a₂
-  let b4 := Int.mul 2 a₄
-  let b6 := Int.mul 4 a₆
-  Int.add (Int.sub (Int.sub
-      (Int.neg (Int.mul (Int.mul b2 b2)
-        (Int.sub (Int.mul (Int.mul 4 a₂) a₆) (Int.mul a₄ a₄))))
-      (Int.mul 8 (Int.mul (Int.mul b4 b4) b4)))
-      (Int.mul 27 (Int.mul b6 b6)))
-    (Int.mul (Int.mul (Int.mul 9 b2) b4) b6)
+  have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
+  have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
+    have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
+    rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
+    exact Int.emod_emod_of_dvd θ dvd_rfl
+  have hpoly : monicEval [a₆, a₄, a₂] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
+    simp only [monicEval, Int.add_def, Int.mul_def]; ring
+  rw [monicModL_beq hp, monicEval_modEq hmod, hpoly]
 
 theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
   ring
-
-/-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
-`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`. -/
-noncomputable def checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ) : Bool :=
-  ((Nat.beq (Nat.mod 6 p) 0).not').and'
-    (((Int.beq' (Int.emod
-      (discrIntK (Int.emod a₂ p) (Int.emod a₄ p) (Int.emod a₆ p)) p) 0).not').and'
-      (Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0))
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
@@ -120,20 +88,16 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   · -- `p ∤ 6`
     have h6m : 6 % p = Nat.mod 6 p := rfl
     rw [Nat.dvd_iff_mod_eq_zero, h6m]
-    simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
+    simpa [Nat.beq_eq', beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf
+      (fval_iff a₂ a₄ a₆ θ hp.one_lt).mp hf
     rw [fval]
     grind
-
-/-- Kernel `Bool`: every label passes `checkLabel`. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : ℤ) (labels : List (ℕ × ℤ)) : Bool :=
-  allList (fun l => checkLabel a₂ a₄ a₆ l.1 l.2) labels
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}

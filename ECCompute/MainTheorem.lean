@@ -4,13 +4,13 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certificate
-import ECCompute.Check.Labels
-import ECCompute.Check.Points
-import ECCompute.Check.Primes
+import ECCompute.Soundness.Labels
+import ECCompute.Soundness.Points
+import ECCompute.Soundness.Primes
 import ECCompute.Check.DescentMatrix
-import ECCompute.Check.Torsion
+import ECCompute.Soundness.Torsion
 import ECCompute.Theory.Descent
-import ECCompute.Check.LambdaCompute
+import ECCompute.Soundness.LambdaCompute
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin
@@ -93,7 +93,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     exact (hB i j).symm
   rw [hrow]
   exact Matrix.linearIndependent_rows_of_isUnit
-    (F2Invert.checkInv_isUnit c.rho c.matB c.matM hBlen hMlen hinv)
+    (F2Invert.checkInv_isUnit hBlen hMlen hinv)
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/

@@ -166,7 +166,7 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
   let qms := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
   return mkAppN (mkConst ``Certificate.mk)
-    #[toExpr (0 : Int), sA2E, toExpr (0 : Int), sA4E, sA6E, toExpr rho, pointsE,
+    #[sA2E, sA4E, sA6E, toExpr rho, pointsE,
       toExpr ls.toList, toExpr matB, toExpr matM, toExpr qms, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/

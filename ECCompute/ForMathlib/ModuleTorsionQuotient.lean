@@ -5,14 +5,8 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Algebra.Module.PID
-import Mathlib.Algebra.Module.Torsion.Basic
 import Mathlib.FieldTheory.Finiteness
-import Mathlib.LinearAlgebra.Dimension.Constructions
-import Mathlib.LinearAlgebra.Dimension.RankNullity
 import Mathlib.LinearAlgebra.Dimension.Torsion.Finite
-import Mathlib.LinearAlgebra.FreeModule.ModN
-import Mathlib.LinearAlgebra.FreeModule.StrongRankCondition
-import Mathlib.LinearAlgebra.Isomorphisms
 
 /-!
 # Torsion, quotients and rank of modules over a product
