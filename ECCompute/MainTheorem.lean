@@ -76,16 +76,16 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1))
     (pt : Fin c.rho → ℚ × ℚ)
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
-    (hB : ∀ i j, F2Invert.toMat c.matB c.rho i j
+    (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
         = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
-    (hBlen : c.matB.length = c.rho) (hMlen : c.matM.length = c.rho)
-    (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
+    (hBlen : c.B.length = c.rho) (hMlen : c.M.length = c.rho)
+    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
     (φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2))
     (hφ : φ = AddMonoidHom.pi (fun j => lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)))
     (g : Fin c.rho → (curve c.a₂ c.a₄ c.a₆).toAffine.Point)
     (hg : g = fun i => .some (pt i).1 (pt i).2 (hns i)) :
     LinearIndependent (ZMod 2) (fun i => φ (g i)) := by
-  have hrow : (fun i => φ (g i)) = (F2Invert.toMat c.matB c.rho).row := by
+  have hrow : (fun i => φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
     funext i
     ext j
     rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
@@ -121,11 +121,11 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 = true)
     (hB : ∀ i j : Fin c.rho,
-        F2Invert.toMat c.matB c.rho i j
+        F2Invert.toMat c.B c.rho i j
           = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
-    (hBlen : c.matB.length = c.rho)
-    (hMlen : c.matM.length = c.rho)
-    (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
+    (hBlen : c.B.length = c.rho)
+    (hMlen : c.M.length = c.rho)
+    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
@@ -162,14 +162,14 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hlenP : c.points.length = c.rho)
     (hlenL : c.labels.length = c.rho)
-    (hlenB : c.matB.length = c.rho)
-    (hlenM : c.matM.length = c.rho)
+    (hlenB : c.B.length = c.rho)
+    (hlenM : c.M.length = c.rho)
     (hlenQ : c.qrMasks.length = c.rho)
     (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
     (hlabP : checkPrimes c.labels = true)
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
-    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.matB c.points = true)
-    (hinv : F2Invert.checkInv c.rho c.matB c.matM = true)
+    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points = true)
+    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE W (c.rho - c.t) := by
   -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.

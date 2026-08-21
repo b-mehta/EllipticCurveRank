@@ -20,9 +20,9 @@ general integral model.
 
 ## Implementation notes
 
-The four lists `points`, `labels`, `matB`, and `matM` all have length `rho`; the auditing checkers
-enforce this. `matB` / `matM` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`matB`
-by rows, `matM` by columns), so `F2Invert.checkInv rho matB matM` applies verbatim.
+The four lists `points`, `labels`, `B`, and `M` all have length `rho`; the auditing checkers
+enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
+by rows, `M` by columns), so `F2Invert.checkInv rho B M` applies verbatim.
 -/
 
 namespace ECCompute
@@ -43,9 +43,9 @@ structure Certificate where
   /-- The `ρ` descent-column labels `(p, θ)`: a prime `p` and a root `θ` mod `p`. -/
   labels : List (ℕ × ℤ)
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
-  matB : List Nat
+  B : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
-  matM : List Nat
+  M : List Nat
   /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
   set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee, so
   each Legendre-character check is a bitmask lookup. -/
