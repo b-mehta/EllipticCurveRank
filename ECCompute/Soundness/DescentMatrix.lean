@@ -13,7 +13,7 @@ import ECCompute.Soundness.Fold
 # Soundness of the descent-matrix check
 
 `checkB_true` proves the kernel-reducible `checkB` (`ECCompute.Kernel`) sound: when it passes, every
-entry of the certificate matrix `matB` equals the abstract descent character `lambdaCompute` at the
+entry of the certificate matrix `B` equals the abstract descent character `lambdaCompute` at the
 matching point.
 -/
 
@@ -53,12 +53,12 @@ theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden : ℕ} :
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} :
-    ∀ {matB : List ℕ} {pt : List (ℚ × ℚ)}, checkBGo c2p c2m c4p c4m labN matB pt = true →
-      ∀ i, (hi : i < matB.length) → (hip : i < pt.length) →
+    ∀ {B : List ℕ} {pt : List (ℚ × ℚ)}, checkBGo c2p c2m c4p c4m labN B pt = true →
+      ∀ i, (hi : i < B.length) → (hip : i < pt.length) →
         checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
-          pt[i].1.den matB[i] labN = true := by
-  intro matB
-  induction matB with
+          pt[i].1.den B[i] labN = true := by
+  intro B
+  induction B with
   | nil => grind
   | cons b bs ih =>
     intro pt h i hi hip
@@ -76,14 +76,14 @@ theorem checkMaskList_true {labN : List (ℕ × ℕ × ℕ)} (h : checkMaskList 
   exact Nat.eq_of_beq_eq_true (h _ (List.getElem_mem hj))
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
-theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
-    {lab : List (ℕ × ℤ)} {qms : List ℕ} {pt : List (ℚ × ℚ)}
-    (hBlen : matB.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
-    (hqlen : qms.length = rho)
+theorem checkB_true {a₂ a₄ : ℤ} {B : List ℕ} {rho : ℕ}
+    {lab : List (ℕ × ℤ)} {q : List ℕ} {pt : List (ℚ × ℚ)}
+    (hBlen : B.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
+    (hqlen : q.length = rho)
     (hpr : ∀ j : Fin rho, (lab[j].1).Prime)
     (hp2 : ∀ j : Fin rho, lab[j].1 ≠ 2)
-    (h : checkB a₂ a₄ lab qms matB pt = true) :
-    ∀ i j : Fin rho, F2Invert.toMat matB rho i j =
+    (h : checkB a₂ a₄ lab q B pt = true) :
+    ∀ i j : Fin rho, F2Invert.toMat B rho i j =
       lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by
   intro i j
   set L : ℕ × ℤ := lab[j] with hL
@@ -93,16 +93,16 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hp : 0 < L.1 := (hpr j).pos
   have : Fact L.1.Prime := ⟨hpr j⟩
   have : NeZero L.1 := ⟨hp.ne'⟩
-  set labN := toLabN lab qms with hlabNdef
+  set labN := toLabN lab q with hlabNdef
   have hlabN : labN.length = rho := by
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : labN[j.val]'(by rw [hlabN]; exact j.isLt)
-      = (L.1, (L.2 % (L.1 : ℤ)).toNat, qms[j]) := by
+      = (L.1, (L.2 % (L.1 : ℤ)).toNat, q[j]) := by
     simp only [hlabNdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
-  have hqok : qrMask L.1 = qms[j] := by
+  have hqok : qrMask L.1 = q[j] := by
     have := checkMaskList_true hmask j.val (by rw [hlabN]; exact j.isLt)
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
