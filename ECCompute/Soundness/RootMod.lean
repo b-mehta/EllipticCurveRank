@@ -4,16 +4,18 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
+import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
 
 /-!
-# Ruling out roots of a monic integer polynomial by a residue search
+# Soundness of the monic residue search
 
-For a monic integer polynomial given by a coefficient list `cs` and a modulus `ℓ`,
-`monicHasNoRootMod` tries every residue `0, …, ℓ - 1` in `Nat` arithmetic and returns `true` when
-none of them is a root. That rules out an integer root, and for a monic quadratic a rational one.
+Correctness proofs for the kernel `Bool` checker `ECCompute.monicHasNoRootMod` (defined in
+`ECCompute.Kernel`): for a monic integer polynomial given by a coefficient list `cs` and a modulus
+`ℓ`, a passing residue search over `0, …, ℓ - 1` rules out an integer root, and for a monic
+quadratic a rational one.
 
 ## Main results
 
@@ -25,29 +27,13 @@ none of them is a root. That rules out an integer root, and for a monic quadrati
 
 namespace ECCompute
 
-/-! ## The monic residue search
-
-One coefficient-list evaluator serves the cubic and the quadratic. A coefficient list `cs` gives the
-lower coefficients constant term first; the leading coefficient `1` is implicit, so `[c₀, c₁, c₂]`
-is `u³ + c₂u² + c₁u + c₀` and `[c₀, c₁]` is `u² + c₁u + c₀`. -/
-
-/-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
-coefficient `1`, evaluated at `u`. -/
-def monicEval (cs : List ℤ) (u : ℤ) : ℤ :=
-  cs.rec 1 fun c _ acc ↦ c.add (u.mul acc)
-
-/-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
-reaches it. -/
-noncomputable def monicModL (cs : List ℤ) (ℓ r : ℕ) : ℕ :=
-  cs.rec 1 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
-
 variable {cs : List ℤ} {ℓ r : ℕ}
 
 @[simp, grind =] lemma monicEval_cons {c u : ℤ} :
     monicEval (c :: cs) u = c + u * monicEval cs u := by
   simp [monicEval]
 
-@[simp, grind =] lemma monicModL_cons {c : ℤ} {ℓ r : ℕ} :
+@[simp, grind =] lemma monicModL_cons {c : ℤ} :
     monicModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * monicModL cs ℓ r) % ℓ := by
   simp [monicModL]
 
@@ -68,11 +54,6 @@ theorem monicModL_cast (hl : ℓ ≠ 0) : (monicModL cs ℓ r : ZMod ℓ) = moni
 theorem monicModL_beq (hℓ : 1 < ℓ) : (monicModL cs ℓ r).beq 0 ↔ (monicEval cs r : ZMod ℓ) = 0 := by
   rw [Nat.beq_eq, ← monicModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
     Nat.mod_eq_of_lt (monicModL_lt hℓ)]
-
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
-root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def monicHasNoRootMod (cs : List ℤ) (ℓ : ℕ) : Bool :=
-  allBelow ℓ fun r ↦ ((monicModL cs ℓ r).beq 0).not'
 
 /-- `monicEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
 theorem monicEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
@@ -107,7 +88,7 @@ open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
 root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
 theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod [c, b] ℓ = true) (x : ℚ)
+    (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
     (hx : x ^ 2 + b * x + c = 0) : False := by
   set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
   have hmonic : p.Monic := by simp only [p]; monicity!
