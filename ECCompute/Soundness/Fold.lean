@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import Mathlib.Data.List.Basic
 import ECCompute.Kernel
 
 /-!
@@ -10,7 +11,7 @@ import ECCompute.Kernel
 
 `anyBelow_eq_false` and `allList_eq_true` characterize the kernel folds `ECCompute.anyBelow` and
 `ECCompute.allList` (from `Kernel`) as a bounded `∃` and a list `∀`; the `succ`/`cons` lemmas peel
-one step, and `natBeqEq` bridges the kernel-cheap `Nat.beq` to the `BEq`-dispatched `==`.
+one step, and `natBeqEq` relates `Nat.beq` to the `BEq`-dispatched `==`.
 -/
 
 namespace ECCompute
@@ -39,7 +40,7 @@ theorem allList_eq_true {α : Type*} {p : α → Bool} {l : List α} :
   | nil => simp [allList]
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
-/-- The kernel-cheap `Nat.beq` agrees with the `BEq`-dispatched `==` on `ℕ`. -/
+/-- `Nat.beq` agrees with the `BEq`-dispatched `==` on `ℕ`. -/
 theorem natBeqEq (a b : ℕ) : (a == b) = Nat.beq a b := by
   cases hab : a == b <;> cases hnb : Nat.beq a b <;> simp_all [beq_iff_eq, Nat.beq_eq]
 

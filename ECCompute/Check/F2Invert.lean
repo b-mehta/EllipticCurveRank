@@ -10,7 +10,6 @@ import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 
 /-!
