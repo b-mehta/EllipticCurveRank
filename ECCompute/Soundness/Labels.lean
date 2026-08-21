@@ -9,8 +9,6 @@ import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
 
-import Mathlib.Tactic.NormNum.Prime
-
 /-!
 # Soundness of the column-legitimacy check
 
@@ -31,8 +29,6 @@ into a `DescentHyp`.
 * `ECCompute.curve_Δ_num`: `(curve …).Δ.num = discrInt …`.
 * `ECCompute.descentHyp_of_checkLabel`: the passage to `DescentHyp`.
 -/
-
-open WeierstrassCurve
 
 namespace ECCompute
 
