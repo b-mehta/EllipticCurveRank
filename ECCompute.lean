@@ -1,5 +1,6 @@
 -- Foundations
 import ECCompute.Kernel
+import ECCompute.ForLean
 import ECCompute.Check.IntResNat
 import ECCompute.Certificate
 

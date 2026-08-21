@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Soundness.Fold
 import ECCompute.Check.Primes
 import ECCompute.Check.IntResNat
+import ECCompute.ForLean
 
 import Mathlib.Tactic.NormNum.Prime
 
@@ -79,7 +80,7 @@ theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
   have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
       = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
     simp only [fvalModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ← Int.mod_def', ZMod.natCast_mod,
-      Nat.cast_add, Nat.cast_mul, intResNat_cast]
+      Nat.cast_add, Nat.cast_mul, intResNat_cast hp.ne']
     push_cast
     ring
   rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast]
