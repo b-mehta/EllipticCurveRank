@@ -40,14 +40,7 @@ def popParity : Nat → Nat → Bool
 private def xorBits (v : Nat) (l : List Nat) : Bool :=
   l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
-/-- `(x.land 1).beq 1` reads bit 0 of `x`. It is stated in the raw `.land`/`.beq` primitives, not
-`&&&`/`==`, so that `simp` can rewrite the form `popParityK` reduces to. -/
-private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
-  have hl : x.land 1 = x &&& 1 := rfl
-  rw [Nat.testBit_zero, hl, Nat.and_one_is_mod]
-  rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
-
-private theorem land_one_beq_one' (x : Nat) : (x &&& 1 == 1) = x.testBit 0 := by
+private theorem land_one_beq_one (x : Nat) : (x &&& 1 == 1) = x.testBit 0 := by
   rw [Nat.testBit_zero, Nat.and_one_is_mod]
   grind
 
@@ -75,7 +68,7 @@ theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
   simp only [popParityK, Nat.land_eq, Nat.beq_eq', Nat.xor_eq, Nat.shiftRight_eq',
-    land_one_beq_one', Nat.testBit_xor, Nat.testBit_shiftRight, Nat.reduceAdd, xorBits, List.range,
+    land_one_beq_one, Nat.testBit_xor, Nat.testBit_shiftRight, Nat.reduceAdd, xorBits, List.range,
     List.range.loop, List.foldr_cons, List.foldr_nil, Bool.xor_false, bId_xor]
   grind
 
@@ -100,7 +93,7 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 @[simp, grind =] theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
       ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
-        (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
+        (i.beq k)).and' (checkInvRow bi i k.succ ms):=rfl
 
 @[simp, grind =] theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) = (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
@@ -139,47 +132,36 @@ theorem popParity_sum (fuel a : Nat) :
 
 /-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
-theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
-    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i k M →
-      ∀ k', k' < M.length → popParity n (bi &&& M.getD k' 0) = (i == (k + k'))  := by
-  intro k M
-  induction M generalizing k with
-  | nil => intro _ _ k' hk'; simp at hk'
+theorem checkInvRow_true {bi i n k k' : Nat} (hn : n ≤ 32) {M : List Nat} (hM : ∀ m ∈ M, m < 2 ^ n)
+    (hc : checkInvRow bi i k M) (hk' : k' < M.length) :
+    popParity n (bi &&& M[k']) = (i == k + k') := by
+  induction M generalizing k k' with
+  | nil => simp at hk'
   | cons m ms ih =>
-    intro hM hc k' hk'
     simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨h0, hrec⟩ := hc
     cases k' with
     | zero =>
       have hbnd : bi &&& m < 2 ^ n := Nat.and_lt_two_pow bi (hM m (by simp))
-      have hlm : bi.land m = bi &&& m := rfl
-      rw [hlm, popParityK_eq hbnd hn] at h0
-      have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
-      simpa [Nat.beq_eq', beq_iff_eq] using hbe
+      rw [Nat.land_eq, popParityK_eq hbnd hn, Bool.rec_eq] at h0
+      grind
     | succ k'' =>
-      have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
-      rw [hidx]
-      exact ih (fun m hm ↦ hM m (by simp [hm])) hrec k'' (by simpa using hk')
+      grind
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
-theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) :
-    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo M i B →
-      ∀ i', i' < B.length → ∀ k', k' < M.length →
-        popParity n (B.getD i' 0 &&& M.getD k' 0) = (i + i' == k') := by
-  intro i B
-  induction B generalizing i with
-  | nil => intro _ _ i' hi'; simp at hi'
+theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
+    {i : Nat} {B : List Nat} (hB : ∀ b ∈ B, b < 2 ^ n) (hc : checkInvGo M i B)
+    (i' : Nat) (hi' : i' < B.length) (k' : Nat) (hk' : k' < M.length) :
+        popParity n (B[i'] &&& M[k']) = (i + i' == k') := by
+  induction B generalizing i i' with
+  | nil => simp at hi'
   | cons b bs ih =>
-    intro hB hc i' hi' k' hk'
     simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     obtain ⟨hrow, hrec⟩ := hc
     cases i' with
-    | zero => simpa using checkInvRow_true hn hM hrow k' hk'
-    | succ i'' =>
-      have hidx : i + (i'' + 1) = i + 1 + i'' := by lia
-      rw [hidx]
-      exact ih (fun b hb ↦ hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
+    | zero => simpa using checkInvRow_true hn hM hrow hk'
+    | succ i'' => grind
 
 /-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
 theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
@@ -193,10 +175,9 @@ theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M) :
   grind [checkInv, maskBelow_eq_true]
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
-theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M) :
-    ∀ i k, i < B.length → k < M.length →
-      popParity n (B.getD i 0 &&& M.getD k 0) = (i == k) := by
-  intro i k hi hk
+theorem checkInv_true {n i k : Nat} {B M : List Nat} (hi : i < B.length) (hk : k < M.length)
+    (h : checkInv n B M) :
+    popParity n (B[i] &&& M[k]) = (i == k) := by
   obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
   simpa using checkInvGo_true hn hM hB hgo i hi k hk
 
@@ -209,7 +190,7 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
     simp only [Matrix.mul_apply, toMat, toMatCols, ← bId.eq_def, prodTerm]
     rw [Fin.sum_univ_eq_sum_range (fun j ↦ bId ((B.getD i 0 &&& M.getD k 0).testBit j)) n,
       ← popParity_sum, Matrix.one_apply]
-    grind [bId, checkInv_true h i k]
+    grind [bId, checkInv_true]
   exact .of_mul_eq_one (toMatCols M n) key
 
 end ECCompute.F2Invert
