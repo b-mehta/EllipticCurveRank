@@ -4,7 +4,6 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.CompleteSquare
-import ECCompute.Tactic.QuickRfl
 
 /-!
 # Certifying the j-invariant
