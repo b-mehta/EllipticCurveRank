@@ -43,7 +43,7 @@ noncomputable def monicModL (cs : List ℤ) (ℓ r : ℕ) : ℕ :=
 
 variable {cs : List ℤ} {ℓ r : ℕ}
 
-@[simp, grind =] lemma monicEval_cons {c : ℤ} {u : ℤ} :
+@[simp, grind =] lemma monicEval_cons {c u : ℤ} :
     monicEval (c :: cs) u = c + u * monicEval cs u := by
   simp [monicEval]
 
