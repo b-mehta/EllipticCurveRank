@@ -246,6 +246,20 @@ def j_lit(j):
     return str(j.numerator) if j.denominator == 1 else f"{j.numerator} / {j.denominator}"
 
 
+def gate(decl):
+    """A declaration (its docstring and body), prefixed with `set_option linter.style.longLine
+    false in` when any line exceeds 100 columns — an unbreakable numeral in a def, a tactic line,
+    or a theorem statement."""
+    if any(len(line) > 100 for line in decl.splitlines()):
+        return f"set_option linter.style.longLine false in\n{decl}"
+    return decl
+
+
+def lean_int(n):
+    """A Lean integer literal that parses at `term:max`: negatives need parentheses."""
+    return f"({n})" if n < 0 else str(n)
+
+
 def load(args):
     if args.json:
         with open(args.json) as fh:
@@ -323,19 +337,13 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- ICARM leaderboard curve {id} over `ℚ`. -/
 {defblock}
 
-/-- ICARM leaderboard curve {id} has Mordell-Weil rank at least `{rank}`. -/
-theorem curve{id}_hasRankGE_{rank} : HasRankGE curve{id} {rank} := by
-  unfold curve{id}
-  {tactic}
+{rankblock}
 
-/-- Curve {id} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
-instance : curve{id}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+{ellblock}
 
-{jopt}/-- The `j`-invariant of curve {id}. -/
-theorem curve{id}_j : curve{id}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)
+{jblock}
 
 end ECCompute
 '''
@@ -388,7 +396,7 @@ def main():
         R0 = roots[0]
         b, c = curve.A2 + R0, curve.A4 + R0 * (curve.A2 + R0)
         ellq = cofactor_witness_prime(b, c, curve)
-        tactic = f'certify_curve oneTorsion {R0} {ellq} {data_args}'
+        tactic = f'certify_curve oneTorsion {lean_int(R0)} {ellq} {data_args}'
     else:
         tactic = f'certify_curve fullTorsion {data_args}'
 
@@ -432,11 +440,20 @@ def main():
         for (p, th) in sorted(labels):
             fh.write(f"{p} {th}\n")
     jinv = j_lit(j_invariant(*ainvs))
-    jline = f'theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)'
-    jopt = 'set_option linter.style.longLine false in\n' if len(jline) > 100 else ''
-    lean = LEAN.format(id=cid, rank=rank_goal, tactic=tactic, eq=weier_eq(*ainvs[:3]),
-                       coeffs=coeff_block(ainvs[3], ainvs[4]), defblock=def_block(cid, ainvs),
-                       jinv=jinv, jopt=jopt)
+    defblock = gate(f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(cid, ainvs)}")
+    rankblock = gate(
+        f"/-- ICARM leaderboard curve {cid} has Mordell-Weil rank at least `{rank_goal}`. -/\n"
+        f"theorem curve{cid}_hasRankGE_{rank_goal} : HasRankGE curve{cid} {rank_goal} := by\n"
+        f"  unfold curve{cid}\n  {tactic}")
+    ellblock = gate(
+        f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
+        f"instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
+    jblock = gate(
+        f"/-- The `j`-invariant of curve {cid}. -/\n"
+        f"theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)")
+    lean = LEAN.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
+                       coeffs=coeff_block(ainvs[3], ainvs[4]),
+                       defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
     with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
