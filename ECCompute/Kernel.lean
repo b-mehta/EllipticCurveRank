@@ -57,6 +57,36 @@ root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (m
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
   allBelow ℓ fun r ↦ ((monicModL cs ℓ r).beq 0).not'
 
+/-! ## Descent label check -/
+
+/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
+coefficients reduced to residues first). -/
+noncomputable def fvalModP (a₂ a₄ a₆ θ : Int) (p : Nat) : Nat :=
+  ((((((θ.emod p).toNat.mul (θ.emod p).toNat).mul (θ.emod p).toNat).add
+      ((a₂.emod p).toNat.mul ((θ.emod p).toNat.mul (θ.emod p).toNat))).add
+      ((a₄.emod p).toNat.mul (θ.emod p).toNat)).add (a₆.emod p).toNat).mod p
+
+/-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
+expanded. -/
+def discrIntK (a₂ a₄ a₆ : Int) : Int :=
+  let b2 := Int.mul 4 a₂
+  let b4 := Int.mul 2 a₄
+  let b6 := Int.mul 4 a₆
+  ((((b2.mul b2).mul (((Int.mul 4 a₂).mul a₆).sub (a₄.mul a₄))).neg.sub
+      (Int.mul 8 ((b4.mul b4).mul b4))).sub (Int.mul 27 (b6.mul b6))).add
+    (((Int.mul 9 b2).mul b4).mul b6)
+
+/-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
+`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`. -/
+noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
+  (((Nat.mod 6 p).beq 0).not').and'
+    (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
+      ((fvalModP a₂ a₄ a₆ θ p).beq 0))
+
+/-- Kernel `Bool`: every label passes `checkLabel`. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
+  allList (fun l ↦ checkLabel a₂ a₄ a₆ l.1 l.2) labels
+
 /-! ## 𝔽₂ matrix inverse -/
 
 namespace F2Invert
