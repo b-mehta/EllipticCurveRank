@@ -3,21 +3,19 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.CompleteSquare
 import ECCompute.Check.Fold
 
 /-!
 # Point-on-curve check
 
-`checkPoint` is a kernel-reducible `Bool` function that decides, for integer Weierstrass
-coefficients `a₁ a₂ a₃ a₄ a₆ : ℤ` and a rational point `(x, y) : ℚ × ℚ`, whether the Weierstrass
-equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` holds in `ℚ`. `checkPoint_iff` is the correctness
-lemma; `checkPoints` lifts the check to a list of points.
+`checkPoint` is a kernel-reducible `Bool` that decides, for integer Weierstrass coefficients
+`a₁ a₂ a₃ a₄ a₆ : ℤ` and a rational point `(x, y) : ℚ × ℚ`, whether the Weierstrass equation
+`y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` holds in `ℚ`. `checkPoints` lifts the check to a list of
+points. Correctness is `ECCompute.checkPoint_iff` / `ECCompute.checkPoints_iff` in
+`ECCompute.Soundness.Points`.
 -/
 
 namespace ECCompute
-
-open WeierstrassCurve
 
 /-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation is equivalent, after clearing the denominator `xd³·yd²`, to an identity between
@@ -38,31 +36,8 @@ noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) : Bool
         (Int.mul (Int.mul (Int.mul a₄ xn) xd2) yd2))
       (Int.mul (Int.mul a₆ xd3) yd2))
 
-/-- The kernel-reducible checker `checkPoint` returns `true` iff the point `(x, y)` satisfies the
-affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
-theorem checkPoint_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
-    checkPoint a₁ a₂ a₃ a₄ a₆ x y = true ↔
-      (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
-  have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
-  have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
-  have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
-  have hy : (y.num : ℚ) = y * y.den := (div_eq_iff hyd).mp (Rat.num_div_den y)
-  have hD : (x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2 ≠ 0 :=
-    mul_ne_zero (pow_ne_zero _ hxd) (pow_ne_zero _ hyd)
-  rw [← @Int.cast_inj ℚ]
-  push_cast
-  rw [hx, hy]
-  exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
-
 /-- Check that every point in a list lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) : Bool :=
   allList (fun p => checkPoint a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
-
-/-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
-theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :
-    checkPoints a₁ a₂ a₃ a₄ a₆ pts = true ↔
-      ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  simp only [checkPoints, allList_eq_true, checkPoint_iff]
 
 end ECCompute
