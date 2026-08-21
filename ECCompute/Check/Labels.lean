@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Check.Fold
 import ECCompute.Check.Primes
-import ECCompute.Check.IntResNat
+import ECCompute.Kernel.IntResNat
 
 import Mathlib.Tactic.NormNum.Prime
 

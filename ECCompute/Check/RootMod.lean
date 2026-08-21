@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.Check.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Kernel.IntResNat
 
 /-!
 # Ruling out roots of a monic integer polynomial by a residue search

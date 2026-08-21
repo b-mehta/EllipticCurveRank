@@ -1,6 +1,6 @@
 -- Foundations
 import ECCompute.Check.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Kernel.IntResNat
 import ECCompute.Certificate
 
 -- Pure mathematics
