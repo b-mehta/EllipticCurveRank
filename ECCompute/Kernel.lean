@@ -41,13 +41,13 @@ over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`
 indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with `n ≤ 32`, which `checkInv`
 verifies separately. -/
 noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
-  M.rec (fun _ ↦ true)
+  M.rec (motive := fun _ ↦ Nat → Bool) (fun _ ↦ true)
     (fun m _ ih k ↦ ((popParityK (bi.land m)).rec
       (i.beq k).not' (i.beq k)).and' (ih k.succ)) k
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
 noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
-  B.rec (fun _ ↦ true)
+  B.rec (motive := fun _ ↦ Nat → Bool) (fun _ ↦ true)
     (fun b _ ih i ↦ (checkInvRow b i 0 M).and' (ih i.succ)) i
 
 /-- Every mask in `L` fits in `n` bits (`< 2 ^ n`). -/
