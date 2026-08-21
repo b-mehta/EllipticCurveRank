@@ -100,9 +100,8 @@ theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
 
 /-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
 
-For the `t = 1` bound the `2`-division cubic factors as `(X - R) · q` with `q = X² + bX + c` an
-irreducible quadratic; certifying that `q` has no rational root is done exactly as for the cubic,
-by exhibiting a prime `ℓ` modulo which `q` has no root. -/
+No-rational-root lemmas for the cofactor quadratic `q = X² + b X + c`, certified by a prime `ℓ`
+modulo which `q` has no root. -/
 
 open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
