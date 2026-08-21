@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Kernel
 import ECCompute.Soundness.Fold
+import ECCompute.ForLean
 import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Tactic.Linarith
 
@@ -37,19 +38,16 @@ theorem passes_true_iff {x : ℕ} {L : List ℕ} :
     passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L with
   | nil => simp
-  | cons a t ih =>
-    rw [passes_cons]
-    simp only [Bool.and'_eq_and, Bool.or'_eq_or, Bool.and_eq_true, Bool.or_eq_true, Nat.ble_eq]
-    grind
+  | cons a t ih => grind
 
 /-- The primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`. -/
-theorem _root_.Nat.primes_below_23 (p : ℕ) (hlt : p < 23) (hp : p.Prime) :
+theorem primes_below_23 (p : ℕ) (hlt : p < 23) (hp : p.Prime) :
     p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := by
   decide +revert +kernel
 
 /-- If `2 ≤ n < 529 = 23²` and `n` survives trial division by the primes below `23`, then `n` is
 prime. -/
-theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
+theorem prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
     (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : Nat.Prime n := by
   by_contra hnp
   have hn0 : 0 < n := by lia
@@ -57,20 +55,18 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   have hpp : p.Prime := Nat.minFac_prime (by lia)
   have hsq : p ^ 2 ≤ n := Nat.minFac_sq_le_self hn0 hnp
   have hplt23 : p < 23 := lt_of_pow_lt_pow_left' 2 (by grind)
-  have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := Nat.primes_below_23 p hplt23 hpp
+  have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := primes_below_23 p hplt23 hpp
   have hpltn : p < n := by nlinarith [hpp.two_le, hsq]
   rcases (passes_true_iff.mp hpass) p hpmem with hmod | hle
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
 theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
-  simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
-  exact Nat.prime_of_passes p h.1 (by lia) h.2.2
+  grind [checkPrime, prime_of_passes]
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
-theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels) :
-    ∀ l ∈ labels, l.1.Prime := by
-  rw [checkPrimes, allList_eq_true] at h
-  exact fun l hl ↦ checkPrime_true (h l hl)
+theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) :
+    ∀ l ∈ ls, l.1.Prime := by
+  grind [checkPrimes, checkPrime_true]
 
 end ECCompute
