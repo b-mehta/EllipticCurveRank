@@ -8,8 +8,8 @@ this emits everything `certify_curve` needs:
   - ECCompute/Curves/Curve<id>.lean   the theorem, ready to import
 
 It mirrors the Lean referee exactly (the `certify_curve` tactic and the integral
-short-model change of variables), so the kernel is the final judge: if any
-generated line is wrong, `lake build` fails rather than certifying nonsense.
+short-model change of variables), so the kernel is the final judge: any wrong
+generated line fails `lake build`.
 
 Model (ModelChange.intShort*):
     A2 = a1^2 + 4 a2      A4 = 16 a4 + 8 a1 a3      A6 = 64 a6 + 16 a3^2
@@ -334,8 +334,7 @@ theorem curve{id}_hasRankGE_{rank} : HasRankGE curve{id} {rank} := by
 /-- Curve {id} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 instance : curve{id}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
-/-- The `j`-invariant of curve {id}. -/
+{jopt}/-- The `j`-invariant of curve {id}. -/
 theorem curve{id}_j : curve{id}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
@@ -345,7 +344,7 @@ end ECCompute
 def main():
     ap = argparse.ArgumentParser(description="Generate an ECCompute rank certificate for a curve.")
     ap.add_argument("id", nargs="?", help="ICARM leaderboard curve id")
-    ap.add_argument("--json", help="local JSON file instead of fetching")
+    ap.add_argument("--json", help="read the curve from a local JSON file")
     ap.add_argument("--repo", default=".", help="repo root to write into (default .)")
     ap.add_argument("--dry-run", action="store_true", help="print summary, write no files")
     args = ap.parse_args()
@@ -380,7 +379,7 @@ def main():
     achieved = f2_rank(curve, labels)
     rank_goal = achieved - t
 
-    data_args = f'points "data/curve{cid}.txt" labels "data/curve{cid}-labels.txt"'
+    data_args = f'"data/curve{cid}.txt" "data/curve{cid}-labels.txt"'
     ell0 = ellq = None
     if t == 0:
         ell0 = torsion_prime(curve)
@@ -389,7 +388,7 @@ def main():
         R0 = roots[0]
         b, c = curve.A2 + R0, curve.A4 + R0 * (curve.A2 + R0)
         ellq = cofactor_witness_prime(b, c, curve)
-        tactic = f'certify_curve oneTorsion root {R0} witness {ellq}\n    {data_args}'
+        tactic = f'certify_curve oneTorsion {R0} {ellq} {data_args}'
     else:
         tactic = f'certify_curve fullTorsion {data_args}'
 
@@ -432,9 +431,12 @@ def main():
     with open(f"{repo}/data/curve{cid}-labels.txt", "w") as fh:
         for (p, th) in sorted(labels):
             fh.write(f"{p} {th}\n")
+    jinv = j_lit(j_invariant(*ainvs))
+    jline = f'theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)'
+    jopt = 'set_option linter.style.longLine false in\n' if len(jline) > 100 else ''
     lean = LEAN.format(id=cid, rank=rank_goal, tactic=tactic, eq=weier_eq(*ainvs[:3]),
                        coeffs=coeff_block(ainvs[3], ainvs[4]), defblock=def_block(cid, ainvs),
-                       jinv=j_lit(j_invariant(*ainvs)))
+                       jinv=jinv, jopt=jopt)
     with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
