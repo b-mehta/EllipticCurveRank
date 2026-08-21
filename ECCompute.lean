@@ -1,5 +1,5 @@
 -- Foundations
-import ECCompute.Check.Fold
+import ECCompute.Kernel.Fold
 import ECCompute.Check.IntResNat
 import ECCompute.Certificate
 
