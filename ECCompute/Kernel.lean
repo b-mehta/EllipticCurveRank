@@ -111,8 +111,8 @@ noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
 /-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
 and `(c4p, c4m)` for `a₄`. -/
 noncomputable def fderivResNat (c2p c2m c4p c4m p tval : Nat) : Nat :=
-  (((((Nat.mul 3 tval).mul tval).add ((Nat.mul 2 c2p).mul tval)).add c4p).mod p).add
-      (p.sub ((((Nat.mul 2 c2m).mul tval).add c4m).mod p)) |>.mod p
+  ((((((Nat.mul 3 tval).mul tval).add ((Nat.mul 2 c2p).mul tval)).add c4p).mod p).add
+      (p.sub ((((Nat.mul 2 c2m).mul tval).add c4m).mod p))).mod p
 
 /-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
 evaluations bit tests against a supplied quadratic-residue mask `qmask`. -/
