@@ -206,7 +206,7 @@ theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
       have hlm : bi.land m = bi &&& m := rfl
       rw [hlm, popParityK_eq hbnd hn] at h0
       have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
-      simpa [← natBeqEq, beq_iff_eq] using hbe
+      simpa [Nat.beq_eq', beq_iff_eq] using hbe
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]

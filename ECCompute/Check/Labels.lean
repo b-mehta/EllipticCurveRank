@@ -120,7 +120,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   · -- `p ∤ 6`
     have h6m : 6 % p = Nat.mod 6 p := rfl
     rw [Nat.dvd_iff_mod_eq_zero, h6m]
-    simpa [← natBeqEq, beq_eq_false_iff_ne] using h6
+    simpa [Nat.beq_eq', beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]

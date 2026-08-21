@@ -280,7 +280,7 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : (Nat.beq 
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 := by
   rw [pow_zero]
   exact card_twoTorsion_le_one_of_hasRootMod a₂ a₄ a₆
-    (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
+    (by simpa [Bool.not'_eq_not, Nat.beq_eq', beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using h)
 
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
@@ -293,7 +293,7 @@ theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : (Nat.beq
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
     (by simpa [Int.beq'_eq] using hR)
-    (by simpa [Bool.not'_eq_not, ← natBeqEq, beq_eq_false_iff_ne] using hp)
+    (by simpa [Bool.not'_eq_not, Nat.beq_eq', beq_eq_false_iff_ne] using hp)
     (by simpa [Bool.not'_eq_not] using hq)
 
 /-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/

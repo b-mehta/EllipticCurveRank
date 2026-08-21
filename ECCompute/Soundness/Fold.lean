@@ -10,8 +10,8 @@ import ECCompute.Kernel
 # Soundness of the `Bool` folds
 
 `anyBelow_eq_false` and `allList_eq_true` characterize the kernel folds `ECCompute.anyBelow` and
-`ECCompute.allList` (from `Kernel`) as a bounded `∃` and a list `∀`; the `succ`/`cons` lemmas peel
-one step, and `natBeqEq` relates `Nat.beq` to the `BEq`-dispatched `==`.
+`ECCompute.allList` (from `Kernel`) as a bounded `∃` and a list `∀`, the `succ`/`cons` lemmas peel
+one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 -/
 
 namespace ECCompute
@@ -40,8 +40,8 @@ theorem allList_eq_true {α : Type*} {p : α → Bool} {l : List α} :
   | nil => simp [allList]
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
-/-- `Nat.beq` agrees with the `BEq`-dispatched `==` on `ℕ`. -/
-theorem natBeqEq (a b : ℕ) : (a == b) = Nat.beq a b := by
+/-- `Nat.beq` and the `BEq`-dispatched `==` agree on `ℕ`. -/
+theorem _root_.Nat.beq_eq' (a b : ℕ) : Nat.beq a b = (a == b) := by
   cases hab : a == b <;> cases hnb : Nat.beq a b <;> simp_all [beq_iff_eq, Nat.beq_eq]
 
 end ECCompute
