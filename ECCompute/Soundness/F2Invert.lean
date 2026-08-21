@@ -33,16 +33,15 @@ open Matrix Finset
 /-- Parity of the popcount of `a`, reading the low `fuel` bits. -/
 def popParity : Nat → Nat → Bool
   | 0, _ => false
-  | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
+  | fuel + 1, a => (a.testBit 0).xor (popParity fuel (a / 2))
 
 /-- The XOR over `v.testBit j` for `j` in a list. -/
 private def xorBits (v : Nat) (l : List Nat) : Bool :=
-  l.foldr (fun j r ↦ Bool.xor (v.testBit j) r) false
+  l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
-/-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
-private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
-  have hl : x.land 1 = x &&& 1 := rfl
-  rw [Nat.testBit_zero, hl, Nat.and_one_is_mod]
+/-- `(x &&& 1) == 1` reads bit 0 of `x`. -/
+private theorem land_one_beq_one (x : Nat) : ((x &&& 1) == 1) = x.testBit 0 := by
+  rw [Nat.testBit_zero, Nat.and_one_is_mod]
   rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
@@ -60,7 +59,7 @@ private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
   cases a <;> cases b <;> simp_all [bId]
 
-private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
+private theorem bId_xor (a b : Bool) : bId (a.xor b) = bId a + bId b := by
   cases a <;> cases b <;> decide
 
 /-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
@@ -105,7 +104,7 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 
 theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
-      ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
+      ((popParityK (bi.land m)).rec (i.beq k).not'
         (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
@@ -125,14 +124,14 @@ theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length
 def toMatCols (M : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
   fun j k ↦ if (M.getD k 0).testBit j then 1 else 0
 
-/-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `Nat.land`. -/
+/-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `&&&`. -/
 private theorem prodTerm (a b j : Nat) :
     (if a.testBit j then (1 : ZMod 2) else 0) * (if b.testBit j then 1 else 0)
       = if (a &&& b).testBit j then 1 else 0 := by grind
 
 /-- `Bool.xor` corresponds to addition of 𝔽₂ indicators. -/
 private theorem xor_add (p q : Bool) :
-    (if Bool.xor p q then (1 : ZMod 2) else 0) = (if p then 1 else 0) + (if q then 1 else 0) := by
+    (if p.xor q then (1 : ZMod 2) else 0) = (if p then 1 else 0) + (if q then 1 else 0) := by
   cases p <;> cases q <;> decide
 
 /-- Link between the recursive parity and the `Finset.range` sum over 𝔽₂ indicators. -/
