@@ -10,18 +10,11 @@ import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Fold
 
 /-!
-# Soundness of the aggregate descent-character matrix check
+# Soundness of the descent-matrix check
 
-`checkB` (`ECCompute.Kernel`) is a single `Bool` that tests every entry of the certificate matrix
-`matB` against the computed descent character; `checkB_true` recovers the individual entry
-equalities from `checkB … = true`.
-
-The kernel-reduced work runs through `lambdaComputeBoolNatMask`, evaluating every entry in `Nat`
-and reading each label's Legendre character from a precomputed quadratic-residue mask. The signed
-inputs are turned into `Nat` pieces once: the coefficients `a₂`, `a₄` and each point's numerator
-become `mp - mn` pairs via `Int.toNat`, each label representative `θ : ℤ` becomes its residue
-`(θ % p).toNat`, and each label carries its quadratic-residue mask `q`. `checkMaskList` verifies
-each supplied mask equals `qrMask p` once per prime.
+`checkB_true` proves the kernel-reducible `checkB` (`ECCompute.Kernel`) sound: when it passes, every
+entry of the certificate matrix `matB` equals the abstract descent character `lambdaCompute` at the
+matching point.
 -/
 
 namespace ECCompute
