@@ -7,7 +7,7 @@ import ECCompute.Certificate
 import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.Primes
-import ECCompute.Check.DescentMatrix
+import ECCompute.Soundness.DescentMatrix
 import ECCompute.Soundness.Torsion
 import ECCompute.Theory.Descent
 import ECCompute.Soundness.LambdaCompute
