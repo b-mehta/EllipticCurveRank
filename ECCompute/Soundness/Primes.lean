@@ -18,7 +18,7 @@ import Mathlib.Tactic.Linarith
 ## Main results
 
 * `Nat.primes_below_23`: the primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`.
-* `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2,3,5,7,11,13,17,19] = true`, then
+* `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2, 3, 5, 7, 11, 13, 17, 19] = true`, then
   `Nat.Prime n`.
 * `ECCompute.checkPrime_true` / `ECCompute.checkPrimes_true`: soundness of the kernel `Bool`
   checkers `checkPrime` / `checkPrimes`.
