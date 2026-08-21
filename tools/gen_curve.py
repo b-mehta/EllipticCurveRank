@@ -25,7 +25,10 @@ Requires sympy (number theory). Usage:
     uv run --with sympy tools/gen_curve.py --json curve273.json --repo /path/to/ECCompute
     uv run --with sympy tools/gen_curve.py 273 --dry-run    # print summary, write nothing
 """
-import argparse, json, sys, urllib.request
+import argparse
+import json
+import sys
+import urllib.request
 from fractions import Fraction
 from math import isqrt
 from pathlib import Path
@@ -45,7 +48,8 @@ class Curve:
             raise SystemExit("gen_curve: short model is singular (disc = 0)")
         self.short = []  # (xnum, xden, ynum, yden)
         for (x, y) in points:
-            if y * y + self.a1 * x * y + self.a3 * y != x**3 + self.a2 * x * x + self.a4 * x + self.a6:
+            if (y * y + self.a1 * x * y + self.a3 * y
+                    != x**3 + self.a2 * x * x + self.a4 * x + self.a6):
                 raise SystemExit("gen_curve: a witness point is not on the general curve")
             X = 4 * x
             Y = 8 * y + 4 * self.a1 * x + 4 * self.a3
@@ -62,6 +66,8 @@ class Curve:
         return [t for t in range(p) if self.f(t) % p == 0]
 
     def lam(self, p, theta, xnum, xden):
+        """The descent character λ_{p,θ} at the point x = xnum/xden: 0 when the relevant residue
+        is a square mod p (Jacobi symbol 1), else 1. Mirrors CertifyEval.lambdaEval."""
         if xden % p == 0:
             return 0
         alpha = (xnum - theta * xden) % p
@@ -70,6 +76,7 @@ class Curve:
 
 
 def col_bits(curve, p, theta):
+    """The (p, θ) descent column as a bitmask: bit i is set iff λ_{p,θ} is 1 on witness point i."""
     v = 0
     for i, (xn, xd, _, _) in enumerate(curve.short):
         if curve.lam(p, theta, xn, xd):
@@ -90,7 +97,7 @@ def select_labels(curve, prime_cap=100000):
         for th in curve.roots_mod(p):
             red = col_bits(curve, p, th)
             for b in basis:
-                red = min(red, red ^ b)
+                red = min(red, red ^ b)      # reduce mod the running F2 basis
             if red != 0:
                 basis.append(red)
                 basis.sort(reverse=True)
@@ -200,6 +207,8 @@ def load(args):
 
 
 def weier_eq(a1, a2, a3):
+    """A human-readable Weierstrass equation string (`y² + a₁xy + a₃y = x³ + a₂x² + a₄·x + a₆`,
+    with zero terms dropped) for the generated module docstring."""
     def term(coef, mono):
         if coef == 0:
             return ""
@@ -292,7 +301,8 @@ def main():
         tactic = f'certify_curve fullTorsion {data_args}'
 
     tdesc = {0: "trivial", 1: "one rational point", 2: "full (ℤ/2)²"}[t]
-    print(f"curve {cid}: {ngen} generators + {len(tors_pts)} torsion = {rho} points, claimed rank {claimed}")
+    print(f"curve {cid}: {ngen} generators + {len(tors_pts)} torsion = "
+          f"{rho} points, claimed rank {claimed}")
     print(f"  2-torsion t = {t} ({tdesc}); short-model roots {roots}")
     print(f"  labels selected: {len(labels)} (primes to {labels[-1][0] if labels else '-'})")
     print(f"  F2 rank of the {rho}x{rho} matrix: {achieved}  ->  certified rank >= {rank_goal}")
@@ -349,7 +359,8 @@ def main():
     with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
-    print(f"\nwrote data/curve{cid}.txt, data/curve{cid}-labels.txt, ECCompute/Curves/Curve{cid}.lean")
+    print(f"\nwrote data/curve{cid}.txt, data/curve{cid}-labels.txt, "
+          f"ECCompute/Curves/Curve{cid}.lean")
     print(f"add to ECCompute.lean:  import ECCompute.Curves.Curve{cid}")
 
 
