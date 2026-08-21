@@ -76,17 +76,21 @@ private theorem xorBits_range_hi {v n m : Nat} (hzero : ∀ j, n ≤ j → v.tes
     xorBits v (List.range m) = xorBits v (List.range n) := by
   induction m with grind [List.range_succ, xorBits]
 
+section
+variable {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32)
+include hv hn
+
 /-- Extra high bits (`≥ n`) are zero when `v < 2 ^ n`, so they drop out of the XOR. -/
-theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
-    popParity 32 v = popParity n v := by
+theorem popParity_hi_eq : popParity 32 v = popParity n v := by
   rw [popParity_eq_xorBits, popParity_eq_xorBits]
   refine xorBits_range_hi (fun j hj ↦ ?_) hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
 /-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
-theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
-    popParityK v = popParity n v := by
+theorem popParityK_eq : popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
+
+end
 
 @[simp, grind =] theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
@@ -124,9 +128,12 @@ theorem popParity_sum (fuel a : Nat) :
     rw [popParity, Finset.sum_range_succ', bId_xor, add_comm, ih]
     simp [Nat.testBit_succ]
 
+section
+variable {n : Nat} {B M : List Nat}
+
 /-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
-theorem checkInvRow_true {bi i n k k' : Nat} (hn : n ≤ 32) {M : List Nat} (hM : ∀ m ∈ M, m < 2 ^ n)
+theorem checkInvRow_true {bi i k k' : Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
     (hc : checkInvRow bi i k M) (hk' : k' < M.length) :
     popParity n (bi &&& M[k']) = (i == k + k') := by
   induction M generalizing k k' with
@@ -144,8 +151,8 @@ theorem checkInvRow_true {bi i n k k' : Nat} (hn : n ≤ 32) {M : List Nat} (hM 
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
-theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
-    {i : Nat} {B : List Nat} (hB : ∀ b ∈ B, b < 2 ^ n) (hc : checkInvGo M i B)
+theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
+    {i : Nat} (hB : ∀ b ∈ B, b < 2 ^ n) (hc : checkInvGo M i B)
     (i' : Nat) (hi' : i' < B.length) (k' : Nat) (hk' : k' < M.length) :
         popParity n (B[i'] &&& M[k']) = (i + i' == k') := by
   induction B generalizing i i' with
@@ -158,22 +165,24 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈
     | succ i'' => grind
 
 /-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
-theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
+theorem maskBelow_eq_true {L : List Nat} :
     maskBelow n L ↔ ∀ x ∈ L, x < 2 ^ n := by
   rw [maskBelow, allList_eq_true]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
 /-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
-theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M) :
+theorem checkInv_true_of (h : checkInv n B M) :
     (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B := by
   grind [checkInv, maskBelow_eq_true]
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
-theorem checkInv_true {n i k : Nat} {B M : List Nat} (hi : i < B.length) (hk : k < M.length)
+theorem checkInv_true {i k : Nat} (hi : i < B.length) (hk : k < M.length)
     (h : checkInv n B M) :
     popParity n (B[i] &&& M[k]) = (i == k) := by
   obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
   simpa using checkInvGo_true hn hM hB hgo i hi k hk
+
+end
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
