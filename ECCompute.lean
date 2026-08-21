@@ -17,7 +17,6 @@ import ECCompute.Theory.CompleteSquare
 
 -- Certification checkers
 import ECCompute.Check.DescentMatrix
-import ECCompute.Check.Labels
 import ECCompute.Check.Torsion
 import ECCompute.Check.Points
 
@@ -29,6 +28,7 @@ import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.RootMod
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.JInvariant
+import ECCompute.Soundness.Labels
 
 -- Main theory
 import ECCompute.MainTheorem
