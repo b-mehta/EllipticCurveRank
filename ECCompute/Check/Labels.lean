@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Soundness.Fold
 import ECCompute.Check.Primes
 import ECCompute.Check.IntResNat
+import ECCompute.ForLean
 
 import Mathlib.Tactic.NormNum.Prime
 

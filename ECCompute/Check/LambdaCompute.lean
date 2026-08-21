@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Check.IntResNat
+import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
 /-!
