@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
+import ECCompute.Soundness.RootMod
 import ECCompute.ForLean
 
 /-!
@@ -59,18 +60,18 @@ theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
   push_cast [h]
   ring
 
-theorem fvalModP_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 0 < p) :
-    Nat.beq (fvalModP a₂ a₄ a₆ θ p) 0 = true
+/-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
+theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
+    Nat.beq (monicModL [a₆, a₄, a₂] p (θ.emod p).toNat) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  have : NeZero p := ⟨hp.ne'⟩
-  have hlt : fvalModP a₂ a₄ a₆ θ p < p := Nat.mod_lt _ hp
-  have hcast : ((fvalModP a₂ a₄ a₆ θ p : ℕ) : ZMod p)
-      = ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) := by
-    simp only [fvalModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq, ← Int.mod_def', ZMod.natCast_mod,
-      Nat.cast_add, Nat.cast_mul, intResNat_cast hp.ne']
-    push_cast
-    ring
-  rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt hlt, hcast]
+  have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
+  have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
+    have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
+    rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
+    exact Int.emod_emod_of_dvd θ dvd_rfl
+  have hpoly : monicEval [a₆, a₄, a₂] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
+    simp only [monicEval, Int.add_def, Int.mul_def]; ring
+  rw [monicModL_beq hp, monicEval_modEq hmod, hpoly]
 
 theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
@@ -94,7 +95,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fvalModP_iff a₂ a₄ a₆ θ hp.pos).mp hf
+      (fval_iff a₂ a₄ a₆ θ hp.one_lt).mp hf
     rw [fval]
     grind
 
