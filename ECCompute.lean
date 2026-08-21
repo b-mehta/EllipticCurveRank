@@ -16,7 +16,6 @@ import ECCompute.Theory.CompleteSquare
 
 -- Certification checkers
 import ECCompute.Check.DescentMatrix
-import ECCompute.Check.Torsion
 import ECCompute.Check.Points
 
 -- Soundness of the checkers
@@ -29,6 +28,7 @@ import ECCompute.Soundness.Points
 import ECCompute.Soundness.JInvariant
 import ECCompute.Soundness.Labels
 import ECCompute.Soundness.LambdaCompute
+import ECCompute.Soundness.Torsion
 
 -- Main theory
 import ECCompute.MainTheorem
