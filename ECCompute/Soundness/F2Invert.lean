@@ -104,12 +104,12 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
-theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
+@[simp, grind =] theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
       ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
         (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
-theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
+@[simp, grind =] theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) =
       (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
@@ -149,7 +149,7 @@ theorem popParity_sum (fuel a : Nat) :
 /-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
 each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
 theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
-    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i k M = true →
+    ∀ {k : Nat} {M : List Nat}, (∀ m ∈ M, m < 2 ^ n) → checkInvRow bi i k M →
       ∀ k', k' < M.length → (popParity n (bi &&& M.getD k' 0) == (i == (k + k'))) = true := by
   intro k M
   induction M generalizing k with
@@ -173,7 +173,7 @@ theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
 theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) :
-    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo M i B = true →
+    ∀ {i : Nat} {B : List Nat}, (∀ b ∈ B, b < 2 ^ n) → checkInvGo M i B →
       ∀ i', i' < B.length → ∀ k', k' < M.length →
         (popParity n (B.getD i' 0 &&& M.getD k' 0) == (i + i' == k')) = true := by
   intro i B
@@ -195,19 +195,19 @@ private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := Nat.one_s
 
 /-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
 theorem maskBelow_eq_true {n : Nat} {L : List Nat} :
-    maskBelow n L = true ↔ ∀ x ∈ L, x < 2 ^ n := by
+    maskBelow n L ↔ ∀ x ∈ L, x < 2 ^ n := by
   rw [maskBelow, allList_eq_true]
   simp only [shiftLeft_one, Nat.blt_eq]
 
 /-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
-theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
+theorem checkInv_true_of {n : Nat} {B M : List Nat} (h : checkInv n B M) :
     (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B = true := by
   simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hB, hMask, hle, hgo⟩ := h
   exact ⟨maskBelow_eq_true.1 hB, maskBelow_eq_true.1 hMask, by simpa using hle, hgo⟩
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
-theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
+theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M) :
     ∀ i k, i < B.length → k < M.length →
       (popParity n (B.getD i 0 &&& M.getD k 0) == (i == k)) = true := by
   intro i k hi hk
@@ -218,7 +218,7 @@ theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen : M.length = n)
-    (h : checkInv n B M = true) : IsUnit (toMat B n) := by
+    (h : checkInv n B M) : IsUnit (toMat B n) := by
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
     simp only [Matrix.mul_apply, toMat, toMatCols, prodTerm]
