@@ -28,6 +28,7 @@ Requires sympy (number theory). Usage:
 import argparse, json, sys, urllib.request
 from fractions import Fraction
 from math import isqrt
+from pathlib import Path
 from sympy import divisors, jacobi_symbol, primerange
 
 
@@ -238,46 +239,6 @@ def coeff_block(a4, a6, width=76):
     return "\n".join(wrap("a₄", a4, "   and") + wrap("a₆", a6))
 
 
-LEAN = '''\
-/-
-Copyright (c) 2026 Bhavik Mehta. All rights reserved.
-Released under the GNU General Public License version 3.0 as described in the file LICENSE.
-Authors: Bhavik Mehta
--/
-import ECCompute.Tactic.CertifyCurve
-import ECCompute.Check.JInvariant
-
-/-!
-# Curve {id} has rank at least {rank}
-
-The elliptic curve recorded as
-[curve {id}](https://elliptic-rank.icarm.cloud/curve/{id}) on the ICARM Elliptic Curve Rank
-Leaderboard is
-
-  `E : {eq}`,   with
-{coeffs}
-
-over `ℚ`. It has Mordell-Weil rank at least `{rank}`. The witness points from the leaderboard,
-transported to the integral short model, are in `data/curve{id}.txt`; descent labels are in
-`data/curve{id}-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
--/
-
-namespace ECCompute
-
-open WeierstrassCurve
-
-{defblock}
-
-{rankblock}
-
-{ellblock}
-
-{jblock}
-
-end ECCompute
-'''
-
-
 def main():
     ap = argparse.ArgumentParser(description="Generate an ECCompute rank certificate for a curve.")
     ap.add_argument("id", nargs="?", help="ICARM leaderboard curve id")
@@ -381,9 +342,10 @@ def main():
     jblock = gate(
         f"/-- The `j`-invariant of curve {cid}. -/\n"
         f"theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)")
-    lean = LEAN.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
-                       coeffs=coeff_block(ainvs[3], ainvs[4]),
-                       defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
+    template = (Path(__file__).parent / "curve_template.lean").read_text()
+    lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
+                           coeffs=coeff_block(ainvs[3], ainvs[4]),
+                           defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
     with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
