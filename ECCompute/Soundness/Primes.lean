@@ -26,15 +26,15 @@ import Mathlib.Tactic.Linarith
 
 namespace ECCompute
 
-@[simp] theorem passes_nil (x : ℕ) : passes x [] = true := rfl
+@[simp, grind =] theorem passes_nil (x : ℕ) : passes x [] = true := rfl
 
-theorem passes_cons (x a : ℕ) (t : List ℕ) :
+@[simp, grind =] theorem passes_cons (x a : ℕ) (t : List ℕ) :
     passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
 
 /-- `passes x L = true` exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
 theorem passes_true_iff {x : ℕ} {L : List ℕ} :
-    passes x L = true ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
+    passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L with
   | nil => simp
   | cons a t ih =>
@@ -63,12 +63,12 @@ theorem _root_.Nat.prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
-theorem checkPrime_true {p : ℕ} (h : checkPrime p = true) : p.Prime := by
+theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
   simp only [checkPrime, Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq] at h
   exact Nat.prime_of_passes p h.1 (by lia) h.2.2
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
-theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels = true) :
+theorem checkPrimes_true {labels : List (ℕ × ℤ)} (h : checkPrimes labels) :
     ∀ l ∈ labels, l.1.Prime := by
   rw [checkPrimes, allList_eq_true] at h
   exact fun l hl ↦ checkPrime_true (h l hl)
