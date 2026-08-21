@@ -161,7 +161,7 @@ end F2Invert
 /-- Turn the `(prime, θ)` labels and their quadratic-residue masks into the `Nat` label triples
 `(p, (θ % p).toNat, q)` consumed by the kernel-reduced checker. -/
 noncomputable def toLabN (lab : List (Nat × Int)) (qms : List Nat) : List (Nat × Nat × Nat) :=
-  List.zipWith (fun l q ↦ (l.1, (l.2.emod (l.1 : Int)).toNat, q)) lab qms
+  List.zipWith (fun l q ↦ (l.1, (l.2.emod l.1).toNat, q)) lab qms
 
 /-- One row of the descent-matrix check: for the row bitmask `b`, the point's `Nat` pieces and the
 coefficient pairs, fold over the `Nat` label triples `labN = (p, tval, q)`, consuming `b` one bit at
