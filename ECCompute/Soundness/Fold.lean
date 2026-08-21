@@ -30,11 +30,11 @@ theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
     grind
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
-theorem allList_cons {α : Type*} (p : α → Bool) (a : α) (l : List α) :
+theorem allList_cons {α : Type} (p : α → Bool) (a : α) (l : List α) :
     allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
-theorem allList_eq_true {α : Type*} {p : α → Bool} {l : List α} :
+theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
     allList p l = true ↔ ∀ a ∈ l, p a = true := by
   induction l with
   | nil => simp [allList]

@@ -20,7 +20,7 @@ noncomputable def anyBelow (n : Nat) (p : Nat → Bool) : Bool :=
   n.rec false fun m r => (p m).or' r
 
 /-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
-noncomputable def allList {α : Type _} (p : α → Bool) : List α → Bool :=
+noncomputable def allList {α : Type} (p : α → Bool) : List α → Bool :=
   List.rec true fun a _ r => (p a).and' r
 
 end ECCompute
