@@ -77,17 +77,16 @@ private theorem xorBits_range_hi {v n m : Nat} (hzero : ∀ j, n ≤ j → v.tes
   induction m with grind [List.range_succ, xorBits]
 
 section
-variable {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32)
-include hv hn
+variable {v n : Nat}
 
 /-- Extra high bits (`≥ n`) are zero when `v < 2 ^ n`, so they drop out of the XOR. -/
-theorem popParity_hi_eq : popParity 32 v = popParity n v := by
+theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popParity n v := by
   rw [popParity_eq_xorBits, popParity_eq_xorBits]
   refine xorBits_range_hi (fun j hj ↦ ?_) hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
 /-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
-theorem popParityK_eq : popParityK v = popParity n v := by
+theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
 end
@@ -153,7 +152,7 @@ theorem checkInvRow_true {bi i k k' : Nat} (hn : n ≤ 32) (hM : ∀ m ∈ M, m 
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
 theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
     {i : Nat} (hB : ∀ b ∈ B, b < 2 ^ n) (hc : checkInvGo M i B)
-    (i' : Nat) (hi' : i' < B.length) (k' : Nat) (hk' : k' < M.length) :
+    {i' : Nat} (hi' : i' < B.length) {k' : Nat} (hk' : k' < M.length) :
         popParity n (B[i'] &&& M[k']) = (i + i' == k') := by
   induction B generalizing i i' with
   | nil => simp at hi'
@@ -180,13 +179,13 @@ theorem checkInv_true {i k : Nat} (hi : i < B.length) (hk : k < M.length)
     (h : checkInv n B M) :
     popParity n (B[i] &&& M[k]) = (i == k) := by
   obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
-  simpa using checkInvGo_true hn hM hB hgo i hi k hk
+  simpa using checkInvGo_true hn hM hB hgo hi hk
 
 end
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
-theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen : M.length = n)
+theorem checkInv_isUnit {n : Nat} {B M : List Nat} (hBlen : B.length = n) (hMlen : M.length = n)
     (h : checkInv n B M) : IsUnit (toMat B n) := by
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
