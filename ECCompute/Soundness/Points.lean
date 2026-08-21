@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Check.Points
 import ECCompute.Theory.CompleteSquare
+import ECCompute.Soundness.Fold
 
 /-!
 # Soundness of the point-on-curve check

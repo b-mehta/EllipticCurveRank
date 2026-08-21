@@ -4,7 +4,8 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Check.Fold
+import ECCompute.Kernel
+import ECCompute.Soundness.Fold
 import ECCompute.Check.Primes
 import ECCompute.Check.IntResNat
 

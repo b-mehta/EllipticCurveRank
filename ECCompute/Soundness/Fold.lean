@@ -3,21 +3,17 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.Data.List.Basic
+import ECCompute.Kernel
 
 /-!
-# Kernel-reducible bounded and structural `Bool` folds
+# Soundness of the `Bool` folds
 
-`anyBelow` folds a `Bool` predicate over `{m | m < n}` (via `Nat.rec`); `allList` folds a predicate
-over the members of a `List` (via `List.rec`). These are the building blocks the certificate
-checkers (`checkB`, `checkInv`, `checkPoints`, …) fold over.
+`anyBelow_eq_false` and `allList_eq_true` characterize the kernel folds `ECCompute.anyBelow` and
+`ECCompute.allList` (from `Kernel`) as a bounded `∃` and a list `∀`; the `succ`/`cons` lemmas peel
+one step, and `natBeqEq` bridges the kernel-cheap `Nat.beq` to the `BEq`-dispatched `==`.
 -/
 
 namespace ECCompute
-
-/-- Kernel-reducible bounded `∃`: `true` iff `p m = true` for some `m < n`. -/
-noncomputable def anyBelow (n : Nat) (p : Nat → Bool) : Bool :=
-  Nat.rec false (fun m r => (p m).or' r) n
 
 /-- `anyBelow (n + 1) p` peels the top index: it folds `p n` into `anyBelow n p`. -/
 theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
@@ -31,10 +27,6 @@ theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
   | succ k ih =>
     rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]
     grind
-
-/-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
-noncomputable def allList {α : Type*} (p : α → Bool) : List α → Bool :=
-  List.rec true (fun a _ r => (p a).and' r)
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
 theorem allList_cons {α : Type*} (p : α → Bool) (a : α) (l : List α) :

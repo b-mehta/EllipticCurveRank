@@ -1,5 +1,5 @@
 -- Foundations
-import ECCompute.Check.Fold
+import ECCompute.Kernel
 import ECCompute.Check.IntResNat
 import ECCompute.Certificate
 
@@ -26,6 +26,7 @@ import ECCompute.Check.Points
 import ECCompute.Check.JInvariant
 
 -- Soundness of the checkers
+import ECCompute.Soundness.Fold
 import ECCompute.Soundness.Points
 
 -- Main theory

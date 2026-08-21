@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Check.RootMod
 import ECCompute.Check.F2Invert
+import ECCompute.Soundness.Fold
 import ECCompute.Theory.CompleteSquare
 import ECCompute.Theory.Descent.Defs
 
