@@ -191,7 +191,7 @@ noncomputable def checkMaskList (labN : List (Nat × Nat × Nat)) : Bool :=
 /-- The aggregate descent-matrix check. The coefficients become `mp - mn` pairs and the labels their
 `Nat` residues and masks once, up front; the masks are verified by `checkMaskList` and then
 `checkBGo` folds the rows entirely in `Nat`. -/
-noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (qms : List Nat) (matB : List Nat)
+noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (qms matB : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   (checkMaskList (toLabN lab qms)).and'
     (checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat (toLabN lab qms) matB pt)
