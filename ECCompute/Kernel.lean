@@ -42,7 +42,7 @@ indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with `n �
 verifies separately. -/
 noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
   M.rec (motive := fun _ ↦ Nat → Bool) (fun _ ↦ true)
-    (fun m _ ih k ↦ ((popParityK (bi.land m)).rec
+    (fun m _ ih k ↦ ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool)
       (i.beq k).not' (i.beq k)).and' (ih k.succ)) k
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
