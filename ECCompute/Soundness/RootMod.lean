@@ -33,7 +33,7 @@ variable {cs : List ℤ} {ℓ r : ℕ}
     monicEval (c :: cs) u = c + u * monicEval cs u := by
   simp [monicEval]
 
-@[simp, grind =] lemma monicModL_cons {c : ℤ} {ℓ r : ℕ} :
+@[simp, grind =] lemma monicModL_cons {c : ℤ} :
     monicModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * monicModL cs ℓ r) % ℓ := by
   simp [monicModL]
 
