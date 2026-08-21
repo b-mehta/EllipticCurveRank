@@ -15,59 +15,20 @@ Model (ModelChange.intShort*):
     A2 = a1^2 + 4 a2      A4 = 16 a4 + 8 a1 a3      A6 = 64 a6 + 16 a3^2
     short model  Y^2 = X^3 + A2 X^2 + A4 X + A6
     point map    X = 4 x,  Y = 8 y + 4 a1 x + 4 a3   (general (x,y) -> short)
-Descent character (CertifyEval.lambdaEval): lambda = 1 iff jacobi(a,p) != 1,
+Descent character (CertifyEval.lambdaEval): lambda = 1 iff jacobi_symbol(a,p) != 1,
 where a = alpha = x.num - theta*x.den mod p, or f'(theta)=3θ²+2A2θ+A4 if alpha≡0.
 Torsion (certTorsionBound_zero): t=0 witnessed by a prime ℓ where the 2-division
 cubic has no root; f(4x)-scaling makes that equivalent to f having no root mod ℓ.
 
-Usage:
-    python3 gen_curve.py 273 --repo /path/to/ECCompute
-    python3 gen_curve.py --json curve273.json --repo /path/to/ECCompute
-    python3 gen_curve.py 273 --dry-run          # print summary, write nothing
+Requires sympy (number theory). Usage:
+    uv run --with sympy tools/gen_curve.py 273 --repo /path/to/ECCompute
+    uv run --with sympy tools/gen_curve.py --json curve273.json --repo /path/to/ECCompute
+    uv run --with sympy tools/gen_curve.py 273 --dry-run    # print summary, write nothing
 """
 import argparse, json, sys, urllib.request
 from fractions import Fraction
 from math import isqrt
-
-
-# ---------- number theory, ported 1:1 from CertifyEval.lean ----------
-def jacobi(a, n):
-    a = ((a % n) + n) % n
-    acc = 1
-    while a != 0:
-        while a % 2 == 0:
-            a //= 2
-            if n % 8 in (3, 5):
-                acc = -acc
-        a, n = n, a
-        if a % 4 == 3 and n % 4 == 3:
-            acc = -acc
-        a = a % n
-    return acc if n == 1 else 0
-
-
-def is_prime(n):
-    if n < 2:
-        return False
-    for q in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
-        if n % q == 0:
-            return n == q
-    d = n - 1
-    r = 0
-    while d % 2 == 0:
-        d //= 2
-        r += 1
-    for a in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
-        x = pow(a, d, n)
-        if x in (1, n - 1):
-            continue
-        for _ in range(r - 1):
-            x = x * x % n
-            if x == n - 1:
-                break
-        else:
-            return False
-    return True
+from sympy import divisors, isprime, jacobi_symbol
 
 
 # ---------- curve model ----------
@@ -104,7 +65,7 @@ class Curve:
             return 0
         alpha = (xnum - theta * xden) % p
         a = (3 * theta * theta + 2 * self.A2 * theta + self.A4) if alpha == 0 else alpha
-        return 0 if jacobi(a, p) == 1 else 1
+        return 0 if jacobi_symbol(a, p) == 1 else 1
 
 
 def col_bits(curve, p, theta):
@@ -122,7 +83,7 @@ def select_labels(curve, prime_cap=100000):
     basis, chosen = [], []
     p = 5
     while len(chosen) < n and p < prime_cap:
-        if is_prime(p) and curve.disc % p != 0:
+        if isprime(p) and curve.disc % p != 0:
             for th in curve.roots_mod(p):
                 r = col_bits(curve, p, th)
                 red = r
@@ -142,7 +103,7 @@ def torsion_prime(curve, cap=1000):
     # means the curve almost certainly has rational 2-torsion (t>0).
     q = 5
     while q < cap:
-        if is_prime(q) and curve.disc % q != 0 and not curve.roots_mod(q):
+        if isprime(q) and curve.disc % q != 0 and not curve.roots_mod(q):
             return q
         q += 2
     return None
@@ -157,13 +118,10 @@ def find_integer_root(A2, A4, A6):
         return 0
     n = abs(A6)
     if n < 10**13:
-        i = 1
-        while i * i <= n:
-            if n % i == 0:
-                for r in (i, -i, n // i, -(n // i)):
-                    if val(r) == 0:
-                        return r
-            i += 1
+        for d in divisors(n):
+            for r in (d, -d):
+                if val(r) == 0:
+                    return r
         return None
     for r in range(-10**6, 10**6 + 1):       # fallback for an unfactorable constant term
         if val(r) == 0:
@@ -195,7 +153,7 @@ def cofactor_witness_prime(b, c, curve, cap=10000):
     D = b * b - 4 * c
     q = 5
     while q < cap:
-        if is_prime(q) and curve.disc % q != 0 and jacobi(D, q) == -1:
+        if isprime(q) and curve.disc % q != 0 and jacobi_symbol(D, q) == -1:
             return q
         q += 2
     return None
