@@ -37,31 +37,29 @@ theorem checkBGo_cons_cons (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ × �
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden : ℕ} :
-    ∀ {b : ℕ} {labN : List (ℕ × ℕ × ℕ)}, checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true →
-      ∀ j, (hj : j < labN.length) → b.testBit j = lambdaComputeBoolNatMask c2p c2m c4p c4m
-        labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
-  intro b labN
-  induction labN generalizing b with
+theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden b : ℕ} {labN : List (ℕ × ℕ × ℕ)}
+    (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true) (j : ℕ) (hj : j < labN.length) :
+    b.testBit j = lambdaComputeBoolNatMask c2p c2m c4p c4m
+      labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
+  induction labN generalizing b j with
   | nil => grind
   | cons l ls ih =>
-    intro hb j hj
+    intro hb hj
     simp only [checkBRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hb
     obtain ⟨h0, hrec⟩ := hb
     have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
     cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} :
-    ∀ {B : List ℕ} {pt : List (ℚ × ℚ)}, checkBGo c2p c2m c4p c4m labN B pt = true →
-      ∀ i, (hi : i < B.length) → (hip : i < pt.length) →
-        checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
-          pt[i].1.den B[i] labN = true := by
-  intro B
-  induction B with
+theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} {B : List ℕ}
+    {pt : List (ℚ × ℚ)} (h : checkBGo c2p c2m c4p c4m labN B pt = true) (i : ℕ)
+    (hi : i < B.length) (hip : i < pt.length) :
+    checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
+      pt[i].1.den B[i] labN = true := by
+  induction B generalizing pt i with
   | nil => grind
   | cons b bs ih =>
-    intro pt h i hi hip
+    intro h hi hip
     cases pt with
     | nil => grind
     | cons p ps =>
