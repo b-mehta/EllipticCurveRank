@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Tactic.CertifyCurve
-import ECCompute.Check.JInvariant
+import ECCompute.Soundness.JInvariant
 
 /-!
 # Curve 7 has rank at least 20
