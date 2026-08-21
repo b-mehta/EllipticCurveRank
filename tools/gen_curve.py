@@ -136,29 +136,6 @@ def select_labels(curve, prime_cap=100000):
     return chosen
 
 
-def f2_rank(curve, labels):
-    n = len(curve.short)
-    cols = [col_bits(curve, p, th) for (p, th) in labels]
-    rows = []
-    for i in range(n):
-        row = 0
-        for j, cv in enumerate(cols):
-            if (cv >> i) & 1:
-                row |= (1 << j)
-        rows.append(row)
-    rank = 0
-    for c in range(len(cols)):
-        piv = next((r for r in range(rank, n) if (rows[r] >> c) & 1), None)
-        if piv is None:
-            continue
-        rows[rank], rows[piv] = rows[piv], rows[rank]
-        for r in range(n):
-            if r != rank and (rows[r] >> c) & 1:
-                rows[r] ^= rows[rank]
-        rank += 1
-    return rank
-
-
 def torsion_prime(curve, cap=1000):
     # For t=0 the 2-division cubic is irreducible over ℚ, so a positive density of
     # primes have no root; a witness turns up well under 1000. Not finding one here
@@ -384,7 +361,8 @@ def main():
 
     labels = select_labels(curve)
     rho = len(curve.short)
-    achieved = f2_rank(curve, labels)
+    # select_labels only keeps F2-independent columns, so the matrix rank is exactly their count.
+    achieved = len(labels)
     rank_goal = achieved - t
 
     data_args = f'"data/curve{cid}.txt" "data/curve{cid}-labels.txt"'
