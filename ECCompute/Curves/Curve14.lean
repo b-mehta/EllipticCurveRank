@@ -36,7 +36,7 @@ def curve14 : WeierstrassCurve ℚ := ⟨0, -1, 0, -24649, 1355209⟩
 `2`-torsion. -/
 theorem curve14_hasRankGE_4 : HasRankGE curve14 4 := by
   unfold curve14
-  certify_curve fullTorsion points "data/curve14.txt" labels "data/curve14-labels.txt"
+  certify_curve fullTorsion "data/curve14.txt" "data/curve14-labels.txt"
 
 /-- Curve 14 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 instance : curve14.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)

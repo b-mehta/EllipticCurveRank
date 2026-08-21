@@ -14,7 +14,7 @@ Over `ℚ` (characteristic `≠ 2`) the substitution `y ↦ y - (a₁x + a₃)/2
 `y² = x³ + a₂'x² + a₄'x + a₆'`, on which the descent character is stated. Rank is an isomorphism
 invariant, so a rank lower bound on the short model transfers back; see `pointAddEquiv`.
 
-The point-on-curve check `chkZ`/`checkPoints` used alongside this isomorphism lives in
+The point-on-curve check `checkPoint`/`checkPoints` used alongside this isomorphism lives in
 `ECCompute.Check.Points`.
 
 ## Main results

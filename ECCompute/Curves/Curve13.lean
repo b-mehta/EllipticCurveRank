@@ -32,8 +32,7 @@ def curve13 : WeierstrassCurve ℚ := ⟨0, 0, 0, -82, 0⟩
 `2`-torsion point. -/
 theorem curve13_hasRankGE_3 : HasRankGE curve13 3 := by
   unfold curve13
-  certify_curve oneTorsion root 0 witness 5
-    points "data/curve13.txt" labels "data/curve13-labels.txt"
+  certify_curve oneTorsion 0 5 "data/curve13.txt" "data/curve13-labels.txt"
 
 /-- Curve 13 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 instance : curve13.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
