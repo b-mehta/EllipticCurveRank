@@ -10,7 +10,6 @@ import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Check.LambdaCompute
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare
@@ -28,6 +27,7 @@ import ECCompute.Soundness.RootMod
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.JInvariant
 import ECCompute.Soundness.Labels
+import ECCompute.Soundness.LambdaCompute
 import ECCompute.Soundness.Torsion
 
 -- Main theory

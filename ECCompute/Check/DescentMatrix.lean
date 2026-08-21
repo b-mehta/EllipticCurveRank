@@ -4,7 +4,8 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Soundness.F2Invert
-import ECCompute.Check.LambdaCompute
+import ECCompute.Soundness.LambdaCompute
+import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Fold
 
 /-!

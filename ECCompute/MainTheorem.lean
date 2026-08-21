@@ -10,7 +10,7 @@ import ECCompute.Soundness.Primes
 import ECCompute.Check.DescentMatrix
 import ECCompute.Soundness.Torsion
 import ECCompute.Theory.Descent
-import ECCompute.Check.LambdaCompute
+import ECCompute.Soundness.LambdaCompute
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin

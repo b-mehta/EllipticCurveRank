@@ -59,13 +59,6 @@ noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
 
 /-! ## Descent label check -/
 
-/-- The label polynomial `f(θ) = θ³ + a₂θ² + a₄θ + a₆` reduced mod `p` in `Nat` (θ and the
-coefficients reduced to residues first). -/
-noncomputable def fvalModP (a₂ a₄ a₆ θ : Int) (p : Nat) : Nat :=
-  ((((((θ.emod p).toNat.mul (θ.emod p).toNat).mul (θ.emod p).toNat).add
-      ((a₂.emod p).toNat.mul ((θ.emod p).toNat.mul (θ.emod p).toNat))).add
-      ((a₄.emod p).toNat.mul (θ.emod p).toNat)).add (a₆.emod p).toNat).mod p
-
 /-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
 expanded. -/
 def discrIntK (a₂ a₄ a₆ : Int) : Int :=
@@ -77,15 +70,51 @@ def discrIntK (a₂ a₄ a₆ : Int) : Int :=
     (((Int.mul 9 b2).mul b4).mul b6)
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
-`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`. -/
+`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, where `f(θ) = θ³ + a₂θ² + a₄θ + a₆` is read as the monic cubic
+`monicModL [a₆, a₄, a₂]` evaluated at the residue of `θ`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
   (((Nat.mod 6 p).beq 0).not').and'
     (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
-      ((fvalModP a₂ a₄ a₆ θ p).beq 0))
+      ((monicModL [a₆, a₄, a₂] p (θ.emod p).toNat).beq 0))
 
 /-- Kernel `Bool`: every label passes `checkLabel`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkLabel a₂ a₄ a₆ l.1 l.2) labels
+
+/-! ## Descent character -/
+
+/-- Reference quadratic-residue-mask builder: OR together `1 <<< (j² % p)` for `j = 1 .. fuel`. With
+`fuel = (p-1)/2` this sets exactly the bits at the nonzero quadratic residues mod an odd prime `p`,
+using `Nat` primitives only. -/
+noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
+  Nat.rec 0 (fun k ih ↦ ih.lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)))
+
+/-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
+noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
+
+/-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
+set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
+noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
+
+/-- Residue in `[0, p)` of `x.num - θ·x.den`, from the `mp - mn` pair `(xp, xm)` for `x.num` and the
+label residue `tval` for `θ`. -/
+noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
+  ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
+
+/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
+and `(c4p, c4m)` for `a₄`. -/
+noncomputable def fderivResNat (c2p c2m c4p c4m p tval : Nat) : Nat :=
+  ((((((Nat.mul 3 tval).mul tval).add ((Nat.mul 2 c2p).mul tval)).add c4p).mod p).add
+      (p.sub ((((Nat.mul 2 c2m).mul tval).add c4m).mod p))).mod p
+
+/-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
+evaluations bit tests against a supplied quadratic-residue mask `qmask`. -/
+noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : Nat) : Bool :=
+  ((xden.mod p).beq 0).rec
+    (((alphaResNat p tval xp xm xden).beq 0).rec
+      ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
+      ((qrLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
+    false
 
 /-! ## 𝔽₂ matrix inverse -/
 
