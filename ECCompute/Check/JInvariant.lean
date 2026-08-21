@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.CompleteSquare
 import ECCompute.Tactic.QuickRfl
-import ECCompute.Check.Fold
+import ECCompute.Kernel.Fold
 
 /-!
 # Certifying the j-invariant

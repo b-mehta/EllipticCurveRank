@@ -15,7 +15,7 @@ Over `ℚ` (characteristic `≠ 2`) the substitution `y ↦ y - (a₁x + a₃)/2
 invariant, so a rank lower bound on the short model transfers back; see `pointAddEquiv`.
 
 The point-on-curve check `checkPoint`/`checkPoints` used alongside this isomorphism lives in
-`ECCompute.Check.Points`.
+`ECCompute.Kernel.Points`.
 
 ## Main results
 

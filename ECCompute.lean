@@ -1,6 +1,6 @@
 -- Foundations
-import ECCompute.Check.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Kernel.Fold
+import ECCompute.Kernel.IntResNat
 import ECCompute.Certificate
 
 -- Pure mathematics
@@ -22,7 +22,7 @@ import ECCompute.Check.Primes
 import ECCompute.Check.Labels
 import ECCompute.Check.RootMod
 import ECCompute.Check.Torsion
-import ECCompute.Check.Points
+import ECCompute.Kernel.Points
 import ECCompute.Check.JInvariant
 
 -- Soundness of the checkers

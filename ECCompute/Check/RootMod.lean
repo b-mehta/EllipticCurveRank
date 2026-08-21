@@ -4,8 +4,8 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Check.Fold
-import ECCompute.Check.IntResNat
+import ECCompute.Kernel.Fold
+import ECCompute.Kernel.IntResNat
 
 /-!
 # Ruling out roots of a monic integer polynomial by a residue search
