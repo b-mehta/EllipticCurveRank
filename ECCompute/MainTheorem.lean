@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Certificate
-import ECCompute.Check.Labels
+import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
 import ECCompute.Check.Primes
 import ECCompute.Check.DescentMatrix

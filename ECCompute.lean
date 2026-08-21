@@ -27,6 +27,7 @@ import ECCompute.Check.JInvariant
 
 -- Soundness of the checkers
 import ECCompute.Soundness.Points
+import ECCompute.Soundness.Labels
 
 -- Main theory
 import ECCompute.MainTheorem
