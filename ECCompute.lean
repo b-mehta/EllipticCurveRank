@@ -25,6 +25,9 @@ import ECCompute.Check.Torsion
 import ECCompute.Check.Points
 import ECCompute.Check.JInvariant
 
+-- Soundness of the checkers
+import ECCompute.Soundness.Points
+
 -- Main theory
 import ECCompute.MainTheorem
 
