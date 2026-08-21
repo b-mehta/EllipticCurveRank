@@ -10,8 +10,9 @@ import ECCompute.Check.F2Invert
 # The rank-bound certificate data type
 
 `Certificate` bundles the data a referee audits to accept a lower bound on the Mordell-Weil rank
-of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. The intended witness is the integral
-Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`.
+of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. Its curve is the short integral Weierstrass
+model `y² = x³ + a₂x² + a₄x + a₆`; `ECCompute.hasRankGE_of_certificate` transports the bound to a
+general integral model.
 
 ## Main definitions
 
@@ -26,18 +27,14 @@ by rows, `matM` by columns), so `F2Invert.checkInv rho matB matM` applies verbat
 
 namespace ECCompute
 
-/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the integral
-Weierstrass model `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆`. -/
+/-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the short integral
+Weierstrass model `y² = x³ + a₂x² + a₄x + a₆`. -/
 structure Certificate where
-  /-- The `x y` coefficient of the Weierstrass model. -/
-  a₁ : ℤ
-  /-- The `x²` coefficient of the Weierstrass model. -/
+  /-- The `x²` coefficient of the short model. -/
   a₂ : ℤ
-  /-- The `y` coefficient of the Weierstrass model. -/
-  a₃ : ℤ
-  /-- The `x` coefficient of the Weierstrass model. -/
+  /-- The `x` coefficient of the short model. -/
   a₄ : ℤ
-  /-- The constant coefficient of the Weierstrass model. -/
+  /-- The constant coefficient of the short model. -/
   a₆ : ℤ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   rho : ℕ
