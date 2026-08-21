@@ -28,7 +28,7 @@ Requires sympy (number theory). Usage:
 import argparse, json, sys, urllib.request
 from fractions import Fraction
 from math import isqrt
-from sympy import divisors, isprime, jacobi_symbol
+from sympy import divisors, jacobi_symbol, primerange
 
 
 # ---------- curve model ----------
@@ -81,32 +81,31 @@ def select_labels(curve, prime_cap=100000):
     Matches the ordering the committed data files were built with."""
     n = len(curve.short)
     basis, chosen = [], []
-    p = 5
-    while len(chosen) < n and p < prime_cap:
-        if isprime(p) and curve.disc % p != 0:
-            for th in curve.roots_mod(p):
-                r = col_bits(curve, p, th)
-                red = r
-                for b in basis:
-                    red = min(red, red ^ b)
-                if red != 0:
-                    basis.append(red)
-                    basis.sort(reverse=True)
-                    chosen.append((p, th))
-        p += 2
+    for p in primerange(5, prime_cap):
+        if len(chosen) >= n:
+            break
+        if curve.disc % p == 0:
+            continue
+        for th in curve.roots_mod(p):
+            red = col_bits(curve, p, th)
+            for b in basis:
+                red = min(red, red ^ b)
+            if red != 0:
+                basis.append(red)
+                basis.sort(reverse=True)
+                chosen.append((p, th))
     return chosen
 
 
+def first_prime(curve, cap, pred):
+    """The least prime `q < cap` of good reduction (`disc % q != 0`) satisfying `pred(q)`."""
+    return next((q for q in primerange(5, cap) if curve.disc % q != 0 and pred(q)), None)
+
+
 def torsion_prime(curve, cap=1000):
-    # For t=0 the 2-division cubic is irreducible over ℚ, so a positive density of
-    # primes have no root; a witness turns up well under 1000. Not finding one here
-    # means the curve almost certainly has rational 2-torsion (t>0).
-    q = 5
-    while q < cap:
-        if isprime(q) and curve.disc % q != 0 and not curve.roots_mod(q):
-            return q
-        q += 2
-    return None
+    # For t=0 the 2-division cubic is irreducible over ℚ, so a positive density of primes have no
+    # root; a witness turns up well under 1000. None here means the curve likely has t>0.
+    return first_prime(curve, cap, lambda q: not curve.roots_mod(q))
 
 
 def find_integer_root(A2, A4, A6):
@@ -151,12 +150,7 @@ def cofactor_witness_prime(b, c, curve, cap=10000):
     """Prime ℓ where the cofactor quadratic X^2+bX+c has no root (its discriminant is a
     non-residue), witnessing that the other two 2-torsion points are irrational (t=1)."""
     D = b * b - 4 * c
-    q = 5
-    while q < cap:
-        if isprime(q) and curve.disc % q != 0 and jacobi_symbol(D, q) == -1:
-            return q
-        q += 2
-    return None
+    return first_prime(curve, cap, lambda q: jacobi_symbol(D, q) == -1)
 
 
 # ---------- io ----------
