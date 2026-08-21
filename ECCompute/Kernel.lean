@@ -10,8 +10,8 @@ Authors: Bhavik Mehta
 The kernel-reducible `Bool` checkers and the `Nat`/`Int`/`List` arithmetic they fold over. The
 correctness proofs and the abstract-typed spec definitions live in `ECCompute.Soundness.*`.
 
-Currently the `Bool` folds `allBelow`/`allList`, the small-prime trial-division checkers, and the
-𝔽₂ matrix-inverse checker.
+Currently the `Bool` folds `allBelow`/`allList`, the small-prime trial-division checkers, the monic
+residue search, and the 𝔽₂ matrix-inverse checker.
 -/
 
 namespace ECCompute
@@ -39,6 +39,23 @@ noncomputable def checkPrime (p : Nat) : Bool :=
 /-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
 noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkPrime l.1) labels
+
+/-! ## Monic residue search -/
+
+/-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
+coefficient `1`, evaluated at `u`. -/
+def monicEval (cs : List Int) (u : Int) : Int :=
+  cs.rec 1 fun c _ acc ↦ c.add (u.mul acc)
+
+/-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
+reaches it. -/
+noncomputable def monicModL (cs : List Int) (ℓ r : Nat) : Nat :=
+  cs.rec 1 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
+
+/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
+root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
+noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
+  allBelow ℓ fun r ↦ ((monicModL cs ℓ r).beq 0).not'
 
 /-! ## 𝔽₂ matrix inverse -/
 
