@@ -4,23 +4,22 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Soundness.IntResNat
+import ECCompute.Kernel
 import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
 /-!
-# A kernel-reducible descent character
+# Soundness of the kernel-reducible descent character
 
 The descent character `λ_{p,θ}` (`ECCompute.Descent.Defs`) is `noncomputable`, as `ECCompute.psi`
 decides `IsSquare` classically. To evaluate `λ` inside a certificate we need a `rfl`-reducible
 replacement. For a fixed odd prime `p` we precompute, once per prime, a `Nat` bitmask `Q` whose bit
 `a` is set exactly on the nonzero quadratic residues `a` mod `p`; each character evaluation is then
-the bit test `((Q >>> a) &&& 1).beq 1`.
+the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMask`, `qrLookupBool`,
+`lambdaComputeBoolNatMask`, …) live in `ECCompute.Kernel`; this file proves them correct.
 
 ## Main declarations
 
-* `ECCompute.qrMask`: reference quadratic-residue-mask builder for a prime `p`.
-* `ECCompute.qrLookupBool`: the bit test against a supplied mask.
 * `ECCompute.qrLookupBool_spec`: the bit test decides `a ≠ 0 ∧ IsSquare (a : ZMod p)`.
 * `ECCompute.psiCompute`: kernel-reducible replacement for `psi`.
 * `ECCompute.psiCompute_eq`: `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
@@ -38,16 +37,6 @@ test `((Q >>> a) &&& 1).beq 1`. `qrMask` is the reference builder the certificat
 is checked against; `qrLookupBool_spec` shows the bit test decides whether `a` is a nonzero
 square mod `p`.
 -/
-
-/-- Reference quadratic-residue-mask builder: OR together `1 <<< (j² % p)` for `j = 1 .. fuel`. With
-`fuel = (p-1)/2` this sets exactly the bits at the nonzero quadratic residues mod an odd prime `p`,
-using `Nat` primitives only. -/
-noncomputable def qrMaskGo : Nat → Nat → Nat :=
-  Nat.rec (fun _ => 0)
-    (fun k ih p => (ih p).lor (Nat.shiftLeft 1 (Nat.mod (Nat.mul (Nat.succ k) (Nat.succ k)) p)))
-
-/-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrMask (p : Nat) : Nat := qrMaskGo (Nat.div (Nat.sub p 1) 2) p
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
 theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
@@ -139,10 +128,6 @@ theorem qrMask_testBit (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : 
   rw [shiftRight_land_one_eq_one_iff, qrMask, testBit_qrMaskGo]
   exact exists_sq_iff p hp2 a ha
 
-/-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
-set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrLookupBool (qmask a : ℕ) : Bool := ((qmask.shiftRight a).land 1).beq 1
-
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
 prime). This is what lets a verified mask evaluate the descent character at each call site. -/
 theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
@@ -157,7 +142,7 @@ theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha
     rw [hbf]
     symm
     simp only [decide_eq_false_iff_not]
-    exact fun hc => h (hmask.mpr hc)
+    exact fun hc ↦ h (hmask.mpr hc)
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
@@ -178,7 +163,7 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
   -- the natural-number value `a.val` casts back to `a`, and is `< p`
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
-  have ha0 : a.val ≠ 0 := fun h => ha (by rw [← hval', h, Nat.cast_zero])
+  have ha0 : a.val ≠ 0 := fun h ↦ ha (by rw [← hval', h, Nat.cast_zero])
   -- the mask bit test decides `IsSquare a`
   have hspec := qrLookupBool_spec p hp2 a.val hvlt
   rw [hval'] at hspec
@@ -202,7 +187,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
-  have hp2 : p ≠ 2 := fun hp => hyp.ne_six (hp ▸ ⟨3, rfl⟩)
+  have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
       if (x.den : ZMod p) = 0 then 0
@@ -237,29 +222,6 @@ the modulus reduction is `(mp % p + (p - mn % p)) % p`, and the characters are b
 quadratic-residue mask `qmask` of `p`. It agrees with `lambdaComputeBool` through
 `lambdaComputeBoolNatMask_eq` (given `qmask = qrMask p`, `p` an odd prime, and that the pairs
 represent the inputs). -/
-
-/-- Residue in `[0, p)` of `x.num - θ·x.den`, from the `mp - mn` pair `(xp, xm)` for `x.num` and the
-label residue `tval` for `θ`. -/
-noncomputable def alphaResNat (p tval xp xm xden : ℕ) : ℕ :=
-  Nat.mod (Nat.add (Nat.mod xp p) (Nat.sub p (Nat.mod (Nat.add xm (Nat.mul tval xden)) p))) p
-
-/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
-and `(c4p, c4m)` for `a₄`. -/
-noncomputable def fderivResNat (c2p c2m c4p c4m p tval : ℕ) : ℕ :=
-  Nat.mod (Nat.add
-    (Nat.mod
-      (Nat.add (Nat.add (Nat.mul (Nat.mul 3 tval) tval) (Nat.mul (Nat.mul 2 c2p) tval)) c4p) p)
-    (Nat.sub p (Nat.mod (Nat.add (Nat.mul (Nat.mul 2 c2m) tval) c4m) p))) p
-
-/-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
-evaluations bit tests against a supplied quadratic-residue mask `qmask`. For `qmask = qrMask p`
-(`p` an odd prime) it agrees with `lambdaComputeBool` (see `lambdaComputeBoolNatMask_eq`). -/
-noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : ℕ) : Bool :=
-  ((Nat.mod xden p).beq 0).rec
-    (((alphaResNat p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
-    false
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
 private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
