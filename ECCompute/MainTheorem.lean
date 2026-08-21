@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 import ECCompute.Certificate
 import ECCompute.Check.Labels
 import ECCompute.Soundness.Points
-import ECCompute.Check.Primes
+import ECCompute.Soundness.Primes
 import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Torsion
 import ECCompute.Theory.Descent

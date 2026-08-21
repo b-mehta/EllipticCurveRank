@@ -22,7 +22,7 @@ theorem allBelow_succ (n : Nat) (p : Nat → Bool) :
 
 /-- `allBelow` is `true` exactly when `p` holds at every `m < n`. -/
 theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
-    allBelow n p = true ↔ ∀ m, m < n → p m = true := by
+    allBelow n p ↔ ∀ m < n, p m := by
   induction n with
   | zero => exact iff_of_true rfl (by simp)
   | succ k ih =>
@@ -34,8 +34,8 @@ theorem allList_cons {α : Type} (p : α → Bool) (a : α) (l : List α) :
     allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
-theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
-    allList p l = true ↔ ∀ a ∈ l, p a = true := by
+@[grind =] theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
+    allList p l ↔ ∀ a ∈ l, p a := by
   induction l with
   | nil => simp [allList]
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
