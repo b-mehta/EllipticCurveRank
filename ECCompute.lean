@@ -17,7 +17,6 @@ import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare
 
 -- Certification checkers
-import ECCompute.Check.F2Invert
 import ECCompute.Check.DescentMatrix
 import ECCompute.Check.Primes
 import ECCompute.Check.Labels
@@ -28,6 +27,7 @@ import ECCompute.Check.JInvariant
 
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
+import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.Points
 
 -- Main theory

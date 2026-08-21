@@ -3,6 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import ECCompute.Kernel
+import ECCompute.Soundness.Fold
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Data.Matrix.Basic
@@ -10,29 +12,18 @@ import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import ECCompute.Soundness.Fold
 
 /-!
-# Kernel-reducible 𝔽₂ matrix invertibility certificates
+# Soundness of the kernel-reducible 𝔽₂ matrix invertibility certificate
 
-We certify that a square matrix `B` over `𝔽₂ = ZMod 2` is invertible by supplying a claimed
-inverse `M` and checking `B * M = I` with a kernel-reducible `Bool` function.
-
-## Representation
-
-An `n × n` matrix over `𝔽₂` is given as a `List Nat` of length `n`, one `Nat` bitmask per line,
-where bit `j` of the `i`-th entry is the `(i, j)` matrix entry.
-
-* `B` is supplied by rows: bit `j` of `B.getD i 0` is `B i j`.
-* `M` is supplied by columns: bit `j` of `M.getD k 0` is `M j k`.
-
-With this layout the `(i, k)` entry of `B * M` is the parity of the popcount of
-`B.getD i 0 &&& M.getD k 0`.
+Correctness proofs for the `Bool` checker `ECCompute.F2Invert.checkInv` (defined in
+`ECCompute.Kernel`): supplying a claimed inverse `M` and checking `B * M = I` certifies that the
+square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible.
 
 ## Main results
 
-* `checkInv` : the `Bool` certificate checker.
-* `checkInv_isUnit` : the correctness lemma, `checkInv n B M = true → IsUnit (toMat B n)`.
+* `checkInv_true` : a passing `checkInv` gives, at each `(i, k)`, the diagonal parity indicator.
+* `checkInv_isUnit` : `checkInv n B M = true → IsUnit (toMat B n)`, the invertibility certificate.
 -/
 
 namespace ECCompute.F2Invert
@@ -44,24 +35,15 @@ def popParity : Nat → Nat → Bool
   | 0, _ => false
   | fuel + 1, a => Bool.xor (a.testBit 0) (popParity fuel (a / 2))
 
-/-- XOR of the low 32 bits of `v`, folded into bit 0 by five shift-xor stages (16, 8, 4, 2, 1).
-For input `v < 2 ^ n` this equals the spec `popParity n v` (`popParityK_eq`), the range `checkInv`
-enforces through `maskBelow`. -/
-noncomputable def popParityK (v : Nat) : Bool :=
-  let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
-  let v := v.xor (v.shiftRight 4); let v := v.xor (v.shiftRight 2)
-  let v := v.xor (v.shiftRight 1)
-  (v.land 1).beq 1
+/-- The XOR over `v.testBit j` for `j` in a list. -/
+private def xorBits (v : Nat) (l : List Nat) : Bool :=
+  l.foldr (fun j r ↦ Bool.xor (v.testBit j) r) false
 
 /-- `(x.land 1).beq 1` reads bit 0 of `x`. -/
 private theorem land_one_beq_one (x : Nat) : (x.land 1).beq 1 = x.testBit 0 := by
   have hl : x.land 1 = x &&& 1 := rfl
   rw [Nat.testBit_zero, hl, Nat.and_one_is_mod]
   rcases Nat.mod_two_eq_zero_or_one x with h | h <;> rw [h] <;> rfl
-
-/-- The XOR over `v.testBit j` for `j` in a list. -/
-private def xorBits (v : Nat) (l : List Nat) : Bool :=
-  l.foldr (fun j r => Bool.xor (v.testBit j) r) false
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
 theorem popParity_eq_xorBits (fuel a : Nat) :
@@ -85,12 +67,11 @@ private theorem bId_xor (a b : Bool) : bId (Bool.xor a b) = bId a + bId b := by
 theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
-  have hxor : ∀ a b : Nat, a.xor b = a ^^^ b := fun _ _ => rfl
-  have hshr : ∀ a b : Nat, a.shiftRight b = a >>> b := fun _ _ => rfl
+  have hxor : ∀ a b : Nat, a.xor b = a ^^^ b := fun _ _ ↦ rfl
+  have hshr : ∀ a b : Nat, a.shiftRight b = a >>> b := fun _ _ ↦ rfl
   simp only [popParityK, land_one_beq_one, hxor, hshr, Nat.testBit_xor,
     Nat.testBit_shiftRight]
   simp only [xorBits, List.range, List.range.loop, List.foldr_cons, List.foldr_nil]
-  -- both sides are explicit XOR trees over `v.testBit c`; push into `ZMod 2` and `ring`
   simp only [Bool.xor_false, bId_xor]
   ring
 
@@ -114,50 +95,26 @@ private theorem xorBits_range_hi {v n : Nat} (hzero : ∀ j, n ≤ j → v.testB
 theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParity 32 v = popParity n v := by
   rw [popParity_eq_xorBits, popParity_eq_xorBits]
-  refine xorBits_range_hi (fun j hj => ?_) 32 hn
+  refine xorBits_range_hi (fun j hj ↦ ?_) 32 hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
-/-- Bridge: for `v < 2 ^ n` with `n ≤ 32`, the fold matches the `n`-bit `popParityK`. -/
+/-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
 theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
-/-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`)
-against the diagonal indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with
-`n ≤ 32`, which `checkInv` verifies separately. -/
-noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
-  M.rec (motive := fun _ => Nat → Bool) (fun _ => true)
-    (fun m _ ih k => ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool)
-      (Nat.beq i k).not' (Nat.beq i k)).and' (ih k.succ)) k
-
 theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
-      ((popParityK (Nat.land bi m)).rec (motive := fun _ => Bool) (Nat.beq i k).not'
-        (Nat.beq i k)).and' (checkInvRow bi i k.succ ms) := rfl
-
-/-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
-noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
-  B.rec (motive := fun _ => Nat → Bool) (fun _ => true)
-    (fun b _ ih i => (checkInvRow b i 0 M).and' (ih i.succ)) i
+      ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
+        (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) =
       (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
-/-- Every mask in `L` fits in `n` bits (`< 2 ^ n`). -/
-noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
-  allList (fun x => Nat.blt x (Nat.shiftLeft 1 n)) L
-
-/-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
-rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
-masks fit in `n ≤ 32` bits, which `popParityK` relies on for soundness. -/
-noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  (maskBelow n B).and' ((maskBelow n M).and' ((Nat.ble n 32).and' (checkInvGo M 0 B)))
-
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
-  fun i j => if (B.getD i 0).testBit j then 1 else 0
+  fun i j ↦ if (B.getD i 0).testBit j then 1 else 0
 
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
 theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length) :
@@ -166,7 +123,7 @@ theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length
 
 /-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMatCols (M : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
-  fun j k => if (M.getD k 0).testBit j then 1 else 0
+  fun j k ↦ if (M.getD k 0).testBit j then 1 else 0
 
 /-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `Nat.land`. -/
 private theorem prodTerm (a b j : Nat) :
@@ -210,7 +167,7 @@ theorem checkInvRow_true {bi i n : Nat} (hn : n ≤ 32) :
     | succ k'' =>
       have hidx : k + (k'' + 1) = k + 1 + k'' := by lia
       rw [hidx]
-      exact ih (fun m hm => hM m (by simp [hm])) hrec k'' (by simpa using hk')
+      exact ih (fun m hm ↦ hM m (by simp [hm])) hrec k'' (by simpa using hk')
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
@@ -230,7 +187,7 @@ theorem checkInvGo_true {n : Nat} {M : List Nat} (hn : n ≤ 32) (hM : ∀ m ∈
     | succ i'' =>
       have hidx : i + (i'' + 1) = i + 1 + i'' := by lia
       rw [hidx]
-      exact ih (fun b hb => hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
+      exact ih (fun b hb ↦ hB b (by simp [hb])) hrec i'' (by simpa using hi') k' hk'
 
 /-- `Nat.shiftLeft 1 n` is `2 ^ n`, restated in the def's primitive `Nat.shiftLeft` form. -/
 private theorem shiftLeft_one (n : Nat) : Nat.shiftLeft 1 n = 2 ^ n := Nat.one_shiftLeft n
@@ -261,19 +218,15 @@ theorem checkInv_true {n : Nat} {B M : List Nat} (h : checkInv n B M = true) :
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen : M.length = n)
     (h : checkInv n B M = true) : IsUnit (toMat B n) := by
-  -- First: `B * M = 1` as matrices over `ZMod 2`.
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
-    -- Turn the product-of-indicators sum into a single indicator sum, then use `popParity_sum`.
     simp only [Matrix.mul_apply, toMat, toMatCols, prodTerm]
     rw [Fin.sum_univ_eq_sum_range
-        (fun j => if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
+        (fun j ↦ if (B.getD i 0 &&& M.getD k 0).testBit j then (1 : ZMod 2) else 0) n,
       ← popParity_sum, Matrix.one_apply]
-    -- Read off the `(i, k)` certificate; `grind` matches it against the diagonal.
     have hb := checkInv_true h i.val k.val
       (by rw [hBlen]; exact i.isLt) (by rw [hMlen]; exact k.isLt)
     grind
-  -- Square matrices over a finite (hence Dedekind-finite) monoid: a right inverse is a unit.
   exact IsUnit.of_mul_eq_one (toMatCols M n) key
 
 end ECCompute.F2Invert

@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Check.RootMod
-import ECCompute.Check.F2Invert
+import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.Fold
 import ECCompute.Theory.CompleteSquare
 import ECCompute.Theory.Descent.Defs
