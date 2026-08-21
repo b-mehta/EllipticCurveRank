@@ -4,7 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.Data.Rat.Defs
-import ECCompute.Check.F2Invert
+import ECCompute.Soundness.F2Invert
 
 /-!
 # The rank-bound certificate data type
