@@ -29,32 +29,6 @@ namespace ECCompute
 
 variable {cs : List ℤ} {ℓ r : ℕ}
 
-@[simp, grind =] lemma monicEval_cons {c u : ℤ} :
-    monicEval (c :: cs) u = c + u * monicEval cs u := by
-  simp [monicEval]
-
-@[simp, grind =] lemma monicModL_cons {c : ℤ} :
-    monicModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * monicModL cs ℓ r) % ℓ := by
-  simp [monicModL]
-
-/-- A `monicModL` value is a residue mod `ℓ`. -/
-theorem monicModL_lt (hℓ : 1 < ℓ) : monicModL cs ℓ r < ℓ := by
-  cases cs with
-  | nil => exact hℓ
-  | cons _ _ => exact Nat.mod_lt _ (by grind)
-
-/-- `monicModL` casts to `monicEval` in `ZMod ℓ`. -/
-theorem monicModL_cast (hl : ℓ ≠ 0) : (monicModL cs ℓ r : ZMod ℓ) = monicEval cs r := by
-  induction cs with
-  | nil => simp [monicModL, monicEval]
-  | cons c t ih => simp [ih, intResNat_cast, hl]
-
-/-- The `Nat` residue test at `r` passes exactly when `monicEval cs r` vanishes in `ZMod ℓ`
-(`1 < ℓ`). -/
-theorem monicModL_beq (hℓ : 1 < ℓ) : (monicModL cs ℓ r).beq 0 ↔ (monicEval cs r : ZMod ℓ) = 0 := by
-  rw [Nat.beq_eq, ← monicModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
-    Nat.mod_eq_of_lt (monicModL_lt hℓ)]
-
 @[simp, grind =] lemma polyEval_cons {c u : ℤ} :
     polyEval (c :: cs) u = c + u * polyEval cs u := by
   simp [polyEval]
@@ -75,28 +49,35 @@ theorem polyModL_cast (hl : ℓ ≠ 0) : (polyModL cs ℓ r : ZMod ℓ) = polyEv
   | nil => simp [polyModL, polyEval]
   | cons c t ih => simp [ih, intResNat_cast, hl]
 
-/-- `monicEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
-theorem monicEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
-    (monicEval cs a : ZMod ℓ) = monicEval cs b := by
+/-- The `Nat` residue test at `r` passes exactly when `polyEval cs r` vanishes in `ZMod ℓ`
+(`1 < ℓ`). -/
+theorem polyModL_beq (hℓ : 1 < ℓ) : (polyModL cs ℓ r).beq 0 ↔ (polyEval cs r : ZMod ℓ) = 0 := by
+  rw [Nat.beq_eq, ← polyModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
+    Nat.mod_eq_of_lt (polyModL_lt (by lia))]
+
+/-- `polyEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
+theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
+    (polyEval cs a : ZMod ℓ) = polyEval cs b := by
   induction cs with
   | nil => rfl
   | cons c t ih =>
-    rw [monicEval_cons, monicEval_cons]
+    rw [polyEval_cons, polyEval_cons]
     grind
 
-/-- If the monic polynomial has no root mod `ℓ` (with `1 < ℓ`), it has no integer root. -/
+/-- If the monic polynomial with lower coefficients `cs` has no root mod `ℓ` (with `1 < ℓ`), it has
+no integer root. -/
 theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod cs ℓ) (u : ℤ) : monicEval cs u ≠ 0 := by
+    (h : monicHasNoRootMod cs ℓ) (u : ℤ) : polyEval (cs ++ [1]) u ≠ 0 := by
   rw [monicHasNoRootMod, allBelow_eq_true] at h
-  replace h : ∀ r < ℓ, (monicEval cs r : ZMod ℓ) ≠ 0 := by
-    simp_rw [ne_eq, ← monicModL_beq hℓ, Bool.not_eq_true]
+  replace h : ∀ r < ℓ, (polyEval (cs ++ [1]) r : ZMod ℓ) ≠ 0 := by
+    simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     simpa [Bool.not'_eq_not] using h
   intro hu
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast (by omega : (0 : ℕ) < ℓ)
   set r : ℤ := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
-  rw [monicEval_modEq, hu, Int.cast_zero]
+  rw [polyEval_modEq, hu, Int.cast_zero]
   simp [r, Int.emod_nonneg _ hℓ0.ne']
 
 /-! ## Quadratic no-root lemmas (for the `t = 1` cofactor)
@@ -117,8 +98,8 @@ theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   simp only [algebraMap_int_eq, eq_intCast] at hz
   refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
-  have hQ : (monicEval [c, b] z : ℚ) = 0 := by
-    simp only [monicEval]
+  have hQ : (polyEval [c, b, 1] z : ℚ) = 0 := by
+    simp only [polyEval]
     grind
   exact mod_cast hQ
 

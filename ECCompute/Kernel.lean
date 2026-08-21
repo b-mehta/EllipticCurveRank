@@ -40,32 +40,22 @@ noncomputable def checkPrime (p : Nat) : Bool :=
 noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkPrime l.1) labels
 
-/-! ## Monic residue search -/
-
-/-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
-coefficient `1`, evaluated at `u`. -/
-noncomputable def monicEval (cs : List Int) (u : Int) : Int :=
-  cs.rec 1 fun c _ acc ↦ c.add (u.mul acc)
-
-/-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
-reaches it. -/
-noncomputable def monicModL (cs : List Int) (ℓ r : Nat) : Nat :=
-  cs.rec 1 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
+/-! ## Polynomial residue search -/
 
 /-- The integer polynomial with coefficients `cs` (constant term first, leading coefficient last),
-evaluated at `u`. Unlike `monicEval`, the leading coefficient is explicit in `cs`. -/
+evaluated at `u`. -/
 noncomputable def polyEval (cs : List Int) (u : Int) : Int :=
   cs.rec 0 fun c _ acc ↦ c.add (u.mul acc)
 
 /-- `polyEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the Horner
-fold reaches it. Unlike `monicModL`, the leading coefficient is explicit in `cs`. -/
+fold reaches it. -/
 noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
-root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
+/-- Kernel-reducible test: `true` iff the monic integer polynomial with lower coefficients `cs`
+(implicit leading coefficient `1`) has no root modulo `ℓ`, trying every residue `0, …, ℓ - 1`. -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
-  allBelow ℓ fun r ↦ ((monicModL cs ℓ r).beq 0).not'
+  allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not'
 
 /-! ## Descent label check -/
 
@@ -81,11 +71,11 @@ def discrIntK (a₂ a₄ a₆ : Int) : Int :=
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, where `f(θ) = θ³ + a₂θ² + a₄θ + a₆` is read as the monic cubic
-`monicModL [a₆, a₄, a₂]` evaluated at the residue of `θ`. -/
+`polyModL [a₆, a₄, a₂, 1]` evaluated at the residue of `θ`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
   (((Nat.mod 6 p).beq 0).not').and'
     (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
-      ((monicModL [a₆, a₄, a₂] p (θ.emod p).toNat).beq 0))
+      ((polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- Kernel `Bool`: every label passes `checkLabel`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
