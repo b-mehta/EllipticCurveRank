@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Check.F2Invert
 import ECCompute.Check.LambdaCompute
+import ECCompute.Soundness.Fold
 
 /-!
 # Aggregate descent-character matrix check

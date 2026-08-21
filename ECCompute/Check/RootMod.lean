@@ -4,21 +4,22 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Check.Fold
+import ECCompute.Soundness.Fold
 import ECCompute.Check.IntResNat
 
 /-!
 # Ruling out roots of a monic integer polynomial by a residue search
 
 For a monic integer polynomial given by a coefficient list `cs` and a modulus `ℓ`,
-`monicHasRootMod` tries every residue `0, …, ℓ - 1` in `Nat` arithmetic. A `false` result rules out
-an integer root, and for a monic quadratic a rational one.
+`monicHasNoRootMod` tries every residue `0, …, ℓ - 1` in `Nat` arithmetic and returns `true` when
+none of them is a root. That rules out an integer root, and for a monic quadratic a rational one.
 
 ## Main results
 
-* `ECCompute.no_int_root_of_monicHasRootMod_eq_false`: a failed search rules out an integer root.
-* `ECCompute.no_rat_root_of_monicHasRootMod_eq_false`: for a monic quadratic, it rules out a
-  rational root.
+* `ECCompute.no_int_root_of_monicHasNoRootMod`: a residue search finding no root rules out an
+  integer root.
+* `ECCompute.no_rat_root_of_monicHasNoRootMod`: for a monic quadratic, it rules out a rational
+  root.
 -/
 
 namespace ECCompute
@@ -66,10 +67,10 @@ theorem monicModL_beq (cs : List ℤ) {ℓ : ℕ} (hℓ : ℓ ≠ 0) (r : ℕ) :
   have : NeZero ℓ := ⟨hℓ⟩
   rw [Nat.beq_eq, ← natCast_eq_zero_iff_of_lt (monicModL_lt hℓ cs r), monicModL_cast cs r]
 
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has a
+/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
 root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
-noncomputable def monicHasRootMod (cs : List ℤ) (ℓ : ℕ) : Bool :=
-  anyBelow ℓ fun r => Nat.beq (monicModL cs ℓ r) 0
+noncomputable def monicHasNoRootMod (cs : List ℤ) (ℓ : ℕ) : Bool :=
+  allBelow ℓ fun r => (Nat.beq (monicModL cs ℓ r) 0).not'
 
 /-- `monicEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
 theorem monicEval_modEq (cs : List ℤ) (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD n]) :
@@ -82,11 +83,12 @@ theorem monicEval_modEq (cs : List ℤ) (n : ℤ) {a b : ℤ} (h : a ≡ b [ZMOD
     exact Int.ModEq.add_left c (h.mul ih)
 
 /-- If the monic polynomial has no root mod `ℓ` (with `ℓ ≠ 0`), it has no integer root. -/
-theorem no_int_root_of_monicHasRootMod_eq_false {cs : List ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : monicHasRootMod cs ℓ = false) (u : ℤ) : monicEval cs u ≠ 0 := by
-  rw [monicHasRootMod, anyBelow_eq_false] at h
+theorem no_int_root_of_monicHasNoRootMod {cs : List ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : monicHasNoRootMod cs ℓ = true) (u : ℤ) : monicEval cs u ≠ 0 := by
+  rw [monicHasNoRootMod, allBelow_eq_true] at h
   have hres : ∀ r : ℕ, r < ℓ → ((monicEval cs (r : ℤ) : ℤ) : ZMod ℓ) ≠ 0 := fun r hr => by
-    rw [ne_eq, ← monicModL_beq cs hℓ r, Bool.not_eq_true]; exact h r hr
+    rw [ne_eq, ← monicModL_beq cs hℓ r, Bool.not_eq_true]
+    simpa [Bool.not'_eq_not] using h r hr
   intro hu
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
   set r : ℤ := u % (ℓ : ℤ) with hr
@@ -109,8 +111,8 @@ by exhibiting a prime `ℓ` modulo which `q` has no root. -/
 open Polynomial in
 /-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
 root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
-theorem no_rat_root_of_monicHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
-    (h : monicHasRootMod [c, b, 1] ℓ = false) (x : ℚ)
+theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} {ℓ : ℕ} (hℓ : ℓ ≠ 0)
+    (h : monicHasNoRootMod [c, b, 1] ℓ = true) (x : ℚ)
     (hx : x ^ 2 + (b : ℚ) * x + (c : ℚ) = 0) : False := by
   set p : ℤ[X] := X ^ 2 + (C b * X + C c) with hp
   have hdeg : (C b * X + C c).degree < 2 := by
@@ -125,7 +127,7 @@ theorem no_rat_root_of_monicHasRootMod_eq_false {b c : ℤ} {ℓ : ℕ} (hℓ : 
   have hroot : aeval x p = 0 := by rw [haeval, hx]
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   have hzcast : x = (z : ℚ) := by simp [hz]
-  refine no_int_root_of_monicHasRootMod_eq_false hℓ h z ?_
+  refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
   have hQ : ((monicEval [c, b, 1] z : ℤ) : ℚ) = 0 := by
     simp only [monicEval, Int.add_def, Int.mul_def]
     push_cast
