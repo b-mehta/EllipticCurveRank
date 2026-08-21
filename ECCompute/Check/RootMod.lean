@@ -109,25 +109,17 @@ open Polynomial in
 root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
 theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [c, b] ℓ = true) (x : ℚ)
-    (hx : x ^ 2 + (b : ℚ) * x + (c : ℚ) = 0) : False := by
-  set p : ℤ[X] := X ^ 2 + (C b * X + C c) with hp
-  have hdeg : (C b * X + C c).degree < 2 := by
-    refine lt_of_le_of_lt (degree_add_le _ _) ?_
-    rw [max_lt_iff]
-    exact ⟨lt_of_le_of_lt (degree_C_mul_X_le b) (by decide),
-      lt_of_le_of_lt degree_C_le (by decide)⟩
-  have hmonic : p.Monic := monic_X_pow_add hdeg
-  have haeval : aeval x p = x ^ 2 + (b : ℚ) * x + (c : ℚ) := by
-    simp only [hp, map_add, map_mul, map_pow, aeval_X, map_intCast, eq_intCast]
-    ring
-  have hroot : aeval x p = 0 := by rw [haeval, hx]
+    (hx : x ^ 2 + b * x + c = 0) : False := by
+  set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
+  have hmonic : p.Monic := by simp only [p]; monicity!
+  have haeval : p.aeval x = x ^ 2 + b * x + c := by simp [hp]
+  have hroot : p.aeval x = 0 := by grind
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  have hzcast : x = (z : ℚ) := by simp [hz]
+  simp only [algebraMap_int_eq, eq_intCast] at hz
   refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
-  have hQ : ((monicEval [c, b] z : ℤ) : ℚ) = 0 := by
-    simp only [monicEval, Int.add_def, Int.mul_def]
-    push_cast
+  have hQ : (monicEval [c, b] z : ℚ) = 0 := by
+    simp only [monicEval]
     grind
-  exact_mod_cast hQ
+  exact mod_cast hQ
 
 end ECCompute
