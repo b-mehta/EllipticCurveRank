@@ -92,12 +92,11 @@ noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)
 /-- Reference quadratic-residue-mask builder: OR together `1 <<< (j² % p)` for `j = 1 .. fuel`. With
 `fuel = (p-1)/2` this sets exactly the bits at the nonzero quadratic residues mod an odd prime `p`,
 using `Nat` primitives only. -/
-noncomputable def qrMaskGo : Nat → Nat → Nat :=
-  Nat.rec (fun _ ↦ 0)
-    (fun k ih p ↦ (ih p).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)))
+noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
+  Nat.rec 0 (fun k ih ↦ ih.lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)))
 
 /-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrMask (p : Nat) : Nat := qrMaskGo ((p.sub 1).div 2) p
+noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
 /-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
 set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/

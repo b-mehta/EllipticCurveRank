@@ -47,7 +47,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
 theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
-    ∀ f : ℕ, Nat.testBit (qrMaskGo f p) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
+    ∀ f : ℕ, Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
   intro f
   induction f with
   | zero =>
@@ -56,8 +56,8 @@ theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
     · rintro h; simp at h
     · rintro ⟨j, hj, hj0, _⟩; omega
   | succ k ih =>
-    have hunfold : qrMaskGo (k + 1) p =
-        (qrMaskGo k p).lor (Nat.shiftLeft 1 (Nat.mod (Nat.mul (Nat.succ k) (Nat.succ k)) p)) := rfl
+    have hunfold : qrMaskGo p (k + 1) =
+        (qrMaskGo p k).lor (Nat.shiftLeft 1 (Nat.mod (Nat.mul (Nat.succ k) (Nat.succ k)) p)) := rfl
     rw [hunfold, Nat.lor_eq, Nat.testBit_lor, Nat.shiftLeft_eq', Nat.shiftLeft_eq,
       Nat.one_mul, Nat.testBit_two_pow, Bool.or_eq_true, ih]
     constructor
