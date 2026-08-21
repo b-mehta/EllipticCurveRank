@@ -87,7 +87,7 @@ theorem no_int_root_of_monicHasNoRootMod {cs : List ℤ} {ℓ : ℕ} (hℓ : ℓ
     (h : monicHasNoRootMod cs ℓ = true) (u : ℤ) : monicEval cs u ≠ 0 := by
   rw [monicHasNoRootMod, allBelow_eq_true] at h
   have hres : ∀ r : ℕ, r < ℓ → ((monicEval cs (r : ℤ) : ℤ) : ZMod ℓ) ≠ 0 := fun r hr => by
-    rw [ne_eq, ← monicModL_beq cs hℓ r]
+    rw [ne_eq, ← monicModL_beq cs hℓ r, Bool.not_eq_true]
     simpa [Bool.not'_eq_not] using h r hr
   intro hu
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast Nat.pos_of_ne_zero hℓ
