@@ -44,7 +44,7 @@ noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
 
 /-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
 coefficient `1`, evaluated at `u`. -/
-def monicEval (cs : List Int) (u : Int) : Int :=
+noncomputable def monicEval (cs : List Int) (u : Int) : Int :=
   cs.rec 1 fun c _ acc ↦ c.add (u.mul acc)
 
 /-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
