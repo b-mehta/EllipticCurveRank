@@ -57,11 +57,9 @@ theorem popParity_eq_xorBits (fuel a : Nat) :
 can use grind's ring solver. -/
 private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
-private theorem bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by
-  cases a <;> cases b <;> simp_all [bId]
-
-private theorem bId_xor (a b : Bool) : bId (a ^^ b) = bId a + bId b := by
-  cases a <;> cases b <;> decide
+private lemma bId_inj {a b : Bool} (h : bId a = bId b) : a = b := by decide +revert
+@[simp] private lemma bId_xor (a b : Bool) : bId (a ^^ b) = bId a + bId b := by decide +revert
+@[simp] private lemma bId_and (a b : Bool) : bId (a && b) = bId a * bId b := by decide +revert
 
 /-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
 theorem popParityK_eq32 (v : Nat) : popParityK v = popParity 32 v := by
@@ -93,27 +91,23 @@ theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
 @[simp, grind =] theorem checkInvRow_cons (bi i k m : Nat) (ms : List Nat) :
     checkInvRow bi i k (m :: ms) =
       ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
-        (i.beq k)).and' (checkInvRow bi i k.succ ms):=rfl
+        (i.beq k)).and' (checkInvRow bi i k.succ ms) := rfl
 
 @[simp, grind =] theorem checkInvGo_cons (M : List Nat) (i b : Nat) (bs : List Nat) :
     checkInvGo M i (b :: bs) = (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMat (B : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
-  fun i j ↦ if (B.getD i 0).testBit j then 1 else 0
+  Matrix.of fun i j ↦ if (B.getD i 0).testBit j then 1 else 0
 
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
 theorem toMat_apply {B : List Nat} {n : Nat} {i j : Fin n} (h : i.val < B.length) :
     toMat B n i j = if B[i].testBit j then 1 else 0 := by
-  rw [toMat, List.getD_eq_getElem (hn := h), Fin.getElem_fin]
+  rw [toMat, Matrix.of_apply, List.getD_eq_getElem (hn := h), Fin.getElem_fin]
 
 /-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMatCols (M : List Nat) (n : Nat) : Matrix (Fin n) (Fin n) (ZMod 2) :=
   fun j k ↦ bId ((M.getD k 0).testBit j)
-
-/-- Product of two 𝔽₂ indicator bits is the indicator of the bit of the `&&&`. -/
-private theorem prodTerm (a b j : Nat) :
-    bId (a.testBit j) * bId (b.testBit j) = bId ((a &&& b).testBit j) := by grind [bId]
 
 /-- `Bool.xor` corresponds to addition of 𝔽₂ indicators. -/
 private theorem xor_add (p q : Bool) :
@@ -187,7 +181,8 @@ theorem checkInv_isUnit (n : Nat) (B M : List Nat) (hBlen : B.length = n) (hMlen
     (h : checkInv n B M) : IsUnit (toMat B n) := by
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
-    simp only [Matrix.mul_apply, toMat, toMatCols, ← bId.eq_def, prodTerm]
+    simp only [Matrix.mul_apply, toMat, Matrix.of_apply, toMatCols, ← bId.eq_def, ← bId_and,
+      ← Nat.testBit_land]
     rw [Fin.sum_univ_eq_sum_range (fun j ↦ bId ((B.getD i 0 &&& M.getD k 0).testBit j)) n,
       ← popParity_sum, Matrix.one_apply]
     grind [bId, checkInv_true]
