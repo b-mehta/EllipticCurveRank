@@ -16,4 +16,4 @@ Authors: Bhavik Mehta
 
 @[simp, grind =] theorem Int.emod_eq : Int.emod a b = a % b := rfl
 
-attribute [grind =] Nat.add_eq Nat.mul_eq
+attribute [grind =] Nat.add_eq Nat.mul_eq Nat.ble_eq Bool.and'_eq_and Bool.or'_eq_or

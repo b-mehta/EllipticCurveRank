@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
 import ECCompute.Soundness.Fold
-import ECCompute.Check.Primes
+import ECCompute.Soundness.Primes
 import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
 
