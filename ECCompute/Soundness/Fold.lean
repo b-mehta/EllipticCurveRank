@@ -9,24 +9,24 @@ import ECCompute.Kernel
 /-!
 # Soundness of the `Bool` folds
 
-`anyBelow_eq_false` and `allList_eq_true` characterize the kernel folds `ECCompute.anyBelow` and
-`ECCompute.allList` (from `Kernel`) as a bounded `∃` and a list `∀`, the `succ`/`cons` lemmas peel
+`allBelow_eq_true` and `allList_eq_true` characterize the kernel folds `ECCompute.allBelow` and
+`ECCompute.allList` (from `Kernel`) as a bounded `∀` and a list `∀`, the `succ`/`cons` lemmas peel
 one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 -/
 
 namespace ECCompute
 
-/-- `anyBelow (n + 1) p` peels the top index: it folds `p n` into `anyBelow n p`. -/
-theorem anyBelow_succ (n : Nat) (p : Nat → Bool) :
-    anyBelow (n + 1) p = (p n).or' (anyBelow n p) := rfl
+/-- `allBelow (n + 1) p` peels the top index: it folds `p n` into `allBelow n p`. -/
+theorem allBelow_succ (n : Nat) (p : Nat → Bool) :
+    allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
 
-/-- `anyBelow` is `false` exactly when `p` fails at every `m < n`. -/
-theorem anyBelow_eq_false {n : Nat} {p : Nat → Bool} :
-    anyBelow n p = false ↔ ∀ m, m < n → p m = false := by
+/-- `allBelow` is `true` exactly when `p` holds at every `m < n`. -/
+theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
+    allBelow n p = true ↔ ∀ m, m < n → p m = true := by
   induction n with
   | zero => exact iff_of_true rfl (by simp)
   | succ k ih =>
-    rw [anyBelow_succ, Bool.or'_eq_or, Bool.or_eq_false_iff, ih]
+    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
     grind
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
