@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.LambdaCompute
+import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Fold
 
 /-!
