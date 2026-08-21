@@ -58,18 +58,18 @@ over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`
 indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with `n ≤ 32`, which `checkInv`
 verifies separately. -/
 noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
-  M.rec (motive := fun _ ↦ Nat → Bool) (fun _ ↦ true)
+  M.rec (fun _ ↦ true)
     (fun m _ ih k ↦ ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool)
       (i.beq k).not' (i.beq k)).and' (ih k.succ)) k
 
 /-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
 noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
-  B.rec (motive := fun _ ↦ Nat → Bool) (fun _ ↦ true)
+  B.rec (fun _ ↦ true)
     (fun b _ ih i ↦ (checkInvRow b i 0 M).and' (ih i.succ)) i
 
-/-- Every mask in `L` fits in `n` bits (`< 2 ^ n`). -/
-noncomputable def maskBelow (n : Nat) (L : List Nat) : Bool :=
-  allList (fun x ↦ x.blt (Nat.shiftLeft 1 n)) L
+/-- Every mask in `M` fits in `n` bits (`< 2 ^ n`). -/
+noncomputable def maskBelow (n : Nat) (M : List Nat) : Bool :=
+  allList (fun x ↦ x.blt (Nat.shiftLeft 1 n)) M
 
 /-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
