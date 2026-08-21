@@ -98,7 +98,7 @@ theorem popParity_hi_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
   refine xorBits_range_hi (fun j hj => ?_) 32 hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
-/-- Bridge: for `v < 2 ^ n` with `n ≤ 32`, the fold matches the `n`-bit `popParityK`. -/
+/-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
 theorem popParityK_eq {v n : Nat} (hv : v < 2 ^ n) (hn : n ≤ 32) :
     popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]

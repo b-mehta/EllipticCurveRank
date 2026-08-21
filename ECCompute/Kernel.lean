@@ -69,7 +69,7 @@ A coefficient list `cs` gives the lower coefficients constant term first; the le
 
 /-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
 coefficient `1`, evaluated at `u`. -/
-def monicEval (cs : List ℤ) (u : ℤ) : ℤ :=
+noncomputable def monicEval (cs : List ℤ) (u : ℤ) : ℤ :=
   List.rec 1 (fun c _ acc => Int.add c (Int.mul u acc)) cs
 
 /-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
@@ -133,7 +133,7 @@ noncomputable def fvalModP (a₂ a₄ a₆ θ : ℤ) (p : ℕ) : ℕ :=
 
 /-- `discrInt` written with the raw `Int.mul`/`Int.add`/`Int.sub`/`Int.neg` primitives, powers
 expanded. -/
-def discrIntK (a₂ a₄ a₆ : ℤ) : ℤ :=
+noncomputable def discrIntK (a₂ a₄ a₆ : ℤ) : ℤ :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄
   let b6 := Int.mul 4 a₆
