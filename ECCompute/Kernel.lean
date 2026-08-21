@@ -52,6 +52,16 @@ reaches it. -/
 noncomputable def monicModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 1 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
+/-- The integer polynomial with coefficients `cs` (constant term first, leading coefficient last),
+evaluated at `u`. Unlike `monicEval`, the leading coefficient is explicit in `cs`. -/
+noncomputable def polyEval (cs : List Int) (u : Int) : Int :=
+  cs.rec 0 fun c _ acc ↦ c.add (u.mul acc)
+
+/-- `polyEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the Horner
+fold reaches it. Unlike `monicModL`, the leading coefficient is explicit in `cs`. -/
+noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
+  cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
+
 /-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
 root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
@@ -102,10 +112,9 @@ noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
 /-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
-and `(c4p, c4m)` for `a₄`. -/
+and `(c4p, c4m)` for `a₄`, read as the polynomial `polyModL [a₄, 2a₂, 3]` at `tval`. -/
 noncomputable def fderivResNat (c2p c2m c4p c4m p tval : Nat) : Nat :=
-  ((((((Nat.mul 3 tval).mul tval).add ((Nat.mul 2 c2p).mul tval)).add c4p).mod p).add
-      (p.sub ((((Nat.mul 2 c2m).mul tval).add c4m).mod p))).mod p
+  polyModL [(c4p : Int) - c4m, 2 * ((c2p : Int) - c2m), 3] p tval
 
 /-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
 evaluations bit tests against a supplied quadratic-residue mask `qmask`. -/

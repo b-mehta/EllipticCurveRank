@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Kernel
+import ECCompute.Soundness.RootMod
 import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
@@ -237,9 +238,9 @@ private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ :
     (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) :
     ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ p θ := by
-  have hle : (2 * c2m * tval + c4m) % p ≤ p := (Nat.mod_lt _ hp).le
-  simp only [fderivResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
-    Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self, Nat.cast_mul, Nat.cast_ofNat]
+  simp only [fderivResNat]
+  rw [polyModL_cast hp.ne']
+  simp only [polyEval, Int.add_def, Int.mul_def]
   subst hc2 hc4 htval
   unfold fderiv
   push_cast
@@ -262,7 +263,8 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
     (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
     (htval : (tval : ZMod p) = θ) :
     fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ p θ).val := by
-  have hlt : fderivResNat c2p c2m c4p c4m p tval < p := Nat.mod_lt _ hp
+  have hlt : fderivResNat c2p c2m c4p c4m p tval < p := by
+    simp only [fderivResNat]; exact polyModL_lt hp
   rw [← fderivResNat_cast hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval,
     ZMod.val_cast_of_lt hlt]
 

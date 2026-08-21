@@ -55,6 +55,26 @@ theorem monicModL_beq (hℓ : 1 < ℓ) : (monicModL cs ℓ r).beq 0 ↔ (monicEv
   rw [Nat.beq_eq, ← monicModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
     Nat.mod_eq_of_lt (monicModL_lt hℓ)]
 
+@[simp, grind =] lemma polyEval_cons {c u : ℤ} :
+    polyEval (c :: cs) u = c + u * polyEval cs u := by
+  simp [polyEval]
+
+@[simp, grind =] lemma polyModL_cons {c : ℤ} :
+    polyModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * polyModL cs ℓ r) % ℓ := by
+  simp [polyModL]
+
+/-- A `polyModL` value is a residue mod `ℓ`. -/
+theorem polyModL_lt (hℓ : 0 < ℓ) : polyModL cs ℓ r < ℓ := by
+  cases cs with
+  | nil => exact hℓ
+  | cons _ _ => exact Nat.mod_lt _ hℓ
+
+/-- `polyModL` casts to `polyEval` in `ZMod ℓ`. -/
+theorem polyModL_cast (hl : ℓ ≠ 0) : (polyModL cs ℓ r : ZMod ℓ) = polyEval cs r := by
+  induction cs with
+  | nil => simp [polyModL, polyEval]
+  | cons c t ih => simp [ih, intResNat_cast, hl]
+
 /-- `monicEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
 theorem monicEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
     (monicEval cs a : ZMod ℓ) = monicEval cs b := by
