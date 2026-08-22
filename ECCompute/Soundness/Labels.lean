@@ -21,7 +21,7 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 * `f(θ) ≡ 0 (mod p)`.
 
 The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`) decides all three;
-`descentHyp_of_checkLabel` turns `checkLabel … = true` (with a separately supplied primality proof)
+`descentHyp_of_checkLabel` turns a passing `checkLabel` (with a separately supplied primality proof)
 into a `DescentHyp`.
 
 ## Main declarations
