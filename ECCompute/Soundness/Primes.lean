@@ -18,8 +18,8 @@ import Mathlib.Tactic.Linarith
 
 ## Main results
 
-* `Nat.primes_below_23`: the primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`.
-* `Nat.prime_of_passes`: if `2 ≤ n < 529` and `passes n [2, 3, 5, 7, 11, 13, 17, 19] = true`, then
+* `primes_below_23`: the primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`.
+* `prime_of_passes`: if `2 ≤ n < 529` and `passes n [2, 3, 5, 7, 11, 13, 17, 19]`, then
   `Nat.Prime n`.
 * `ECCompute.checkPrime_true` / `ECCompute.checkPrimes_true`: soundness of the kernel `Bool`
   checkers `checkPrime` / `checkPrimes`.
@@ -32,7 +32,7 @@ namespace ECCompute
 @[simp, grind =] theorem passes_cons (x a : ℕ) (t : List ℕ) :
     passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
 
-/-- `passes x L = true` exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
+/-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
 theorem passes_true_iff {x : ℕ} {L : List ℕ} :
     passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
