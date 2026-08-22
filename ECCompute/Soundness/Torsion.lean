@@ -38,10 +38,10 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
     ∃ z : ℤ,
       polyEval [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂, 1] z = 0 := by
-  set c₂ : ℤ := a₁ ^ 2 + 4 * a₂ with hc₂
-  set c₁ : ℤ := 8 * (2 * a₄ + a₁ * a₃) with hc₁
-  set c₀ : ℤ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
-  set p : ℤ[X] := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
+  set c₂ := a₁ ^ 2 + 4 * a₂ with hc₂
+  set c₁ := 8 * (2 * a₄ + a₁ * a₃) with hc₁
+  set c₀ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
+  set p := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
   have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
   -- evaluate the abstract cubic polynomial, keeping the integer coefficients opaque
   have haeval : aeval (4 * x : ℚ) p =
