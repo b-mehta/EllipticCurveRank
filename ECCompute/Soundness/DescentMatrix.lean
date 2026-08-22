@@ -3,11 +3,8 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Kernel
 import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.LambdaCompute
-import ECCompute.Soundness.IntResNat
-import ECCompute.Soundness.Fold
 
 /-!
 # Soundness of the descent-matrix check
