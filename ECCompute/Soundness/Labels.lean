@@ -4,11 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.Defs
-import ECCompute.Kernel
-import ECCompute.Soundness.Fold
-import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.RootMod
-import ECCompute.ForLean
 
 /-!
 # Soundness of the column-legitimacy check
@@ -21,7 +17,7 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 * `f(θ) ≡ 0 (mod p)`.
 
 The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`) decides all three;
-`descentHyp_of_checkLabel` turns `checkLabel … = true` (with a separately supplied primality proof)
+`descentHyp_of_checkLabel` turns a passing `checkLabel` (with a separately supplied primality proof)
 into a `DescentHyp`.
 
 ## Main declarations
@@ -39,44 +35,49 @@ def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
+section
+variable {a₂ a₄ a₆ : ℤ}
+
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_eq (a₂ a₄ a₆ : ℤ) :
+theorem curve_Δ_eq :
     (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
   simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
     WeierstrassCurve.b₆, WeierstrassCurve.b₈, curve, discrInt]
   grind
 
 /-- The numerator of the (integral) discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
+theorem curve_Δ_num :
     (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
-theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
+theorem discrInt_emod (p : ℕ) :
     (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
-  have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a ↦ by
+  have h : ∀ a : ℤ, ((a % (p : ℤ)) : ZMod p) = (a : ZMod p) := fun a ↦ by
     rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
   simp only [discrInt]
   push_cast [h]
   ring
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
-theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
-    Nat.beq (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat) 0
+theorem fval_iff (θ : ℤ) {p : ℕ} (hp : 1 < p) :
+    (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
+  have hp0 : p ≠ 0 := by lia
+  have hpz : (p : ℤ) ≠ 0 := by exact mod_cast hp0
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
-    have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
-    rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
+    rw [Int.emod_eq, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
     exact Int.emod_emod_of_dvd θ dvd_rfl
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
     simp only [polyEval, Int.add_def, Int.mul_def]; ring
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
 /-- `discrIntK a₂ a₄ a₆` equals the integer discriminant `discrInt a₂ a₄ a₆`. -/
-theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
+theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
   ring
+
+end
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
@@ -87,16 +88,15 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    have h6m : 6 % p = Nat.mod 6 p := rfl
-    rw [Nat.dvd_iff_mod_eq_zero, h6m]
+    rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
     simpa [Nat.beq_eq', beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ← discrInt_emod a₂ a₄ a₆ p, ← discrIntK_eq,
+    rw [curve_Δ_num, Ne, ← discrInt_emod p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fval_iff a₂ a₄ a₆ θ hp.one_lt).mp hf
+      (fval_iff θ hp.one_lt).mp hf
     rw [fval]
     grind
 
