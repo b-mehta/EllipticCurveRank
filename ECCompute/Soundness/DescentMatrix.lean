@@ -67,8 +67,7 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ labN B pt) (i : ℕ)
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
 theorem checkMaskList_true (h : checkMaskList labN) (j : ℕ) (hj : j < labN.length) :
     qrMask labN[j].1 = labN[j].2.2 := by
-  rw [checkMaskList, allList_eq_true] at h
-  exact Nat.eq_of_beq_eq_true (h _ (List.getElem_mem hj))
+  grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
 theorem checkB_true {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
