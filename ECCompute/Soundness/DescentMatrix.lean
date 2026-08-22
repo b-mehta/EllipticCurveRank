@@ -60,9 +60,7 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ labN B pt) (i : ℕ)
   | cons b bs ih =>
     cases pt with
     | nil => grind
-    | cons p ps =>
-      simp only [checkBGo_cons_cons, Bool.and'_eq_and, Bool.and_eq_true] at h
-      cases i <;> grind
+    | cons p ps => cases i <;> grind
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
 theorem checkMaskList_true (h : checkMaskList labN) (j : ℕ) (hj : j < labN.length) :
