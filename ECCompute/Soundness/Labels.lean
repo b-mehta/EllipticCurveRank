@@ -64,7 +64,7 @@ theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
 theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
     (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
-  have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
+  have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by lia)
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
     have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
     rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
