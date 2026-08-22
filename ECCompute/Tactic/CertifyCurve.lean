@@ -138,10 +138,10 @@ private def readData (path lpath : String) (rho : Nat) :
 /-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
 private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (rho : Nat) :
     MetaM (List Nat × List Nat) := do
-  let matB := CertifyEval.computeMatB sA2 sA4 xs ls
-  let some matM := CertifyEval.invF2 matB.toArray rho
+  let B := CertifyEval.computeB sA2 sA4 xs ls
+  let some M := CertifyEval.invF2 B.toArray rho
     | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
-  return (matB, matM)
+  return (B, M)
 
 /-- The pair type `ℚ × ℚ` as an `Expr`. -/
 private def ratPairTy : Expr :=
@@ -156,7 +156,7 @@ private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr 
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
 private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
-    (matB matM : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
+    (B M : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
   let ptExprs := pts.toList.map fun (xn, xd, yn, yd) =>
@@ -164,10 +164,10 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
-  let qms := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
+  let q := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
   return mkAppN (mkConst ``Certificate.mk)
     #[sA2E, sA4E, sA6E, toExpr rho, pointsE,
-      toExpr ls.toList, toExpr matB, toExpr matM, toExpr qms, toExpr t, toExpr tp]
+      toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
@@ -195,8 +195,8 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))
-  let hlenB := hlenOf ``Certificate.matB natTy
-  let hlenM := hlenOf ``Certificate.matM natTy
+  let hlenB := hlenOf ``Certificate.B natTy
+  let hlenM := hlenOf ``Certificate.M natTy
   let hlenQ := hlenOf ``Certificate.qrMasks natTy
   -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curve c.a₂ …`.
   let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
@@ -230,8 +230,8 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let rho := rhoGoal + t
   let (pts, lbls) ← readData path lpath rho
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
-  let (matB, matM) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
-  let cExpr ← mkCertExpr rho pts lbls matB matM t tpNat a1E a2E a3E a4E a6E
+  let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
+  let cExpr ← mkCertExpr rho pts lbls B M t tpNat a1E a2E a3E a4E a6E
   -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=

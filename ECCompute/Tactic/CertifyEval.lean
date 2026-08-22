@@ -10,14 +10,14 @@ Authors: Bhavik Mehta
 These functions reproduce the descent character and the `𝔽₂` matrix inverse using plain
 `Int`/`Nat` arithmetic (the Legendre symbol via quadratic reciprocity), written for the
 compiler/interpreter. The `certify_curve` elaborator calls them to produce a certificate's
-character matrix `matB` and its inverse `matM`.
+character matrix `B` and its inverse `M`.
 
 ## Main definitions
 
 * `jacobi`: the Jacobi symbol `(a | n)` for odd `n`.
 * `lambdaEval`: evaluator-side value of the descent character `λ_{p,θ}`.
-* `computeMatB`: the descent-character matrix `matB` as `Nat` row bitmasks.
-* `invF2`: inverse of an `𝔽₂` matrix in the column-bitmask convention feeding `matM`.
+* `computeB`: the descent-character matrix `B` as `Nat` row bitmasks.
+* `invF2`: inverse of an `𝔽₂` matrix in the column-bitmask convention feeding `M`.
 
 ## Implementation notes
 
@@ -56,9 +56,9 @@ def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :
 def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
   (List.range n).foldl (fun acc j => if p j then acc ||| (1 <<< j) else acc) 0
 
-/-- The descent-character matrix `matB` as `Nat` row bitmasks: row `i` has bit `j` set iff the
+/-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `labs[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
-def computeMatB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
+def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
   xs.map fun x =>
     bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
@@ -69,7 +69,7 @@ def qrMaskNat (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k => acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
-column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `matM`). Returns
+column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
 `none` if the matrix is singular. -/
 def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
