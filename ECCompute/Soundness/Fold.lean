@@ -41,7 +41,7 @@ theorem allList_cons {α : Type} (p : α → Bool) (a : α) (l : List α) :
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
 /-- `Nat.beq` and the `BEq`-dispatched `==` agree on `ℕ`. -/
-theorem _root_.Nat.beq_eq' (a b : ℕ) : Nat.beq a b = (a == b) := by
-  cases hab : a == b <;> cases hnb : Nat.beq a b <;> simp_all [beq_iff_eq, Nat.beq_eq]
+theorem _root_.Nat.beq_eq' (a b : ℕ) : a.beq b = (a == b) := by
+  cases hab : a == b <;> cases hnb : a.beq b <;> simp_all [beq_iff_eq, Nat.beq_eq]
 
 end ECCompute
