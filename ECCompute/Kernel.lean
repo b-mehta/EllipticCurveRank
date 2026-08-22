@@ -182,7 +182,7 @@ noncomputable def checkBGo (c2p c2m c4p c4m : Nat) (labN : List (Nat × Nat × N
       (fun p ps _ ↦ (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (ih ps))) pt
 
-/-- `true` iff each triple's mask `q` equals `qrMask p` for its prime `p`. -/
+/-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
 noncomputable def checkMaskList (labN : List (Nat × Nat × Nat)) : Bool :=
   allList (fun l ↦ (qrMask l.1).beq l.2.2) labN
 
