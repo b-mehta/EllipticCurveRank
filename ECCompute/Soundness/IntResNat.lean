@@ -18,13 +18,8 @@ namespace ECCompute
 /-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
 theorem intResNat_cast {p : ℕ} (hp : p ≠ 0) (z : ℤ) :
     ((z % (p : ℤ)).toNat : ZMod p) = (z : ZMod p) := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact_mod_cast hp)
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact mod_cast hp)
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
-
-/-- A residue `n < p` is zero in `ZMod p` exactly when it is zero in `ℕ`. -/
-theorem natCast_eq_zero_iff_of_lt {p n : ℕ} (h : n < p) : (n : ZMod p) = 0 ↔ n = 0 := by
-  rw [ZMod.natCast_eq_zero_iff]
-  exact ⟨fun hd ↦ Nat.eq_zero_of_dvd_of_lt hd h, fun hn ↦ hn ▸ dvd_zero p⟩
 
 end ECCompute
