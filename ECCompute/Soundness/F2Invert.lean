@@ -43,7 +43,6 @@ private def xorBits (v : ℕ) (l : List ℕ) : Bool :=
   l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
 private theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
-  rw [Nat.testBit_zero, Nat.and_one_is_mod]
   grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
