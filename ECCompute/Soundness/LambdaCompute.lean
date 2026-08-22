@@ -42,9 +42,7 @@ square mod `p`.
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
 theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
-  rw [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq, Nat.and_one_is_mod,
-    Nat.testBit_eq_decide_div_mod_eq]
-  simp
+  grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
 /-- One-step unfolding of the quadratic-residue mask fold. -/
 @[simp, grind =] theorem qrMaskGo_succ (p k : ℕ) :
