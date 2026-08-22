@@ -198,8 +198,8 @@ noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (q B : List
 Weierstrass equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` is equivalent, after clearing the
 denominator `xd³·yd²`, to an identity between integers, which `checkPoint` tests. -/
 noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : Int) (x y : Rat) : Bool :=
-  let xn := x.num; let xd := (x.den : Int)
-  let yn := y.num; let yd := (y.den : Int)
+  let xn := x.num; let xd := x.den
+  let yn := y.num; let yd := y.den
   let xd2 := xd.mul xd; let xd3 := xd2.mul xd
   let yd2 := yd.mul yd
   let xn2 := xn.mul xn; let xn3 := xn2.mul xn
