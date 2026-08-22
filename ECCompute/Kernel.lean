@@ -11,7 +11,8 @@ The kernel-reducible `Bool` checkers and the `Nat`/`Int`/`List` arithmetic they 
 correctness proofs and the abstract-typed spec definitions live in `ECCompute.Soundness.*`.
 
 Currently the `Bool` folds `allBelow`/`allList`, the small-prime trial-division checkers, the monic
-residue search, and the 𝔽₂ matrix-inverse checker.
+residue search, the descent label and character checks, the 𝔽₂ matrix-inverse checker, and the
+aggregate descent-matrix check.
 -/
 
 namespace ECCompute
@@ -154,5 +155,42 @@ noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
   (maskBelow n B).and' ((maskBelow n M).and' ((n.ble 32).and' (checkInvGo M 0 B)))
 
 end F2Invert
+
+/-! ## Descent matrix -/
+
+/-- The `Nat` label triples `(p, (θ % p).toNat, m)`, one for each label `(p, θ)` in `lab` paired
+with its quadratic-residue mask `m` in `q`. -/
+noncomputable def toLabN (lab : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
+  List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) lab q
+
+/-- `true` iff bit `j` of `b` matches label `labN[j]`'s descent character at point
+`(xnp - xnm) / xden`, for every `j`, with `a₂ = c2p - c2m` and `a₄ = c4p - c4m`. -/
+noncomputable def checkBRow (c2p c2m c4p c4m xnp xnm xden b : Nat) (labN : List (Nat × Nat × Nat)) :
+    Bool :=
+  labN.rec (fun _ ↦ true)
+    (fun l _ ih b ↦
+      (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
+        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (ih (b.div 2))) b
+
+/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
+noncomputable def checkBGo (c2p c2m c4p c4m : Nat) (labN : List (Nat × Nat × Nat)) (B : List Nat)
+    (pt : List (Rat × Rat)) : Bool :=
+  B.rec (fun _ ↦ true)
+    (fun b _ ih pt ↦ pt.rec (motive := fun _ ↦ Bool) true
+      (fun p ps _ ↦ (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
+        (ih ps))) pt
+
+/-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
+noncomputable def checkMaskList (labN : List (Nat × Nat × Nat)) : Bool :=
+  allList (fun l ↦ (qrMask l.1).beq l.2.2) labN
+
+/-- `true` iff every entry of `B` equals the descent character at its point in `pt`, with each
+mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
+noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (q B : List Nat)
+    (pt : List (Rat × Rat)) : Bool :=
+  (checkMaskList (toLabN lab q)).and'
+    (checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat (toLabN lab q) B pt)
 
 end ECCompute
