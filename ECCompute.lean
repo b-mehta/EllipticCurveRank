@@ -14,9 +14,6 @@ import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare
 
--- Certification checkers
-import ECCompute.Check.Points
-
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
