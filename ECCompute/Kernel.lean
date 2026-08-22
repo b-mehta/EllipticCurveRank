@@ -11,8 +11,8 @@ The kernel-reducible `Bool` checkers and the `Nat`/`Int`/`List` arithmetic they 
 correctness proofs and the abstract-typed spec definitions live in `ECCompute.Soundness.*`.
 
 Currently the `Bool` folds `allBelow`/`allList`, the small-prime trial-division checkers, the monic
-residue search, the descent label and character checks, the 𝔽₂ matrix-inverse checker, and the
-aggregate descent-matrix check.
+residue search, the descent label and character checks, the 𝔽₂ matrix-inverse checker, the
+aggregate descent-matrix check, and the point-on-curve check.
 -/
 
 namespace ECCompute
@@ -191,5 +191,26 @@ noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (q B : List
     (pt : List (Rat × Rat)) : Bool :=
   (checkMaskList (toLabN lab q)).and'
     (checkBGo a₂ a₄ (toLabN lab q) B pt)
+
+/-! ## Point on curve -/
+
+/-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
+Weierstrass equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` is equivalent, after clearing the
+denominator `xd³·yd²`, to an identity between integers, which `checkPoint` tests. -/
+noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : Int) (x y : Rat) : Bool :=
+  let xn := x.num; let xd := x.den
+  let yn := y.num; let yd := y.den
+  let xd2 := xd.mul xd; let xd3 := xd2.mul xd
+  let yd2 := yd.mul yd
+  let xn2 := xn.mul xn; let xn3 := xn2.mul xn
+  let yn2 := yn.mul yn
+  (((yn2.mul xd3).add ((((a₁.mul xn).mul yn).mul xd2).mul yd)).add
+      (((a₃.mul yn).mul xd3).mul yd)).beq'
+    ((((xn3.mul yd2).add (((a₂.mul xn2).mul xd).mul yd2)).add
+        (((a₄.mul xn).mul xd2).mul yd2)).add ((a₆.mul xd3).mul yd2))
+
+/-- `true` iff every point in `pts` lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
+noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
+  allList (fun p ↦ checkPoint a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
 
 end ECCompute
