@@ -17,10 +17,10 @@ computed descent character; `checkB_true` recovers the individual entry equaliti
 
 The kernel-reduced work runs through `lambdaComputeBoolNatMask`, evaluating every entry in `Nat`
 and reading each label's Legendre character from a precomputed quadratic-residue mask. The
-signed inputs are turned into `Nat` pieces once: the coefficients `a₂`, `a₄` and each point's
-numerator become `mp - mn` pairs via `Int.toNat`, each label representative `θ : ℤ` becomes its
-residue `(θ % p).toNat`, and each label carries its quadratic-residue mask `q`. `checkMaskList`
-verifies each supplied mask equals `qrMask p` once per prime.
+coefficients `a₂`, `a₄` are carried as `Int`; each point's numerator becomes an `mp - mn` pair via
+`Int.toNat`, each label representative `θ : ℤ` becomes its residue `(θ % p).toNat`, and each label
+carries its quadratic-residue mask `q`. `checkMaskList` verifies each supplied mask equals
+`qrMask p` once per prime.
 -/
 
 namespace ECCompute
@@ -35,54 +35,42 @@ noncomputable def toLabN (lab : List (ℕ × ℤ)) (qms : List ℕ) : List (ℕ 
 /-- One row of the descent-matrix check: for the row bitmask `b`, the point's `Nat` pieces and the
 coefficient pairs, fold over the `Nat` label triples `labN = (p, tval, q)`, consuming `b` one bit at
 a time, comparing each against the mask-based `Nat`-valued descent character. -/
-noncomputable def checkBRow (c2p c2m c4p c4m xnp xnm xden b : ℕ) (labN : List (ℕ × ℕ × ℕ)) : Bool :=
+noncomputable def checkBRow (a₂ a₄ : ℤ) (xnp xnm xden b : ℕ) (labN : List (ℕ × ℕ × ℕ)) : Bool :=
   labN.rec (motive := fun _ => ℕ → Bool) (fun _ => true)
     (fun l _ ih b =>
       ((Nat.beq (Nat.mod b 2) 1).rec (motive := fun _ => Bool)
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (ih (Nat.div b 2))) b
 
-theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ × ℕ)
+theorem checkBRow_cons (a₂ a₄ : ℤ) (xnp xnm xden b : ℕ) (l : ℕ × ℕ × ℕ)
     (ls : List (ℕ × ℕ × ℕ)) :
-    checkBRow c2p c2m c4p c4m xnp xnm xden b (l :: ls) =
+    checkBRow a₂ a₄ xnp xnm xden b (l :: ls) =
       ((Nat.beq (b % 2) 1).rec (motive := fun _ => Bool)
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden)).and'
-        (checkBRow c2p c2m c4p c4m xnp xnm xden (b / 2) ls) := rfl
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (checkBRow a₂ a₄ xnp xnm xden (b / 2) ls) := rfl
 
 /-- Fold over the rows, pairing each row bitmask of `matB` with its point in `pt`, and check each
 row with `checkBRow`. The point's numerator is split into `x.num.toNat - (-x.num).toNat`. -/
-noncomputable def checkBGo (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ × ℕ)) (matB : List ℕ)
+noncomputable def checkBGo (a₂ a₄ : ℤ) (labN : List (ℕ × ℕ × ℕ)) (matB : List ℕ)
     (pt : List (ℚ × ℚ)) : Bool :=
   matB.rec (motive := fun _ => List (ℚ × ℚ) → Bool) (fun _ => true)
     (fun b _ ih pt => pt.rec (motive := fun _ => Bool) true
-      (fun p ps _ => (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
+      (fun p ps _ => (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (ih ps))) pt
 
-theorem checkBGo_cons_cons (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ × ℕ)) (b : ℕ) (bs : List ℕ)
+theorem checkBGo_cons_cons (a₂ a₄ : ℤ) (labN : List (ℕ × ℕ × ℕ)) (b : ℕ) (bs : List ℕ)
     (p : ℚ × ℚ) (ps : List (ℚ × ℚ)) :
-    checkBGo c2p c2m c4p c4m labN (b :: bs) (p :: ps) =
-      (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
-        (checkBGo c2p c2m c4p c4m labN bs ps) := rfl
-
-/-- Verify every supplied mask: for each label triple `(p, _, q)`, `q` must equal `qrMask p`. -/
-noncomputable def checkMaskList (labN : List (ℕ × ℕ × ℕ)) : Bool :=
-  allList (fun l => (qrMask l.1).beq l.2.2) labN
-
-/-- The aggregate descent-matrix check. The coefficients become `mp - mn` pairs and the labels their
-`Nat` residues and masks once, up front; the masks are verified by `checkMaskList` and then
-`checkBGo` folds the rows entirely in `Nat`. -/
-noncomputable def checkB (a₂ a₄ : ℤ) (lab : List (ℕ × ℤ)) (qms : List ℕ) (matB : List ℕ)
-    (pt : List (ℚ × ℚ)) : Bool :=
-  (checkMaskList (toLabN lab qms)).and'
-    (checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat (toLabN lab qms) matB pt)
+    checkBGo a₂ a₄ labN (b :: bs) (p :: ps) =
+      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
+        (checkBGo a₂ a₄ labN bs ps) := rfl
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden : ℕ} :
-    ∀ {b : ℕ} {labN : List (ℕ × ℕ × ℕ)}, checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true →
-      ∀ j, (hj : j < labN.length) → b.testBit j = lambdaComputeBoolNatMask c2p c2m c4p c4m
+theorem checkBRow_true {a₂ a₄ : ℤ} {xnp xnm xden : ℕ} :
+    ∀ {b : ℕ} {labN : List (ℕ × ℕ × ℕ)}, checkBRow a₂ a₄ xnp xnm xden b labN = true →
+      ∀ j, (hj : j < labN.length) → b.testBit j = lambdaComputeBoolNatMask a₂ a₄
         labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
   intro b labN
   induction labN generalizing b with
@@ -95,10 +83,10 @@ theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden : ℕ} :
     cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} :
-    ∀ {matB : List ℕ} {pt : List (ℚ × ℚ)}, checkBGo c2p c2m c4p c4m labN matB pt = true →
+theorem checkBGo_row {a₂ a₄ : ℤ} {labN : List (ℕ × ℕ × ℕ)} :
+    ∀ {matB : List ℕ} {pt : List (ℚ × ℚ)}, checkBGo a₂ a₄ labN matB pt = true →
       ∀ i, (hi : i < matB.length) → (hip : i < pt.length) →
-        checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
+        checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat
           pt[i].1.den matB[i] labN = true := by
   intro matB
   induction matB with
@@ -110,6 +98,18 @@ theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} :
     | cons p ps =>
       simp only [checkBGo_cons_cons, Bool.and'_eq_and, Bool.and_eq_true] at h
       cases i <;> grind
+
+/-- Verify every supplied mask: for each label triple `(p, _, q)`, `q` must equal `qrMask p`. -/
+noncomputable def checkMaskList (labN : List (ℕ × ℕ × ℕ)) : Bool :=
+  allList (fun l => (qrMask l.1).beq l.2.2) labN
+
+/-- The aggregate descent-matrix check. The labels become their `Nat` residues and masks once, up
+front; the masks are verified by `checkMaskList` and then `checkBGo` folds the rows, evaluating the
+descent character with the integer coefficients `a₂ a₄`. -/
+noncomputable def checkB (a₂ a₄ : ℤ) (lab : List (ℕ × ℤ)) (qms : List ℕ) (matB : List ℕ)
+    (pt : List (ℚ × ℚ)) : Bool :=
+  (checkMaskList (toLabN lab qms)).and'
+    (checkBGo a₂ a₄ (toLabN lab qms) matB pt)
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
 theorem checkMaskList_true {labN : List (ℕ × ℕ × ℕ)} (h : checkMaskList labN = true) :
@@ -152,14 +152,12 @@ theorem checkB_true {a₂ a₄ : ℤ} {matB : List ℕ} {rho : ℕ}
   have hrow := checkBGo_row hgo i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
   have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
-  -- rewrite the supplied mask to `qrMask L.1`, then bridge the mask cell to `lambdaComputeBool`
   rw [← hqok, ← hP] at hcell
-  have hbridge : lambdaComputeBoolNatMask a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat
+  have hbridge : lambdaComputeBoolNatMask a₂ a₄
       L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
       = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
-    lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _ _ _ _ _
-      (int_toNat_sub a₂) (int_toNat_sub a₄) (intResNat_cast hp.ne' L.2)
-      (int_toNat_sub P.1.num) rfl
+    lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _
+      (intResNat_cast hp.ne' L.2) (int_toNat_sub P.1.num) rfl
   rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), Fin.getElem_fin, hcell, hbridge,
     lambdaCompute_eq_bool]
 

@@ -101,18 +101,18 @@ label residue `tval` for `θ`. -/
 noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
-/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
-and `(c4p, c4m)` for `a₄`, read as the polynomial `polyModL [a₄, 2a₂, 3]` at `tval`. -/
-noncomputable def fderivResNat (c2p c2m c4p c4m p tval : Nat) : Nat :=
-  polyModL [(c4p : Int) - c4m, 2 * ((c2p : Int) - c2m), 3] p tval
+/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the coefficients `a₂ a₄ : Int`, read as
+the polynomial `polyModL [a₄, 2a₂, 3]` at `tval`. -/
+noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
+  polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
-/-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
-evaluations bit tests against a supplied quadratic-residue mask `qmask`. -/
-noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : Nat) : Bool :=
+/-- Fully `Nat` mirror of `lambdaComputeBool`; the coefficients are carried as `Int`, the point
+numerator as an `mp - mn` pair, the two character evaluations bit tests against `qmask`. -/
+noncomputable def lambdaComputeBoolNatMask (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResNat p tval xp xm xden).beq 0).rec
       ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
+      ((qrLookupBool qmask (fderivResNat a₂ a₄ p tval)).not'))
     false
 
 /-! ## 𝔽₂ matrix inverse -/
