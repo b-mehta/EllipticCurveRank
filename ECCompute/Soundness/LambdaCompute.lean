@@ -226,7 +226,7 @@ represent the inputs). -/
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
 private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
-    ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+    (alphaResNat p tval xp xm xden : ZMod p)
       = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
   have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le
   simp only [alphaResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
@@ -237,7 +237,7 @@ private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) 
 private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ) (tval xp xm xden : ℕ)
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * (x.den : ZMod p)).val := by
-  have hcast : ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+  have hcast : (alphaResNat p tval xp xm xden : ZMod p)
       = (x.num : ZMod p) - θ * (x.den : ZMod p) := by
     rw [alphaResNat_cast hp, ← htval, ← hxden]
     have : (x.num : ZMod p) = (xp : ZMod p) - (xm : ZMod p) := by rw [hxnum]; push_cast; ring
@@ -248,7 +248,7 @@ private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
 private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p) (tval : ℕ)
     (htval : (tval : ZMod p) = θ) :
-    ((fderivResNat a₂ a₄ p tval : ℕ) : ZMod p) = fderiv a₂ a₄ p θ := by
+    (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ p θ := by
   simp only [fderivResNat]
   rw [polyModL_cast hp.ne']
   simp only [polyEval, Int.add_def, Int.mul_def]
