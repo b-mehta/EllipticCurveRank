@@ -45,7 +45,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
   have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
   -- evaluate the abstract cubic polynomial, keeping the integer coefficients opaque
   have haeval : aeval (4 * x : ℚ) p =
-      (4 * x) ^ 3 + (c₂ : ℚ) * (4 * x) ^ 2 + (c₁ : ℚ) * (4 * x) + (c₀ : ℚ) := by
+      (4 * x) ^ 3 + c₂ * (4 * x) ^ 2 + c₁ * (4 * x) + c₀ := by
     simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
       eq_intCast, Int.cast_one, one_mul]
   have hroot : aeval (4 * x : ℚ) p = 0 := by
@@ -217,9 +217,9 @@ nonzero `2`-torsion points all share the `x`-coordinate `R` and `|E(ℚ)[2]| ≤
 identity in the coefficients, valid whenever `polyEval [a₆, a₄, a₂, 1] R = 0`. -/
 private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     (x : ℚ) :
-    x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ)
-      = (x - R) * (x ^ 2 + ((a₂ : ℚ) + R) * x + ((a₄ : ℚ) + R * ((a₂ : ℚ) + R))) := by
-  have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
+    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆
+      = (x - R) * (x ^ 2 + (a₂ + R) * x + (a₄ + R * (a₂ + R))) := by
+  have hRQ : (R : ℚ) ^ 3 + a₂ * R ^ 2 + a₄ * R + a₆ = 0 := by
     have hz : ((polyEval [a₆, a₄, a₂, 1] R : ℤ) : ℚ) = 0 := by simp [hR]
     simp only [polyEval, Int.add_def, Int.mul_def] at hz
     push_cast at hz
@@ -232,7 +232,7 @@ root of `F` equals `R`. -/
 private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     {ℓ : ℕ} (hℓ : 1 < ℓ)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ)
-    {x : ℚ} (hx : x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) = 0) :
+    {x : ℚ} (hx : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0) :
     x = (R : ℚ) := by
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
   rcases hx with h | h
