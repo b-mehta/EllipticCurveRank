@@ -5,6 +5,7 @@ Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Kernel
+import ECCompute.Soundness.RootMod
 import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
@@ -225,31 +226,18 @@ represent the inputs). -/
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
 private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
-    ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+    (alphaResNat p tval xp xm xden : ZMod p)
       = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
   have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le
   simp only [alphaResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self, Nat.cast_mul]
   ring
 
-/-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p)
-    (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
-    (htval : (tval : ZMod p) = θ) :
-    ((fderivResNat c2p c2m c4p c4m p tval : ℕ) : ZMod p) = fderiv a₂ a₄ p θ := by
-  have hle : (2 * c2m * tval + c4m) % p ≤ p := (Nat.mod_lt _ hp).le
-  simp only [fderivResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
-    Nat.cast_add, Nat.cast_sub hle, ZMod.natCast_self, Nat.cast_mul, Nat.cast_ofNat]
-  subst hc2 hc4 htval
-  unfold fderiv
-  push_cast
-  ring
-
 /-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
 private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ) (tval xp xm xden : ℕ)
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * (x.den : ZMod p)).val := by
-  have hcast : ((alphaResNat p tval xp xm xden : ℕ) : ZMod p)
+  have hcast : (alphaResNat p tval xp xm xden : ZMod p)
       = (x.num : ZMod p) - θ * (x.den : ZMod p) := by
     rw [alphaResNat_cast hp, ← htval, ← hxden]
     have : (x.num : ZMod p) = (xp : ZMod p) - (xm : ZMod p) := by rw [hxnum]; push_cast; ring
@@ -257,32 +245,43 @@ private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ
   have hlt : alphaResNat p tval xp xm xden < p := Nat.mod_lt _ hp
   rw [← hcast, ZMod.val_cast_of_lt hlt]
 
-/-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
-private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p)
-    (c2p c2m c4p c4m tval : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
+/-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
+private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p) (tval : ℕ)
     (htval : (tval : ZMod p) = θ) :
-    fderivResNat c2p c2m c4p c4m p tval = (fderiv a₂ a₄ p θ).val := by
-  have hlt : fderivResNat c2p c2m c4p c4m p tval < p := Nat.mod_lt _ hp
-  rw [← fderivResNat_cast hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval,
-    ZMod.val_cast_of_lt hlt]
+    (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ p θ := by
+  simp only [fderivResNat]
+  rw [polyModL_cast hp.ne']
+  simp only [polyEval, Int.add_def, Int.mul_def]
+  subst htval
+  unfold fderiv
+  push_cast
+  ring
 
-/-- The mask-based `Nat` mirror agrees with `lambdaComputeBool` when `0 < p` and the pairs represent
-the inputs (`a₂ = c2p - c2m`, `a₄ = c4p - c4m`, `θ = tval`, `x.num = xp - xm`, `xden = x.den`). The
-mask is fixed to `qrMask p`, matching the character used by `psiComputeBool`. -/
+/-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
+private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p) (tval : ℕ)
+    (htval : (tval : ZMod p) = θ) :
+    fderivResNat a₂ a₄ p tval = (fderiv a₂ a₄ p θ).val := by
+  have hlt : fderivResNat a₂ a₄ p tval < p := by
+    simp only [fderivResNat]; exact polyModL_lt hp
+  rw [← fderivResNat_cast hp a₂ a₄ θ tval htval, ZMod.val_cast_of_lt hlt]
+
+/-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
+provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
+denominator `xden`. -/
 theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
-    (c2p c2m c4p c4m tval xp xm xden : ℕ) (hc2 : a₂ = (c2p : ℤ) - c2m) (hc4 : a₄ = (c4p : ℤ) - c4m)
-    (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
-    lambdaComputeBoolNatMask c2p c2m c4p c4m p (qrMask p) tval xp xm xden
+    (tval xp xm xden : ℕ) (htval : (tval : ZMod p) = θ)
+    (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
+    lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden
       = lambdaComputeBool a₂ a₄ p θ x := by
   have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
-  have hfd := fderivResNat_eq_val hp a₂ a₄ θ c2p c2m c4p c4m tval hc2 hc4 htval
+  have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
   have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
 
 /-- Any integer is the difference of the `Nat`s `v.toNat` and `(-v).toNat` (one of them zero). This
-is how a signed input is fed to `lambdaComputeBoolNatMask` as an `mp - mn` pair. -/
+is how the point numerator is fed to `lambdaComputeBoolNatMask` as an `mp - mn` pair. -/
 theorem int_toNat_sub (v : ℤ) : v = (v.toNat : ℤ) - ((-v).toNat : ℤ) := by omega
 
 end ECCompute

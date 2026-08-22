@@ -53,7 +53,7 @@ theorem curve_Δ_num (a₂ a₄ a₆ : ℤ) :
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
-    ((discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ℤ) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
+    (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
   have h : ∀ a : ℤ, ((a % (p : ℤ) : ℤ) : ZMod p) = (a : ZMod p) := fun a ↦ by
     rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
   simp only [discrInt]
@@ -62,16 +62,16 @@ theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
 theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
-    Nat.beq (monicModL [a₆, a₄, a₂] p (θ.emod p).toNat) 0 = true
+    Nat.beq (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat) 0 = true
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
     have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
     rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
     exact Int.emod_emod_of_dvd θ dvd_rfl
-  have hpoly : monicEval [a₆, a₄, a₂] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
-    simp only [monicEval, Int.add_def, Int.mul_def]; ring
-  rw [monicModL_beq hp, monicEval_modEq hmod, hpoly]
+  have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
+    simp only [polyEval, Int.add_def, Int.mul_def]; ring
+  rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
 theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]

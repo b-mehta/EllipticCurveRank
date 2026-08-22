@@ -41,22 +41,22 @@ noncomputable def checkPrime (p : Nat) : Bool :=
 noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkPrime l.1) labels
 
-/-! ## Monic residue search -/
+/-! ## Polynomial residue search -/
 
-/-- The monic integer polynomial with lower coefficients `cs` (constant term first) and leading
-coefficient `1`, evaluated at `u`. -/
-noncomputable def monicEval (cs : List Int) (u : Int) : Int :=
-  cs.rec 1 fun c _ acc ↦ c.add (u.mul acc)
+/-- The integer polynomial with coefficients `cs` (constant term first, leading coefficient last),
+evaluated at `u`. -/
+noncomputable def polyEval (cs : List Int) (u : Int) : Int :=
+  cs.rec 0 fun c _ acc ↦ c.add (u.mul acc)
 
-/-- `monicEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the fold
-reaches it. -/
-noncomputable def monicModL (cs : List Int) (ℓ r : Nat) : Nat :=
-  cs.rec 1 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
+/-- `polyEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the Horner
+fold reaches it. -/
+noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
+  cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with coefficients `cs` has no
-root modulo `ℓ`, checked by trying every residue `0, …, ℓ - 1` in `Nat` (mod `ℓ`). -/
+/-- Kernel-reducible test: `true` iff the monic integer polynomial with lower coefficients `cs`
+(implicit leading coefficient `1`) has no root modulo `ℓ`, trying every residue `0, …, ℓ - 1`. -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
-  allBelow ℓ fun r ↦ ((monicModL cs ℓ r).beq 0).not'
+  allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not'
 
 /-! ## Descent label check -/
 
@@ -72,11 +72,11 @@ def discrIntK (a₂ a₄ a₆ : Int) : Int :=
 
 /-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, where `f(θ) = θ³ + a₂θ² + a₄θ + a₆` is read as the monic cubic
-`monicModL [a₆, a₄, a₂]` evaluated at the residue of `θ`. -/
+`polyModL [a₆, a₄, a₂, 1]` evaluated at the residue of `θ`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
   (((Nat.mod 6 p).beq 0).not').and'
     (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
-      ((monicModL [a₆, a₄, a₂] p (θ.emod p).toNat).beq 0))
+      ((polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- Kernel `Bool`: every label passes `checkLabel`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
@@ -102,19 +102,18 @@ label residue `tval` for `θ`. -/
 noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
-/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the `mp - mn` pairs `(c2p, c2m)` for `a₂`
-and `(c4p, c4m)` for `a₄`. -/
-noncomputable def fderivResNat (c2p c2m c4p c4m p tval : Nat) : Nat :=
-  ((((((Nat.mul 3 tval).mul tval).add ((Nat.mul 2 c2p).mul tval)).add c4p).mod p).add
-      (p.sub ((((Nat.mul 2 c2m).mul tval).add c4m).mod p))).mod p
+/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the coefficients `a₂ a₄ : Int`, read as
+the polynomial `polyModL [a₄, 2a₂, 3]` at `tval`. -/
+noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
+  polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
-/-- Fully `Nat` mirror of `lambdaComputeBool`; signed inputs carried as `mp - mn`, the two character
-evaluations bit tests against a supplied quadratic-residue mask `qmask`. -/
-noncomputable def lambdaComputeBoolNatMask (c2p c2m c4p c4m p qmask tval xp xm xden : Nat) : Bool :=
+/-- Fully `Nat` mirror of `lambdaComputeBool`; the coefficients are carried as `Int`, the point
+numerator as an `mp - mn` pair, the two character evaluations bit tests against `qmask`. -/
+noncomputable def lambdaComputeBoolNatMask (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResNat p tval xp xm xden).beq 0).rec
       ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResNat c2p c2m c4p c4m p tval)).not'))
+      ((qrLookupBool qmask (fderivResNat a₂ a₄ p tval)).not'))
     false
 
 /-! ## 𝔽₂ matrix inverse -/
@@ -164,22 +163,22 @@ noncomputable def toLabN (lab : List (Nat × Int)) (q : List Nat) : List (Nat ×
   List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) lab q
 
 /-- `true` iff bit `j` of `b` matches label `labN[j]`'s descent character at point
-`(xnp - xnm) / xden`, for every `j`, with `a₂ = c2p - c2m` and `a₄ = c4p - c4m`. -/
-noncomputable def checkBRow (c2p c2m c4p c4m xnp xnm xden b : Nat) (labN : List (Nat × Nat × Nat)) :
+`(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/
+noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (labN : List (Nat × Nat × Nat)) :
     Bool :=
   labN.rec (fun _ ↦ true)
     (fun l _ ih b ↦
       (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (ih (b.div 2))) b
 
 /-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
-noncomputable def checkBGo (c2p c2m c4p c4m : Nat) (labN : List (Nat × Nat × Nat)) (B : List Nat)
+noncomputable def checkBGo (a₂ a₄ : Int) (labN : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec (motive := fun _ ↦ Bool) true
-      (fun p ps _ ↦ (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
+      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
@@ -191,6 +190,6 @@ mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
 noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (q B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   (checkMaskList (toLabN lab q)).and'
-    (checkBGo a₂.toNat (-a₂).toNat a₄.toNat (-a₄).toNat (toLabN lab q) B pt)
+    (checkBGo a₂ a₄ (toLabN lab q) B pt)
 
 end ECCompute
