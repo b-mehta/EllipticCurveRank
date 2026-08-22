@@ -83,8 +83,10 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not] at h
-  obtain ⟨h6, hΔ, hf⟩ := h
+  obtain ⟨h6, hΔ, hf⟩ :
+      (Nat.mod 6 p).beq 0 = false ∧
+        ((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0 = false ∧
+          (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0 := by grind
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
     have h6m : 6 % p = Nat.mod 6 p := rfl
