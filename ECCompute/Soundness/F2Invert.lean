@@ -61,15 +61,14 @@ private theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testB
     xorBits v (List.range m) = xorBits v (List.range n) := by
   induction m with grind [List.range_succ, xorBits]
 
-/-- `ZMod 2` image of a `Bool`; injective and turns `Bool.xor` into `+`. Turns `xor` into `+` so we
-can use grind's ring solver. -/
+/-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
 private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
 private lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
 @[simp] private lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert
 @[simp] private lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert
 
-/-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
+/-- `popParityK v` is the XOR over the low 32 bits of `v`. -/
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
@@ -96,7 +95,7 @@ theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popP
   refine xorBits_range_hi (fun j hj ↦ ?_) hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
-/-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
+/-- For `v < 2 ^ n` with `n ≤ 32`, `popParityK v` equals `popParity n v`. -/
 theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
