@@ -71,7 +71,7 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
     (W : WeierstrassCurve ℚ)
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
     (h : monicHasNoRootMod
-      [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ = true)
+      [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ)
     (P : W.toAffine.Point) (hP : P + P = 0) : P = 0 := by
   -- eliminate the point-at-infinity case; work with `P = some x y h`
   obtain _ | ⟨x, y, hns⟩ := P
@@ -195,7 +195,7 @@ theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
 witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the identity, so the
 `2`-torsion has at most one element. -/
 theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ = true) :
+    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
   have hnn : ∀ P : (curve a₂ a₄ a₆).toAffine.Point, P + P = 0 → P = 0 := by
     intro P hP
@@ -214,7 +214,7 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ 
 
 If the `2`-division cubic `F = X³ + a₂X² + a₄X + a₆` has an integer root `R`, then it factors as
 `F = (X - R) · q` with `q = X² + (a₂ + R)X + (a₄ + R(a₂ + R))`. If `q` has no rational root (again
-certified by a prime `ℓ` modulo which `q` has no root), then `R` is the *only* rational root of `F`,
+certified by a prime `ℓ` modulo which `q` has no root), then `R` is the only rational root of `F`,
 so the nonzero `2`-torsion points all share the `x`-coordinate `R`, giving `|E(ℚ)[2]| ≤ 2`. -/
 
 /-- Over `ℚ`, the `2`-division cubic factors as `F = (X - R) · q` at an integer root `R`: an
@@ -235,7 +235,7 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a�
 root of `F` equals `R`. -/
 private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ = true)
+    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ)
     {x : ℚ} (hx : x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) = 0) :
     x = (R : ℚ) := by
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
@@ -251,7 +251,7 @@ cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then ev
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
 theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     (hR : polyEval [a₆, a₄, a₂, 1] R = 0) {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ = true) :
+    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 := by
   -- every nonzero `2`-torsion `x`-coordinate is a root of the cubic, hence equal to `R`
   have hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
