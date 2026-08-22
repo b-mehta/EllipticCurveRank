@@ -134,16 +134,7 @@ prime). This is what lets a verified mask evaluate the descent character at each
 theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
     qrLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
   have hmask := qrMask_testBit p hp2 a ha
-  rw [qrLookupBool]
-  rcases eq_or_ne (((qrMask p).shiftRight a).land 1) 1 with h | h
-  · rw [h, Nat.beq_refl]
-    exact (decide_eq_true (hmask.mp h)).symm
-  · have hbf : (((qrMask p).shiftRight a).land 1).beq 1 = false := by
-      rw [Bool.eq_false_iff, ne_eq, Nat.beq_eq]; exact h
-    rw [hbf]
-    symm
-    simp only [decide_eq_false_iff_not]
-    exact fun hc ↦ h (hmask.mpr hc)
+  grind [qrLookupBool]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
