@@ -39,8 +39,8 @@ open WeierstrassCurve Module CompleteSquare IntegralScaling
 /-- Two Weierstrass curves over `ℚ` are equal when their five coefficients agree, each certified
 by a kernel-reducible `BEq` check. -/
 theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
-    (h₁ : (W.a₁ == W'.a₁) = true) (h₂ : (W.a₂ == W'.a₂) = true) (h₃ : (W.a₃ == W'.a₃) = true)
-    (h₄ : (W.a₄ == W'.a₄) = true) (h₆ : (W.a₆ == W'.a₆) = true) : W = W' := by
+    (h₁ : W.a₁ == W'.a₁) (h₂ : W.a₂ == W'.a₂) (h₃ : W.a₃ == W'.a₃)
+    (h₄ : W.a₄ == W'.a₄) (h₆ : W.a₆ == W'.a₆) : W = W' := by
   cases W; cases W'
   simp only [WeierstrassCurve.mk.injEq]
   exact ⟨eq_of_beq h₁, eq_of_beq h₂, eq_of_beq h₃, eq_of_beq h₄, eq_of_beq h₆⟩
@@ -79,7 +79,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
         = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
     (hBlen : c.B.length = c.rho) (hMlen : c.M.length = c.rho)
-    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
+    (hinv : F2Invert.checkInv c.rho c.B c.M)
     (φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2))
     (hφ : φ = AddMonoidHom.pi (fun j => lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)))
     (g : Fin c.rho → (curve c.a₂ c.a₄ c.a₆).toAffine.Point)
@@ -119,13 +119,13 @@ theorem rank_ge_of_certificate (c : Certificate)
     (pt : Fin c.rho → ℚ × ℚ) (lab : Fin c.rho → ℕ × ℤ)
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
     (hlabP : ∀ j, ((lab j).1).Prime)
-    (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 = true)
+    (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
     (hB : ∀ i j : Fin c.rho,
         F2Invert.toMat c.B c.rho i j
           = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
     (hBlen : c.B.length = c.rho)
     (hMlen : c.M.length = c.rho)
-    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
+    (hinv : F2Invert.checkInv c.rho c.B c.M)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
@@ -165,11 +165,11 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hlenB : c.B.length = c.rho)
     (hlenM : c.M.length = c.rho)
     (hlenQ : c.qrMasks.length = c.rho)
-    (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points = true)
-    (hlabP : checkPrimes c.labels = true)
-    (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels = true)
-    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points = true)
-    (hinv : F2Invert.checkInv c.rho c.B c.M = true)
+    (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points)
+    (hlabP : checkPrimes c.labels)
+    (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels)
+    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points)
+    (hinv : F2Invert.checkInv c.rho c.B c.M)
     (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
     HasRankGE W (c.rho - c.t) := by
   -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
@@ -190,7 +190,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hlabP' : ∀ j : Fin c.rho, (c.labels[j].1).Prime :=
     fun j => checkPrimes_true hlabP _ (hmemL j)
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
-      c.labels[j].1 c.labels[j].2 = true :=
+      c.labels[j].1 c.labels[j].2 :=
     fun j => checkLabels_true hlabC _ (hmemL j)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points[i]) (fun j => c.labels[j])

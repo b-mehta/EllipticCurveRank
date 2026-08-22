@@ -38,7 +38,7 @@ theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × �
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true) (j : ℕ)
+theorem checkBRow_true (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN) (j : ℕ)
     (hj : j < labN.length) :
     b.testBit j = lambdaComputeBoolNatMask c2p c2m c4p c4m
       labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
@@ -51,10 +51,10 @@ theorem checkBRow_true (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN = tru
     cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row (h : checkBGo c2p c2m c4p c4m labN B pt = true) (i : ℕ)
+theorem checkBGo_row (h : checkBGo c2p c2m c4p c4m labN B pt) (i : ℕ)
     (hi : i < B.length) (hip : i < pt.length) :
     checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
-      pt[i].1.den B[i] labN = true := by
+      pt[i].1.den B[i] labN := by
   induction B generalizing pt i with
   | nil => grind
   | cons b bs ih =>
@@ -65,10 +65,9 @@ theorem checkBGo_row (h : checkBGo c2p c2m c4p c4m labN B pt = true) (i : ℕ)
       cases i <;> grind
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true (h : checkMaskList labN = true) :
-    ∀ j, (hj : j < labN.length) → qrMask labN[j].1 = labN[j].2.2 := by
+theorem checkMaskList_true (h : checkMaskList labN) (j : ℕ) (hj : j < labN.length) :
+    qrMask labN[j].1 = labN[j].2.2 := by
   rw [checkMaskList, allList_eq_true] at h
-  intro j hj
   exact Nat.eq_of_beq_eq_true (h _ (List.getElem_mem hj))
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
@@ -76,10 +75,9 @@ theorem checkB_true {a₂ a₄ : ℤ} {rho : ℕ} {lab : List (ℕ × ℤ)} {q :
     (hBlen : B.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
     (hqlen : q.length = rho)
     (hpr : ∀ j : Fin rho, (lab[j].1).Prime)
-    (h : checkB a₂ a₄ lab q B pt = true) :
-    ∀ i j : Fin rho, F2Invert.toMat B rho i j =
+    (h : checkB a₂ a₄ lab q B pt) (i j : Fin rho) :
+    F2Invert.toMat B rho i j =
       lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by
-  intro i j
   set L : ℕ × ℤ := lab[j] with hL
   set P : ℚ × ℚ := pt[i] with hP
   -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
