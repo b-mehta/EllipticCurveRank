@@ -44,7 +44,6 @@ theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden b : ℕ} {labN : List (ℕ 
   induction labN generalizing b j with
   | nil => grind
   | cons l ls ih =>
-    intro hb hj
     simp only [checkBRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hb
     obtain ⟨h0, hrec⟩ := hb
     have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
@@ -59,7 +58,6 @@ theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} {
   induction B generalizing pt i with
   | nil => grind
   | cons b bs ih =>
-    intro h hi hip
     cases pt with
     | nil => grind
     | cons p ps =>
