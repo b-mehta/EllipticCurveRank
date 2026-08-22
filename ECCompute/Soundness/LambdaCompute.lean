@@ -265,9 +265,9 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
     simp only [fderivResNat]; exact polyModL_lt hp
   rw [← fderivResNat_cast hp a₂ a₄ θ tval htval, ZMod.val_cast_of_lt hlt]
 
-/-- The mask-based `Nat` mirror agrees with `lambdaComputeBool` when `0 < p` and the point numerator
-is the `mp - mn` pair (`x.num = xp - xm`, `xden = x.den`), the coefficients are `a₂ a₄`, and
-`θ = tval`. The mask is fixed to `qrMask p`, matching the character used by `psiComputeBool`. -/
+/-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
+provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
+denominator `xden`. -/
 theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
     (tval xp xm xden : ℕ) (htval : (tval : ZMod p) = θ)
     (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
