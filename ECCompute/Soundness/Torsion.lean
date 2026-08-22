@@ -93,11 +93,9 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
 
 /-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
 
-For the short model `curve a₂ a₄ a₆` (with `a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
-`(x, 0)` where `x` is a rational root of `f = X³ + a₂X² + a₄X + a₆`. Since `f` has at most three
-roots, the full `2`-torsion has at most four elements. This is the torsion witness for
-certificates with `t = 2` (full rational `2`-torsion, e.g. curves with square discriminant),
-for which the bound `rank ≥ ρ - t` needs only `|E(ℚ)[2]| ≤ 2^t = 4`. -/
+For the short model `curve a₂ a₄ a₆` (`a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
+`(x, 0)` with `x` a rational root of `X³ + a₂X² + a₄X + a₆`. The cubic has at most three roots, so
+the full `2`-torsion has at most four elements. -/
 
 open Polynomial in
 /-- On the short model, a nonzero rational `2`-torsion point `some x y` has `y = 0`, and its
@@ -121,10 +119,9 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
   rw [hy0] at heq
   grind
 
-/-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
-`2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
-`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`). Each concrete bound
-just supplies an `Sx`: the cubic's roots (`≤ 3`) for the universal case, a singleton for `t = 1`. -/
+/-- If the `x`-coordinates of all nonzero rational `2`-torsion points lie in a finite set `Sx`, then
+the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity together with one point
+`(x, 0)` for each allowed `x`. -/
 private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finset ℚ)
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
@@ -212,10 +209,9 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ 
 
 /-! ## The `t = 1` bound `|E(ℚ)[2]| ≤ 2`
 
-If the `2`-division cubic `F = X³ + a₂X² + a₄X + a₆` has an integer root `R`, then it factors as
-`F = (X - R) · q` with `q = X² + (a₂ + R)X + (a₄ + R(a₂ + R))`. If `q` has no rational root (again
-certified by a prime `ℓ` modulo which `q` has no root), then `R` is the only rational root of `F`,
-so the nonzero `2`-torsion points all share the `x`-coordinate `R`, giving `|E(ℚ)[2]| ≤ 2`. -/
+If the `2`-division cubic `X³ + a₂X² + a₄X + a₆` has an integer root `R` and its cofactor quadratic
+`X² + (a₂ + R)X + (a₄ + R(a₂ + R))` has no rational root, then `R` is the only rational root, so the
+nonzero `2`-torsion points all share the `x`-coordinate `R` and `|E(ℚ)[2]| ≤ 2`. -/
 
 /-- Over `ℚ`, the `2`-division cubic factors as `F = (X - R) · q` at an integer root `R`: an
 identity in the coefficients, valid whenever `polyEval [a₆, a₄, a₂, 1] R = 0`. -/
@@ -266,10 +262,9 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
 
 /-! ## Certificate-facing torsion bounds
 
-These three wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
-`|E(ℚ)[2]| ≤ 2^t` bound the certificate soundness theorem consumes: `t = 0` from a no-root witness,
-`t = 1` from an integer root whose cofactor has no root mod `ℓ`, and `t = 2` unconditionally (the
-universal `≤ 4` bound). -/
+Three wrappers taking kernel-`Bool` witnesses and producing the `|E(ℚ)[2]| ≤ 2^t` bound: `t = 0`
+from a no-root witness, `t = 1` from an integer root whose cofactor has no root mod `ℓ`, `t = 2`
+unconditionally. -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
 theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : Nat.blt 1 ℓ)
