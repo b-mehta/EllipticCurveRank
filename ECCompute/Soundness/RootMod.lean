@@ -4,7 +4,6 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
