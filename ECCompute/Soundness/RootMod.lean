@@ -55,7 +55,7 @@ theorem polyModL_beq (hℓ : 1 < ℓ) : (polyModL cs ℓ r).beq 0 ↔ (polyEval 
   rw [Nat.beq_eq, ← polyModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
     Nat.mod_eq_of_lt (polyModL_lt (by lia))]
 
-/-- `polyEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
+/-- `polyEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
     (polyEval cs a : ZMod ℓ) = polyEval cs b := by
   induction cs with
