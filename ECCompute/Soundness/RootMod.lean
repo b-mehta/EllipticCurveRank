@@ -86,8 +86,8 @@ No-rational-root lemmas for the cofactor quadratic `q = X² + b X + c`, certifie
 modulo which `q` has no root. -/
 
 open Polynomial in
-/-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
-root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
+/-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
+rational root. -/
 theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
     (hx : x ^ 2 + b * x + c = 0) : False := by
