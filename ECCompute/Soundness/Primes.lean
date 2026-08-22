@@ -27,7 +27,7 @@ import Mathlib.Tactic.Linarith
 
 namespace ECCompute
 
-@[simp, grind =] theorem passes_nil (x : ℕ) : passes x [] = true := rfl
+@[simp, grind =] theorem passes_nil (x : ℕ) : passes x [] := rfl
 
 @[simp, grind =] theorem passes_cons (x a : ℕ) (t : List ℕ) :
     passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
