@@ -4,7 +4,6 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
@@ -55,7 +54,7 @@ theorem polyModL_beq (hℓ : 1 < ℓ) : (polyModL cs ℓ r).beq 0 ↔ (polyEval 
   rw [Nat.beq_eq, ← polyModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
     Nat.mod_eq_of_lt (polyModL_lt (by lia))]
 
-/-- `polyEval` is invariant, modulo `n`, under changing its argument by a multiple of `n`. -/
+/-- `polyEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
 theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
     (polyEval cs a : ZMod ℓ) = polyEval cs b := by
   induction cs with
@@ -71,10 +70,10 @@ theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
   rw [monicHasNoRootMod, allBelow_eq_true] at h
   replace h : ∀ r < ℓ, (polyEval (cs ++ [1]) r : ZMod ℓ) ≠ 0 := by
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
-    simpa [Bool.not'_eq_not] using h
+    grind
   intro hu
-  have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast (by omega : (0 : ℕ) < ℓ)
-  set r : ℤ := u % ℓ with hr
+  have hℓ0 : (0 : ℤ) < ℓ := by exact mod_cast (by lia : 0 < ℓ)
+  set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
   rw [polyEval_modEq, hu, Int.cast_zero]
@@ -86,8 +85,8 @@ No-rational-root lemmas for the cofactor quadratic `q = X² + b X + c`, certifie
 modulo which `q` has no root. -/
 
 open Polynomial in
-/-- If the monic integer quadratic `u² + b u + c` has no integer root, then it has no *rational*
-root: by the rational root theorem, a rational root of a monic integer polynomial is an integer. -/
+/-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
+rational root. -/
 theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
     (hx : x ^ 2 + b * x + c = 0) : False := by
