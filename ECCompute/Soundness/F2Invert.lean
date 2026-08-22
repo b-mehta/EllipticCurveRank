@@ -3,7 +3,6 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.ZMod.Basic
@@ -24,7 +23,7 @@ square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible.
 ## Main results
 
 * `checkInv_true` : a passing `checkInv` gives, at each `(i, k)`, the diagonal parity indicator.
-* `checkInv_isUnit` : `checkInv n B M = true → IsUnit (toMat B n)`, the invertibility certificate.
+* `checkInv_isUnit` : `checkInv n B M → IsUnit (toMat B n)`, the invertibility certificate.
 -/
 
 namespace ECCompute.F2Invert
@@ -43,7 +42,6 @@ private def xorBits (v : ℕ) (l : List ℕ) : Bool :=
   l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
 private theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
-  rw [Nat.testBit_zero, Nat.and_one_is_mod]
   grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
@@ -61,15 +59,14 @@ private theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testB
     xorBits v (List.range m) = xorBits v (List.range n) := by
   induction m with grind [List.range_succ, xorBits]
 
-/-- `ZMod 2` image of a `Bool`; injective and turns `Bool.xor` into `+`. Turns `xor` into `+` so we
-can use grind's ring solver. -/
+/-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
 private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
 private lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
 @[simp] private lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert
 @[simp] private lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert
 
-/-- Unconditional: bit 0 of the five-stage fold is the XOR over the low 32 bits. -/
+/-- `popParityK v` is the XOR over the low 32 bits of `v`. -/
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
@@ -96,7 +93,7 @@ theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popP
   refine xorBits_range_hi (fun j hj ↦ ?_) hn
   exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
 
-/-- For `v < 2 ^ n` with `n ≤ 32`, the five-stage fold matches the `n`-bit `popParityK`. -/
+/-- For `v < 2 ^ n` with `n ≤ 32`, `popParityK v` equals `popParity n v`. -/
 theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParity n v := by
   rw [popParityK_eq32, popParity_hi_eq hv hn]
 
@@ -156,8 +153,8 @@ theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
     | zero => simpa using checkInvRow_true hn hM hrow hk'
     | succ i'' => grind
 
-/-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
-theorem maskBelow_eq_true : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
+/-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
+@[grind =] theorem maskBelow_eq_true : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
   rw [maskBelow, allList_eq_true]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
