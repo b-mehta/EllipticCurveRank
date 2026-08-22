@@ -48,7 +48,7 @@ theorem primes_below_23 (p : ℕ) (hlt : p < 23) (hp : p.Prime) :
 /-- If `2 ≤ n < 529 = 23²` and `n` survives trial division by the primes below `23`, then `n` is
 prime. -/
 theorem prime_of_passes (n : ℕ) (h2 : 2 ≤ n) (h529 : n < 529)
-    (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : Nat.Prime n := by
+    (hpass : passes n [2, 3, 5, 7, 11, 13, 17, 19]) : n.Prime := by
   by_contra hnp
   have hn0 : 0 < n := by lia
   set p := n.minFac
