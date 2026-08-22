@@ -74,7 +74,7 @@ theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simpa [Bool.not'_eq_not] using h
   intro hu
   have hℓ0 : (0 : ℤ) < ℓ := by exact_mod_cast (by omega : (0 : ℕ) < ℓ)
-  set r : ℤ := u % ℓ with hr
+  set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
   rw [polyEval_modEq, hu, Int.cast_zero]
