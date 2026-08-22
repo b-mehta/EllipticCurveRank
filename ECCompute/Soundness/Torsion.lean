@@ -122,7 +122,7 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
 /-- If the `x`-coordinates of all nonzero rational `2`-torsion points lie in a finite set `Sx`, then
 the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity together with one point
 `(x, 0)` for each allowed `x`. -/
-private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finset ℚ)
+private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) {Sx : Finset ℚ}
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
     ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).Finite ∧
@@ -177,14 +177,14 @@ private theorem twoTorsion_xcoord_mem_roots (a₂ a₄ a₆ : ℤ) (x y : ℚ)
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
 instance twoTorsion_finite (a₂ a₄ a₆ : ℤ) :
     Finite {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
-  (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).1.to_subtype
+  (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).1.to_subtype
 
 open Polynomial in
 /-- The rational `2`-torsion of the short model `curve a₂ a₄ a₆` has at most four elements: the
 identity together with the (at most three) nonzero points `(x, 0)` for `x` a root of the cubic. -/
 theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 4 := by
-  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
+  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
   have := Cubic.card_roots_le (P := (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ))
   lia
 
@@ -257,7 +257,7 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
     refine Finset.mem_singleton.mpr (root_eq_of_cofactor_no_root a₂ a₄ a₆ R hR hℓ hq ?_)
     grind
-  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ hx).2
+  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ hx).2
   simpa using h
 
 /-! ## Certificate-facing torsion bounds
