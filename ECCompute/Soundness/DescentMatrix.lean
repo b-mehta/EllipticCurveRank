@@ -35,7 +35,7 @@ theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × �
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b labN) (j : ℕ)
+theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b labN) {j : ℕ}
     (hj : j < labN.length) :
     b.testBit j = lambdaComputeBoolNatMask a₂ a₄
       labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
@@ -60,17 +60,17 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ labN B pt) (i : ℕ)
     | cons p ps => cases i <;> grind
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true (h : checkMaskList labN) (j : ℕ) (hj : j < labN.length) :
+theorem checkMaskList_true (h : checkMaskList labN) {j : ℕ} (hj : j < labN.length) :
     qrMask labN[j].1 = labN[j].2.2 := by
   grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
-theorem checkB_true {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
-    (hBlen : B.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
-    (hqlen : q.length = rho)
-    (hpr : ∀ j : Fin rho, (lab[j].1).Prime)
-    (h : checkB a₂ a₄ lab q B pt) (i j : Fin rho) :
-    F2Invert.toMat B rho i j =
+theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
+    (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : lab.length = ρ)
+    (hqlen : q.length = ρ)
+    (hpr : ∀ j : Fin ρ, (lab[j].1).Prime)
+    (h : checkB a₂ a₄ lab q B pt) (i j : Fin ρ) :
+    F2Invert.toMat B ρ i j =
       lambdaCompute a₂ a₄ lab[j].1 (lab[j].2 : ZMod lab[j].1) pt[i].1 := by
   set L := lab[j] with hL
   set P := pt[i] with hP
@@ -80,7 +80,7 @@ theorem checkB_true {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
   have : Fact L.1.Prime := ⟨hpr j⟩
   have : NeZero L.1 := ⟨hp.ne'⟩
   set labN := toLabN lab q with hlabNdef
-  have hlabN : labN.length = rho := by
+  have hlabN : labN.length = ρ := by
     rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : labN[j.val]'(by rw [hlabN]; exact j.isLt)
       = (L.1, (L.2 % (L.1 : ℤ)).toNat, q[j]) := by
@@ -89,11 +89,11 @@ theorem checkB_true {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
-    have := checkMaskList_true hmask j.val (by rw [hlabN]; exact j.isLt)
+    have := checkMaskList_true hmask (by rw [hlabN]; exact j.isLt)
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
   have hrow := checkBGo_row hgo i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
-  have hcell := checkBRow_true hrow j.val (by rw [hlabN]; exact j.isLt)
+  have hcell := checkBRow_true hrow (by rw [hlabN]; exact j.isLt)
   rw [hgetN] at hcell
   -- rewrite the supplied mask to `qrMask L.1`, then bridge the mask cell to `lambdaComputeBool`
   rw [← hqok, ← hP] at hcell
