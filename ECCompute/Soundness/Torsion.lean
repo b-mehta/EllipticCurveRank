@@ -198,11 +198,9 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ 
     intro P hP
     refine no_nonzero_twoTorsion_of_monicHasNoRootMod 0 a₂ 0 a₄ a₆ hℓ _
       rfl rfl rfl rfl rfl ?_ P hP
-    have e1 : (0 : ℤ) ^ 2 + 4 * a₂ = 4 * a₂ := by ring
-    have e2 : 8 * (2 * a₄ + 0 * 0) = 16 * a₄ := by ring
-    have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * a₆) = 64 * a₆ := by ring
-    rw [e1, e2, e3]
-    exact h
+    have hlist : [16 * ((0 : ℤ) ^ 2 + 4 * a₆), 8 * (2 * a₄ + 0 * 0), (0 : ℤ) ^ 2 + 4 * a₂]
+        = [64 * a₆, 16 * a₄, 4 * a₂] := by grind
+    rwa [hlist]
   have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
     ⟨fun a b ↦ Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
   exact Finite.card_le_one_iff_subsingleton.mpr this
