@@ -13,7 +13,7 @@ import Mathlib.Tactic.Linarith
 # A kernel-reducible primality test for small numbers
 
 `ECCompute.passes` is a trial-division fold (defined in `ECCompute.Kernel`), and
-`Nat.prime_of_passes` certifies that if `n < 23² = 529` survives trial division by the primes below
+`prime_of_passes` certifies that if `n < 23² = 529` survives trial division by the primes below
 `23`, then `n` is prime. It certifies the small label primes used by the rank certificates.
 
 ## Main results
@@ -34,7 +34,7 @@ namespace ECCompute
 
 /-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
-theorem passes_true_iff {x : ℕ} {L : List ℕ} :
+@[grind =] theorem passes_true_iff {x : ℕ} {L : List ℕ} :
     passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L <;> grind
 
@@ -59,6 +59,7 @@ theorem prime_of_passes {n : ℕ} (h2 : 2 ≤ n) (h529 : n < 529)
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
+/-- If `checkPrime p` passes, `p` is prime. -/
 theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
   grind [checkPrime, prime_of_passes]
 
