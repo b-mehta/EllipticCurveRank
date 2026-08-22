@@ -22,7 +22,7 @@ open WeierstrassCurve
 /-- The kernel-reducible checker `checkPoint` returns `true` iff the point `(x, y)` satisfies the
 affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 theorem checkPoint_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
-    checkPoint a₁ a₂ a₃ a₄ a₆ x y = true ↔
+    checkPoint a₁ a₂ a₃ a₄ a₆ x y ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
   simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
   have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
@@ -34,11 +34,11 @@ theorem checkPoint_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (x y : ℚ) :
   rw [← @Int.cast_inj ℚ]
   push_cast
   rw [hx, hy]
-  exact ⟨fun h => mul_left_cancel₀ hD (by grind), fun h => by grind⟩
+  exact ⟨fun h ↦ mul_left_cancel₀ hD (by grind), fun h ↦ by grind⟩
 
 /-- `checkPoints` returns `true` if and only if every listed point satisfies the equation. -/
 theorem checkPoints_iff (a₁ a₂ a₃ a₄ a₆ : ℤ) (pts : List (ℚ × ℚ)) :
-    checkPoints a₁ a₂ a₃ a₄ a₆ pts = true ↔
+    checkPoints a₁ a₂ a₃ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_eq_true, checkPoint_iff]
 
