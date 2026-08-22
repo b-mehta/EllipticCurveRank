@@ -3,7 +3,6 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Kernel
 import ECCompute.Soundness.Fold
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.ZMod.Basic
