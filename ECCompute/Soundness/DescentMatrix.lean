@@ -78,8 +78,8 @@ theorem checkB_true {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
     (h : checkB a₂ a₄ lab q B pt) (i j : Fin rho) :
     F2Invert.toMat B rho i j =
       lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by
-  set L : ℕ × ℤ := lab[j] with hL
-  set P : ℚ × ℚ := pt[i] with hP
+  set L := lab[j] with hL
+  set P := pt[i] with hP
   -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
   simp only [Fin.getElem_fin] at hL hP
   have hp : 0 < L.1 := (hpr j).pos
