@@ -45,7 +45,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
   have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
   -- evaluate the abstract cubic polynomial, keeping the integer coefficients opaque
   have haeval : aeval (4 * x : ℚ) p =
-      (4 * x) ^ 3 + (c₂ : ℚ) * (4 * x) ^ 2 + (c₁ : ℚ) * (4 * x) + (c₀ : ℚ) := by
+      (4 * x) ^ 3 + c₂ * (4 * x) ^ 2 + c₁ * (4 * x) + c₀ := by
     simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
       eq_intCast, Int.cast_one, one_mul]
   have hroot : aeval (4 * x : ℚ) p = 0 := by
@@ -71,7 +71,7 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
     (W : WeierstrassCurve ℚ)
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
     (h : monicHasNoRootMod
-      [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ = true)
+      [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ)
     (P : W.toAffine.Point) (hP : P + P = 0) : P = 0 := by
   -- eliminate the point-at-infinity case; work with `P = some x y h`
   obtain _ | ⟨x, y, hns⟩ := P
@@ -93,11 +93,9 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
 
 /-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
 
-For the short model `curve a₂ a₄ a₆` (with `a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
-`(x, 0)` where `x` is a rational root of `f = X³ + a₂X² + a₄X + a₆`. Since `f` has at most three
-roots, the full `2`-torsion has at most four elements. This is the torsion witness for
-certificates with `t = 2` (full rational `2`-torsion, e.g. curves with square discriminant),
-for which the bound `rank ≥ ρ - t` needs only `|E(ℚ)[2]| ≤ 2^t = 4`. -/
+For the short model `curve a₂ a₄ a₆` (`a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
+`(x, 0)` with `x` a rational root of `X³ + a₂X² + a₄X + a₆`. The cubic has at most three roots, so
+the full `2`-torsion has at most four elements. -/
 
 open Polynomial in
 /-- On the short model, a nonzero rational `2`-torsion point `some x y` has `y = 0`, and its
@@ -121,11 +119,10 @@ private theorem twoTorsion_y_eq_zero_and_root (a₂ a₄ a₆ : ℤ) {x y : ℚ}
   rw [hy0] at heq
   grind
 
-/-- Core counting step for every torsion bound: if the `x`-coordinates of all nonzero rational
-`2`-torsion points lie in a finite set `Sx`, then the `2`-torsion set is finite with at most
-`|Sx| + 1` elements (the identity plus one point `(x, 0)` per allowed `x`). Each concrete bound
-just supplies an `Sx`: the cubic's roots (`≤ 3`) for the universal case, a singleton for `t = 1`. -/
-private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) (Sx : Finset ℚ)
+/-- If the `x`-coordinates of all nonzero rational `2`-torsion points lie in a finite set `Sx`, then
+the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity together with one point
+`(x, 0)` for each allowed `x`. -/
+private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) {Sx : Finset ℚ}
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
     ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).Finite ∧
@@ -180,14 +177,14 @@ private theorem twoTorsion_xcoord_mem_roots (a₂ a₄ a₆ : ℤ) (x y : ℚ)
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
 instance twoTorsion_finite (a₂ a₄ a₆ : ℤ) :
     Finite {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
-  (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).1.to_subtype
+  (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).1.to_subtype
 
 open Polynomial in
 /-- The rational `2`-torsion of the short model `curve a₂ a₄ a₆` has at most four elements: the
 identity together with the (at most three) nonzero points `(x, 0)` for `x` a root of the cubic. -/
 theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 4 := by
-  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
+  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ (twoTorsion_xcoord_mem_roots a₂ a₄ a₆)).2
   have := Cubic.card_roots_le (P := (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ))
   lia
 
@@ -195,35 +192,32 @@ theorem card_twoTorsion_le_four (a₂ a₄ a₆ : ℤ) :
 witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the identity, so the
 `2`-torsion has at most one element. -/
 theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ = true) :
+    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
   have hnn : ∀ P : (curve a₂ a₄ a₆).toAffine.Point, P + P = 0 → P = 0 := by
     intro P hP
     refine no_nonzero_twoTorsion_of_monicHasNoRootMod 0 a₂ 0 a₄ a₆ hℓ _
       rfl rfl rfl rfl rfl ?_ P hP
-    have e1 : (0 : ℤ) ^ 2 + 4 * a₂ = 4 * a₂ := by ring
-    have e2 : 8 * (2 * a₄ + 0 * 0) = 16 * a₄ := by ring
-    have e3 : 16 * ((0 : ℤ) ^ 2 + 4 * a₆) = 64 * a₆ := by ring
-    rw [e1, e2, e3]
-    exact h
+    have hlist : [16 * ((0 : ℤ) ^ 2 + 4 * a₆), 8 * (2 * a₄ + 0 * 0), (0 : ℤ) ^ 2 + 4 * a₂]
+        = [64 * a₆, 16 * a₄, 4 * a₂] := by grind
+    rwa [hlist]
   have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
     ⟨fun a b ↦ Subtype.ext (by rw [hnn a.1 a.2, hnn b.1 b.2])⟩
   exact Finite.card_le_one_iff_subsingleton.mpr this
 
 /-! ## The `t = 1` bound `|E(ℚ)[2]| ≤ 2`
 
-If the `2`-division cubic `F = X³ + a₂X² + a₄X + a₆` has an integer root `R`, then it factors as
-`F = (X - R) · q` with `q = X² + (a₂ + R)X + (a₄ + R(a₂ + R))`. If `q` has no rational root (again
-certified by a prime `ℓ` modulo which `q` has no root), then `R` is the *only* rational root of `F`,
-so the nonzero `2`-torsion points all share the `x`-coordinate `R`, giving `|E(ℚ)[2]| ≤ 2`. -/
+If the `2`-division cubic `X³ + a₂X² + a₄X + a₆` has an integer root `R` and its cofactor quadratic
+`X² + (a₂ + R)X + (a₄ + R(a₂ + R))` has no rational root, then `R` is the only rational root, so the
+nonzero `2`-torsion points all share the `x`-coordinate `R` and `|E(ℚ)[2]| ≤ 2`. -/
 
 /-- Over `ℚ`, the `2`-division cubic factors as `F = (X - R) · q` at an integer root `R`: an
 identity in the coefficients, valid whenever `polyEval [a₆, a₄, a₂, 1] R = 0`. -/
 private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     (x : ℚ) :
-    x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ)
-      = (x - R) * (x ^ 2 + ((a₂ : ℚ) + R) * x + ((a₄ : ℚ) + R * ((a₂ : ℚ) + R))) := by
-  have hRQ : (R : ℚ) ^ 3 + (a₂ : ℚ) * R ^ 2 + (a₄ : ℚ) * R + (a₆ : ℚ) = 0 := by
+    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆
+      = (x - R) * (x ^ 2 + (a₂ + R) * x + (a₄ + R * (a₂ + R))) := by
+  have hRQ : (R : ℚ) ^ 3 + a₂ * R ^ 2 + a₄ * R + a₆ = 0 := by
     have hz : ((polyEval [a₆, a₄, a₂, 1] R : ℤ) : ℚ) = 0 := by simp [hR]
     simp only [polyEval, Int.add_def, Int.mul_def] at hz
     push_cast at hz
@@ -235,8 +229,8 @@ private theorem cubic_factor_at_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a�
 root of `F` equals `R`. -/
 private theorem root_eq_of_cofactor_no_root (a₂ a₄ a₆ R : ℤ) (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ = true)
-    {x : ℚ} (hx : x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) = 0) :
+    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ)
+    {x : ℚ} (hx : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0) :
     x = (R : ℚ) := by
   rw [cubic_factor_at_root a₂ a₄ a₆ R hR, mul_eq_zero] at hx
   rcases hx with h | h
@@ -251,7 +245,7 @@ cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then ev
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
 theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     (hR : polyEval [a₆, a₄, a₂, 1] R = 0) {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ = true) :
+    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 := by
   -- every nonzero `2`-torsion `x`-coordinate is a root of the cubic, hence equal to `R`
   have hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
@@ -261,19 +255,18 @@ theorem card_twoTorsion_le_two_of_root_cofactor (a₂ a₄ a₆ R : ℤ)
     rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
     refine Finset.mem_singleton.mpr (root_eq_of_cofactor_no_root a₂ a₄ a₆ R hR hℓ hq ?_)
     grind
-  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ _ hx).2
+  have h := (card_twoTorsion_le_of_xcoords a₂ a₄ a₆ hx).2
   simpa using h
 
 /-! ## Certificate-facing torsion bounds
 
-These three wrappers take kernel-`Bool` witnesses (dischargeable by `reflBoolTrue`) and produce the
-`|E(ℚ)[2]| ≤ 2^t` bound the certificate soundness theorem consumes: `t = 0` from a no-root witness,
-`t = 1` from an integer root whose cofactor has no root mod `ℓ`, and `t = 2` unconditionally (the
-universal `≤ 4` bound). -/
+Three wrappers taking kernel-`Bool` witnesses and producing the `|E(ℚ)[2]| ≤ 2^t` bound: `t = 0`
+from a no-root witness, `t = 1` from an integer root whose cofactor has no root mod `ℓ`, `t = 2`
+unconditionally. -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
-theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : Nat.blt 1 ℓ = true)
-    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ = true) :
+theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : Nat.blt 1 ℓ)
+    (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 := by
   rw [pow_zero]
   exact card_twoTorsion_le_one_of_monicHasNoRootMod a₂ a₄ a₆
@@ -282,9 +275,9 @@ theorem certTorsionBound_zero (a₂ a₄ a₆ : ℤ) (ℓ : ℕ) (hp : Nat.blt 1
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
 `2`-division cubic (`polyEval [a₆, a₄, a₂, 1] R == 0`) whose cofactor quadratic has no root modulo
 a prime `ℓ` (`1 < ℓ`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
-theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : Nat.blt 1 ℓ = true)
-    (hR : (polyEval [a₆, a₄, a₂, 1] R).beq' 0 = true)
-    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ = true) :
+theorem certTorsionBound_one (a₂ a₄ a₆ R : ℤ) (ℓ : ℕ) (hp : Nat.blt 1 ℓ)
+    (hR : (polyEval [a₆, a₄, a₂, 1] R).beq' 0)
+    (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 := by
   rw [pow_one]
   exact card_twoTorsion_le_two_of_root_cofactor a₂ a₄ a₆ R
