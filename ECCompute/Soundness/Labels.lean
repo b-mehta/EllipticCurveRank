@@ -62,7 +62,7 @@ theorem discrInt_emod (a₂ a₄ a₆ : ℤ) (p : ℕ) :
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
 theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
-    Nat.beq (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat) 0 = true
+    Nat.beq (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat) 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have hpz : (p : ℤ) ≠ 0 := by exact_mod_cast (show p ≠ 0 by omega)
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
@@ -73,6 +73,7 @@ theorem fval_iff (a₂ a₄ a₆ θ : ℤ) {p : ℕ} (hp : 1 < p) :
     simp only [polyEval, Int.add_def, Int.mul_def]; ring
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
+/-- `discrIntK a₂ a₄ a₆` equals the integer discriminant `discrInt a₂ a₄ a₆`. -/
 theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
   ring
