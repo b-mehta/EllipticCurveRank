@@ -19,9 +19,11 @@ matching point.
 
 namespace ECCompute
 
+variable {c2p c2m c4p c4m xnp xnm xden b : ℕ} {labN : List (ℕ × ℕ × ℕ)} {B : List ℕ}
+  {pt : List (ℚ × ℚ)}
+
 @[simp, grind =]
-theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ × ℕ)
-    (ls : List (ℕ × ℕ × ℕ)) :
+theorem checkBRow_cons {l : ℕ × ℕ × ℕ} {ls : List (ℕ × ℕ × ℕ)} :
     checkBRow c2p c2m c4p c4m xnp xnm xden b (l :: ls) =
       (((b % 2).beq 1).rec (motive := fun _ ↦ Bool)
         (lambdaComputeBoolNatMask c2p c2m c4p c4m l.1 l.2.2 l.2.1 xnp xnm xden).not'
@@ -29,16 +31,15 @@ theorem checkBRow_cons (c2p c2m c4p c4m xnp xnm xden b : ℕ) (l : ℕ × ℕ ×
         (checkBRow c2p c2m c4p c4m xnp xnm xden (b / 2) ls) := rfl
 
 @[simp, grind =]
-theorem checkBGo_cons_cons (c2p c2m c4p c4m : ℕ) (labN : List (ℕ × ℕ × ℕ)) (b : ℕ) (bs : List ℕ)
-    (p : ℚ × ℚ) (ps : List (ℚ × ℚ)) :
+theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
     checkBGo c2p c2m c4p c4m labN (b :: bs) (p :: ps) =
       (checkBRow c2p c2m c4p c4m p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (checkBGo c2p c2m c4p c4m labN bs ps) := rfl
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden b : ℕ} {labN : List (ℕ × ℕ × ℕ)}
-    (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true) (j : ℕ) (hj : j < labN.length) :
+theorem checkBRow_true (hb : checkBRow c2p c2m c4p c4m xnp xnm xden b labN = true) (j : ℕ)
+    (hj : j < labN.length) :
     b.testBit j = lambdaComputeBoolNatMask c2p c2m c4p c4m
       labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
   induction labN generalizing b j with
@@ -50,8 +51,7 @@ theorem checkBRow_true {c2p c2m c4p c4m xnp xnm xden b : ℕ} {labN : List (ℕ 
     cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} {B : List ℕ}
-    {pt : List (ℚ × ℚ)} (h : checkBGo c2p c2m c4p c4m labN B pt = true) (i : ℕ)
+theorem checkBGo_row (h : checkBGo c2p c2m c4p c4m labN B pt = true) (i : ℕ)
     (hi : i < B.length) (hip : i < pt.length) :
     checkBRow c2p c2m c4p c4m pt[i].1.num.toNat (-pt[i].1.num).toNat
       pt[i].1.den B[i] labN = true := by
@@ -65,19 +65,17 @@ theorem checkBGo_row {c2p c2m c4p c4m : ℕ} {labN : List (ℕ × ℕ × ℕ)} {
       cases i <;> grind
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true {labN : List (ℕ × ℕ × ℕ)} (h : checkMaskList labN = true) :
+theorem checkMaskList_true (h : checkMaskList labN = true) :
     ∀ j, (hj : j < labN.length) → qrMask labN[j].1 = labN[j].2.2 := by
   rw [checkMaskList, allList_eq_true] at h
   intro j hj
   exact Nat.eq_of_beq_eq_true (h _ (List.getElem_mem hj))
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
-theorem checkB_true {a₂ a₄ : ℤ} {B : List ℕ} {rho : ℕ}
-    {lab : List (ℕ × ℤ)} {q : List ℕ} {pt : List (ℚ × ℚ)}
+theorem checkB_true {a₂ a₄ : ℤ} {rho : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
     (hBlen : B.length = rho) (hplen : pt.length = rho) (hllen : lab.length = rho)
     (hqlen : q.length = rho)
     (hpr : ∀ j : Fin rho, (lab[j].1).Prime)
-    (hp2 : ∀ j : Fin rho, lab[j].1 ≠ 2)
     (h : checkB a₂ a₄ lab q B pt = true) :
     ∀ i j : Fin rho, F2Invert.toMat B rho i j =
       lambdaCompute a₂ a₄ lab[j].1 ((lab[j].2 : ZMod lab[j].1)) pt[i].1 := by

@@ -192,13 +192,10 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
   have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
       c.labels[j].1 c.labels[j].2 = true :=
     fun j => checkLabels_true hlabC _ (hmemL j)
-  -- Each label's prime divides `6` nowhere, so it is `≠ 2` (needed for the residue-mask lookup).
-  have hp2' : ∀ j : Fin c.rho, c.labels[j].1 ≠ 2 := fun j he =>
-    (descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ _ _ (hlabC' j) (hlabP' j)).ne_six (he ▸ ⟨3, rfl⟩)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i => c.points[i]) (fun j => c.labels[j])
       hpt' hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hlenQ hlabP' hp2' hB) hlenB hlenM hinv htors
+      (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute
