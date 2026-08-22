@@ -80,7 +80,7 @@ theorem discrIntK_eq (a₂ a₄ a₆ : ℤ) : discrIntK a₂ a₄ a₆ = discrIn
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
 theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
-    (h : checkLabel a₂ a₄ a₆ p θ = true) (hp : p.Prime) :
+    (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not] at h
@@ -102,8 +102,8 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
-    (h : checkLabels a₂ a₄ a₆ labels = true) :
-    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 = true := by
+    (h : checkLabels a₂ a₄ a₆ labels) :
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
   rwa [checkLabels, allList_eq_true] at h
 
 end ECCompute
