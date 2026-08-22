@@ -24,7 +24,7 @@ square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible.
 ## Main results
 
 * `checkInv_true` : a passing `checkInv` gives, at each `(i, k)`, the diagonal parity indicator.
-* `checkInv_isUnit` : `checkInv n B M = true → IsUnit (toMat B n)`, the invertibility certificate.
+* `checkInv_isUnit` : `checkInv n B M → IsUnit (toMat B n)`, the invertibility certificate.
 -/
 
 namespace ECCompute.F2Invert
