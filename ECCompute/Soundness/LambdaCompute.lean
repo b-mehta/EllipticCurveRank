@@ -49,9 +49,8 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
-theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
-    ∀ f : ℕ, Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
-  intro f
+theorem testBit_qrMaskGo (p a f : ℕ) :
+    Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
   induction f with
   | zero =>
     simp only [qrMaskGo]
