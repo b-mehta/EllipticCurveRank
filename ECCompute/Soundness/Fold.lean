@@ -16,6 +16,9 @@ one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 
 namespace ECCompute
 
+/-- `allBelow 0 p` is vacuously `true`. -/
+@[simp] theorem allBelow_zero {p : Nat → Bool} : allBelow 0 p = true := rfl
+
 /-- `allBelow (n + 1) p` peels the top index: it folds `p n` into `allBelow n p`. -/
 @[simp, grind =] theorem allBelow_succ {n : Nat} {p : Nat → Bool} :
     allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
@@ -24,10 +27,11 @@ namespace ECCompute
 @[grind =] theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
     allBelow n p ↔ ∀ m < n, p m := by
   induction n with
-  | zero => exact iff_of_true rfl (by simp)
-  | succ k ih =>
-    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
-    grind
+  | zero => simp
+  | succ k ih => rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]; grind
+
+/-- `allList` over the empty list is `true`. -/
+@[simp] theorem allList_nil {α : Type} {p : α → Bool} : allList p [] = true := rfl
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
 @[simp, grind =] theorem allList_cons {α : Type} {p : α → Bool} {a : α} {l : List α} :
@@ -37,7 +41,7 @@ namespace ECCompute
 @[grind =] theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
     allList p l ↔ ∀ a ∈ l, p a := by
   induction l with
-  | nil => simp [allList]
+  | nil => simp
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
 /-- `Nat.beq` and the `BEq`-dispatched `==` agree on `ℕ`. -/
