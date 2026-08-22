@@ -154,8 +154,8 @@ theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
     | zero => simpa using checkInvRow_true hn hM hrow hk'
     | succ i'' => grind
 
-/-- `maskBelow n L` is `true` exactly when every mask in `L` fits in `n` bits. -/
-theorem maskBelow_eq_true : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
+/-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
+@[grind =] theorem maskBelow_eq_true : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
   rw [maskBelow, allList_eq_true]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
