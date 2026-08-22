@@ -25,8 +25,8 @@ theorem checkPoint_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (x y : ℚ) :
     checkPoint a₁ a₂ a₃ a₄ a₆ x y ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
   simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
-  have hxd : (x.den : ℚ) ≠ 0 := by exact_mod_cast x.den_nz
-  have hyd : (y.den : ℚ) ≠ 0 := by exact_mod_cast y.den_nz
+  have hxd : (x.den : ℚ) ≠ 0 := by exact mod_cast x.den_nz
+  have hyd : (y.den : ℚ) ≠ 0 := by exact mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
   have hy : (y.num : ℚ) = y * y.den := (div_eq_iff hyd).mp (Rat.num_div_den y)
   have hD : (x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2 ≠ 0 :=

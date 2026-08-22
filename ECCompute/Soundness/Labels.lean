@@ -69,13 +69,12 @@ theorem fval_iff (θ : ℤ) {p : ℕ} (hp : 1 < p) :
     rw [Int.emod_eq, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
     exact Int.emod_emod_of_dvd θ dvd_rfl
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
-    simp only [polyEval, Int.add_def, Int.mul_def]; ring
+    grind [polyEval]
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
 /-- `discrIntK a₂ a₄ a₆` equals the integer discriminant `discrInt a₂ a₄ a₆`. -/
 theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
-  simp only [discrIntK, discrInt, Int.mul_def, Int.add_def, Int.sub_eq, Int.neg_eq]
-  ring
+  grind [discrIntK, discrInt]
 
 end
 

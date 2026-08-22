@@ -12,6 +12,8 @@ Authors: Bhavik Mehta
 
 @[simp, grind =] theorem Int.sub_eq : Int.sub a b = a - b := rfl
 
+attribute [simp, grind =] Int.add_def Int.mul_def
+
 @[simp, grind =] theorem Int.neg_eq : Int.neg a = -a := rfl
 
 @[simp, grind =] theorem Int.emod_eq : Int.emod a b = a % b := rfl
