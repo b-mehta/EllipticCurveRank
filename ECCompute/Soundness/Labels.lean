@@ -66,8 +66,7 @@ theorem fval_iff (θ : ℤ) {p : ℕ} (hp : 1 < p) :
   have hp0 : p ≠ 0 := by lia
   have hpz : (p : ℤ) ≠ 0 := by exact mod_cast hp0
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
-    have hbridge : θ.emod (p : ℤ) = θ % (p : ℤ) := rfl
-    rw [hbridge, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
+    rw [Int.emod_eq, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
     exact Int.emod_emod_of_dvd θ dvd_rfl
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
     simp only [polyEval, Int.add_def, Int.mul_def]; ring
@@ -89,8 +88,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
   obtain ⟨h6, hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    have h6m : 6 % p = Nat.mod 6 p := rfl
-    rw [Nat.dvd_iff_mod_eq_zero, h6m]
+    rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
     simpa [Nat.beq_eq', beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod p, ← discrIntK_eq,
