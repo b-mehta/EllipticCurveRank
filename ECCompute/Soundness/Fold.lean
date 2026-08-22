@@ -16,32 +16,36 @@ one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 
 namespace ECCompute
 
+/-- `allBelow 0 p` is vacuously `true`. -/
+@[simp] theorem allBelow_zero {p : Nat → Bool} : allBelow 0 p = true := rfl
+
 /-- `allBelow (n + 1) p` peels the top index: it folds `p n` into `allBelow n p`. -/
-theorem allBelow_succ (n : Nat) (p : Nat → Bool) :
+@[simp, grind =] theorem allBelow_succ {n : Nat} {p : Nat → Bool} :
     allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
 
 /-- `allBelow` is `true` exactly when `p` holds at every `m < n`. -/
-theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
+@[grind =] theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
     allBelow n p ↔ ∀ m < n, p m := by
   induction n with
-  | zero => exact iff_of_true rfl (by simp)
-  | succ k ih =>
-    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
-    grind
+  | zero => simp
+  | succ k ih => rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]; grind
+
+/-- `allList` over the empty list is `true`. -/
+@[simp] theorem allList_nil {α : Type} {p : α → Bool} : allList p [] = true := rfl
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
-theorem allList_cons {α : Type} (p : α → Bool) (a : α) (l : List α) :
+@[simp, grind =] theorem allList_cons {α : Type} {p : α → Bool} {a : α} {l : List α} :
     allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
 @[grind =] theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
     allList p l ↔ ∀ a ∈ l, p a := by
   induction l with
-  | nil => simp [allList]
+  | nil => simp
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
 
 /-- `Nat.beq` and the `BEq`-dispatched `==` agree on `ℕ`. -/
-theorem _root_.Nat.beq_eq' (a b : ℕ) : Nat.beq a b = (a == b) := by
-  cases hab : a == b <;> cases hnb : Nat.beq a b <;> simp_all [beq_iff_eq, Nat.beq_eq]
+theorem _root_.Nat.beq_eq' (a b : ℕ) : a.beq b = (a == b) := by
+  cases hab : a == b <;> cases hnb : a.beq b <;> simp_all [beq_iff_eq, Nat.beq_eq]
 
 end ECCompute
