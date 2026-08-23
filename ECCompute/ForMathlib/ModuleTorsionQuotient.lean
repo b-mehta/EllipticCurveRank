@@ -3,10 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import Mathlib.LinearAlgebra.Dimension.Torsion.Finite
+
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Algebra.Module.PID
 import Mathlib.FieldTheory.Finiteness
-import Mathlib.LinearAlgebra.Dimension.Torsion.Finite
 
 /-!
 # Torsion, quotients and rank of modules over a product
@@ -25,6 +28,8 @@ binary product, and the free rank of a product with a finite factor.
 * `Submodule.prodSubtypeEquiv`: `↥(S.prod T) ≃ ↥S × ↥T`.
 * `Module.finrank_prod_finite`: `finrank ℤ (F × D) = finrank ℤ F` for a finite `D`.
 -/
+
+public section
 
 open Module
 

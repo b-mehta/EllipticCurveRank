@@ -3,9 +3,12 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import Mathlib.Algebra.Field.ZMod
+
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
-import Mathlib.Algebra.Field.ZMod
 
 /-!
 # Good denominators mod a prime
@@ -21,6 +24,8 @@ multiplication, powers and division.
 * `Rat.den_cast_eq_zero_iff`, `Rat.ne_zero_of_den_eq_pow`: reductions of a power-base denominator
   `q.den = w ^ k`.
 -/
+
+public section
 
 namespace ZMod
 
