@@ -36,12 +36,6 @@ namespace ECCompute
 
 open WeierstrassCurve Module CompleteSquare IntegralScaling
 
-/-- Two Weierstrass curves over `ℚ` are equal when their five coefficient `BEq` checks all hold. -/
-theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
-    (h₁ : W.a₁ == W'.a₁) (h₂ : W.a₂ == W'.a₂) (h₃ : W.a₃ == W'.a₃)
-    (h₄ : W.a₄ == W'.a₄) (h₆ : W.a₆ == W'.a₆) : W = W' :=
-  WeierstrassCurve.ext (eq_of_beq h₁) (eq_of_beq h₂) (eq_of_beq h₃) (eq_of_beq h₄) (eq_of_beq h₆)
-
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
 def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
