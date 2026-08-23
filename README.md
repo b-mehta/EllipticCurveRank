@@ -44,9 +44,9 @@ trusted.
 * `Certify/`, `Certify.lean`, `MainTheorem.lean` - the certificate type, the assembled rank bound
   `hasRankGE_of_certificate`, and the `certify_curve` tactic.
 * `Curves/` - certified curves, named by their id on the
-  [ICARM Elliptic Curve Rank Leaderboard](https://elliptic-rank.icarm.cloud/): rank records from
-  `20` to `31` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, curve `273` at
-  rank `30`, and curve `302` at rank `31`) and two small worked examples.
+  [ICARM Elliptic Curve Rank Leaderboard](https://elliptic-rank.icarm.cloud/): high-rank curves
+  spanning rank `20` to `31` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, and
+  curve `302` at rank `31`).
 * `ForMathlib/` - lemmas destined upstream (2-torsion, `padicValInt`, rational denominators).
 * `data/` - the points and labels each certificate reads.
 
