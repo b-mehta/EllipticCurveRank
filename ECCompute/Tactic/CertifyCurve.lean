@@ -12,8 +12,8 @@ import ECCompute.Tactic.CertifyEval
 `certify_curve` closes a goal `HasRankGE W ρ`, where `W` is a Weierstrass curve over `ℚ` whose
 coefficients are integers. It reads the coefficients and rank from the goal (so the curve must be
 `unfold`ed to a `WeierstrassCurve` literal first) and the generating points and descent labels from
-two data files, computes the descent-character matrix and its `𝔽₂` inverse, and discharges the
-referee obligations of `hasRankGE_of_certificate`.
+two data files, computes the descent-character matrix and its `𝔽₂` inverse, bundles the
+referee obligations into a `Certificate.Valid`, and applies `hasRankGE_of_certificate`.
 
 Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
@@ -185,12 +185,13 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
 private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
     (h : l.length.beq n = true) : l.length = n := Nat.eq_of_beq_eq_true h
 
-/-- Build the `hasRankGE_of_certificate` proof term directly. The model equality (via
-`WeierstrassCurve.ext_of_beq` on the five coefficient `BEq`s), the five length obligations, and the
-five referee `Bool` checks are all discharged by `Lean.reflBoolTrue`. The torsion obligation
-`|E(ℚ)[2]| ≤ 2^t` is discharged by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
-`certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
-universal `certTorsionBound_two` for `t = 2`. `torsRoot` supplies the `t = 1` root `R`. -/
+/-- Build the `hasRankGE_of_certificate` proof term directly. The referee obligations are packaged
+into a `Certificate.Valid` via its constructor: the five length obligations and the five `Bool`
+checks are discharged by `Lean.reflBoolTrue`, and the torsion obligation `|E(ℚ)[2]| ≤ 2^t` by
+`certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
+root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
+`t = 2`. The model equality is discharged by `WeierstrassCurve.ext_of_beq` on the five coefficient
+`BEq`s. `torsRoot` supplies the `t = 1` root `R`. -/
 private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
@@ -222,9 +223,10 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
       mkAppN (mkConst ``certTorsionBound_one) #[a2C, a4C, a6C, toExpr torsRoot, tpC, rb, rb, rb]
     else
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
+  let hValid := mkAppN (mkConst ``Certificate.Valid.mk)
+    #[cExpr, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
-    #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW,
-      hmodel, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
+    #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW, hmodel, hValid]
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
