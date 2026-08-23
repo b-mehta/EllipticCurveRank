@@ -65,6 +65,14 @@ private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W
     grind
   exact mod_cast hQ
 
+/-- If `some x y` doubles to zero (`some x y + some x y = 0`), then `y = negY x y`. -/
+private lemma y_eq_negY_of_self_add {W : WeierstrassCurve ℚ} {x y : ℚ}
+    {h : W.toAffine.Nonsingular x y}
+    (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
+    y = W.toAffine.negY x y := by
+  by_contra hne
+  exact Affine.Point.some_ne_zero _ (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
+
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `1 < ℓ`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
 `W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
@@ -79,10 +87,7 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
   obtain _ | ⟨x, y, hns⟩ := P
   · rfl
   exfalso
-  -- `some x y + some x y = 0` forces `y = W.negY x y`
-  have hy : y = W.toAffine.negY x y := by
-    by_contra hne
-    exact Affine.Point.some_ne_zero _ (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
+  have hy : y = W.toAffine.negY x y := y_eq_negY_of_self_add hP
   -- the Weierstrass equation and the 2-torsion condition
   have heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆ :=
     (Affine.equation_iff _ _).mp hns.1
@@ -106,10 +111,7 @@ private theorem twoTorsion_y_eq_zero_and_root {a₂ a₄ a₆ : ℤ} {x y : ℚ}
     y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
   have hmonic : (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).toPoly.Monic :=
     Cubic.monic_of_a_eq_one' ..
-  have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := by
-    by_contra hne
-    exact Affine.Point.some_ne_zero _
-      (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
+  have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := y_eq_negY_of_self_add hP
   have hy0 : y = 0 := by grind [Affine.negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
