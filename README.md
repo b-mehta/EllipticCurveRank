@@ -9,7 +9,7 @@ kernel via `Lean.reflBoolTrue`.
 
 The headline result is
 [curve 302](https://elliptic-rank.icarm.cloud/curve/302) of the ICARM Elliptic Curve Rank
-Leaderboard, at rank at least `31`:
+Leaderboard, at rank at least `31` (the curve's attribution is on the linked page):
 
 ```lean
 def curve302 : WeierstrassCurve ℚ :=
@@ -21,8 +21,7 @@ theorem curve302_hasRankGE_31 : HasRankGE curve302 31 := by
   certify_curve torsion 31 "data/curve302.txt" "data/curve302-labels.txt"
 ```
 
-The points and labels are read from `data/`. `torsion 31` concedes a bound on the 2-torsion
-dimension `t`; `fullTorsion` certifies `t` instead.
+The points and labels are read from `data/`.
 
 ## How it works
 
