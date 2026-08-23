@@ -21,7 +21,7 @@ of the nonzero `2`-torsion affine points of `W`.
   if and only if it is the `X`-coordinate of a nonzero affine point `P` with `P + P = 0`.
 -/
 
-public section
+section
 
 open Polynomial
 
@@ -38,7 +38,7 @@ lemma eval_twoTorsionPolynomial_toPoly (x : F) :
 /-- `x` is a root of the `2`-torsion polynomial of a Weierstrass curve of characteristic
 different from `2` with nonzero discriminant if and only if it is the `X`-coordinate of a nonzero
 affine `2`-torsion point. -/
-theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (hΔ : W.Δ ≠ 0)
+public theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (hΔ : W.Δ ≠ 0)
     (x : F) :
     W.twoTorsionPolynomial.toPoly.IsRoot x ↔
       ∃ y, ∃ h : W.toAffine.Nonsingular x y,
@@ -74,3 +74,5 @@ theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (h�
     linear_combination (2 * y + W.a₁ * x + W.a₃) * he - 4 * heq
 
 end WeierstrassCurve
+
+end

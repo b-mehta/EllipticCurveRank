@@ -25,7 +25,7 @@ multiplication, powers and division.
   `q.den = w ^ k`.
 -/
 
-public section
+section
 
 namespace ZMod
 
@@ -43,39 +43,39 @@ namespace Rat
 variable {p : ℕ}
 
 /-- With `q.den = w ^ k` (`k ≠ 0`), the denominator vanishes mod `p` iff `w` does. -/
-theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
+public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
     (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
   rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
 
 /-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0`. -/
-theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) : w ≠ 0 := by
+public theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) : w ≠ 0 := by
   rintro rfl; rw [zero_pow hk] at hden; exact q.den_nz hden
 
 /-- If `x` and `y` both reduce well mod `p`, so does `x + y`: the sum's denominator divides
 `x.den * y.den`. -/
-theorem den_add_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
+public theorem den_add_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x + y).den : ZMod p) ≠ 0 :=
   ZMod.natCast_ne_zero_of_dvd (Rat.add_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- Same for `x - y`, via `Rat.sub_den_dvd`. -/
-theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
+public theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x - y).den : ZMod p) ≠ 0 :=
   ZMod.natCast_ne_zero_of_dvd (Rat.sub_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- ... and for the product `x * y`. -/
-theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
+public theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
 
 /-- Powers `x ^ n` inherit the property from the multiplicative case. -/
-theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
+public theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
     ((x ^ n).den : ZMod p) ≠ 0 := by
   rw [Rat.den_pow, Nat.cast_pow]
   exact pow_ne_zero n hx
 
 /-- Division `b / a` too, as long as the divisor `a` reduces to a nonzero element (otherwise
 `a⁻¹` need not have good denominator). -/
-theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
+public theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
     (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
     ((b / a).den : ZMod p) ≠ 0 := by
   have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
@@ -93,3 +93,5 @@ theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
   exact mul_ne_zero hb hnatabs
 
 end Rat
+
+end
