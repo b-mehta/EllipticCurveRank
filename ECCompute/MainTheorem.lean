@@ -155,8 +155,8 @@ theorem rank_ge_of_certificate (c : Certificate)
 
 /-- The referee obligations a certificate carries on its own data: the five lists have length
 `rho`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is
-correct, and the `2`-torsion order is at most `2 ^ t`. `hasRankGE_of_valid` turns this, together
-with a curve match, into a rank lower bound. -/
+correct, and the `2`-torsion order is at most `2 ^ t`. `hasRankGE_of_certificate` turns this,
+together with a curve match, into a rank lower bound. -/
 structure Certificate.Valid (c : Certificate) : Prop where
   /-- The point list has `rho` entries. -/
   lenP : c.points.length = c.rho
@@ -182,24 +182,16 @@ structure Certificate.Valid (c : Certificate) : Prop where
   tors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t
 
 /-- The same bound for a general integral model. Given `W = ⟨a₁, …, a₆⟩` (`hW`) whose short-model
-change of variables is the certificate's curve (`hmodel`), transporting `rank_ge_of_certificate`
-along `generalToShortEquiv` gives `rank W ≥ c.rho - c.t`. -/
+change of variables is the certificate's curve (`hmodel`) and a certificate whose referee
+obligations hold (`hc : c.Valid`), transporting `rank_ge_of_certificate` along `generalToShortEquiv`
+gives `rank W ≥ c.rho - c.t`. -/
 theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate)
     (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
     (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
-    (hlenP : c.points.length = c.rho)
-    (hlenL : c.labels.length = c.rho)
-    (hlenB : c.B.length = c.rho)
-    (hlenM : c.M.length = c.rho)
-    (hlenQ : c.qrMasks.length = c.rho)
-    (hpt : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points)
-    (hlabP : checkPrimes c.labels)
-    (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels)
-    (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points)
-    (hinv : F2Invert.checkInv c.rho c.B c.M)
-    (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
+    (hc : c.Valid) :
     HasRankGE W (c.rho - c.t) := by
+  obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlabP, hlabC, hB, hinv, htors⟩ := hc
   -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
   rw [hW]
   -- The point/label families the soundness theorem consumes are read from the certificate's lists
@@ -225,15 +217,5 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
       hpt' hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
-
-/-- The rank bound from a bundled `Certificate.Valid`: given `W = ⟨a₁, …, a₆⟩` (`hW`) whose
-short-model change of variables is the certificate's curve (`hmodel`) and a certificate whose
-referee obligations hold (`hc`), `rank W ≥ c.rho - c.t`. -/
-theorem hasRankGE_of_valid (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate) (W : WeierstrassCurve ℚ)
-    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
-    (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
-    (hc : c.Valid) : HasRankGE W (c.rho - c.t) :=
-  hasRankGE_of_certificate a₁ a₂ a₃ a₄ a₆ c W hW hmodel hc.lenP hc.lenL hc.lenB hc.lenM hc.lenQ
-    hc.pts hc.primes hc.labels hc.matrix hc.inv hc.tors
 
 end ECCompute
