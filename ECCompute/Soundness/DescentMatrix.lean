@@ -42,10 +42,7 @@ theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b labN) {j : ℕ}
   induction labN generalizing b j with
   | nil => grind
   | cons l ls ih =>
-    simp only [checkBRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hb
-    obtain ⟨h0, hrec⟩ := hb
-    have hbe := (by decide : ∀ x y : Bool, (x.rec y.not' y = true) → x = y) _ _ h0
-    cases j <;> grind [Nat.testBit_succ, Nat.beq_eq]
+    cases j <;> grind [Nat.testBit_succ, Nat.beq_eq, Bool.rec_eq]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ labN B pt) (i : ℕ)

@@ -4,9 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Kernel
 import ECCompute.Soundness.RootMod
-import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
 /-!
@@ -45,7 +43,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
   grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
 /-- One-step unfolding of the quadratic-residue mask fold. -/
-@[simp, grind =] theorem qrMaskGo_succ (p k : ℕ) :
+@[simp, grind =] theorem qrMaskGo_succ {p k : ℕ} :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
@@ -265,7 +263,7 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
       = lambdaComputeBool a₂ a₄ p θ x := by
   have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
   have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
-  have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
+  have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
