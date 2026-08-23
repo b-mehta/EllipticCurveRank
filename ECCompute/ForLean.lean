@@ -3,10 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
 
 /-!
 # Raw kernel primitives as notation
 -/
+
+public section
 
 @[simp, grind =] theorem Nat.mod_eq_mod : Nat.mod a b = a % b := rfl
 
