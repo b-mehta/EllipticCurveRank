@@ -20,4 +20,5 @@ Authors: Bhavik Mehta
 theorem Nat.beq_eq_beq : Nat.beq a b = (a == b) := by rw [Bool.eq_iff_iff]; simp
 
 attribute [grind =] Nat.add_eq Nat.mul_eq Nat.ble_eq
+attribute [grind =] Int.add_def Int.mul_def
 attribute [grind =] Bool.and'_eq_and Bool.not'_eq_not Bool.or'_eq_or
