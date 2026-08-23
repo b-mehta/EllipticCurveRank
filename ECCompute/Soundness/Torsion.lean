@@ -28,6 +28,13 @@ open WeierstrassCurve Polynomial
 
 /-! ## The t = 0 lemma -/
 
+/-- The monic cubic `X³ + b X² + c X + d`, evaluated at `r` by `polyEval` and cast to `ℚ`, equals
+`r³ + b r² + c r + d`. -/
+private lemma polyEval_monicCubic_cast {b c d r : ℤ} :
+    (polyEval [d, c, b, 1] r : ℚ) = (r : ℚ) ^ 3 + b * r ^ 2 + c * r + d := by
+  simp only [polyEval]
+  grind
+
 /-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
 `4x` is an integer root of the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/
 private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W : WeierstrassCurve ℚ)
@@ -54,7 +61,7 @@ private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W
   -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
   have hQ : (polyEval [c₀, c₁, c₂, 1] z : ℚ) = 0 := by
     have hzcast : (4 * x) = (z : ℚ) := by simp [hz]
-    simp only [polyEval, hc₂, hc₁, hc₀]
+    rw [polyEval_monicCubic_cast]
     grind
   exact mod_cast hQ
 
@@ -207,9 +214,8 @@ private theorem cubic_factor_at_root {a₂ a₄ a₆ R : ℤ} (hR : polyEval [a�
     x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆
       = (x - R) * (x ^ 2 + (a₂ + R) * x + (a₄ + R * (a₂ + R))) := by
   have hRQ : (R : ℚ) ^ 3 + a₂ * R ^ 2 + a₄ * R + a₆ = 0 := by
-    have hz : (polyEval [a₆, a₄, a₂, 1] R : ℚ) = 0 := by simp [hR]
-    simp only [polyEval] at hz
-    grind
+    rw [← polyEval_monicCubic_cast]
+    exact mod_cast hR
   grind
 
 /-- If the `2`-division cubic `F` of the short model has integer root `R` and its cofactor quadratic
