@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 
 /-!
 # The completing-the-square model isomorphism
@@ -25,6 +27,8 @@ The point-on-curve check `checkPoint`/`checkPoints` used alongside this isomorph
 * `CompleteSquare.pointAddEquiv`: this change of variables as a group isomorphism `W.Point ≃+
   (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
+
+public section
 
 namespace ECCompute.CompleteSquare
 
@@ -175,14 +179,14 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
     grind
 
 /-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
-def fwd :
+@[expose] def fwd :
     W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
     .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W x y).mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
-def bwd :
+@[expose] def bwd :
     (shortModel W).toAffine.Point → W.toAffine.Point
   | .zero => .zero
   | .some x y h =>
