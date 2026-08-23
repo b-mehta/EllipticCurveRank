@@ -9,7 +9,7 @@ kernel via `Lean.reflBoolTrue`.
 
 The headline result is
 [curve 302](https://elliptic-rank.icarm.cloud/curve/302) of the ICARM Elliptic Curve Rank
-Leaderboard, at rank at least `31`:
+Leaderboard, at rank at least `31` (the curve's attribution is on the linked page):
 
 ```lean
 def curve302 : WeierstrassCurve ℚ :=
@@ -21,16 +21,23 @@ theorem curve302_hasRankGE_31 : HasRankGE curve302 31 := by
   certify_curve torsion 31 "data/curve302.txt" "data/curve302-labels.txt"
 ```
 
-The points and labels are read from `data/`. `torsion 31` concedes a bound on the 2-torsion
-dimension `t`; `fullTorsion` certifies `t` instead.
+The points and labels are read from `data/`.
 
 ## How it works
 
-mathlib has no Mordell-Weil theorem, so rather than compute the rank, we show that `ρ` given points
-are independent. Cremona's descent turns each point into a short bit-vector; when those vectors are
-independent, so are the points, and the rank is at least `ρ` (minus a small 2-torsion correction).
-Independence of the vectors is one invertible matrix over the two-element field, which a computer
-can check.
+`HasRankGE E ρ` says the Mordell-Weil group `E(ℚ)` contains a finitely generated `ℤ`-submodule of
+free rank at least `ρ`. The rank of a subgroup bounds the rank of the whole group, so this is
+exactly `rank E(ℚ) ≥ ρ`. Phrasing the bound through a subgroup means a proof needs only `ρ`
+explicit independent points, not the theorem that `E(ℚ)` is itself finitely generated (Mordell-Weil),
+which mathlib does not have.
+
+To exhibit such a subgroup we take `ρ` points from the leaderboard and show they are independent.
+The tool for this is a descent map, due to Cremona. Fix a prime `p` and a root `θ` of the curve's
+cubic modulo `p`. Sending a point `P = (x, y)` to `0` when `x − θ` is a square modulo `p`, and to
+`1` when it is not, defines a group homomorphism `E(ℚ) → 𝔽₂`. Several choices of `(p, θ)` combine
+into one homomorphism `E(ℚ) → 𝔽₂^k`. Points whose images are linearly independent are themselves
+independent, so the rank is at least `ρ` (minus a small 2-torsion correction). Independence of the
+`ρ` image vectors comes down to inverting one matrix over `𝔽₂`.
 
 A certificate is that precomputed data: the points, the matrix and its inverse, and the torsion
 bound. `certify_curve` rechecks it inside the Lean kernel, so nothing outside Lean's core is
