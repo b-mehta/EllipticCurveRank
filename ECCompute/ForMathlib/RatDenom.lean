@@ -48,7 +48,8 @@ public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k
   rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
 
 /-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0`. -/
-public theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) : w ≠ 0 := by
+public theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) :
+    w ≠ 0 := by
   rintro rfl; rw [zero_pow hk] at hden; exact q.den_nz hden
 
 /-- If `x` and `y` both reduce well mod `p`, so does `x + y`: the sum's denominator divides
