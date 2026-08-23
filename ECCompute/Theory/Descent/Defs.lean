@@ -58,11 +58,11 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
 @[expose] def fval (θ : ZMod p) : ZMod p :=
-  θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
+  θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
 @[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
-  3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p)
+  3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
 /-- The descent character as a raw function. -/
 @[expose] noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
