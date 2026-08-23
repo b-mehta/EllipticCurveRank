@@ -43,9 +43,6 @@ private def getLitE {α} (kind : String) (parse : Expr → Option α)
 /-- Extract the `Nat` value of a numeral `Expr`. -/
 private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? e
 
-/-- Extract the `Int` value of a numeral `Expr`; see `getNatE`. -/
-private def getIntE (e : Expr) : MetaM Int := getLitE "Int" (·.int?) getIntValue? e
-
 /-- ASCII-trim `s`, returning a `String`. -/
 private def strTrim (s : String) : String := s.trimAscii.toString
 
@@ -80,16 +77,27 @@ private def parseLabel (line : String) : Option (Nat × Int) :=
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
 
+/-- An integer literal argument: a numeral `n`, or `(-n)` for a negative. -/
+declare_syntax_cat intLit
+syntax num : intLit
+syntax "(" "-" num ")" : intLit
+
+/-- Read the `Int` value of an `intLit`. -/
+private def getIntLit : TSyntax `intLit → MetaM Int
+  | `(intLit| $n:num) => return (n.getNat : Int)
+  | `(intLit| (-$n:num)) => return -(n.getNat : Int)
+  | _ => throwError "certify_curve: expected an integer literal"
+
 /-- Syntax of the `certify_curve` tactic (see the module docstring). There are three torsion forms.
 `torsion ℓ` handles `t = 0` via a witness prime `ℓ` at which the `2`-division cubic has no root.
 `oneTorsion` handles `t = 1`, taking a short-model root `R` and a prime `ℓ` where the quadratic
 cofactor has no root. `fullTorsion` handles `t = 2` (e.g. square-discriminant curves) through the
 universal bound. -/
-syntax "certify_curve" " torsion " term:max str str : tactic
+syntax "certify_curve" " torsion " num str str : tactic
 
 syntax "certify_curve" " fullTorsion " str str : tactic
 
-syntax "certify_curve" " oneTorsion " term:max term:max str str : tactic
+syntax "certify_curve" " oneTorsion " intLit num str str : tactic
 
 /-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
 negation, or an `Int.cast` of an `ℤ` literal. Errors if the coefficient is not an integer. -/
@@ -248,14 +256,11 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   replaceMainGoal []
 
 elab_rules : tactic
-  | `(tactic| certify_curve torsion $tp $path:str $lpath:str) => do
-    let tpNat ← getNatE (← elabTermEnsuringType tp (mkConst ``Nat))
-    runCertify 0 tpNat 0 path.getString lpath.getString
+  | `(tactic| certify_curve torsion $tp:num $path:str $lpath:str) => do
+    runCertify 0 tp.getNat 0 path.getString lpath.getString
   | `(tactic| certify_curve fullTorsion $path:str $lpath:str) => do
     runCertify 2 0 0 path.getString lpath.getString
-  | `(tactic| certify_curve oneTorsion $r $l $path:str $lpath:str) => do
-    let torsRoot ← getIntE (← elabTermEnsuringType r (mkConst ``Int))
-    let tpNat ← getNatE (← elabTermEnsuringType l (mkConst ``Nat))
-    runCertify 1 tpNat torsRoot path.getString lpath.getString
+  | `(tactic| certify_curve oneTorsion $r:intLit $l:num $path:str $lpath:str) => do
+    runCertify 1 l.getNat (← getIntLit r) path.getString lpath.getString
 
 end ECCompute
