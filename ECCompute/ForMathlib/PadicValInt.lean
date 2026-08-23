@@ -3,8 +3,11 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
 import Mathlib.Data.Nat.Factorization.Defs
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
 
 /-!
 # Divisibility bounds for `padicValInt`
@@ -18,6 +21,8 @@ product identity.
 * `padicValInt_lt_of_mul_eq`: from `N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and nonzero factors,
   `v_p(N) < v_p(K)`.
 -/
+
+public section
 
 variable (p : ℕ) [Fact p.Prime]
 

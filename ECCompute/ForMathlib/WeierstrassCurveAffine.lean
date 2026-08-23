@@ -3,7 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 
 /-!
 # Negation on Weierstrass curves with `a₁ = a₃ = 0`
@@ -15,6 +17,8 @@ points is `y ↦ -y`.
 
 * `WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero`: `negY x y = -y` when `a₁ = a₃ = 0`.
 -/
+
+public section
 
 namespace WeierstrassCurve.Affine
 

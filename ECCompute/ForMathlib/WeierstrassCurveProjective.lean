@@ -3,7 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 
 /-!
 # Recognising equivalent projective representatives
@@ -17,6 +19,8 @@ equality of the underlying affine points.
 * `WeierstrassCurve.Projective.equiv_of_proportional`: `V 2 • U = U 2 • V` implies `U ≈ V`.
 * `WeierstrassCurve.Projective.equiv_of_toAffine_eq`: equal affine points imply `U ≈ V`.
 -/
+
+public section
 
 namespace WeierstrassCurve.Projective
 

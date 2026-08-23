@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 
 /-!
 # Roots of the 2-torsion polynomial
@@ -18,6 +20,8 @@ of the nonzero `2`-torsion affine points of `W`.
 * `WeierstrassCurve.isRoot_twoTorsionPolynomial_iff`: `x` is a root of `W.twoTorsionPolynomial`
   if and only if it is the `X`-coordinate of a nonzero affine point `P` with `P + P = 0`.
 -/
+
+public section
 
 open Polynomial
 
