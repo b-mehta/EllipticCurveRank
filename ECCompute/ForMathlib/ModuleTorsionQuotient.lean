@@ -29,14 +29,14 @@ binary product, and the free rank of a product with a finite factor.
 * `Module.finrank_prod_finite`: `finrank ℤ (F × D) = finrank ℤ F` for a finite `D`.
 -/
 
-public section
+section
 
 open Module
 
 namespace Module
 
 /-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
-lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
+public lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V] [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
   have := Module.Finite.of_finite (R := ZMod 2) (M := V)
   rw [Module.natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
@@ -49,7 +49,7 @@ lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
   exact isAddTorsion_of_finite
 
 /-- The free rank of `F × D` equals that of `F` when `D` is finite. -/
-lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
+public lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
     (D : Type*) [AddCommGroup D] [Finite D] :
     finrank ℤ (F × D) = finrank ℤ F := by
   have hkerD : finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
@@ -67,7 +67,7 @@ namespace LinearEquiv
 variable {H K : Type*} [AddCommGroup H] [AddCommGroup K]
 
 /-- A linear equivalence carries the range of doubling to the range of doubling. -/
-lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
+public lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
     (LinearMap.range (LinearMap.lsmul ℤ H 2)).map (e : H →ₗ[ℤ] K) =
       LinearMap.range (LinearMap.lsmul ℤ K 2) := by
   ext z
@@ -79,7 +79,7 @@ lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
     exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
 
 /-- A linear equivalence carries 2-torsion to 2-torsion. -/
-lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
+public lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
     (Submodule.torsionBy ℤ H 2).map (e : H →ₗ[ℤ] K) = Submodule.torsionBy ℤ K 2 := by
   ext z
   simp only [Submodule.mem_map, Submodule.mem_torsionBy_iff, LinearEquiv.coe_coe]
@@ -96,7 +96,7 @@ variable {R : Type*} [Ring R] {M N : Type*} [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N]
 
 /-- The quotient of a binary product by a product submodule splits as a product of quotients. -/
-def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
+public def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
     HasQuotient.Quotient (M × N) (P.prod Q) ≃ₗ[R] (M ⧸ P) × (N ⧸ Q) := by
   refine LinearEquiv.ofLinearMap
     ((P.prod Q).liftQ (LinearMap.prodMap P.mkQ Q.mkQ) ?_)
@@ -122,7 +122,7 @@ def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
     simp [← Submodule.Quotient.mk_add]
 
 /-- The subtype of a product submodule is the product of the subtypes. -/
-def prodSubtypeEquiv {M N : Type*} [AddCommGroup M] [AddCommGroup N]
+public def prodSubtypeEquiv {M N : Type*} [AddCommGroup M] [AddCommGroup N]
     (S : Submodule ℤ M) (T : Submodule ℤ N) : ↥(S.prod T) ≃ ↥S × ↥T where
   toFun x := (⟨x.1.1, x.2.1⟩, ⟨x.1.2, x.2.2⟩)
   invFun y := ⟨(y.1.1, y.2.1), y.1.2, y.2.2⟩
@@ -130,3 +130,5 @@ def prodSubtypeEquiv {M N : Type*} [AddCommGroup M] [AddCommGroup N]
   right_inv _ := rfl
 
 end Submodule
+
+end
