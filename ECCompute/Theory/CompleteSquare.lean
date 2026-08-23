@@ -250,3 +250,5 @@ public def pointAddEquiv :
 end GroupIso
 
 end ECCompute.CompleteSquare
+
+end
