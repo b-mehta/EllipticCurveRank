@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
 
 /-!
 # Evaluator-side helpers for the `certify_curve` command
@@ -58,20 +59,20 @@ def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
 
 /-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `labs[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
-def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
+public def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
   xs.map fun x =>
     bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`. Mirrors `ECCompute.qrMask` (OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`); the certificate
 carries this so each Legendre-character check is a bitmask lookup. -/
-def qrMaskNat (p : Nat) : Nat :=
+public def qrMaskNat (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k => acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
 `none` if the matrix is singular. -/
-def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
+public def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
   let mut inv : Array Nat := (Array.range n).map (fun i => (1 <<< i : Nat))
   for col in [0:n] do
