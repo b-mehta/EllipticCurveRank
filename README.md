@@ -25,11 +25,17 @@ The points and labels are read from `data/`.
 
 ## How it works
 
-mathlib has no Mordell-Weil theorem, so rather than compute the rank, we show that `ρ` given points
-are independent. Cremona's descent turns each point into a short bit-vector; when those vectors are
-independent, so are the points, and the rank is at least `ρ` (minus a small 2-torsion correction).
-Independence of the vectors is one invertible matrix over the two-element field, which a computer
-can check.
+`HasRankGE E ρ` says the Mordell-Weil group `E(ℚ)` contains a finitely generated `ℤ`-submodule of
+free rank at least `ρ`. The rank of a subgroup bounds the rank of the whole group, so this is
+exactly `rank E(ℚ) ≥ ρ`. Phrasing the bound through a subgroup means a proof needs only `ρ`
+explicit independent points, not the theorem that `E(ℚ)` is itself finitely generated (Mordell-Weil),
+which mathlib does not have.
+
+To exhibit such a subgroup we take `ρ` points from the leaderboard and show they are independent.
+Cremona's descent sends each point to a short vector over the two-element field; when those vectors
+are independent, so are the points, and the rank is at least `ρ` (minus a small 2-torsion
+correction). Independence of the vectors is one invertible matrix over `𝔽₂`, which a computer can
+check.
 
 A certificate is that precomputed data: the points, the matrix and its inverse, and the torsion
 bound. `certify_curve` rechecks it inside the Lean kernel, so nothing outside Lean's core is
