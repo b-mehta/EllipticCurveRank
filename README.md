@@ -32,11 +32,12 @@ explicit independent points, not the theorem that `E(ℚ)` is itself finitely ge
 which mathlib does not have.
 
 To exhibit such a subgroup we take `ρ` points from the leaderboard and show they are independent.
-The tool for this is a descent map, due to Cremona: a group homomorphism from `E(ℚ)` to a vector
-space over the two-element field `𝔽₂`, evaluated one point at a time. Points whose images are
-linearly independent are themselves independent, so the rank is at least `ρ` (minus a small
-2-torsion correction). Independence of the `ρ` image vectors comes down to inverting one matrix
-over `𝔽₂`.
+The tool for this is a descent map, due to Cremona. Fix a prime `p` and a root `θ` of the curve's
+cubic modulo `p`. Sending a point `P = (x, y)` to `0` when `x − θ` is a square modulo `p`, and to
+`1` when it is not, defines a group homomorphism `E(ℚ) → 𝔽₂`. Several choices of `(p, θ)` combine
+into one homomorphism `E(ℚ) → 𝔽₂^k`. Points whose images are linearly independent are themselves
+independent, so the rank is at least `ρ` (minus a small 2-torsion correction). Independence of the
+`ρ` image vectors comes down to inverting one matrix over `𝔽₂`.
 
 A certificate is that precomputed data: the points, the matrix and its inverse, and the torsion
 bound. `certify_curve` rechecks it inside the Lean kernel, so nothing outside Lean's core is
