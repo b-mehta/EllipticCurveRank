@@ -8,20 +8,20 @@ For a Weierstrass curve `E/ℚ` and an integer `ρ`, ECCompute produces a term o
 kernel via `Lean.reflBoolTrue`.
 
 The headline result is
-[curve 273](https://elliptic-rank.icarm.cloud/curve/273) of the ICARM Elliptic Curve Rank
-Leaderboard, at rank at least `30`:
+[curve 302](https://elliptic-rank.icarm.cloud/curve/302) of the ICARM Elliptic Curve Rank
+Leaderboard, at rank at least `31`:
 
 ```lean
-def curve273 : WeierstrassCurve ℚ :=
-  ⟨1, 0, 0, -201769035260418549083594900060734240952308696994802735114305555,
-    1151107939141058565733479426024323225135665982951300586808823640527729578307228357301072889377⟩
+def curve302 : WeierstrassCurve ℚ :=
+  ⟨1, 1, 1, -1284727764113567728281797636015784768866707681415849262157224232063,
+    560368321454261339256859338901915312332769858684945406858043869199456710681989058863306170127006181⟩
 
-theorem curve273_hasRankGE_30 : HasRankGE curve273 30 := by
-  unfold curve273
-  certify_curve torsion 23 points "data/curve273.txt" labels "data/curve273-labels.txt"
+theorem curve302_hasRankGE_31 : HasRankGE curve302 31 := by
+  unfold curve302
+  certify_curve torsion 31 "data/curve302.txt" "data/curve302-labels.txt"
 ```
 
-The points and labels are read from `data/`. `torsion 23` concedes a bound on the 2-torsion
+The points and labels are read from `data/`. `torsion 31` concedes a bound on the 2-torsion
 dimension `t`; `fullTorsion` certifies `t` instead.
 
 ## How it works
@@ -45,8 +45,8 @@ trusted.
   `hasRankGE_of_certificate`, and the `certify_curve` tactic.
 * `Curves/` - certified curves, named by their id on the
   [ICARM Elliptic Curve Rank Leaderboard](https://elliptic-rank.icarm.cloud/): rank records from
-  `20` to `30` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, and curve `273` at
-  rank `30`) and two small worked examples.
+  `20` to `31` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, curve `273` at
+  rank `30`, and curve `302` at rank `31`) and two small worked examples.
 * `ForMathlib/` - lemmas destined upstream (2-torsion, `padicValInt`, rational denominators).
 * `data/` - the points and labels each certificate reads.
 
