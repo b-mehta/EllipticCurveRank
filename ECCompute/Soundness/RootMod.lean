@@ -67,7 +67,7 @@ theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
 no integer root. -/
 theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod cs ℓ) (u : ℤ) : polyEval (cs ++ [1]) u ≠ 0 := by
-  rw [monicHasNoRootMod, allBelow_eq_true] at h
+  rw [monicHasNoRootMod, allBelow_iff] at h
   replace h : ∀ r < ℓ, (polyEval (cs ++ [1]) r : ZMod ℓ) ≠ 0 := by
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     grind

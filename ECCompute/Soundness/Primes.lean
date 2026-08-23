@@ -33,7 +33,7 @@ namespace ECCompute
 
 /-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
-@[grind =] theorem passes_true_iff {x : ℕ} {L : List ℕ} :
+@[grind =] theorem passes_iff {x : ℕ} {L : List ℕ} :
     passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L <;> grind
 
@@ -54,7 +54,7 @@ theorem prime_of_passes {n : ℕ} (h2 : 2 ≤ n) (h529 : n < 529)
   have hplt23 : p < 23 := lt_of_pow_lt_pow_left' 2 (by grind)
   have hpmem : p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := primes_below_23 hplt23 hpp
   have hpltn : p < n := by nlinarith [hpp.two_le, hsq]
-  rcases (passes_true_iff.mp hpass) p hpmem with hmod | hle
+  rcases (passes_iff.mp hpass) p hpmem with hmod | hle
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
