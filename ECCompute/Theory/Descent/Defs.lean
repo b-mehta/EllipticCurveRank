@@ -75,7 +75,7 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
 
 @[simp]
 theorem lambda_zero (θ : ZMod p) :
-    lambda a₂ a₄ a₆ p θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 :=
+    lambda a₂ a₄ a₆ p θ 0 = 0 :=
   rfl
 
 /-! ### The hypotheses of the descent lemma
