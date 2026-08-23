@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Data.ZMod.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # The descent character: basic definitions
@@ -26,6 +28,8 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 * `ECCompute.lambda`: the raw function `E(ℚ) → ZMod 2`.
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
+
+public section
 
 open WeierstrassCurve
 
@@ -61,7 +65,7 @@ def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
   3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p)
 
 /-- The descent character as a raw function. -/
-noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
+@[expose] noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
     if (x.den : ZMod p) = 0 then 0

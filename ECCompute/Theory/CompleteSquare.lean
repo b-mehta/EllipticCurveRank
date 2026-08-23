@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 
 /-!
 # The completing-the-square model isomorphism
@@ -26,6 +28,8 @@ The point-on-curve check `checkPoint`/`checkPoints` used alongside this isomorph
   (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
 
+section
+
 namespace ECCompute.CompleteSquare
 
 open WeierstrassCurve
@@ -40,33 +44,33 @@ def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ :=
 
 /-- The short model `y² = x³ + a₂'x² + a₄'x + a₆'` obtained from `W` by completing the square. Its
 `a₁` and `a₃` coefficients vanish (`shortModel_a₁`, `shortModel_a₃`). -/
-def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
+public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
   completeSquare W • W
 
 @[simp]
-theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
+public theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₁]
 
 @[simp]
-theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₂, inv_one,
     Units.val_one, one_pow]
   ring
 
 @[simp]
-theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
+public theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₃]
 
 @[simp]
-theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₄, inv_one,
     Units.val_one, one_pow]
   ring
 
 @[simp]
-theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₆, inv_one,
     Units.val_one, one_pow]
@@ -89,12 +93,12 @@ variable (W : WeierstrassCurve ℚ)
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
 invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
-private theorem or_ne_zero_sub_iff (A B σ : ℚ) :
+theorem or_ne_zero_sub_iff (A B σ : ℚ) :
     (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
   by_cases hB : B = 0 <;> simp [hB]
 
 /-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
+public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
@@ -229,7 +233,7 @@ theorem fwd_map_add (P Q : W.toAffine.Point) :
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
 isomorphism between the Mordell-Weil groups of the general model `W` and the short model
 `shortModel W`, so any rank lower bound on the short model transfers back. -/
-def pointAddEquiv :
+public def pointAddEquiv :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
   AddEquiv.mk'
     ⟨fwd W, bwd W,
@@ -246,3 +250,5 @@ def pointAddEquiv :
 end GroupIso
 
 end ECCompute.CompleteSquare
+
+end
