@@ -30,6 +30,13 @@ open Lean Elab Tactic Meta
 
 namespace ECCompute
 
+/-- Two Weierstrass curves over `ℚ` are equal when their five coefficient `BEq` checks all hold.
+The tactic uses this to prove the model equality from five `reflBoolTrue` witnesses. -/
+theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
+    (h₁ : W.a₁ == W'.a₁) (h₂ : W.a₂ == W'.a₂) (h₃ : W.a₃ == W'.a₃)
+    (h₄ : W.a₄ == W'.a₄) (h₆ : W.a₆ == W'.a₆) : W = W' :=
+  WeierstrassCurve.ext (eq_of_beq h₁) (eq_of_beq h₂) (eq_of_beq h₃) (eq_of_beq h₄) (eq_of_beq h₆)
+
 /-- Extract a literal from `e`: try `parse` on the raw term, then on its `whnf`, then `fallback`.
 `kind` names the expected type in the error. -/
 private def getLitE {α} (kind : String) (parse : Expr → Option α)
