@@ -45,6 +45,7 @@ import ECCompute.Curves.Curve13
 import ECCompute.Curves.Curve14
 import ECCompute.Curves.Curve74
 import ECCompute.Curves.Curve273
+import ECCompute.Curves.Curve302
 
 -- Upstream candidates
 import ECCompute.ForMathlib.ModuleTorsionQuotient
