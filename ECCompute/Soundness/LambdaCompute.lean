@@ -263,7 +263,7 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
       = lambdaComputeBool a₂ a₄ p θ x := by
   have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
   have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
-  have hden : (Nat.mod xden p = 0) = ((x.den : ZMod p) = 0) := by
+  have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
