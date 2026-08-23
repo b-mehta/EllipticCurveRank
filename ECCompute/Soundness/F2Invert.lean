@@ -128,13 +128,10 @@ theorem checkInvRow_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) (hc : che
   induction M generalizing k k' with
   | nil => simp at hk'
   | cons m ms ih =>
-    simp only [checkInvRow_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
-    obtain ⟨h0, hrec⟩ := hc
     cases k' with
     | zero =>
       have hbnd : b &&& m < 2 ^ n := Nat.and_lt_two_pow b (hM m (by simp))
-      rw [popParityK_eq (by grind) hn, Bool.rec_eq] at h0
-      grind
+      grind [popParityK_eq, Bool.rec_eq]
     | succ k'' =>
       grind
 
@@ -146,10 +143,8 @@ theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
   induction B generalizing i i' with
   | nil => simp at hi'
   | cons b bs ih =>
-    simp only [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
-    obtain ⟨hrow, hrec⟩ := hc
     cases i' with
-    | zero => simpa using checkInvRow_true hn hM hrow hk'
+    | zero => grind [checkInvRow_true]
     | succ i'' => grind
 
 /-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
