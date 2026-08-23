@@ -69,8 +69,8 @@ private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
-/-- `ℚ` Expr for `num / den` (reduced) via the proof-free `mkRat`; normalization is kernel
-computation, so no `Coprime`/`den ≠ 0` proof is constructed. -/
+/-- `ℚ` Expr for `num / den` (reduced) via `mkRat`, whose reduction the kernel performs by
+computation, leaving the emitted term a bare numerator/denominator pair. -/
 private def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
@@ -117,23 +117,27 @@ private def readGoal (goal : MVarId) :
   return (← getNatE rhoE, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
+/-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
+line kind in the error message. -/
+private def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
+    MetaM (Array α) := do
+  ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l => do
+    if (strTrim l).isEmpty then return none
+    match parse l with
+    | some a => return some a
+    | none => throwError "certify_curve: malformed {what} line: {l}"
+
 /-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
 `rho` entries. -/
 private def readData (path lpath : String) (rho : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
-  let pts ← (((← IO.FS.readFile path).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
-    fun l => match parseLine l with
-      | some p => pure p
-      | none => throwError "certify_curve: malformed points line: {l}"
-  let lbls ← (((← IO.FS.readFile lpath).splitOn "\n").filter fun l => !(strTrim l).isEmpty).mapM
-    fun l => match parseLabel l with
-      | some x => pure x
-      | none => throwError "certify_curve: malformed labels line: {l}"
-  if pts.length ≠ rho then
-    throwError "certify_curve: points file has {pts.length} points but the goal rank is {rho}"
-  if lbls.length ≠ rho then
-    throwError "certify_curve: labels file has {lbls.length} labels but the goal rank is {rho}"
-  return (pts.toArray, lbls.toArray)
+  let pts ← readEntries "points" parseLine path
+  let lbls ← readEntries "labels" parseLabel lpath
+  if pts.size ≠ rho then
+    throwError "certify_curve: points file has {pts.size} points but the goal rank is {rho}"
+  if lbls.size ≠ rho then
+    throwError "certify_curve: labels file has {lbls.size} labels but the goal rank is {rho}"
+  return (pts, lbls)
 
 /-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
 private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (rho : Nat) :
