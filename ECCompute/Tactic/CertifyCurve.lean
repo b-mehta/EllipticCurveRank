@@ -69,8 +69,8 @@ private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
-/-- `ℚ` Expr for `num / den` (reduced) via the proof-free `mkRat`; normalization is kernel
-computation, so no `Coprime`/`den ≠ 0` proof is constructed. -/
+/-- `ℚ` Expr for `num / den` (reduced) via `mkRat`, whose reduction the kernel performs by
+computation, leaving the emitted term a bare numerator/denominator pair. -/
 private def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
