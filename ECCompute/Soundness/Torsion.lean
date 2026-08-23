@@ -61,7 +61,7 @@ private theorem exists_intRoot_of_twoTorsion (a₁ a₂ a₃ a₄ a₆ : ℤ) (W
     simp only [polyEval, Int.add_def, Int.mul_def, hc₂, hc₁, hc₀]
     push_cast
     grind
-  exact_mod_cast hQ
+  exact mod_cast hQ
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `1 < ℓ`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
@@ -128,7 +128,7 @@ private theorem card_twoTorsion_le_of_xcoords (a₂ a₄ a₆ : ℤ) {Sx : Finse
     ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).Finite ∧
       Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ Sx.card + 1 := by
   classical
-  set W := curve a₂ a₄ a₆ with hW
+  set W := curve a₂ a₄ a₆
   set T : Set W.toAffine.Point := {P | P + P = 0} with hT
   set ι : W.toAffine.Point → Option ℚ :=
     fun P ↦ match P with
