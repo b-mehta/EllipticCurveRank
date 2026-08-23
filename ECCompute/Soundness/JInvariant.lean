@@ -3,7 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 
 /-!
 # Certifying the j-invariant
@@ -15,6 +17,8 @@ model `⟨a₁, …, a₆⟩`.
 `j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`;
 `isElliptic_of_Δ_ne_zero` supplies the `IsElliptic` instance from a nonzero discriminant.
 -/
+
+public section
 
 namespace ECCompute
 

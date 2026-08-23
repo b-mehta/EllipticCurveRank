@@ -3,7 +3,9 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.Data.ZMod.Basic
+module
+
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # Reducing an integer to a `Nat` residue before casting to `ZMod p`
@@ -11,6 +13,8 @@ import Mathlib.Data.ZMod.Basic
 These lemmas take a checker's `Nat` residue computation to a statement about the integer it stands
 for.
 -/
+
+public section
 
 namespace ECCompute
 
