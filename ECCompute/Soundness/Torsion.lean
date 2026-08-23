@@ -19,7 +19,7 @@ then `W` has no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
 * `ECCompute.no_nonzero_twoTorsion_of_monicHasNoRootMod` : the t = 0 lemma. If the `2`-division
   cubic's search returns `true` (no root), then every 2-torsion point of `W` is `0`.
 * `ECCompute.card_twoTorsion_le_four`, `ECCompute.card_twoTorsion_le_two_of_root_cofactor`,
-  `ECCompute.certTorsionBound_zero/one/two` : the counting bounds behind each torsion mode.
+  `ECCompute.certTorsionBound_zero/one/two` : the counting bound for each value of `t`.
 -/
 
 namespace ECCompute
@@ -70,7 +70,7 @@ private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W
 `W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
 theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
     (a₁ a₂ a₃ a₄ a₆ : ℤ) {ℓ : ℕ} (hℓ : 1 < ℓ)
-    (W : WeierstrassCurve ℚ)
+    {W : WeierstrassCurve ℚ}
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
     (h : monicHasNoRootMod
       [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ)
@@ -85,8 +85,8 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
     exact Affine.Point.some_ne_zero _ (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
   -- the Weierstrass equation and the 2-torsion condition
   have heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆ :=
-    (WeierstrassCurve.Affine.equation_iff _ _).mp hns.1
-  have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by grind [WeierstrassCurve.Affine.negY]
+    (Affine.equation_iff _ _).mp hns.1
+  have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by grind [Affine.negY]
   -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
   obtain ⟨z, hz⟩ :=
     exists_intRoot_of_twoTorsion W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
@@ -110,10 +110,10 @@ private theorem twoTorsion_y_eq_zero_and_root {a₂ a₄ a₆ : ℤ} {x y : ℚ}
     by_contra hne
     exact Affine.Point.some_ne_zero _
       (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
-  have hy0 : y = 0 := by grind [WeierstrassCurve.Affine.negY, curve]
+  have hy0 : y = 0 := by grind [Affine.negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
-  have heq := (WeierstrassCurve.Affine.equation_iff _ _).mp h.1
+  have heq := (Affine.equation_iff _ _).mp h.1
   simp only [curve, hy0] at heq
   grind
 
@@ -192,9 +192,9 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (a₂ a₄ a₆ : ℤ) {ℓ 
     Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
   have hnn : ∀ P : (curve a₂ a₄ a₆).toAffine.Point, P + P = 0 → P = 0 := by
     intro P hP
-    refine no_nonzero_twoTorsion_of_monicHasNoRootMod 0 a₂ 0 a₄ a₆ hℓ _
+    refine no_nonzero_twoTorsion_of_monicHasNoRootMod 0 a₂ 0 a₄ a₆ hℓ
       rfl rfl rfl rfl rfl ?_ P hP
-    have hlist : [16 * ((0 : ℤ) ^ 2 + 4 * a₆), 8 * (2 * a₄ + 0 * 0), (0 : ℤ) ^ 2 + 4 * a₂]
+    have hlist : [16 * (0 ^ 2 + 4 * a₆), 8 * (2 * a₄ + 0 * 0), 0 ^ 2 + 4 * a₂]
         = [64 * a₆, 16 * a₄, 4 * a₂] := by grind
     rwa [hlist]
   have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
