@@ -28,7 +28,7 @@ The point-on-curve check `checkPoint`/`checkPoints` used alongside this isomorph
   (shortModel W).Point`, so a rank lower bound transfers between the two models.
 -/
 
-public section
+section
 
 namespace ECCompute.CompleteSquare
 
@@ -39,38 +39,38 @@ open WeierstrassCurve
 /-- The change of variables `⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩` completing the square for a curve
 `W`: the substitution `y ↦ y - (W.a₁ x + W.a₃)/2` (over `ℚ`, where `2` is invertible) that clears
 the `a₁` and `a₃` coefficients. -/
-private def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ :=
+def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ :=
   ⟨1, 0, -W.a₁ / 2, -W.a₃ / 2⟩
 
 /-- The short model `y² = x³ + a₂'x² + a₄'x + a₆'` obtained from `W` by completing the square. Its
 `a₁` and `a₃` coefficients vanish (`shortModel_a₁`, `shortModel_a₃`). -/
-def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
+public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
   completeSquare W • W
 
 @[simp]
-theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
+public theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₁]
 
 @[simp]
-theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₂, inv_one,
     Units.val_one, one_pow]
   ring
 
 @[simp]
-theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
+public theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
   grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₃]
 
 @[simp]
-theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₄, inv_one,
     Units.val_one, one_pow]
   ring
 
 @[simp]
-theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
   simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₆, inv_one,
     Units.val_one, one_pow]
@@ -78,7 +78,7 @@ theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
 
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
-private theorem equation_completeSquare (W : WeierstrassCurve ℚ) (x y : ℚ) :
+theorem equation_completeSquare (W : WeierstrassCurve ℚ) (x y : ℚ) :
     W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff]
@@ -93,12 +93,12 @@ variable (W : WeierstrassCurve ℚ)
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
 invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
-private theorem or_ne_zero_sub_iff (A B σ : ℚ) :
+theorem or_ne_zero_sub_iff (A B σ : ℚ) :
     (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
   by_cases hB : B = 0 <;> simp [hB]
 
 /-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
+public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by
@@ -106,7 +106,7 @@ theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/
-private theorem nonsingular_completeSquare (x y : ℚ) :
+theorem nonsingular_completeSquare (x y : ℚ) :
     W.toAffine.Nonsingular x y ↔
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
@@ -125,19 +125,19 @@ private theorem nonsingular_completeSquare (x y : ℚ) :
   exact or_ne_zero_sub_iff _ _ _
 
 /-- The `Y`-negation commutes with the completing-the-square shift. -/
-private theorem negY_completeSquare (x y : ℚ) :
+theorem negY_completeSquare (x y : ℚ) :
     (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
       = W.toAffine.negY x y + (W.a₁ * x + W.a₃) / 2 := by
   grind [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
-private theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
+theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
     (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
       = W.toAffine.addX x₁ x₂ ℓ := by
   grind [WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂]
 
 /-- The `Y`-coordinate of the sum commutes with the shift. -/
-private theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
+theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
     (shortModel W).toAffine.addY x₁ x₂ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) (ℓ + W.a₁ / 2)
       = W.toAffine.addY x₁ x₂ y₁ ℓ
         + (W.a₁ * W.toAffine.addX x₁ x₂ ℓ + W.a₃) / 2 := by
@@ -148,7 +148,7 @@ private theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
 in the non-degenerate branch of the addition law. -/
-private theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
+theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
     (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂)
     (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
@@ -179,14 +179,14 @@ private theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
     grind
 
 /-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
-@[expose] private def fwd :
+def fwd :
     W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
     .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W x y).mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
-@[expose] private def bwd :
+def bwd :
     (shortModel W).toAffine.Point → W.toAffine.Point
   | .zero => .zero
   | .some x y h =>
@@ -194,14 +194,14 @@ private theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
         (by simpa using h))
 
-@[simp] private theorem fwd_some (x y : ℚ)
+@[simp] theorem fwd_some (x y : ℚ)
     (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h)
       = .some x (y + (W.a₁ * x + W.a₃) / 2)
         ((nonsingular_completeSquare W x y).mp h) :=
   rfl
 
-@[simp] private theorem bwd_some (x y : ℚ)
+@[simp] theorem bwd_some (x y : ℚ)
     (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)
       = .some x (y - (W.a₁ * x + W.a₃) / 2)
@@ -210,7 +210,7 @@ private theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
   rfl
 
 /-- The forward map is additive: it commutes with the affine group law on both models. -/
-private theorem fwd_map_add (P Q : W.toAffine.Point) :
+theorem fwd_map_add (P Q : W.toAffine.Point) :
     fwd W (P + Q) = fwd W P + fwd W Q := by
   rcases P with _ | ⟨x₁, y₁, h₁⟩ <;> rcases Q with _ | ⟨x₂, y₂, h₂⟩
   any_goals rfl
@@ -233,7 +233,7 @@ private theorem fwd_map_add (P Q : W.toAffine.Point) :
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
 isomorphism between the Mordell-Weil groups of the general model `W` and the short model
 `shortModel W`, so any rank lower bound on the short model transfers back. -/
-def pointAddEquiv :
+public def pointAddEquiv :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
   AddEquiv.mk'
     ⟨fwd W, bwd W,
