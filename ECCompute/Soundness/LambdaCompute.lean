@@ -270,8 +270,4 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
 
-/-- Any integer is the difference of the `Nat`s `v.toNat` and `(-v).toNat` (one of them zero). This
-is how the point numerator is fed to `lambdaComputeBoolNatMask` as an `mp - mn` pair. -/
-theorem int_toNat_sub (v : ℤ) : v = (v.toNat : ℤ) - ((-v).toNat : ℤ) := by lia
-
 end ECCompute
