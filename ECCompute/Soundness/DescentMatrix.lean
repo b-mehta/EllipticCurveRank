@@ -101,7 +101,7 @@ theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
       L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
       = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
     lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _
-      (intResNat_cast hp.ne' L.2) (int_toNat_sub P.1.num) rfl
+      (intResNat_cast hp.ne' L.2) (Int.toNat_sub_toNat_neg P.1.num).symm rfl
   rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), Fin.getElem_fin, hcell, hbridge,
     lambdaCompute_eq_bool]
 

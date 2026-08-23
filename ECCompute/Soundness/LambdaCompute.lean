@@ -42,34 +42,31 @@ square mod `p`.
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
 theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
-  rw [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq, Nat.and_one_is_mod,
-    Nat.testBit_eq_decide_div_mod_eq]
-  simp
+  grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
 /-- One-step unfolding of the quadratic-residue mask fold. -/
 @[simp, grind =] theorem qrMaskGo_succ (p k : ℕ) :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
-theorem testBit_qrMaskGo (p : ℕ) (a : ℕ) :
-    ∀ f : ℕ, Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
-  intro f
+theorem testBit_qrMaskGo (p a f : ℕ) :
+    Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
   induction f with
   | zero =>
     simp only [qrMaskGo]
     constructor
     · rintro h; simp at h
-    · rintro ⟨j, hj, hj0, _⟩; omega
+    · rintro ⟨j, hj, hj0, _⟩; lia
   | succ k ih =>
     rw [qrMaskGo_succ, Nat.lor_eq, Nat.testBit_lor, Nat.shiftLeft_eq', Nat.shiftLeft_eq,
       Nat.one_mul, Nat.testBit_two_pow, Bool.or_eq_true, ih]
     constructor
     · rintro (⟨j, hj1, hjk, hja⟩ | hb)
-      · exact ⟨j, hj1, by omega, hja⟩
-      · exact ⟨k + 1, by omega, by omega, of_decide_eq_true hb⟩
+      · exact ⟨j, hj1, by lia, hja⟩
+      · exact ⟨k + 1, by lia, by lia, of_decide_eq_true hb⟩
     · rintro ⟨j, hj1, hjk, hja⟩
       rcases Nat.lt_succ_iff_lt_or_eq.mp (Nat.lt_succ_of_le hjk) with h | h
-      · exact Or.inl ⟨j, hj1, by omega, hja⟩
+      · exact Or.inl ⟨j, hj1, by lia, hja⟩
       · subst h
         refine Or.inr ?_
         simp only [decide_eq_true_eq]
@@ -81,10 +78,10 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
     (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   have hpp : p.Prime := hp.out
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
-  have hp3 : 3 ≤ p := by have := hpp.two_le; omega
+  have hp3 : 3 ≤ p := by have := hpp.two_le; lia
   constructor
   · rintro ⟨j, hj1, hjk, hja⟩
-    have hjp : j < p := by omega
+    have hjp : j < p := by lia
     have hcast : (a : ZMod p) = (j : ZMod p) * (j : ZMod p) := by
       rw [← Nat.cast_mul, ← hja, ZMod.natCast_mod, Nat.cast_mul]
     refine ⟨?_, ⟨(j : ZMod p), hcast⟩⟩
@@ -92,7 +89,7 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
     rw [h0] at hja
     have hdvd : p ∣ j * j := Nat.dvd_of_mod_eq_zero hja
     rcases (Nat.Prime.dvd_mul hpp).mp hdvd with hd | hd <;>
-      exact absurd (Nat.le_of_dvd (by omega) hd) (by omega)
+      exact absurd (Nat.le_of_dvd (by lia) hd) (by lia)
   · rintro ⟨ha0, ⟨x, hx⟩⟩
     have hxne : x ≠ 0 := by
       rintro rfl
@@ -112,13 +109,13 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
         rw [hx, Nat.cast_mul, hxcast]
       have hmod := (ZMod.natCast_eq_natCast_iff' a (v * v) p).mp hc
       rw [Nat.mod_eq_of_lt ha] at hmod
-      omega
+      lia
     by_cases hlow : v ≤ (p - 1) / 2
     · exact ⟨v, hv1, hlow, haeq⟩
-    · refine ⟨p - v, by omega, by omega, ?_⟩
+    · refine ⟨p - v, by lia, by lia, ?_⟩
       have hsq : (p - v) * (p - v) % p = v * v % p := by
         have hkey : (((p - v) * (p - v) : ℕ) : ZMod p) = ((v * v : ℕ) : ZMod p) := by
-          push_cast [Nat.cast_sub (by omega : v ≤ p)]
+          push_cast [Nat.cast_sub (by lia : v ≤ p)]
           ring_nf
           rw [ZMod.natCast_self]
           ring
@@ -136,16 +133,7 @@ prime). This is what lets a verified mask evaluate the descent character at each
 theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
     qrLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
   have hmask := qrMask_testBit p hp2 a ha
-  rw [qrLookupBool]
-  rcases eq_or_ne (((qrMask p).shiftRight a).land 1) 1 with h | h
-  · rw [h, Nat.beq_refl]
-    exact (decide_eq_true (hmask.mp h)).symm
-  · have hbf : (((qrMask p).shiftRight a).land 1).beq 1 = false := by
-      rw [Bool.eq_false_iff, ne_eq, Nat.beq_eq]; exact h
-    rw [hbf]
-    symm
-    simp only [decide_eq_false_iff_not]
-    exact fun hc ↦ h (hmask.mpr hc)
+  grind [qrLookupBool]
 
 /-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
 
@@ -204,7 +192,7 @@ theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
 `lambdaComputeBool` mirrors `lambdaCompute` in `Bool` (`1 ↦ true`, `0 ↦ false`), so certificate
 matrix checks compare `Bool`s; `lambdaCompute_eq_bool` reads the result back into `ZMod 2`. -/
 
-/-- `Bool` mirror of `lambdaCompute`, with `false`/`true` in place of `0`/`1 : ZMod 2`. -/
+/-- `Bool` mirror of `lambdaCompute`: `true` for `1 : ZMod 2`, `false` for `0`. -/
 noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
   if (x.den : ZMod p) = 0 then false
   else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ p θ)
@@ -281,9 +269,5 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
-
-/-- Any integer is the difference of the `Nat`s `v.toNat` and `(-v).toNat` (one of them zero). This
-is how the point numerator is fed to `lambdaComputeBoolNatMask` as an `mp - mn` pair. -/
-theorem int_toNat_sub (v : ℤ) : v = (v.toNat : ℤ) - ((-v).toNat : ℤ) := by omega
 
 end ECCompute
