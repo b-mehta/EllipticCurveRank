@@ -103,6 +103,6 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
 theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
-  rwa [checkLabels, allList_eq_true] at h
+  rwa [checkLabels, allList_iff] at h
 
 end ECCompute

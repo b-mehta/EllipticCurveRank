@@ -9,7 +9,7 @@ import ECCompute.Kernel
 /-!
 # Soundness of the `Bool` folds
 
-`allBelow_eq_true` and `allList_eq_true` characterize the kernel folds `ECCompute.allBelow` and
+`allBelow_iff` and `allList_iff` characterize the kernel folds `ECCompute.allBelow` and
 `ECCompute.allList` (from `Kernel`) as a bounded `∀` and a list `∀`, the `succ`/`cons` lemmas peel
 one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 -/
@@ -24,7 +24,7 @@ namespace ECCompute
     allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
 
 /-- `allBelow` is `true` exactly when `p` holds at every `m < n`. -/
-@[grind =] theorem allBelow_eq_true {n : Nat} {p : Nat → Bool} :
+@[grind =] theorem allBelow_iff {n : Nat} {p : Nat → Bool} :
     allBelow n p ↔ ∀ m < n, p m := by
   induction n with
   | zero => simp
@@ -38,7 +38,7 @@ namespace ECCompute
     allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
-@[grind =] theorem allList_eq_true {α : Type} {p : α → Bool} {l : List α} :
+@[grind =] theorem allList_iff {α : Type} {p : α → Bool} {l : List α} :
     allList p l ↔ ∀ a ∈ l, p a := by
   induction l with
   | nil => simp

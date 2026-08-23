@@ -154,14 +154,14 @@ theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
     | succ i'' => grind
 
 /-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
-@[grind =] theorem maskBelow_eq_true : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
-  rw [maskBelow, allList_eq_true]
+@[grind =] theorem maskBelow_iff : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
+  rw [maskBelow, allList_iff]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
 /-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
 theorem checkInv_true_of (h : checkInv n B M) :
     (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B := by
-  grind [checkInv, maskBelow_eq_true]
+  grind [checkInv, maskBelow_iff]
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
 theorem checkInv_true {i k : ℕ} (hi : i < B.length) (hk : k < M.length) (h : checkInv n B M) :

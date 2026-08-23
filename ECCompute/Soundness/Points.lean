@@ -40,6 +40,6 @@ theorem checkPoint_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (x y : ℚ) :
 theorem checkPoints_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (pts : List (ℚ × ℚ)) :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  simp only [checkPoints, allList_eq_true, checkPoint_iff]
+  simp only [checkPoints, allList_iff, checkPoint_iff]
 
 end ECCompute
