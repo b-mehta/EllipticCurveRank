@@ -43,7 +43,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
   grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
 /-- One-step unfolding of the quadratic-residue mask fold. -/
-@[simp, grind =] theorem qrMaskGo_succ (p k : ℕ) :
+@[simp, grind =] theorem qrMaskGo_succ {p k : ℕ} :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/

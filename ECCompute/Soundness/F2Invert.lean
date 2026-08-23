@@ -44,7 +44,7 @@ private theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
   grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
-theorem popParity_eq_xorBits (fuel a : ℕ) :
+theorem popParity_eq_xorBits {fuel a : ℕ} :
     popParity fuel a = xorBits a (List.range fuel) := by
   induction fuel generalizing a with
   | zero => rfl
@@ -75,7 +75,7 @@ theorem popParityK_eq32 : popParityK v = popParity 32 v := by
   grind
 
 /-- Link between the recursive parity and the `Finset.range` sum over 𝔽₂ indicators. -/
-theorem popParity_sum (fuel a : ℕ) :
+theorem popParity_sum {fuel a : ℕ} :
     bId (popParity fuel a) = ∑ j ∈ range fuel, bId (a.testBit j) := by
   induction fuel generalizing a with
   | zero => rfl
@@ -98,12 +98,12 @@ theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParit
 
 end
 
-@[simp, grind =] theorem checkInvRow_cons (b i k m : ℕ) (ms : List ℕ) :
+@[simp, grind =] theorem checkInvRow_cons {b i k m : ℕ} {ms : List ℕ} :
     checkInvRow b i k (m :: ms) =
       ((popParityK (b &&& m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
         (i.beq k)).and' (checkInvRow b i k.succ ms) := rfl
 
-@[simp, grind =] theorem checkInvGo_cons (M : List ℕ) (i b : ℕ) (bs : List ℕ) :
+@[simp, grind =] theorem checkInvGo_cons {M : List ℕ} {i b : ℕ} {bs : List ℕ} :
     checkInvGo M i (b :: bs) = (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
