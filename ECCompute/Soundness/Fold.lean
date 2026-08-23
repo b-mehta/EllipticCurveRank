@@ -3,8 +3,11 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import ECCompute.Kernel
+
 import Mathlib.Data.List.Basic
-import ECCompute.Kernel
 
 /-!
 # Soundness of the `Bool` folds
@@ -13,6 +16,8 @@ import ECCompute.Kernel
 `ECCompute.allList` (from `Kernel`) as a bounded `∀` and a list `∀`, the `succ`/`cons` lemmas peel
 one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
 -/
+
+public section
 
 namespace ECCompute
 
