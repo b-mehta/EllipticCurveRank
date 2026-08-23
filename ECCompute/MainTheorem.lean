@@ -153,6 +153,34 @@ theorem rank_ge_of_certificate (c : Certificate)
   have hbound : c.rho ≤ Module.finrank ℤ H + c.t := RankDeduction.rank_ge_le gH φH hindep htorH
   exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
 
+/-- The referee obligations a certificate carries on its own data: the five lists have length
+`rho`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is
+correct, and the `2`-torsion order is at most `2 ^ t`. `hasRankGE_of_valid` turns this, together
+with a curve match, into a rank lower bound. -/
+structure Certificate.Valid (c : Certificate) : Prop where
+  /-- The point list has `rho` entries. -/
+  lenP : c.points.length = c.rho
+  /-- The label list has `rho` entries. -/
+  lenL : c.labels.length = c.rho
+  /-- The row bitmask list `B` has `rho` entries. -/
+  lenB : c.B.length = c.rho
+  /-- The column bitmask list `M` has `rho` entries. -/
+  lenM : c.M.length = c.rho
+  /-- The quadratic-residue mask list has `rho` entries. -/
+  lenQ : c.qrMasks.length = c.rho
+  /-- Each listed point lies on the short model. -/
+  pts : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points
+  /-- Each label carries a prime. -/
+  primes : checkPrimes c.labels
+  /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
+  labels : checkLabels c.a₂ c.a₄ c.a₆ c.labels
+  /-- `B` is the descent-character matrix the labels induce on the points. -/
+  matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
+  /-- `M` inverts `B` over `𝔽₂`. -/
+  inv : F2Invert.checkInv c.rho c.B c.M
+  /-- The rational `2`-torsion has order at most `2 ^ t`. -/
+  tors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t
+
 /-- The same bound for a general integral model. Given `W = ⟨a₁, …, a₆⟩` (`hW`) whose short-model
 change of variables is the certificate's curve (`hmodel`), transporting `rank_ge_of_certificate`
 along `generalToShortEquiv` gives `rank W ≥ c.rho - c.t`. -/
@@ -197,5 +225,15 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
       hpt' hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
+
+/-- The rank bound from a bundled `Certificate.Valid`: given `W = ⟨a₁, …, a₆⟩` (`hW`) whose
+short-model change of variables is the certificate's curve (`hmodel`) and a certificate whose
+referee obligations hold (`hc`), `rank W ≥ c.rho - c.t`. -/
+theorem hasRankGE_of_valid (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate) (W : WeierstrassCurve ℚ)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
+    (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
+    (hc : c.Valid) : HasRankGE W (c.rho - c.t) :=
+  hasRankGE_of_certificate a₁ a₂ a₃ a₄ a₆ c W hW hmodel hc.lenP hc.lenL hc.lenB hc.lenM hc.lenQ
+    hc.pts hc.primes hc.labels hc.matrix hc.inv hc.tors
 
 end ECCompute
