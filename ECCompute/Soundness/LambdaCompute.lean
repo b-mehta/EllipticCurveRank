@@ -4,9 +4,7 @@ Released under the GNU General Public License version 3.0 as described in the fi
 Authors: Bhavik Mehta
 -/
 import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Kernel
 import ECCompute.Soundness.RootMod
-import ECCompute.ForLean
 import Mathlib.Data.Nat.Bitwise
 
 /-!
