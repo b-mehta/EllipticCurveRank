@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
 
 /-!
 # Kernel-reducible definitions
@@ -14,6 +15,8 @@ Currently the `Bool` folds `allBelow`/`allList`, the small-prime trial-division 
 residue search, the descent label and character checks, the 𝔽₂ matrix-inverse checker, the
 aggregate descent-matrix check, and the point-on-curve check.
 -/
+
+@[expose] public section
 
 namespace ECCompute
 
