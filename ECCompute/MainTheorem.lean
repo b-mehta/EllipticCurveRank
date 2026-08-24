@@ -135,8 +135,8 @@ theorem rank_ge_of_certificate (c : Certificate)
   exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
 
 /-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), a proof that the
-short model of these coefficients is the certificate's curve (`hmodel`), and a certificate meeting
-its referee obligations (`hc`), the rank of `W` is at least `c.rho - c.t`. -/
+short model of these coefficients is the certificate's curve (`hmodel`), and a certificate
+satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.rho - c.t`. -/
 theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate) (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hc : c.Valid) :

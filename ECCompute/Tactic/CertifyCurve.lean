@@ -13,7 +13,7 @@ import ECCompute.Tactic.CertifyEval
 coefficients are integers. It reads the coefficients and rank from the goal (so the curve must be
 `unfold`ed to a `WeierstrassCurve` literal first) and the generating points and descent labels from
 two data files, computes the descent-character matrix and its `𝔽₂` inverse, bundles the
-referee obligations into a `Certificate.Valid`, and applies `hasRankGE_of_certificate`.
+required checks into a `Certificate.Valid`, and applies `hasRankGE_of_certificate`.
 
 Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
@@ -192,9 +192,9 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
 private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
     (h : l.length.beq n = true) : l.length = n := Nat.eq_of_beq_eq_true h
 
-/-- Build the `hasRankGE_of_certificate` proof term directly. The referee obligations are packaged
-into a `Certificate.Valid` via its constructor: the five length obligations and the five `Bool`
-checks are discharged by `Lean.reflBoolTrue`, and the torsion obligation `|E(ℚ)[2]| ≤ 2^t` by
+/-- Build the `hasRankGE_of_certificate` proof term directly. The `Certificate.Valid` checks are
+packaged via its constructor: the five length checks and the five `Bool`
+checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]| ≤ 2^t` by
 `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
 `t = 2`. The model equality is discharged by `WeierstrassCurve.ext_of_beq` on the five coefficient

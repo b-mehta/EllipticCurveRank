@@ -12,7 +12,7 @@ public import ECCompute.Theory.Descent.Defs
 /-!
 # The rank-bound certificate data type
 
-`Certificate` bundles the data a referee audits to accept a lower bound on the Mordell-Weil rank
+`Certificate` bundles the data establishing a lower bound on the Mordell-Weil rank
 of an elliptic curve over `ℚ`, `rank E(ℚ) ≥ ρ - t`. Its curve is the short integral Weierstrass
 model `y² = x³ + a₂x² + a₄x + a₆`; `ECCompute.hasRankGE_of_certificate` transports the bound to a
 general integral model.
@@ -20,12 +20,12 @@ general integral model.
 ## Main definitions
 
 * `ECCompute.Certificate`: the certificate record; see its field docstrings for each entry.
-* `ECCompute.Certificate.Valid`: the referee obligations a certificate carries on its own data.
+* `ECCompute.Certificate.Valid`: the checks a certificate must pass on its own data.
 
 ## Implementation notes
 
-The four lists `points`, `labels`, `B`, and `M` all have length `rho`; the auditing checkers
-enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
+The four lists `points`, `labels`, `B`, and `M` all have length `rho`; the `Certificate.Valid`
+checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
 by rows, `M` by columns), so `F2Invert.checkInv rho B M` applies verbatim.
 -/
 
@@ -51,8 +51,8 @@ public structure Certificate where
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   M : List Nat
   /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
-  set iff `a` is a nonzero square mod `labels[j].1`. Checked against `qrMask` by the referee, so
-  each Legendre-character check is a bitmask lookup. -/
+  set iff `a` is a nonzero square mod `labels[j].1`. `Certificate.Valid` checks each against
+  `qrMask`. -/
   qrMasks : List Nat
   /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
   `rank ≥ ρ - t`. -/
@@ -62,7 +62,7 @@ public structure Certificate where
   torsionPrime : ℕ
   deriving Repr, DecidableEq
 
-/-- The referee obligations a certificate carries on its own data: the five lists have length
+/-- The checks a certificate must pass on its own data: the five lists have length
 `rho`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is
 correct, and the `2`-torsion order is at most `2 ^ t`. `hasRankGE_of_certificate` turns this,
 together with a curve match, into a rank lower bound. -/
