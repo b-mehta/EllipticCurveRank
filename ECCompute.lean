@@ -31,7 +31,6 @@ import ECCompute.Soundness.Torsion
 import ECCompute.MainTheorem
 
 -- Certificate tactic
-import ECCompute.Tactic.CertifyEval
 import ECCompute.Tactic.CertifyCurve
 
 -- Certified curves
