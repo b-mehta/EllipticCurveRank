@@ -157,7 +157,8 @@ public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p)
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
 public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
-    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := rfl
+    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
+  rw [lambdaCompute]
 
 /-- For `p` an odd prime and `a ≠ 0`, reading the residue mask of `p` into `ZMod 2` gives the
 abstract Legendre character `psi`. -/
