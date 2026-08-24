@@ -57,8 +57,7 @@ private theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
   have hy0 : y = 0 := by grind [negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
-  have heq := (equation_iff _ _).mp h.1
-  grind [curve]
+  grind [equation_curve, h.1]
 
 /-- Every nonzero rational `2`-torsion `x`-coordinate is a root of the `2`-division cubic. -/
 private theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
@@ -107,7 +106,7 @@ private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     _ = Sx.card + 1 := Finset.card_insertNone Sx
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
-instance twoTorsion_finite : Finite ↥(curve a₂ a₄ a₆).twoTorsionPoints :=
+instance twoTorsion_finite : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
   (card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).1.to_subtype
 
 /-! ## The universal bound `t = 2` -/
