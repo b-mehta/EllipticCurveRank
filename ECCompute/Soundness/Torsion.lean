@@ -25,7 +25,7 @@ then `W` has no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
 
 namespace ECCompute
 
-open WeierstrassCurve Polynomial
+open WeierstrassCurve Affine Polynomial
 
 variable {a₁ a₂ a₃ a₄ a₆ : ℤ}
 
@@ -89,14 +89,14 @@ the full `2`-torsion has at most four elements. -/
 `x`-coordinate is a root of the cubic `X³ + a₂X² + a₄X + a₆`. -/
 private theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
-    (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
+    (hP : Point.some x y h + Point.some x y h = 0) :
     y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
   have hmonic : (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).toPoly.Monic := Cubic.monic_of_a_eq_one' ..
   have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := Y_eq_negY_of_add_self (curve a₂ a₄ a₆) h hP
-  have hy0 : y = 0 := by grind [Affine.negY, curve]
+  have hy0 : y = 0 := by grind [negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
-  have heq := (Affine.equation_iff _ _).mp h.1
+  have heq := (equation_iff _ _).mp h.1
   grind [curve]
 
 /-- If the `x`-coordinates of all nonzero rational `2`-torsion points lie in a finite set `Sx`, then
@@ -104,7 +104,7 @@ the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity tog
 `(x, 0)` for each allowed `x`. -/
 private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
-        Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
+        Point.some x y h + Point.some x y h = 0 → x ∈ Sx) :
     (curve a₂ a₄ a₆).twoTorsionPoints.Finite ∧
       (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ Sx.card + 1 := by
   classical
@@ -143,7 +143,7 @@ private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
 /-- Every nonzero rational `2`-torsion `x`-coordinate is a root of the `2`-division cubic. -/
 private theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
-    (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
+    (hP : Point.some x y h + Point.some x y h = 0) :
     x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots.toFinset :=
   Multiset.mem_toFinset.mpr (twoTorsion_y_eq_zero_and_root h hP).2
 
