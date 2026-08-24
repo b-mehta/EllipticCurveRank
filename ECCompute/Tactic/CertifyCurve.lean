@@ -227,7 +227,7 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
     if t == 0 then
       mkAppN (mkConst ``certTorsionBound_zero) #[a2C, a4C, a6C, tpC, rb, rb]
     else if t == 1 then
-      mkAppN (mkConst ``certTorsionBound_one) #[a2C, a4C, a6C, toExpr torsRoot, tpC, rb, rb, rb]
+      mkAppN (mkConst ``certTorsionBound_one) #[a2C, a4C, a6C, tpC, toExpr torsRoot, rb, rb, rb]
     else
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   let hValid := mkAppN (mkConst ``Certificate.Valid.mk)

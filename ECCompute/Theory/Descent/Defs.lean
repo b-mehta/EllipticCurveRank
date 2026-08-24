@@ -33,6 +33,18 @@ public section
 
 open WeierstrassCurve
 
+namespace WeierstrassCurve
+
+/-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
+def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
+  {P | P + P = 0}
+
+@[simp]
+lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
+    P ∈ W.twoTorsionPoints ↔ P + P = 0 := Iff.rfl
+
+end WeierstrassCurve
+
 namespace ECCompute
 
 open Classical in
@@ -49,15 +61,16 @@ non-squares. -/
   a₄ := a₄
   a₆ := a₆
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-- The affine equation of `curve a₂ a₄ a₆` in cleared form. -/
+@[grind →]
 theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
   grind [WeierstrassCurve.Affine.equation_iff, curve]
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
-@[expose] def fval (θ : ZMod p) : ZMod p :=
+@[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
   θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
@@ -65,7 +78,8 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
   3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
 /-- The descent character as a raw function. -/
-@[expose] noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
+@[expose] noncomputable def lambda (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
+    (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
     if (x.den : ZMod p) = 0 then 0
@@ -73,10 +87,8 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
       let α : ZMod p := x.num - θ * x.den
       if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
 
-@[simp]
-theorem lambda_zero (θ : ZMod p) :
-    lambda a₂ a₄ a₆ p θ 0 = 0 :=
-  rfl
+@[simp, grind =]
+theorem lambda_zero (θ : ZMod p) : lambda a₂ a₄ a₆ p θ 0 = 0 := rfl
 
 /-! ### The hypotheses of the descent lemma
 
