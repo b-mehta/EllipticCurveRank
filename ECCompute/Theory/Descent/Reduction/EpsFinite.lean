@@ -9,23 +9,23 @@ import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Algebra.Field.ZMod
 
 /-!
-# The finite-field descent character `εp_finite` and its additivity
+# The finite-field descent character `εpFinite` and its additivity
 
 For a good prime `p` and a root `θ ∈ 𝔽ₚ` of `f = x³ + a₂x² + a₄x + a₆`, Cremona's descent
 character on the reduced curve `E/𝔽ₚ` is
 
-  `εp_finite θ : E(𝔽ₚ) → ZMod 2`,   `εp_finite θ O = 0`,
-  `εp_finite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X - θ)`   otherwise,
+  `εpFinite θ : E(𝔽ₚ) → ZMod 2`,   `εpFinite θ O = 0`,
+  `εpFinite θ (X, Y) = ψ_p(f'(θ))`   if `X = θ`,   `ψ_p(X - θ)`   otherwise,
 
 where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`. This file proves that
-`εp_finite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
+`εpFinite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
 is then automatic.
 
 ## Main declarations
 
-* `ECCompute.εp_finite`: the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
-* `ECCompute.εp_finite_map_add`: additivity of `εp_finite`.
-* `ECCompute.εpHom`: `εp_finite` packaged as an `AddMonoidHom`.
+* `ECCompute.εpFinite`: the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
+* `ECCompute.εpFinite_map_add`: additivity of `εpFinite`.
+* `ECCompute.εpHom`: `εpFinite` packaged as an `AddMonoidHom`.
 -/
 
 open WeierstrassCurve
@@ -38,20 +38,20 @@ variable [Fact p.Prime]
 
 /-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
-noncomputable def εp_finite (θ : ZMod p) :
+noncomputable def εpFinite (θ : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point → ZMod 2
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
-theorem εp_finite_zero (θ : ZMod p) :
-    εp_finite a₂ a₄ a₆ p θ
+theorem εpFinite_zero (θ : ZMod p) :
+    εpFinite a₂ a₄ a₆ p θ
       (0 : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) = 0 :=
   rfl
 
-theorem εp_finite_some (θ : ZMod p) {X Y : ZMod p}
+theorem εpFinite_some (θ : ZMod p) {X Y : ZMod p}
     (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
-    εp_finite a₂ a₄ a₆ p θ (.some X Y h)
+    εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
   rfl
 
@@ -76,18 +76,18 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
     θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
   simpa [fval] using h.root
 
-/-- `εp_finite` on an affine point depends only on its `x`-coordinate. -/
+/-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁}
     {h₂ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) :
-    εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
+    εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
 /-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
 whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
 `X₃` equals the sum of the values at `x₁` and `x₂`. The `𝔽ₚ`-arithmetic core of the secant
-additivity, split off from the group-law setup in `εp_finite_map_add_of_X_ne`. -/
+additivity, split off from the group-law setup in `εpFinite_map_add_of_X_ne`. -/
 private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
@@ -127,17 +127,17 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
     have := psi_collinear h.prime hσ₁ hσ₂ hσ₃ h.root c1 c2 c3
     grind
 
-/-- Additivity of `εp_finite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
+/-- Additivity of `εpFinite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
 distinct `x`-coordinates over `𝔽ₚ`. -/
-theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
+theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ZMod p}
     (h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁)
     (h₂ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₂ y₂)
     (hne : x₁ ≠ x₂) :
-    εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      = εp_finite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εp_finite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
+    εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
+      = εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne]
-  simp only [εp_finite_some]
+  simp only [εpFinite_some]
   set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x₁ x₂ ℓ with hX3def
   have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
@@ -161,7 +161,7 @@ theorem εp_finite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
 /-- The descent character vanishes at the double point of a tangent line: given the Vieta
 relations for the double-root triple `x, x, X₃` at a root `θ ≠ x`, the value at `X₃` is `0`.
 The `𝔽ₚ`-arithmetic core of the doubling case, split off from the group-law setup in
-`εp_finite_double`. -/
+`εpFinite_double`. -/
 private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
     (hXθ : x ≠ θ)
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
@@ -188,12 +188,12 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
     rwa [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
       CharTwo.add_self_eq_zero, zero_add] at hpm
 
-/-- Additivity of `εp_finite` in the doubling case: `εp_finite` vanishes on `2P` for a point
+/-- Additivity of `εpFinite` in the doubling case: `εpFinite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
-theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
+theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     (hP : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x y)
     (hy0 : y ≠ 0) :
-    εp_finite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
+    εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
   have hneg := reduced_negY a₂ a₄ a₆ p x y
@@ -204,7 +204,7 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have hθroot := h.root'
   have hXθ : x ≠ θ := by grind
   rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne]
-  simp only [εp_finite_some]
+  simp only [εpFinite_some]
   set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x x y y with hℓdef
   set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
@@ -225,20 +225,20 @@ theorem εp_finite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     ℓ m x X₃ hpt htan hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
-/-- Additivity of `εp_finite`: the finite-field descent character is a homomorphism
+/-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
-theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
+theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) :
-    εp_finite a₂ a₄ a₆ p θ (P + Q)
-      = εp_finite a₂ a₄ a₆ p θ P + εp_finite a₂ a₄ a₆ p θ Q := by
+    εpFinite a₂ a₄ a₆ p θ (P + Q)
+      = εpFinite a₂ a₄ a₆ p θ P + εpFinite a₂ a₄ a₆ p θ Q := by
   rcases P with _ | ⟨x₁, y₁, h₁⟩
-  · rw [← Affine.Point.zero_def, zero_add, εp_finite_zero, zero_add]
+  · rw [← Affine.Point.zero_def, zero_add, εpFinite_zero, zero_add]
   rcases Q with _ | ⟨x₂, y₂, h₂⟩
-  · rw [← Affine.Point.zero_def, add_zero, εp_finite_zero, add_zero]
+  · rw [← Affine.Point.zero_def, add_zero, εpFinite_zero, add_zero]
   by_cases hxy : x₁ = x₂ ∧
       y₁ = ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
-    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, εp_finite_zero,
+    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
@@ -252,16 +252,16 @@ theorem εp_finite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
           ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point)
           = Affine.Point.some x₁ y₁ h₁ := rfl
       rw [hpt, CharTwo.add_self_eq_zero]
-      exact εp_finite_double h h₁ hy1ne0
+      exact εpFinite_double h h₁ hy1ne0
     · -- Secant: `x₁ ≠ x₂`.
-      exact εp_finite_map_add_of_X_ne h h₁ h₂ hne
+      exact εpFinite_map_add_of_X_ne h h₁ h₂ hne
 
-/-- The finite-field descent character `εp_finite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
+/-- The finite-field descent character `εpFinite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
 @[simps]
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point →+ ZMod 2 where
-  toFun := εp_finite a₂ a₄ a₆ p θ
-  map_zero' := εp_finite_zero a₂ a₄ a₆ p θ
-  map_add' := εp_finite_map_add h
+  toFun := εpFinite a₂ a₄ a₆ p θ
+  map_zero' := εpFinite_zero a₂ a₄ a₆ p θ
+  map_add' := εpFinite_map_add h
 
 end ECCompute

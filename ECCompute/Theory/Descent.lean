@@ -16,7 +16,7 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
 `ECCompute.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
-`red_p : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εp_finite`, both of which are
+`redP : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εpFinite`, both of which are
 additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 `ECCompute.Descent.Reduction.EpsFinite`).
 
@@ -70,14 +70,14 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### The trusted theorem: additivity via the reduction factorization
 
 Additivity of `λ_{p,θ}` is obtained by factoring it as the composition
-`λ = εp_finite ∘ red_p`, where `red_p : E(ℚ) → E(𝔽ₚ)` is the reduction map
-(`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εp_finite : E(𝔽ₚ) → ZMod 2` is the
+`λ = εpFinite ∘ redP`, where `redP : E(ℚ) → E(𝔽ₚ)` is the reduction map
+(`ECCompute.Descent.Reduction.Hom`, an `AddMonoidHom`) and `εpFinite : E(𝔽ₚ) → ZMod 2` is the
 finite-field descent character (`ECCompute.Descent.Reduction.EpsFinite`, also an
 `AddMonoidHom`). Additivity of `λ` is then just `map_add` of a composition of homomorphisms.
-The reduction map and `εp_finite` share the point type
+The reduction map and `εpFinite` share the point type
 `((curveℤ …).map (Int.castRingHom (ZMod p))).toAffine.Point`, so the composition is direct. -/
 
-/-- The descent character `λ_{p,θ}` presented as the composition `εp_finite θ ∘ red_p`, packaged
+/-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
 as an `AddMonoidHom E(ℚ) → ZMod 2`. This is the factorization that makes additivity of `λ` free
 (see `lambda_map_add`). -/
 noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
@@ -85,7 +85,7 @@ noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp (redHom a₂ a₄ a₆ p hΔ)
 
-/-- On each point, `λ_{p,θ}` agrees with the reduction composition `εp_finite θ ∘ red_p`. -/
+/-- On each point, `λ_{p,θ}` agrees with the reduction composition `εpFinite θ ∘ redP`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ P = redCharHom a₂ a₄ a₆ p h hΔ P := by
@@ -94,8 +94,8 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
   | some x y hns =>
     rw [redCharHom, AddMonoidHom.comp_apply, redHom_apply]
     by_cases hd : (x.den : ZMod p) = 0
-    · grind [lambda_some_of_den_zero, red_p_of_den_zero]
-    · grind [lambda_some_of_den_ne, red_p_of_den_ne, εpHom_apply, εp_finite_some, xbar]
+    · grind [lambda_some_of_den_zero, redP_of_den_zero]
+    · grind [lambda_some_of_den_ne, redP_of_den_ne, εpHom_apply, εpFinite_some, xbar]
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
