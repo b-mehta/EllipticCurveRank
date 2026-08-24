@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.ForMathlib.RatDenom
 import ECCompute.ForMathlib.WeierstrassCurveAffine
@@ -38,12 +41,12 @@ For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the ratio
 `w` with `x.den = w²`. Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
 
 /-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
-noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
+public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
 
 variable {a₂ a₄ a₆ p}
 
 /-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
-theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
+public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
     (x.num : ZMod p) = xbar p x * (x.den : ZMod p) := by
   rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
 
@@ -53,12 +56,12 @@ On `curve a₂ a₄ a₆` (which has `a₁ = a₃ = 0`), `negY x y = -y`, and wh
 `y`-denominator survives reduction, since `x.den = w²` and `y.den = w³`. -/
 
 /-- On `curve a₂ a₄ a₆`, `negY x y = -y` (the curve has `a₁ = a₃ = 0`). -/
-theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
+public theorem negY_curve (x y : ℚ) : (curve a₂ a₄ a₆).toAffine.negY x y = -y :=
   WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x y
 
 /-- The `y`-denominator reduces well whenever the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
-theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
+public theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : (x.den : ZMod p) ≠ 0) :
     (y.den : ZMod p) ≠ 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
