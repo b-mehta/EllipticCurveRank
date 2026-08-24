@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import ECCompute.Theory.CompleteSquare
 
 /-!
@@ -191,34 +194,34 @@ end Scaling
 /-! ## The integral short model and the change of variables -/
 
 /-- The `a₂` coefficient of the integral short model: `A₂ = a₁² + 4a₂ = b₂`. -/
-def intShortA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
+@[expose] public def intShortA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
 
 /-- The `a₄` coefficient of the integral short model: `A₄ = 16a₄ + 8a₁a₃ = 8·b₄`. -/
-def intShortA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
+@[expose] public def intShortA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
 
 /-- The `a₆` coefficient of the integral short model: `A₆ = 64a₆ + 16a₃² = 16·b₆`. -/
-def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
+@[expose] public def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
 
 /-- The integral short model `curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
 integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
-def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
+@[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   curve (intShortA₂ a₁ a₂) (intShortA₄ a₁ a₃ a₄) (intShortA₆ a₃ a₆)
 
 /-- The general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` over `ℚ`. -/
-def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
+@[expose] public def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   ⟨a₁, a₂, a₃, a₄, a₆⟩
 
-private lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
   simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
   grind
 
-private lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
   simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
   grind
 
-private lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
   simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
   grind
@@ -226,7 +229,7 @@ private lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
 `u = 1/2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
 short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
-def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (genModel a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
   (pointAddEquiv (genModel a₁ a₂ a₃ a₄ a₆)).trans <|
     scaleEquiv (W := shortModel (genModel a₁ a₂ a₃ a₄ a₆))
