@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import Mathlib.Tactic.LinearCombination
 
 /-!
@@ -45,7 +48,7 @@ theorem cubic_sub_lineSq_eq_prod
 
 /-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
-theorem prod_sub_theta_eq_lineSq
+public theorem prod_sub_theta_eq_lineSq
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
@@ -57,7 +60,7 @@ theorem prod_sub_theta_eq_lineSq
 slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
 relations hold for the triple `x₁, x₁, x₃` with `x₃ = ℓ² - a₂ - 2x₁`. Doubling analogue of
 `vieta_of_roots`. -/
-theorem vieta_of_double_root
+public theorem vieta_of_double_root
     (hpt : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (htan : 3 * x₁ ^ 2 + 2 * a₂ * x₁ + a₄ = 2 * ℓ * (ℓ * x₁ + m))
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - 2 * x₁) :
@@ -74,7 +77,7 @@ variable {F : Type*} [Field F] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F)
 /-- The Vieta relations for the line `y = ℓx + m` meeting `E` at `x₁, x₂, x₃`, recovered from
 the two points `(x₁, ℓx₁ + m)` and `(x₂, ℓx₂ + m)` lying on the curve (with `x₁ ≠ x₂`) and the
 group-law value `x₃ = ℓ² - a₂ - x₁ - x₂` for the third `x`-coordinate. -/
-theorem vieta_of_roots (hne : x₁ ≠ x₂)
+public theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆) :
@@ -86,7 +89,7 @@ theorem vieta_of_roots (hne : x₁ ≠ x₂)
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
 mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
-theorem fderiv_eq_prod
+public theorem fderiv_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
@@ -99,10 +102,10 @@ end Field
 /-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
 at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-theorem prod_sub_theta_eq_lineSq_zmod (a₂ a₄ a₆ : ℤ) (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - (a₂ : ZMod p))
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = (a₄ : ZMod p) - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - (a₆ : ZMod p))
+public theorem prod_sub_theta_eq_lineSq_zmod (a₂ a₄ a₆ : ℤ) (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
+    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval a₂ a₄ a₆ p θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
   prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ x₃ θ

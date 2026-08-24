@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Data.ZMod.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # The descent character: basic definitions
@@ -27,6 +29,10 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
 
+public section
+
+open WeierstrassCurve
+
 namespace WeierstrassCurve
 
 /-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
@@ -39,18 +45,16 @@ lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
 
 end WeierstrassCurve
 
-open WeierstrassCurve
-
 namespace ECCompute
 
 open Classical in
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
 non-squares. -/
-noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
+@[expose] noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
   if IsSquare a then 0 else 1
 
 /-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
-def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
+@[expose] def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
   a₁ := 0
   a₂ := a₂
   a₃ := 0
@@ -65,15 +69,15 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
   grind [WeierstrassCurve.Affine.equation_iff, curve]
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
-def fval (θ : ZMod p) : ZMod p :=
-  θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p)
+@[expose] def fval (θ : ZMod p) : ZMod p :=
+  θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
-  3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p)
+@[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
+  3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
 /-- The descent character as a raw function. -/
-noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
+@[expose] noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
     if (x.den : ZMod p) = 0 then 0
@@ -83,7 +87,7 @@ noncomputable def lambda (θ : ZMod p) : (curve a₂ a₄ a₆).toAffine.Point �
 
 @[simp]
 theorem lambda_zero (θ : ZMod p) :
-    lambda a₂ a₄ a₆ p θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 :=
+    lambda a₂ a₄ a₆ p θ 0 = 0 :=
   rfl
 
 /-! ### The hypotheses of the descent lemma
