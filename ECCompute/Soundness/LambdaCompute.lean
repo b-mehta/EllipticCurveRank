@@ -3,9 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Soundness.RootMod
+module
+
+public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Soundness.RootMod
+
 import Mathlib.Data.Nat.Bitwise
+import ECCompute.ForLean
 
 /-!
 # Soundness of the kernel-reducible descent character
@@ -19,11 +23,12 @@ the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMas
 
 ## Main declarations
 
-* `ECCompute.qrLookupBool_spec`: the bit test decides `a ≠ 0 ∧ IsSquare (a : ZMod p)`.
-* `ECCompute.psiCompute`: kernel-reducible replacement for `psi`.
-* `ECCompute.psiCompute_eq`: `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
 * `ECCompute.lambdaCompute`: kernel-reducible evaluation of `λ` on an affine point.
 * `ECCompute.lambdaCompute_eq`: it agrees with the abstract `lambda`.
+* `ECCompute.lambdaComputeBool`: the `Bool` mirror used by the certificate matrix checks.
+* `ECCompute.lambdaCompute_eq_bool`: reads the `Bool` mirror back into `ZMod 2`.
+* `ECCompute.lambdaComputeBoolNatMask_eq`: the fully-`Nat` kernel mirror agrees with
+  `lambdaComputeBool`.
 -/
 
 namespace ECCompute
@@ -164,14 +169,14 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
 
 /-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
 `x`-coordinate `x`, using the mask-based `psiCompute` for the Legendre character. -/
-noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
+public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if (x.den : ZMod p) = 0 then 0
   else if (x.num : ZMod p) - θ * x.den = 0 then psiCompute p (fderiv a₂ a₄ p θ)
        else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
 an affine point. -/
-theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
@@ -187,14 +192,14 @@ theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
 matrix checks compare `Bool`s; `lambdaCompute_eq_bool` reads the result back into `ZMod 2`. -/
 
 /-- `Bool` mirror of `lambdaCompute`: `true` for `1 : ZMod 2`, `false` for `0`. -/
-noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
   if (x.den : ZMod p) = 0 then false
   else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ p θ)
        else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
 character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
-theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
     lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
   rw [lambdaCompute, lambdaComputeBool]
   grind [psiCompute]
@@ -252,7 +257,7 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
 /-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
 provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
 denominator `xden`. -/
-theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
+public theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
     (tval xp xm xden : ℕ) (htval : (tval : ZMod p) = θ)
     (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden
