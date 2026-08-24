@@ -23,7 +23,7 @@ the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMas
 
 ## Main declarations
 
-* `ECCompute.lambdaCompute`: kernel-reducible evaluation of `λ` on an affine point.
+* `ECCompute.lambdaCompute`: the `ZMod 2`-valued evaluation of `λ` on an affine point.
 * `ECCompute.lambdaCompute_eq`: it agrees with the abstract `lambda`.
 * `ECCompute.lambdaComputeBool`: the `Bool` mirror used by the certificate matrix checks.
 * `ECCompute.lambdaCompute_eq_bool`: reads the `Bool` mirror back into `ZMod 2`.
@@ -138,15 +138,16 @@ theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha
   have hmask := qrMask_testBit p hp2 a ha
   grind [qrLookupBool]
 
-/-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
+/-! ### `psiCompute`: the Legendre symbol into `ZMod 2` via the residue mask -/
 
 /-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
 residues (where `psiCompute = 0`). Evaluated via the quadratic-residue mask of `p`. -/
 noncomputable def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
   (qrLookupBool (qrMask p) a.val).not'
 
-/-- Kernel-reducible replacement for `ECCompute.psi`. Reads the quadratic-residue mask of `p` at the
-representative `a.val`: the symbol is `0` on quadratic residues and `1` on non-residues. -/
+/-- The Legendre symbol into `ZMod 2`, read from the quadratic-residue mask of `p` at the
+representative `a.val`: `0` on quadratic residues and `1` on non-residues. Agrees with
+`ECCompute.psi` (`psiCompute_eq`). -/
 noncomputable def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
   if psiComputeBool p a then 1 else 0
 
@@ -165,9 +166,9 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
   simp only [ne_eq, ha0, not_false_eq_true, true_and, Bool.not'_eq_not, psi]
   by_cases hsq : IsSquare a <;> simp [hsq]
 
-/-! ### Kernel-reducible evaluation of `λ` on an affine point -/
+/-! ### Evaluation of `λ` on an affine point via the residue mask -/
 
-/-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
+/-- The `ZMod 2`-valued evaluation of the descent character `λ_{p,θ}` on an affine point with
 `x`-coordinate `x`, using the mask-based `psiCompute` for the Legendre character. -/
 public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if (x.den : ZMod p) = 0 then 0
