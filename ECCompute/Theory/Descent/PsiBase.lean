@@ -36,8 +36,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
 On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-residue character
-transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`. Proved via
-`quadraticChar`. -/
+transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 
 section Psi
 
@@ -73,9 +72,8 @@ end Psi
 variable {a₂ a₄ a₆ p}
 
 /-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
-Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then the `ψ_p`-values sum to
-zero: collinearity makes `(X₁-θ)(X₂-θ)(X₃-θ)` a square, and `ψ_p` is additive on the nonzero
-factors. -/
+Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
+`ψ_p (X₁ - θ) + ψ_p (X₂ - θ) + ψ_p (X₃ - θ) = 0`. -/
 public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
@@ -92,9 +90,8 @@ public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
   rwa [psi_mul hp (mul_ne_zero h1 h2) h3, psi_mul hp h1 h2] at hpm
 
-/-- Since `p ∤ 6Δ` and `θ` is a root of `f`, `θ` is a *simple* root, so `f'(θ) ≠ 0`:
-`disc(f) = f'(θ)² · (B² - 4C)` for the complementary factor `x² + Bx + C = f(x)/(x - θ)`, and
-`Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
+/-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
+(`p ∤ 6Δ`). -/
 public theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ p θ ≠ 0 := by
   have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by

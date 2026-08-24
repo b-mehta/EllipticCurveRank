@@ -45,7 +45,7 @@ open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 /-! ## The scaling isomorphism `(x, y) ↦ (v²x, v³y)`
 
 If two curves have coefficients related by `W'.aᵢ = vⁱ · W.aᵢ`, the map `(x, y) ↦ (v²x, v³y)` is a
-group isomorphism. Each affine-addition ingredient scales by a fixed power of `v`. -/
+group isomorphism. -/
 
 /-- `W'` is the `(x, y) ↦ (v²x, v³y)` rescaling of `W`: `W'.aᵢ = vⁱ · W.aᵢ`, with `v ≠ 0`. -/
 structure IsScaling (W W' : WeierstrassCurve ℚ) (v : ℚ) : Prop where

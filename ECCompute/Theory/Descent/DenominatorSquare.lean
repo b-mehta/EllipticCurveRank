@@ -19,14 +19,6 @@ For the integral Weierstrass curve `E : y² = x³ + a₂x² + a₄x + a₆` over
 `(x, y)`, this file proves there is a natural number `w` with `x.den = w²` and `y.den = w³`,
 so a point is `(u/w², v/w³)` in lowest terms.
 
-This is used in the additivity of the descent character to drop the `w²` factor
-from the Legendre symbol, since a square does not change a quadratic residue class.
-
-Clearing denominators in `y² = f(x)` with `f` integral gives `y.num² * x.den³ = N * y.den²`
-for `N := x.num³ + a₂ x.num² x.den + a₄ x.num x.den² + a₆ x.den³`. Since `N ≡ x.num³` is
-coprime to `x.den` and `y.num` to `y.den`, comparing sides forces `x.den³ = y.den²`, and the
-coprime exponents `2, 3` yield the common witness `w`.
-
 ## Main declarations
 
 * `ECCompute.den_isSquare`: from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
