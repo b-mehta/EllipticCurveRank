@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import ECCompute.Theory.Descent.Collinearity
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
@@ -41,11 +44,11 @@ section Psi
 variable {p}
 
 /-- `ψ_p` vanishes on squares. -/
-theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
+public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
   if_pos ha
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
-theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
+public theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
   have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
     ⟨fun ⟨s, hs⟩ => ⟨s / w, by grind⟩, fun ⟨r, hr⟩ => ⟨w * r, by rw [hr]; ring⟩⟩
@@ -54,7 +57,7 @@ theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
-theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
+public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
   have : Fact p.Prime := ⟨hp⟩
   -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
@@ -73,7 +76,7 @@ variable {a₂ a₄ a₆ p}
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then the `ψ_p`-values sum to
 zero: collinearity makes `(X₁-θ)(X₂-θ)(X₃-θ)` a square, and `ψ_p` is additive on the nonzero
 factors. -/
-theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
+public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
     (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - (a₆ : ZMod p))
@@ -92,7 +95,7 @@ theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 /-- Since `p ∤ 6Δ` and `θ` is a root of `f`, `θ` is a *simple* root, so `f'(θ) ≠ 0`:
 `disc(f) = f'(θ)² · (B² - 4C)` for the complementary factor `x² + Bx + C = f(x)/(x - θ)`, and
 `Δ = 16·disc(f)`, so `f'(θ) = 0` would force `Δ ≡ 0`. -/
-theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+public theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ p θ ≠ 0 := by
   have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
     simpa [fval] using h.root
