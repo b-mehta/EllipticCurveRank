@@ -15,10 +15,8 @@ Leaderboard is `E : y² = x³ - 82 x` over `ℚ`, of Mordell-Weil rank at least 
 Its `2`-division cubic factors as `x (x² - 82)`, and `x² - 82` is irreducible over `ℚ`,
 so the only nonzero rational `2`-torsion point is `(0, 0)` and `t = dim_𝔽₂ E(ℚ)[2] = 1`.
 
-The certificate gives `ρ = 4` points with `𝔽₂`-independent descent images and bounds
-`|E(ℚ)[2]| ≤ 2` from the root `R = 0` and the witness prime `ℓ = 5`, at which `x² - 82`
-has no root mod `5`. These combine to `rank ≥ ρ - t = 4 - 1 = 3`. Points (short-model
-coordinates) are in `data/curve13.txt`, descent labels in `data/curve13-labels.txt`.
+Points (short-model coordinates) are in `data/curve13.txt`, descent labels in
+`data/curve13-labels.txt`.
 -/
 
 namespace ECCompute

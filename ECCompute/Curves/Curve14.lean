@@ -19,10 +19,8 @@ over `ℚ`, of Mordell-Weil rank at least `4` (a curve of Wiman, 1945). Its `2`-
 factors completely, `x³ - x² - 24649 x + 1355209 = (x - 67)(x - 113)(x + 179)`, so `E` has full
 rational `2`-torsion `E(ℚ)[2] ≅ (ℤ/2)²`, i.e. `t = 2`, and its discriminant is a perfect square.
 
-The certificate gives `ρ = 6` points with `𝔽₂`-independent descent images (the four rational
-points of infinite order plus the two `2`-torsion points `(67, 0)`, `(113, 0)`) and bounds the
-two torsion dimensions by `|E(ℚ)[2]| ≤ 4 = 2²`, giving `rank ≥ ρ - t = 6 - 2 = 4`. Points
-(short-model coordinates) in `data/curve14.txt`, descent labels in `data/curve14-labels.txt`.
+Points (short-model coordinates) in `data/curve14.txt`, descent labels in
+`data/curve14-labels.txt`.
 -/
 
 namespace ECCompute
