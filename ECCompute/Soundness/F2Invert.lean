@@ -3,10 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Soundness.Fold
+module
+
+public import ECCompute.Soundness.Fold
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.Data.Matrix.Basic
+
 import Mathlib.Data.Nat.Bitwise
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.List.Range
@@ -90,7 +93,7 @@ variable {v n : ℕ}
 theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popParity n v := by
   rw [popParity_eq_xorBits, popParity_eq_xorBits]
   refine xorBits_range_hi (fun j hj ↦ ?_) hn
-  exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by norm_num) hj))
+  exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by decide) hj))
 
 /-- For `v < 2 ^ n` with `n ≤ 32`, `popParityK v` equals `popParity n v`. -/
 theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParity n v := by
@@ -107,11 +110,11 @@ end
     checkInvGo M i (b :: bs) = (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
-def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
+public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
   Matrix.of fun i j ↦ if (B.getD i 0).testBit j then 1 else 0
 
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
-theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B.length) :
+public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B.length) :
     toMat B n i j = if B[i].testBit j then 1 else 0 := by
   rw [toMat, Matrix.of_apply, List.getD_eq_getElem (hn := h), Fin.getElem_fin]
 
@@ -165,7 +168,7 @@ theorem checkInv_true {i k : ℕ} (hi : i < B.length) (hk : k < M.length) (h : c
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
-theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv n B M) :
+public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv n B M) :
     IsUnit (toMat B n) := by
   have key : toMat B n * toMatCols M n = 1 := by
     ext i k
