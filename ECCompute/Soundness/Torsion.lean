@@ -17,8 +17,6 @@ then `W` has no nonzero rational 2-torsion and `dim_𝔽₂ E(ℚ)[2] = 0`.
 
 ## Main results
 
-* `ECCompute.no_nonzero_twoTorsion_of_monicHasNoRootMod` : the t = 0 lemma. If the `2`-division
-  cubic's search returns `true` (no root), then every 2-torsion point of `W` is `0`.
 * `ECCompute.card_twoTorsion_le_four`, `ECCompute.card_twoTorsion_le_two_of_root_cofactor`,
   `ECCompute.certTorsionBound_zero/one/two` : the counting bound for each value of `t`.
 -/
@@ -66,7 +64,8 @@ private theorem exists_intRoot_of_isRoot {a₁ a₂ a₃ a₄ a₆ : ℤ} (W : W
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `1 < ℓ`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
 `W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
-theorem no_nonzero_twoTorsion_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 1 < ℓ) {W : WeierstrassCurve ℚ}
+private theorem no_nonzero_twoTorsion_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 1 < ℓ)
+    {W : WeierstrassCurve ℚ}
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
     (h : monicHasNoRootMod [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ)
     (P : W.toAffine.Point) (hP : P + P = 0) : P = 0 := by
