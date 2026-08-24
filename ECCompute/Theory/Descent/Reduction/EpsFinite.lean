@@ -84,10 +84,9 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- The descent-character combination for a collinear triple `x₁, x₂, X₃` (with `x₁ ≠ x₂`)
-whose Vieta relations for the secant line `y = ℓx + m` are given: the value at the third root
-`X₃` equals the sum of the values at `x₁` and `x₂`. The `𝔽ₚ`-arithmetic core of the secant
-additivity, split off from the group-law setup in `εpFinite_map_add_of_X_ne`. -/
+/-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
+line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
+`x₂`. -/
 private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
@@ -158,10 +157,8 @@ theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
-/-- The descent character vanishes at the double point of a tangent line: given the Vieta
-relations for the double-root triple `x, x, X₃` at a root `θ ≠ x`, the value at `X₃` is `0`.
-The `𝔽ₚ`-arithmetic core of the doubling case, split off from the group-law setup in
-`εpFinite_double`. -/
+/-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
+descent-character value at `X₃` is `0`. -/
 private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
     (hXθ : x ≠ θ)
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - (a₂ : ZMod p))

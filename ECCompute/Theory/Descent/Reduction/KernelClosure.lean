@@ -45,8 +45,7 @@ private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
   rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
-/-- The numerator of a rational with square denominator `w²` is prime to any `p ∣ w`: since
-`num`, `den` are coprime and `w² = den`, a prime dividing both `num` and `w` would be a unit. -/
+/-- The numerator of a rational with square denominator `w²` is coprime to any `p ∣ w`. -/
 private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
     ¬ (p : ℤ) ∣ q.num := by
   intro hdvd
@@ -71,8 +70,8 @@ private theorem kernel_point_data {x y : ℚ}
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
     not_dvd_num p (by grind) hpw, hwne⟩
 
-/-- Integer form of the curve relation for a point `(A/E², B/E³)`: clearing denominators of
-`y² = x³ + a₂x² + a₄x + a₆` gives `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
+/-- For a point `(A/E², B/E³)` on `y² = x³ + a₂x² + a₄x + a₆`, the integer relation
+`B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
 private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
     (hcv : y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆)
     (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
@@ -85,8 +84,8 @@ private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
 /-! ### The certificate scalars -/
 
 omit [Fact p.Prime] in
-/-- The certificate scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit: it is
-`≡ -A²C²` mod `p` (the other terms carry the factor `E`), and `A`, `C` are `p`-units. -/
+/-- The scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit when `p ∣ E` and
+`A`, `C` are `p`-units. -/
 private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C) (hpE : (p : ℤ) ∣ E) :
     ¬ (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
@@ -102,8 +101,8 @@ private theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
   have hAC : (p : ℤ) ∣ A ^ 2 * C ^ 2 := by simpa using dvd_sub hrest hdvd
   grind [Prime.dvd_of_dvd_pow, Prime.dvd_mul]
 
-/-- The certificate scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`: `K = 0` forces
-`x₁·E²G² = x₂·E²G²` and hence `x₁ = x₂`. -/
+/-- The scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`, given `A = x₁E²`, `C = x₂G²`
+and `E`, `G` nonzero. -/
 private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
     (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
     (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
@@ -113,8 +112,7 @@ private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂
   grind [mul_right_cancel₀, pow_ne_zero]
 
 /-- The single-fraction identity `x₃·(A·C·K²) = N² - a₆E²G²K²` for the doubled `x`-coordinate,
-where `K = AG² - CE²`, `N = ADE - BCG`. It follows from the slope relation `hℓ` and the two
-curve relations by clearing denominators. -/
+with `K = AG² - CE²` and `N = ADE - BCG`. -/
 private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C D E G : ℤ}
     (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (hcv1 : y₁ ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
@@ -134,9 +132,7 @@ private theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C
 
 /-! ### The valuation argument -/
 
-/-- Numerator valuation of the kernel certificate: with `v_p(N) < v_p(K)`, the numerator
-`N² - M·K²` is nonzero with `v_p = 2·v_p(N)`, since the second term has strictly larger valuation
-(`K²` alone already dominates `N²`). -/
+/-- With `v_p(N) < v_p(K)`, the integer `N² - M·K²` is nonzero and has `v_p = 2·v_p(N)`. -/
 private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValInt p K)
     (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
     padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
@@ -171,9 +167,8 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
     rw [← hsplit]
     exact_mod_cast he
 
-/-- Final valuation step of the kernel-closure certificate. Given the single-fraction
-`x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and the crux `v_p(N) < v_p(K)`, the `p`-adic
-valuation of `x₃` is `2·(v_p N - v_p K) < 0`, hence `p ∣ x₃.den`. -/
+/-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
+`v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
 private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     (hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ))
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
@@ -198,10 +193,8 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
 
-/-- The crux valuation inequality of the kernel-closure certificate, isolated from the integer
-curve relations. With `K = AG² - CE²`, `N = ADE - BCG` and the `p`-unit `W = -A²C² + …`, the
-identity `N·(ADE + BCG) = K·W` (from the two curve relations) together with `p ∣ E`, `p ∣ G` and
-`p`-unit `A`, `C` gives `N ≠ 0`, `K ≠ 0` and `v_p(N) < v_p(K)`. -/
+/-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
+`N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
 private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
     (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
     (hEne : (E : ℚ) ≠ 0) (hGne : (G : ℚ) ≠ 0) (hpE : (p : ℤ) ∣ E) (hpG : (p : ℤ) ∣ G)

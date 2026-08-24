@@ -190,10 +190,8 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
   have := WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
   grind [Affine.Point.some.injEq]
 
-/-- Tangent-mod-`p` additivity, `2`-torsion sub-case: the shared reduced point is `2`-torsion
-(`Ȳ₁ = -Ȳ₁`), so both `redP (P + Q)` and `P̄ + P̄` are the origin. The doubled `x`-coordinate
-must have vanishing denominator mod `p`, else the reduced slope forces `f'(X̄₁) = 0`, contradicting
-nonsingularity of the reduced point. -/
+/-- Additivity of `redP` in the tangent-mod-`p` `2`-torsion sub-case: the shared reduced point
+satisfies `Ȳ₁ = -Ȳ₁`, and both `redP (P + Q)` and `P̄ + P̄` are the origin. -/
 private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     {x₁ y₁ x₂ y₂ : ℚ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
@@ -264,9 +262,8 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
 
-/-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum
-reduces to `O` too. If `x₁ = x₂` then `Q = -P` and `P + Q = 0`; otherwise `x₁ ≠ x₂` and the
-kernel-closure certificate `den_addX_both_kernel` gives `p ∣ x₃.den`. -/
+/-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
+reduces to the origin. Uses `den_addX_both_kernel`. -/
 private theorem redP_add_kernel (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)

@@ -62,9 +62,7 @@ private theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.d
     Rat.cast_mul_of_ne_zero hd1 hd2, Rat.cast_pow, Rat.cast_mul_of_ne_zero (by simp) esum,
     Rat.cast_add_of_ne_zero hd1 hd2, Rat.cast_intCast, Rat.cast_intCast]
 
-/-- The reduced secant slope times `y₁ + y₂` equals the secant numerator: clearing the denominator
-of `slope = (y₁ - y₂)/(x₁ - x₂)` against the two curve relations gives
-`slope·(y₁ + y₂) = x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄`. -/
+/-- For the reduced secant slope, `slope·(y₁ + y₂) = x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄`. -/
 private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂) :
@@ -131,8 +129,8 @@ theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     rwa [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
       Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
 
-/-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` survives reduction, so does the slope:
-from `ℓ² = addX + a₂ + x₁ + x₂` a nonzero `addX`-denominator forces a nonzero `ℓ`-denominator. -/
+/-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` has nonzero denominator mod `p`, then so
+does the slope. -/
 theorem slope_den_of_addX_den
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
@@ -185,9 +183,8 @@ theorem reduced_addY_eq (X Y L : ZMod p) :
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
     WeierstrassCurve.Affine.negAddY, map_curveℤ_zmod]; grind
 
-/-- The cast of the rational `addY` matches the reduced `addY` form when the slope, `x`-coordinates
-and `y`-coordinate all survive reduction: the denominators of each summand are nonzero mod `p`, so
-`Rat.cast` distributes over the `-(ℓ·(addX - x₁) + y₁)` expression. -/
+/-- When the slope, `x`-coordinates and `y`-coordinate have nonzero denominators mod `p`, the cast
+of the rational `addY` equals `-(ℓ·(addX - x₁) + y₁)` over `ZMod p`. -/
 theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hdy1 : (y₁.den : ZMod p) ≠ 0)
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :

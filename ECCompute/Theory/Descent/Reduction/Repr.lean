@@ -12,9 +12,9 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 # The integer projective representative of an affine point
 
 For a point `P = (x, y)` on the rational curve `y² = x³ + a₂x² + a₄x + a₆`, the
-denominator-is-a-square lemma gives `w : ℕ` with `x.den = w²` and `y.den = w³`, so that
-`![x.num · w, y.num, w³] : Fin 3 → ℤ` is an integer projective representative of `P`. This
-file records it as `trep x y w` together with the facts used to reduce it modulo `p`.
+denominator-is-a-square lemma gives `w : ℕ` with `x.den = w²` and `y.den = w³`. Then
+`![x.num · w, y.num, w³] : Fin 3 → ℤ` is an integer projective representative of `P`, recorded
+here as `trep x y w` with the facts used to reduce it modulo `p`.
 
 ## Main declarations
 
