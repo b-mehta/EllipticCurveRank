@@ -130,52 +130,8 @@ private theorem card_twoTorsion_le_four :
 
 /-! ## The `t = 0` bound
 
-The cubic has no rational root, so `Sx = ∅`. The witness is the `u = 4x` scaled cubic having no
-root modulo `ℓ`; `4x` is the integer root it forbids, obtained from the general-model root. -/
-
-/-- If `x` is a root of `W.twoTorsionPolynomial`, then `4x` is an integer root of the monic
-`2`-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/
-private theorem exists_intRoot_of_isRoot {a₁ a₂ a₃ a₄ a₆ : ℤ} (W : WeierstrassCurve ℚ)
-    (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
-    {x : ℚ} (hroot : W.twoTorsionPolynomial.toPoly.IsRoot x) :
-    ∃ z, polyEval [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂, 1] z = 0 := by
-  set c₂ := a₁ ^ 2 + 4 * a₂ with hc₂
-  set c₁ := 8 * (2 * a₄ + a₁ * a₃) with hc₁
-  set c₀ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
-  set p := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
-  have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
-  -- expand the `2`-torsion root into the coefficient identity `4x³ + b₂x² + 2b₄x + b₆ = 0`
-  rw [IsRoot.def, eval_twoTorsionPolynomial_toPoly, b₂, b₄, b₆,
-    ha₁, ha₂, ha₃, ha₄, ha₆] at hroot
-  -- the monic cubic at `4x` is `16 ×` that value, hence zero
-  have hae : aeval (4 * x) p = 0 := by
-    simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast, eq_intCast]
-    grind
-  -- the integral root theorem: `4x` equals some integer `z`
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hae
-  refine ⟨z, ?_⟩
-  -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
-  have hQ : (polyEval [c₀, c₁, c₂, 1] z : ℚ) = 0 := by
-    simp only [algebraMap_int_eq, eq_intCast] at hz
-    grind [polyEval_monicCubic_cast]
-  exact mod_cast hQ
-
-/-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
-`1 < ℓ`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
-`W` has no nonzero rational 2-torsion: every point `P` with `P + P = 0` is `0`. -/
-private theorem no_nonzero_twoTorsion_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 1 < ℓ)
-    {W : WeierstrassCurve ℚ}
-    (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
-    (h : monicHasNoRootMod [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂] ℓ)
-    (P : W.toAffine.Point) (hP : P + P = 0) : P = 0 := by
-  -- eliminate the point-at-infinity case; work with `P = some x y h`
-  obtain _ | ⟨x, y, hns⟩ := P
-  · rfl
-  exfalso
-  -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
-  obtain ⟨z, hz⟩ := exists_intRoot_of_isRoot W ha₁ ha₂ ha₃ ha₄ ha₆
-    (isRoot_twoTorsionPolynomial_of_add_self W hns hP)
-  exact no_int_root_of_monicHasNoRootMod hℓ h z hz
+The cubic has no rational root, so `Sx = ∅`: a rational root of the monic cubic is an integer, and
+`4` times it is an integer root of the scaled cubic the witness forbids. -/
 
 /-- The `t = 0` bound: if the scaled `2`-division cubic of the short model has no root modulo a
 witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the identity, so the
@@ -184,9 +140,25 @@ private theorem card_twoTorsion_le_one_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 
     (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 1 := by
   have hx (x y : ℚ) (hns : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
-      Point.some x y hns + Point.some x y hns = 0 → x ∈ (∅ : Finset ℚ) := fun hP ↦
-    (Point.some_ne_zero _
-      (no_nonzero_twoTorsion_of_monicHasNoRootMod hℓ rfl rfl rfl rfl rfl (by grind) _ hP)).elim
+      Point.some x y hns + Point.some x y hns = 0 → x ∈ (∅ : Finset ℚ) := fun hP ↦ by
+    obtain ⟨hy0, -⟩ := twoTorsion_y_eq_zero_and_root hns hP
+    have hxr : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0 := by
+      have heq := (equation_iff _ _).mp hns.1
+      grind [curve]
+    -- `x` roots the monic integer cubic, so it is an integer
+    set p : ℤ[X] := X ^ 3 + C a₂ * X ^ 2 + C a₄ * X + C a₆ with hp
+    have hmonic : p.Monic := by simp only [hp]; monicity!
+    have haeval : p.aeval x = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by simp [hp]
+    obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic (haeval.trans hxr)
+    simp only [algebraMap_int_eq, eq_intCast] at hz
+    -- `4z = 4x` is an integer root of the scaled cubic, contradicting the no-root-mod witness
+    refine (no_int_root_of_monicHasNoRootMod hℓ h (4 * z) ?_).elim
+    have hQ : (polyEval [64 * a₆, 16 * a₄, 4 * a₂, 1] (4 * z) : ℚ) = 0 := by
+      rw [polyEval_monicCubic_cast]
+      push_cast
+      rw [hz]
+      linear_combination 64 * hxr
+    exact mod_cast hQ
   simpa using (card_twoTorsion_le_of_xcoords hx).2
 
 /-! ## The `t = 1` bound
