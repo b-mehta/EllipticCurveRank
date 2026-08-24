@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.RingTheory.Int.Basic
@@ -36,7 +39,7 @@ namespace ECCompute
 
 variable (a₂ a₄ a₆ : ℤ)
 
-private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
+theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
   have hQ : (d : ℚ) ^ 3 = (g : ℚ) ^ 2 := by exact_mod_cast hdg
   obtain ⟨c, hc⟩ := (pow_eq_pow_iff_of_coprime (by decide : (3 : ℕ).Coprime 2)).mp hQ
@@ -48,7 +51,7 @@ private theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
 
 /-- For a solution `(x, y)` of the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is a
 natural number `w` with `x.den = w²` and `y.den = w³`. -/
-theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
   have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
     have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
@@ -84,7 +87,7 @@ theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x
 
 /-- Point form of `den_isSquare`: for a point `.some x y h` on the integral curve, there is
 `w` with `x.den = w²` and `y.den = w³`. -/
-theorem den_isSquare_of_nonsingular {x y : ℚ}
+public theorem den_isSquare_of_nonsingular {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 :=
   den_isSquare a₂ a₄ a₆ h.1
