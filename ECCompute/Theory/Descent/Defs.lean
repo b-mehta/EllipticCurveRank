@@ -27,6 +27,18 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
 
+namespace WeierstrassCurve
+
+/-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
+def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
+  {P | P + P = 0}
+
+@[simp]
+lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
+    P ∈ W.twoTorsionPoints ↔ P + P = 0 := Iff.rfl
+
+end WeierstrassCurve
+
 open WeierstrassCurve
 
 namespace ECCompute
