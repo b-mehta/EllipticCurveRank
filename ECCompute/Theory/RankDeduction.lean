@@ -23,9 +23,8 @@ import Mathlib.Data.DFinsupp.FiniteInfinite
 /-!
 # The rank-bound deduction (abstract core)
 
-The group-theoretic core of the rank-bound descent argument, phrased for a finitely generated
-additive abelian group `H` as a `ℤ`-module, with no reference to the elliptic curve or the
-`𝔽₂`-invertibility check.
+The group-theoretic core of the rank-bound descent argument, for a finitely generated
+additive abelian group `H` as a `ℤ`-module.
 
 Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-vector space) and
 `H[2] = Submodule.torsionBy ℤ H 2` for the 2-torsion.
@@ -244,9 +243,8 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
     Nat.pow_right_injective (le_refl 2) key
   lia
 
-/-- Like `rank_ge` but assuming only `|H[2]| ≤ 2 ^ t`, not equality: `ρ` group elements with
-`𝔽₂`-linearly independent images under `φ` give `ρ ≤ rank H + t`. The certificate uses this form,
-since it bounds the generated subgroup's torsion rather than computing it. -/
+/-- From `|H[2]| ≤ 2 ^ t` and `ρ` group elements whose images under `φ` are `𝔽₂`-linearly
+independent, `ρ ≤ rank H + t`. This is the form the certificate uses. -/
 public theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :
