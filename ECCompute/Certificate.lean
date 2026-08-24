@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import Mathlib.Data.Rat.Defs
+module
+
+public import Mathlib.Data.Rat.Defs
+
 import ECCompute.Soundness.F2Invert
 
 /-!
@@ -29,7 +32,7 @@ namespace ECCompute
 
 /-- A certificate for the Mordell-Weil rank bound `rank E(ℚ) ≥ ρ - t`, over the short integral
 Weierstrass model `y² = x³ + a₂x² + a₄x + a₆`. -/
-structure Certificate where
+public structure Certificate where
   /-- The `x²` coefficient of the short model. -/
   a₂ : ℤ
   /-- The `x` coefficient of the short model. -/
