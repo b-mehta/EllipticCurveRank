@@ -3,10 +3,15 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.FieldTheory.Finiteness
+public import Mathlib.Algebra.Field.ZMod
+
 import ECCompute.ForMathlib.ModuleTorsionQuotient
 import Mathlib.LinearAlgebra.FreeModule.ModN
 import Mathlib.Algebra.Module.PID
-import Mathlib.Algebra.Module.Torsion.Basic
 import Mathlib.LinearAlgebra.Dimension.Torsion.Finite
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import Mathlib.LinearAlgebra.Isomorphisms
@@ -14,8 +19,6 @@ import Mathlib.GroupTheory.Index
 import Mathlib.GroupTheory.FiniteAbelian.Basic
 import Mathlib.Data.ZMod.QuotientRing
 import Mathlib.Data.DFinsupp.FiniteInfinite
-import Mathlib.FieldTheory.Finiteness
-import Mathlib.Algebra.Field.ZMod
 
 /-!
 # The rank-bound deduction (abstract core)
@@ -29,12 +32,9 @@ Write `H ⧸ 2H` for `ModN H 2` (the quotient of `H` by its doubles, a `ZMod 2`-
 
 ## Main results
 
-* `RankDeduction.natCard_modN_two`: `Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card H[2]`.
-* `RankDeduction.finrank_modN_two`: `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`.
-* `RankDeduction.rho_le_finrank_modN_two`: `ρ` elements with `𝔽₂`-independent images under some
-  `φ : H →+ (Fin ρ → ZMod 2)` force `ρ ≤ dim_{𝔽₂}(H ⧸ 2H)`.
-* `RankDeduction.rank_ge`: `ρ ≤ rank H + t` when `Nat.card H[2] = 2 ^ t` and there are `ρ`
-  independent descent-character values.
+* `RankDeduction.rank_ge_le`: `ρ ≤ rank H + t` when `Nat.card H[2] ≤ 2 ^ t` and `ρ` group
+  elements have `𝔽₂`-linearly independent images under a descent-character hom
+  `φ : H →+ (Fin ρ → ZMod 2)`, the form the certificate uses.
 
 An invertible `ρ × ρ` matrix over `𝔽₂` supplies the linear-independence hypothesis.
 -/
@@ -247,7 +247,7 @@ theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ 
 /-- Like `rank_ge` but assuming only `|H[2]| ≤ 2 ^ t`, not equality: `ρ` group elements with
 `𝔽₂`-linearly independent images under `φ` give `ρ ≤ rank H + t`. The certificate uses this form,
 since it bounds the generated subgroup's torsion rather than computing it. -/
-theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
+public theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :
     ρ ≤ finrank ℤ H + t := by
