@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.CompleteSquare
-import ECCompute.Soundness.Fold
+module
+
+public import ECCompute.Theory.CompleteSquare
+public import ECCompute.Soundness.Fold
 
 /-!
 # Soundness of the point-on-curve check
@@ -36,7 +38,7 @@ theorem checkPoint_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (x y : ℚ) :
   exact ⟨fun h ↦ mul_left_cancel₀ hD (by grind), fun h ↦ by grind⟩
 
 /-- `checkPoints` holds iff every listed point satisfies the equation. -/
-theorem checkPoints_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (pts : List (ℚ × ℚ)) :
+public theorem checkPoints_iff {a₁ a₂ a₃ a₄ a₆ : ℤ} (pts : List (ℚ × ℚ)) :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_iff, checkPoint_iff]
