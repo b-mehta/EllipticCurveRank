@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Soundness.Fold
-public import ECCompute.Soundness.IntResNat
+public import Mathlib.Data.ZMod.Basic
 
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.ForLean
@@ -30,6 +30,13 @@ quadratic a rational one.
 namespace ECCompute
 
 variable {cs : List ℤ} {ℓ r : ℕ}
+
+/-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
+public theorem intResNat_cast {p : ℕ} (hp : p ≠ 0) (z : ℤ) :
+    ((z % (p : ℤ)).toNat : ZMod p) = (z : ZMod p) := by
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact mod_cast hp)
+  rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
+  exact Int.emod_emod_of_dvd z dvd_rfl
 
 @[simp, grind =] lemma polyEval_cons {c u : ℤ} :
     polyEval (c :: cs) u = c + u * polyEval cs u := by

@@ -16,7 +16,6 @@ import ECCompute.Theory.CompleteSquare
 
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
-import ECCompute.Soundness.IntResNat
 import ECCompute.Soundness.Primes
 import ECCompute.Soundness.F2Invert
 import ECCompute.Soundness.RootMod
