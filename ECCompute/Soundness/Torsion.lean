@@ -156,7 +156,7 @@ private theorem card_twoTorsion_le_one_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 
     have hQ : (polyEval [64 * a₆, 16 * a₄, 4 * a₂, 1] (4 * z) : ℚ) = 0 := by
       rw [polyEval_monicCubic_cast]
       push_cast
-      rw [hz]
+      rw [← hz]
       linear_combination 64 * hxr
     exact mod_cast hQ
   simpa using (card_twoTorsion_le_of_xcoords hx).2
