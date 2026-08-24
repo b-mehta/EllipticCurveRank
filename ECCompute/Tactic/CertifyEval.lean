@@ -22,7 +22,7 @@ character matrix `B` and its inverse `M`.
 
 ## Implementation notes
 
-This module has no imports.
+This module is self-contained.
 -/
 
 namespace ECCompute.CertifyEval
@@ -64,8 +64,7 @@ public def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat
     bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
-`p`. Mirrors `ECCompute.qrMask` (OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`); the certificate
-carries this so each Legendre-character check is a bitmask lookup. -/
+`p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
 public def qrMaskNat (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k => acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
