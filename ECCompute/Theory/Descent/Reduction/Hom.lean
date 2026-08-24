@@ -7,6 +7,7 @@ import ECCompute.Theory.Descent.Reduction.RedP
 import ECCompute.Theory.Descent.Reduction.KernelClosure
 import ECCompute.Theory.Descent.Reduction.ReducedSlope
 import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.ForMathlib.WeierstrassCurveAffine
 import ECCompute.ForMathlib.WeierstrassCurveProjective
 
 /-!
@@ -291,7 +292,8 @@ private theorem red_p_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
   rw [Affine.Point.add_of_Y_eq hx12 hy, red_p_zero, red_p_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1]
   have hyneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
       (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
-    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ := negY_curve x₂ y₂
+    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
+      WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x₂ y₂
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
     grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
