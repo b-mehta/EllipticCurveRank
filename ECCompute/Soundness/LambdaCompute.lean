@@ -138,37 +138,39 @@ theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha
   have hmask := qrMask_testBit p hp2 a ha
   grind [qrLookupBool]
 
-/-! ### `psiCompute`: the Legendre symbol into `ZMod 2` via the residue mask -/
+/-! ### `Bool` character and its `ZMod 2` lift -/
 
-/-- The Legendre symbol into `ZMod 2`, read from the quadratic-residue mask of `p` at the
-representative `a.val`: `0` on quadratic residues and `1` on non-residues. Agrees with
-`ECCompute.psi` (`psiCompute_eq`). -/
-noncomputable def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  if qrLookupBool (qrMask p) a.val then 0 else 1
+/-- `Bool`-valued evaluation of the descent character `λ_{p,θ}` on an affine point with
+`x`-coordinate `x`, read from the quadratic-residue mask of `p`: `true` where `λ` is `1`, `false`
+where it is `0`. -/
+public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+  if (x.den : ZMod p) = 0 then false
+  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then
+    !(qrLookupBool (qrMask p) (fderiv a₂ a₄ p θ).val)
+  else !(qrLookupBool (qrMask p) ((x.num : ZMod p) - θ * (x.den : ZMod p)).val)
 
-/-- For `p` an odd prime and `a ≠ 0`, `psiCompute` agrees with the abstract Legendre character
-`psi`. -/
-theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
-    psiCompute p a = psi p a := by
-  -- the natural-number value `a.val` casts back to `a`, and is `< p`
+/-- The `ZMod 2`-valued evaluation of `λ_{p,θ}`: the `Bool` mirror `lambdaComputeBool` read into
+`ZMod 2` (`true ↦ 1`, `false ↦ 0`). A certificate checks the character matrix over `Bool` and
+recovers the `ZMod 2` value only at the end. -/
+public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
+  if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
+
+/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
+public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := rfl
+
+/-- For `p` an odd prime and `a ≠ 0`, reading the residue mask of `p` into `ZMod 2` gives the
+abstract Legendre character `psi`. -/
+private theorem mask_eq_psi (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
+    (if qrLookupBool (qrMask p) a.val then (0 : ZMod 2) else 1) = psi p a := by
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
   have ha0 : a.val ≠ 0 := fun h ↦ ha (by rw [← hval', h, Nat.cast_zero])
-  -- the mask bit test decides `IsSquare a`
   have hspec := qrLookupBool_spec p hp2 a.val hvlt
   rw [hval'] at hspec
-  rw [psiCompute, hspec]
+  rw [hspec]
   simp only [ne_eq, ha0, not_false_eq_true, true_and, psi]
   by_cases hsq : IsSquare a <;> simp [hsq]
-
-/-! ### Evaluation of `λ` on an affine point via the residue mask -/
-
-/-- The `ZMod 2`-valued evaluation of the descent character `λ_{p,θ}` on an affine point with
-`x`-coordinate `x`, using the mask-based `psiCompute` for the Legendre character. -/
-public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
-  if (x.den : ZMod p) = 0 then 0
-  else if (x.num : ZMod p) - θ * x.den = 0 then psiCompute p (fderiv a₂ a₄ p θ)
-       else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
 an affine point. -/
@@ -179,27 +181,8 @@ public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
-  rw [lambdaCompute, lambda]
-  grind [psiCompute_eq]
-
-/-! ### `Bool`-valued mirror for kernel checks
-
-`lambdaComputeBool` mirrors `lambdaCompute` in `Bool` (`1 ↦ true`, `0 ↦ false`), so certificate
-matrix checks compare `Bool`s; `lambdaCompute_eq_bool` reads the result back into `ZMod 2`. -/
-
-/-- `Bool` mirror of `lambdaCompute`: `true` for `1 : ZMod 2`, `false` for `0`. -/
-public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
-  if (x.den : ZMod p) = 0 then false
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then
-    !(qrLookupBool (qrMask p) (fderiv a₂ a₄ p θ).val)
-  else !(qrLookupBool (qrMask p) ((x.num : ZMod p) - θ * (x.den : ZMod p)).val)
-
-/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
-character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
-public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
-    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
-  rw [lambdaCompute, lambdaComputeBool]
-  grind [psiCompute]
+  rw [lambdaCompute, lambdaComputeBool, lambda]
+  grind [mask_eq_psi]
 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
