@@ -19,10 +19,6 @@ character matrix `B` and its inverse `M`.
 * `lambdaEval`: evaluator-side value of the descent character `λ_{p,θ}`.
 * `computeB`: the descent-character matrix `B` as `Nat` row bitmasks.
 * `invF2`: inverse of an `𝔽₂` matrix in the column-bitmask convention feeding `M`.
-
-## Implementation notes
-
-This module is self-contained.
 -/
 
 namespace ECCompute.CertifyEval

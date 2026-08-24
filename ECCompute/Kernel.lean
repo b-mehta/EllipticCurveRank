@@ -63,8 +63,7 @@ noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
 
 /-! ## Descent label check -/
 
-/-- The discriminant of the short model `curve a₂ a₄ a₆`, over the raw
-`Int.mul`/`Int.add`/`Int.sub`/`Int.neg` arithmetic primitives. Spec: `discrIntK_eq`. -/
+/-- The discriminant of the short model `curve a₂ a₄ a₆`, for the kernel. -/
 def discrIntK (a₂ a₄ a₆ : Int) : Int :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄
@@ -100,20 +99,15 @@ noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
 
-/-- Residue in `[0, p)` of `x.num - θ·x.den`, where the numerator `x.num` is the difference
-`xp - xm`, the denominator is `xden`, and `θ` is given by its label residue `tval`. -/
+/-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
 noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
-/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, from the coefficients `a₂ a₄ : Int`, read as
-the polynomial `polyModL [a₄, 2a₂, 3]` at `tval`. -/
+/-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, for the kernel. -/
 noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
-/-- The `Bool` value of the descent character `λ_{p,θ}` at a point, over raw `Nat`/`Int` arithmetic:
-coefficients `a₂ a₄ : Int`, numerator `xp - xm`, denominator `xden`, label residue `tval`, and the
-two Legendre-character evaluations done as bit tests against the mask `qmask`. Spec:
-`lambdaComputeBoolNatMask_eq`. -/
+/-- The value of the descent character `λ_{p,θ}` at a point. -/
 noncomputable def lambdaComputeBoolNatMask (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResNat p tval xp xm xden).beq 0).rec
