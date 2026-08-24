@@ -3,7 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+
 import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Data.ZMod.Basic
 
@@ -29,7 +32,7 @@ namespace ECCompute
 variable (a₂ a₄ a₆ : ℤ)
 
 /-- The integral Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℤ`, i.e. `a₁ = a₃ = 0`. -/
-def curveℤ : WeierstrassCurve ℤ where
+public def curveℤ : WeierstrassCurve ℤ where
   a₁ := 0
   a₂ := a₂
   a₃ := 0
@@ -41,19 +44,19 @@ theorem baseChange_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).baseChange ℚ = cur
   ext <;> simp [WeierstrassCurve.baseChange, curveℤ, curve]
 
 /-- The integral model maps to the rational curve under `ℤ → ℚ`. -/
-theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
+public theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
   rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
 
 /-- The reduction of the integral model modulo `p`: mapping the coefficients through the ring
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
-theorem map_curveℤ_zmod (p : ℕ) :
+public theorem map_curveℤ_zmod (p : ℕ) :
     (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p)) =
       { a₁ := 0, a₂ := (a₂ : ZMod p), a₃ := 0, a₄ := (a₄ : ZMod p), a₆ := (a₆ : ZMod p) } := by
   ext <;> simp [curveℤ]
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
-theorem reduced_negY (p : ℕ) (x y : ZMod p) :
+public theorem reduced_negY (p : ℕ) (x y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
   WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod])
     (by simp [map_curveℤ_zmod]) x y
