@@ -15,8 +15,8 @@ import ECCompute.ForLean
 # Soundness of the kernel-reducible descent character
 
 The descent character `λ_{p,θ}` (`ECCompute.Descent.Defs`) is `noncomputable`, as `ECCompute.psi`
-decides `IsSquare` classically. To evaluate `λ` inside a certificate we need a `rfl`-reducible
-replacement. For a fixed odd prime `p` we precompute, once per prime, a `Nat` bitmask `Q` whose bit
+decides `IsSquare` classically. A `rfl`-reducible replacement evaluates `λ` inside a certificate.
+For a fixed odd prime `p` we precompute, once per prime, a `Nat` bitmask `Q` whose bit
 `a` is set exactly on the nonzero quadratic residues `a` mod `p`; each character evaluation is then
 the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMask`, `qrLookupBool`,
 `lambdaComputeBoolNatMask`, …) live in `ECCompute.Kernel`; this file proves them correct.
@@ -132,7 +132,7 @@ theorem qrMask_testBit (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : 
   exact exists_sq_iff p hp2 a ha
 
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
-prime). This is what lets a verified mask evaluate the descent character at each call site. -/
+prime). -/
 theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
     qrLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
   have hmask := qrMask_testBit p hp2 a ha
@@ -149,9 +149,8 @@ public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMo
     !(qrLookupBool (qrMask p) (fderiv a₂ a₄ p θ).val)
   else !(qrLookupBool (qrMask p) ((x.num : ZMod p) - θ * (x.den : ZMod p)).val)
 
-/-- The `ZMod 2`-valued evaluation of `λ_{p,θ}`: the `Bool` mirror `lambdaComputeBool` read into
-`ZMod 2` (`true ↦ 1`, `false ↦ 0`). A certificate checks the character matrix over `Bool` and
-recovers the `ZMod 2` value only at the end. -/
+/-- The `ZMod 2`-valued evaluation of `λ_{p,θ}`: the `Bool` value `lambdaComputeBool` read into
+`ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
 public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
 
