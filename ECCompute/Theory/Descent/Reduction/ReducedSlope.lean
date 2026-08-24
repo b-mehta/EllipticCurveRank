@@ -70,11 +70,8 @@ private theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂) :
     (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (y₁ + y₂)
       = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
-  have hcv1 := equation_curve a₂ a₄ a₆ h₁
-  have hcv2 := equation_curve a₂ a₄ a₆ h₂
   have hℓ : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [WeierstrassCurve.Affine.slope_of_X_ne hne]; grind
-  apply mul_left_cancel₀ (sub_ne_zero.mpr hne)
+    grind [Affine.slope_of_X_ne]
   grind
 
 /-- The reduced secant slope is well-defined. When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the

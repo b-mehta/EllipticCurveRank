@@ -166,23 +166,19 @@ theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha 
 `x`-coordinate `x`, using the mask-based `psiCompute` for the Legendre character. -/
 noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
   if (x.den : ZMod p) = 0 then 0
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiCompute p (fderiv a₂ a₄ p θ)
+  else if (x.num : ZMod p) - θ * x.den = 0 then psiCompute p (fderiv a₂ a₄ p θ)
        else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
 an affine point. -/
-theorem lambdaCompute_eq (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
-    (hyp : DescentHyp a₂ a₄ a₆ p θ) (x y : ℚ)
+theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+    (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
-  have hlam : lambda a₂ a₄ a₆ p θ (.some x y h) =
-      if (x.den : ZMod p) = 0 then 0
-      else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psi p (fderiv a₂ a₄ p θ)
-           else psi p ((x.num : ZMod p) - θ * (x.den : ZMod p)) := rfl
-  rw [lambdaCompute, hlam]
+  rw [lambdaCompute, lambda]
   grind [psiCompute_eq]
 
 /-! ### `Bool`-valued mirror for kernel checks

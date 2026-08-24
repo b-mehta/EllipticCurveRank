@@ -76,27 +76,23 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     (hg : g = fun i ↦ .some (pt i).1 (pt i).2 (hns i)) :
     LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
   have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
-    funext i
-    ext j
-    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
-      ← lambdaCompute_eq c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j) (pt i).1 (pt i).2 (hns i)]
-    exact (hB i j).symm
+    ext i j
+    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg, ← lambdaCompute_eq (hyp j) (hns i)]
+    simp [hB]
   rw [hrow]
-  exact Matrix.linearIndependent_rows_of_isUnit
-    (F2Invert.checkInv_isUnit hBlen hMlen hinv)
+  exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hBlen hMlen hinv)
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
 private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
     (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
     Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
-  have hmap : ∀ x : Submodule.torsionBy ℤ H 2,
-      ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := fun x ↦ by
-    rw [mem_twoTorsionPoints, ← two_zsmul, ← Submodule.coe_smul,
-      (Submodule.mem_torsionBy_iff _ _).mp x.2, Submodule.coe_zero]
+  have hmap (x : Submodule.torsionBy ℤ H 2) :
+      (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
+    rw [mem_twoTorsionPoints, ← two_zsmul, ← Submodule.coe_smul, Submodule.smul_coe_torsionBy,
+      Submodule.coe_zero]
   refine Nat.card_le_card_of_injective (fun x ↦ ⟨((x : H) : _), hmap x⟩) fun a b hab ↦ ?_
-  have h := congrArg Subtype.val hab
-  exact Subtype.coe_injective (Subtype.coe_injective h)
+  grind
 
 /-- Soundness on the short integral model `curve c.a₂ c.a₄ c.a₆` (`a₁ = a₃ = 0`): when the
 certificate's points, labels, character matrix `B`, its `𝔽₂`-inverse, and its torsion witness all
@@ -106,9 +102,8 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
-    (hB : ∀ i j : Fin c.rho,
-        F2Invert.toMat c.B c.rho i j
-          = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+    (hB : ∀ i j, F2Invert.toMat c.B c.rho i j =
+      lambdaCompute c.a₂ c.a₄ (lab j).1 (lab j).2 (pt i).1)
     (hBlen : c.B.length = c.rho)
     (hMlen : c.M.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
@@ -124,9 +119,9 @@ theorem rank_ge_of_certificate (c : Certificate)
   · exact ⟨⊥, inferInstance, by simp [hrho0]⟩
   obtain ⟨j₀⟩ : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
-  have hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 := fun i ↦
+  have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
     (WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
-  set g : Fin c.rho → E := fun i ↦ .some (pt i).1 (pt i).2 (hns i) with hg
+  let (eq := hg) g (i : Fin c.rho) : E := .some (pt i).1 (pt i).2 (hns i)
   -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
   have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) :=
     linearIndependent_descent hyp pt hns hB hBlen hMlen hinv φ hφ g hg
@@ -170,35 +165,20 @@ structure Certificate.Valid (c : Certificate) : Prop where
 /-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), a proof that the
 short model of these coefficients is the certificate's curve (`hmodel`), and a certificate meeting
 its referee obligations (`hc`), the rank of `W` is at least `c.rho - c.t`. -/
-theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certificate) (W : WeierstrassCurve ℚ)
-    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
-    (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
+theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate) (W : WeierstrassCurve ℚ)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.rho - c.t) := by
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlabP, hlabC, hB, hinv, htors⟩ := hc
-  -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
   rw [hW]
-  -- The point/label families the soundness theorem consumes are read from the certificate's lists
-  -- by index. Every kernel-checked hypothesis above is `List`-based; the families here appear
-  -- only in the (non-computational) proof.
-  have hmemP : ∀ i : Fin c.rho, c.points[i] ∈ c.points := fun i ↦ List.getElem_mem _
-  have hmemL : ∀ j : Fin c.rho, c.labels[j] ∈ c.labels := fun j ↦ List.getElem_mem _
-  have hcurve : curve c.a₂ c.a₄ c.a₆ = (⟨0, c.a₂, 0, c.a₄, c.a₆⟩ : WeierstrassCurve ℚ) := by
-    simp only [curve]
   rw [checkPoints_iff] at hpt
-  have hpt' : ∀ i : Fin c.rho, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation
-      c.points[i].1 c.points[i].2 := by
-    intro i
-    rw [hcurve]
-    exact hpt _ (hmemP i)
-  have hlabP' : ∀ j : Fin c.rho, (c.labels[j].1).Prime :=
-    fun j ↦ checkPrimes_true hlabP _ (hmemL j)
-  have hlabC' : ∀ j : Fin c.rho, checkLabel c.a₂ c.a₄ c.a₆
-      c.labels[j].1 c.labels[j].2 :=
-    fun j ↦ checkLabels_true hlabC _ (hmemL j)
+  have hlabP' (j : Fin c.rho) : c.labels[j].1.Prime :=
+    checkPrimes_true hlabP _ (List.getElem_mem _)
+  have hlabC' (j : Fin c.rho) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
+    checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i ↦ c.points[i]) (fun j ↦ c.labels[j])
-      hpt' hlabP' hlabC'
+      (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 

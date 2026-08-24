@@ -244,8 +244,8 @@ theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     grind [WeierstrassCurve.Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     rw [hx3def]; simp only [WeierstrassCurve.Affine.addX, curve]; grind
-  have hcv1 := equation_curve a₂ a₄ a₆ h₁
-  have hcv2 := equation_curve a₂ a₄ a₆ h₂
+  have hcv1 := equation_curve h₁
+  have hcv2 := equation_curve h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data a₂ a₄ a₆ p h₁ hd1
   obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data a₂ a₄ a₆ p h₂ hd2
   set A : ℤ := x₁.num
