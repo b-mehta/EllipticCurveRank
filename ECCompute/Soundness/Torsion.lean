@@ -3,6 +3,7 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+import ECCompute.ForMathlib.TwoTorsion
 import ECCompute.Soundness.RootMod
 import ECCompute.Theory.Descent.Defs
 
@@ -35,13 +36,11 @@ private lemma polyEval_monicCubic_cast {b c d r : ℤ} :
   simp only [polyEval]
   grind
 
-/-- If `some x y` is nonzero 2-torsion on `W` (via the Weierstrass and 2-torsion equations), then
-`4x` is an integer root of the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/
-private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W : WeierstrassCurve ℚ)
+/-- If `x` is a root of `W.twoTorsionPolynomial`, then `4x` is an integer root of the monic
+`2`-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆`. -/
+private theorem exists_intRoot_of_isRoot {a₁ a₂ a₃ a₄ a₆ : ℤ} (W : WeierstrassCurve ℚ)
     (ha₁ : W.a₁ = a₁) (ha₂ : W.a₂ = a₂) (ha₃ : W.a₃ = a₃) (ha₄ : W.a₄ = a₄) (ha₆ : W.a₆ = a₆)
-    {x y : ℚ}
-    (heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)
-    (htor : 2 * y + W.a₁ * x + W.a₃ = 0) :
+    {x : ℚ} (hroot : W.twoTorsionPolynomial.toPoly.IsRoot x) :
     ∃ z : ℤ,
       polyEval [16 * (a₃ ^ 2 + 4 * a₆), 8 * (2 * a₄ + a₁ * a₃), a₁ ^ 2 + 4 * a₂, 1] z = 0 := by
   set c₂ := a₁ ^ 2 + 4 * a₂ with hc₂
@@ -49,14 +48,17 @@ private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W
   set c₀ := 16 * (a₃ ^ 2 + 4 * a₆) with hc₀
   set p := Cubic.toPoly ⟨1, c₂, c₁, c₀⟩ with hp
   have hmonic : p.Monic := Cubic.monic_of_a_eq_one' ..
-  -- `4x` is a root of the abstract cubic, keeping the integer coefficients opaque
-  have hroot : aeval (4 * x) p = 0 := by
+  -- expand the `2`-torsion root into the coefficient identity `4x³ + b₂x² + 2b₄x + b₆ = 0`
+  rw [IsRoot.def, eval_twoTorsionPolynomial_toPoly, b₂, b₄, b₆,
+    ha₁, ha₂, ha₃, ha₄, ha₆] at hroot
+  -- the monic cubic at `4x` is `16 ×` that value, hence zero
+  have hae : aeval (4 * x) p = 0 := by
     simp only [hp, Cubic.toPoly, map_add, map_mul, map_pow, aeval_X, map_intCast,
       eq_intCast, Int.cast_one, one_mul, hc₂, hc₁, hc₀]
     push_cast
-    grind
+    linear_combination 16 * hroot
   -- the integral root theorem: `4x` equals some integer `z`
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
+  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hae
   refine ⟨z, ?_⟩
   -- cast the ℤ cubic value to ℚ and use the identity at `4x = z`
   have hQ : (polyEval [c₀, c₁, c₂, 1] z : ℚ) = 0 := by
@@ -64,14 +66,6 @@ private theorem exists_intRoot_of_twoTorsion {a₁ a₂ a₃ a₄ a₆ : ℤ} (W
     rw [polyEval_monicCubic_cast]
     grind
   exact mod_cast hQ
-
-/-- If `some x y` doubles to zero (`some x y + some x y = 0`), then `y = negY x y`. -/
-private lemma y_eq_negY_of_self_add {W : WeierstrassCurve ℚ} {x y : ℚ}
-    {h : W.toAffine.Nonsingular x y}
-    (hP : Affine.Point.some x y h + Affine.Point.some x y h = 0) :
-    y = W.toAffine.negY x y := by
-  by_contra hne
-  exact Affine.Point.some_ne_zero _ (by rw [Affine.Point.add_self_of_Y_ne hne] at hP; exact hP)
 
 /-- Let `W` be the Weierstrass curve over `ℚ` with integer coefficients `a₁ a₂ a₃ a₄ a₆`, and let
 `1 < ℓ`. If the monic 2-division cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` has no root modulo `ℓ`, then
@@ -87,14 +81,9 @@ theorem no_nonzero_twoTorsion_of_monicHasNoRootMod
   obtain _ | ⟨x, y, hns⟩ := P
   · rfl
   exfalso
-  have hy : y = W.toAffine.negY x y := y_eq_negY_of_self_add hP
-  -- the Weierstrass equation and the 2-torsion condition
-  have heq : y ^ 2 + W.a₁ * x * y + W.a₃ * y = x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆ :=
-    (Affine.equation_iff _ _).mp hns.1
-  have htor : 2 * y + W.a₁ * x + W.a₃ = 0 := by grind [Affine.negY]
   -- `4x` is an integer root of the cubic, contradicting the no-root-mod hypothesis
-  obtain ⟨z, hz⟩ :=
-    exists_intRoot_of_twoTorsion W ha₁ ha₂ ha₃ ha₄ ha₆ heq htor
+  obtain ⟨z, hz⟩ := exists_intRoot_of_isRoot W ha₁ ha₂ ha₃ ha₄ ha₆
+    (isRoot_twoTorsionPolynomial_of_add_self W hns hP)
   exact no_int_root_of_monicHasNoRootMod hℓ h z hz
 
 /-! ## The universal bound `|E(ℚ)[2]| ≤ 4`
@@ -111,7 +100,7 @@ private theorem twoTorsion_y_eq_zero_and_root {a₂ a₄ a₆ : ℤ} {x y : ℚ}
     y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
   have hmonic : (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).toPoly.Monic :=
     Cubic.monic_of_a_eq_one' ..
-  have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := y_eq_negY_of_self_add hP
+  have hy : y = (curve a₂ a₄ a₆).toAffine.negY x y := Y_eq_negY_of_add_self (curve a₂ a₄ a₆) h hP
   have hy0 : y = 0 := by grind [Affine.negY, curve]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
