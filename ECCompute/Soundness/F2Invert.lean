@@ -34,7 +34,7 @@ open Finset
 
 variable {v : ℕ} {a b : Bool}
 
-/-- Parity of the popcount of `a`, reading the low `fuel` bits. -/
+/-- Parity of the number of set bits among the low `fuel` bits of `a`. -/
 def popParity : ℕ → ℕ → Bool
   | 0, _ => false
   | fuel + 1, a => (a.testBit 0).xor (popParity fuel (a / 2))
@@ -155,7 +155,8 @@ theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
   rw [maskBelow, allList_iff]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
-/-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and the core go. -/
+/-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and
+`checkInvGo M 0 B`. -/
 theorem checkInv_true_of (h : checkInv n B M) :
     (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B := by
   grind [checkInv, maskBelow_iff]
