@@ -105,18 +105,18 @@ the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity tog
 private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ Sx) :
-    ({P | P + P = 0} : Set (curve a₂ a₄ a₆).toAffine.Point).Finite ∧
-      Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ Sx.card + 1 := by
+    (curve a₂ a₄ a₆).twoTorsionPoints.Finite ∧
+      (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ Sx.card + 1 := by
   classical
   set W := curve a₂ a₄ a₆
-  set T : Set W.toAffine.Point := {P | P + P = 0} with hT
+  set T : Set W.toAffine.Point := W.twoTorsionPoints with hT
   set ι : W.toAffine.Point → Option ℚ := fun
     | .zero => none
     | .some x _ _ => some x with hιdef
   set S : Finset (Option ℚ) := Sx.insertNone with hS
   have hinj : Set.InjOn ι T := by
     intro P hP P' hP' hEq
-    simp only [hT, Set.mem_ofPred_eq] at hP hP'
+    simp only [hT, mem_twoTorsionPoints] at hP hP'
     obtain _ | ⟨x, y, h⟩ := P
     · grind
     obtain _ | ⟨x', y', h'⟩ := P'
@@ -128,15 +128,12 @@ private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     rfl
   have himg : ι '' T ⊆ ↑S := by
     rintro o ⟨P, hP, rfl⟩
-    simp only [hT, Set.mem_ofPred_eq] at hP
+    simp only [hT, mem_twoTorsionPoints] at hP
     obtain _ | ⟨x, y, h⟩ := P
     · simp [hιdef, hS]
     · simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone]
       exact hx x y h hP
   refine ⟨Set.Finite.of_finite_image (S.finite_toSet.subset himg) hinj, ?_⟩
-  have hcard : Nat.card {P : W.toAffine.Point // P + P = 0} = T.ncard :=
-    (Nat.card_coe_set_eq T).symm
-  rw [hcard]
   calc T.ncard
       = (ι '' T).ncard := (hinj.ncard_image).symm
     _ ≤ (↑S : Set (Option ℚ)).ncard := Set.ncard_le_ncard himg S.finite_toSet
@@ -151,8 +148,7 @@ private theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
   Multiset.mem_toFinset.mpr (twoTorsion_y_eq_zero_and_root h hP).2
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
-instance twoTorsion_finite {a₂ a₄ a₆ : ℤ} :
-    Finite {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} :=
+instance twoTorsion_finite {a₂ a₄ a₆ : ℤ} : Finite ↥(curve a₂ a₄ a₆).twoTorsionPoints :=
   (card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).1.to_subtype
 
 /-- The `t = 0` witness: if the monic `2`-division cubic of the short model has no root modulo a
@@ -160,11 +156,12 @@ witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the
 `2`-torsion has at most one element. -/
 theorem card_twoTorsion_le_one_of_monicHasNoRootMod {ℓ : ℕ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
-    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 1 := by
-  have hnn (P : (curve a₂ a₄ a₆).toAffine.Point) (hP : P + P = 0) : P = 0 :=
-    no_nonzero_twoTorsion_of_monicHasNoRootMod hℓ rfl rfl rfl rfl rfl (by grind) P hP
-  have : Subsingleton {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} := ⟨by grind⟩
-  exact Finite.card_le_one_iff_subsingleton.mpr this
+    (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 1 := by
+  have hx (x y : ℚ) (hns : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
+      Affine.Point.some x y hns + Affine.Point.some x y hns = 0 → x ∈ (∅ : Finset ℚ) := fun hP ↦
+    (Affine.Point.some_ne_zero _
+      (no_nonzero_twoTorsion_of_monicHasNoRootMod hℓ rfl rfl rfl rfl rfl (by grind) _ hP)).elim
+  simpa using (card_twoTorsion_le_of_xcoords hx).2
 
 /-! ## The `t = 1` bound `|E(ℚ)[2]| ≤ 2`
 
@@ -201,7 +198,7 @@ cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then ev
 theorem card_twoTorsion_le_two_of_root_cofactor {R : ℤ} (hR : polyEval [a₆, a₄, a₂, 1] R = 0)
     {ℓ : ℕ} (hℓ : 1 < ℓ)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
-    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 := by
+    (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 := by
   -- every nonzero `2`-torsion `x`-coordinate is a root of the cubic, hence equal to `R`
   have hx (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
       Affine.Point.some x y h + Affine.Point.some x y h = 0 → x ∈ ({(R : ℚ)} : Finset ℚ) := by
@@ -221,7 +218,7 @@ unconditionally. -/
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
 theorem certTorsionBound_zero (ℓ : ℕ) (hp : Nat.blt 1 ℓ)
     (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
-    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 0 :=
+    (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 0 :=
   card_twoTorsion_le_one_of_monicHasNoRootMod (by simpa using hp) h
 
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
@@ -230,12 +227,12 @@ a prime `ℓ` (`1 < ℓ`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
 theorem certTorsionBound_one {R : ℤ} (ℓ : ℕ) (hp : Nat.blt 1 ℓ)
     (hR : (polyEval [a₆, a₄, a₂, 1] R).beq' 0)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
-    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 1 :=
+    (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 1 :=
   card_twoTorsion_le_two_of_root_cofactor (by simpa [Int.beq'_eq] using hR) (by simpa using hp) hq
 
 /-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/
 theorem certTorsionBound_two :
-    Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} ≤ 2 ^ 2 := by
+    (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 := by
   grw [(card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).2, Cubic.card_roots_le]
   norm_num
 
