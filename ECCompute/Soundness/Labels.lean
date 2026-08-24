@@ -3,8 +3,12 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
-import ECCompute.Soundness.RootMod
+module
+
+public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Soundness.RootMod
+
+import ECCompute.ForLean
 
 /-!
 # Soundness of the column-legitimacy check
@@ -22,9 +26,8 @@ into a `DescentHyp`.
 
 ## Main declarations
 
-* `ECCompute.discrInt`: the integer discriminant of `curve a₂ a₄ a₆`.
-* `ECCompute.curve_Δ_num`: `(curve …).Δ.num = discrInt …`.
-* `ECCompute.descentHyp_of_checkLabel`: the passage to `DescentHyp`.
+* `ECCompute.descentHyp_of_checkLabel`: the passage from a passing `checkLabel` to `DescentHyp`.
+* `ECCompute.checkLabels_true`: a passing `checkLabels` gives `checkLabel` for every label.
 -/
 
 namespace ECCompute
@@ -79,7 +82,7 @@ theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
 end
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
-theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
+public theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
@@ -100,7 +103,7 @@ theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
     grind
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
-theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
+public theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
   rwa [checkLabels, allList_iff] at h
