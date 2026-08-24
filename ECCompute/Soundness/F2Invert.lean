@@ -40,10 +40,10 @@ def popParity : ℕ → ℕ → Bool
   | fuel + 1, a => (a.testBit 0).xor (popParity fuel (a / 2))
 
 /-- The XOR over `v.testBit j` for `j` in a list. -/
-private def xorBits (v : ℕ) (l : List ℕ) : Bool :=
+def xorBits (v : ℕ) (l : List ℕ) : Bool :=
   l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
-private theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
+theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
   grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
@@ -56,17 +56,17 @@ theorem popParity_eq_xorBits {fuel a : ℕ} :
     simp only [xorBits, List.foldr_cons, List.foldr_map, Nat.testBit_zero, Nat.testBit_succ]
 
 /-- Dropping trailing indices whose bit is `false` does not change the XOR. -/
-private theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = false)
+theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = false)
     (hnm : n ≤ m) :
     xorBits v (List.range m) = xorBits v (List.range n) := by
   induction m with grind [List.range_succ, xorBits]
 
 /-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
-private def bId (b : Bool) : ZMod 2 := if b then 1 else 0
+def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
-private lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
-@[simp] private lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert
-@[simp] private lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert
+lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
+@[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert
+@[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert
 
 /-- `popParityK v` is the XOR over the low 32 bits of `v`. -/
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
