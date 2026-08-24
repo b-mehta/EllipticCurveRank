@@ -3,9 +3,12 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
+
+public import ECCompute.Soundness.Fold
+public import ECCompute.Soundness.IntResNat
+
 import Mathlib.RingTheory.Polynomial.RationalRoot
-import ECCompute.Soundness.Fold
-import ECCompute.Soundness.IntResNat
 import ECCompute.ForLean
 
 /-!
@@ -37,25 +40,26 @@ variable {cs : List ℤ} {ℓ r : ℕ}
   simp [polyModL]
 
 /-- A `polyModL` value is a residue mod `ℓ`. -/
-theorem polyModL_lt (hℓ : 0 < ℓ) : polyModL cs ℓ r < ℓ := by
+public theorem polyModL_lt (hℓ : 0 < ℓ) : polyModL cs ℓ r < ℓ := by
   cases cs with
   | nil => exact hℓ
   | cons _ _ => exact Nat.mod_lt _ hℓ
 
 /-- `polyModL` casts to `polyEval` in `ZMod ℓ`. -/
-theorem polyModL_cast (hl : ℓ ≠ 0) : (polyModL cs ℓ r : ZMod ℓ) = polyEval cs r := by
+public theorem polyModL_cast (hl : ℓ ≠ 0) : (polyModL cs ℓ r : ZMod ℓ) = polyEval cs r := by
   induction cs with
   | nil => simp [polyModL, polyEval]
   | cons c t ih => simp [ih, intResNat_cast, hl]
 
 /-- The `Nat` residue test at `r` passes exactly when `polyEval cs r` vanishes in `ZMod ℓ`
 (`1 < ℓ`). -/
-theorem polyModL_beq (hℓ : 1 < ℓ) : (polyModL cs ℓ r).beq 0 ↔ (polyEval cs r : ZMod ℓ) = 0 := by
+public theorem polyModL_beq (hℓ : 1 < ℓ) :
+    (polyModL cs ℓ r).beq 0 ↔ (polyEval cs r : ZMod ℓ) = 0 := by
   rw [Nat.beq_eq, ← polyModL_cast (by lia), ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero,
     Nat.mod_eq_of_lt (polyModL_lt (by lia))]
 
 /-- `polyEval` is invariant, modulo `ℓ`, under changing its argument by a multiple of `ℓ`. -/
-theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
+public theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
     (polyEval cs a : ZMod ℓ) = polyEval cs b := by
   induction cs with
   | nil => rfl
@@ -65,7 +69,7 @@ theorem polyEval_modEq {a b : ℤ} (h : (a : ZMod ℓ) = b) :
 
 /-- If the monic polynomial with lower coefficients `cs` has no root mod `ℓ` (with `1 < ℓ`), it has
 no integer root. -/
-theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
+public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod cs ℓ) (u : ℤ) : polyEval (cs ++ [1]) u ≠ 0 := by
   rw [monicHasNoRootMod, allBelow_iff] at h
   replace h : ∀ r < ℓ, (polyEval (cs ++ [1]) r : ZMod ℓ) ≠ 0 := by
@@ -87,7 +91,7 @@ modulo which `q` has no root. -/
 open Polynomial in
 /-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
 rational root. -/
-theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
+public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
     (hx : x ^ 2 + b * x + c = 0) : False := by
   set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
