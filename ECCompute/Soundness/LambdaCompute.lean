@@ -3,9 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Soundness.RootMod
+module
+
+public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Soundness.RootMod
+
 import Mathlib.Data.Nat.Bitwise
+import ECCompute.ForLean
 
 /-!
 # Soundness of the kernel-reducible descent character
@@ -19,11 +23,12 @@ the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMas
 
 ## Main declarations
 
-* `ECCompute.qrLookupBool_spec`: the bit test decides `a ≠ 0 ∧ IsSquare (a : ZMod p)`.
-* `ECCompute.psiCompute`: kernel-reducible replacement for `psi`.
-* `ECCompute.psiCompute_eq`: `psiCompute p a = psi p a` (`p` odd prime, `a ≠ 0`).
-* `ECCompute.lambdaCompute`: kernel-reducible evaluation of `λ` on an affine point.
+* `ECCompute.lambdaCompute`: the `ZMod 2`-valued evaluation of `λ` on an affine point.
 * `ECCompute.lambdaCompute_eq`: it agrees with the abstract `lambda`.
+* `ECCompute.lambdaComputeBool`: the `Bool` mirror used by the certificate matrix checks.
+* `ECCompute.lambdaCompute_eq_bool`: reads the `Bool` mirror back into `ZMod 2`.
+* `ECCompute.lambdaComputeBoolNatMask_eq`: the fully-`Nat` kernel mirror agrees with
+  `lambdaComputeBool`.
 -/
 
 namespace ECCompute
@@ -133,71 +138,52 @@ theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha
   have hmask := qrMask_testBit p hp2 a ha
   grind [qrLookupBool]
 
-/-! ### `psiCompute`: the kernel-reducible Legendre symbol into `ZMod 2` -/
+/-! ### `Bool` character and its `ZMod 2` lift -/
 
-/-- `Bool` mirror of `psiCompute`: `true` on non-residues (where `psiCompute = 1`), `false` on
-residues (where `psiCompute = 0`). Evaluated via the quadratic-residue mask of `p`. -/
-noncomputable def psiComputeBool (p : ℕ) (a : ZMod p) : Bool :=
-  (qrLookupBool (qrMask p) a.val).not'
+/-- `Bool`-valued evaluation of the descent character `λ_{p,θ}` on an affine point with
+`x`-coordinate `x`, read from the quadratic-residue mask of `p`: `true` where `λ` is `1`, `false`
+where it is `0`. -/
+public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
+  if (x.den : ZMod p) = 0 then false
+  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then
+    !(qrLookupBool (qrMask p) (fderiv a₂ a₄ p θ).val)
+  else !(qrLookupBool (qrMask p) ((x.num : ZMod p) - θ * (x.den : ZMod p)).val)
 
-/-- Kernel-reducible replacement for `ECCompute.psi`. Reads the quadratic-residue mask of `p` at the
-representative `a.val`: the symbol is `0` on quadratic residues and `1` on non-residues. -/
-noncomputable def psiCompute (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  if psiComputeBool p a then 1 else 0
+/-- The `ZMod 2`-valued evaluation of `λ_{p,θ}`: the `Bool` mirror `lambdaComputeBool` read into
+`ZMod 2` (`true ↦ 1`, `false ↦ 0`). A certificate checks the character matrix over `Bool` and
+recovers the `ZMod 2` value only at the end. -/
+public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
+  if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
 
-/-- For `p` an odd prime and `a ≠ 0`, `psiCompute` agrees with the abstract Legendre character
-`psi`. -/
-theorem psiCompute_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
-    psiCompute p a = psi p a := by
-  -- the natural-number value `a.val` casts back to `a`, and is `< p`
+/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
+public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
+  rw [lambdaCompute]
+
+/-- For `p` an odd prime and `a ≠ 0`, reading the residue mask of `p` into `ZMod 2` gives the
+abstract Legendre character `psi`. -/
+private theorem mask_eq_psi (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
+    (if qrLookupBool (qrMask p) a.val then (0 : ZMod 2) else 1) = psi p a := by
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
   have ha0 : a.val ≠ 0 := fun h ↦ ha (by rw [← hval', h, Nat.cast_zero])
-  -- the mask bit test decides `IsSquare a`
   have hspec := qrLookupBool_spec p hp2 a.val hvlt
   rw [hval'] at hspec
-  rw [psiCompute, psiComputeBool, hspec]
-  simp only [ne_eq, ha0, not_false_eq_true, true_and, Bool.not'_eq_not, psi]
+  rw [hspec]
+  simp only [ne_eq, ha0, not_false_eq_true, true_and, psi]
   by_cases hsq : IsSquare a <;> simp [hsq]
-
-/-! ### Kernel-reducible evaluation of `λ` on an affine point -/
-
-/-- Kernel-reducible evaluation of the descent character `λ_{p,θ}` on an affine point with
-`x`-coordinate `x`, using the mask-based `psiCompute` for the Legendre character. -/
-noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
-  if (x.den : ZMod p) = 0 then 0
-  else if (x.num : ZMod p) - θ * x.den = 0 then psiCompute p (fderiv a₂ a₄ p θ)
-       else psiCompute p ((x.num : ZMod p) - θ * (x.den : ZMod p))
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
 an affine point. -/
-theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
-  rw [lambdaCompute, lambda]
-  grind [psiCompute_eq]
-
-/-! ### `Bool`-valued mirror for kernel checks
-
-`lambdaComputeBool` mirrors `lambdaCompute` in `Bool` (`1 ↦ true`, `0 ↦ false`), so certificate
-matrix checks compare `Bool`s; `lambdaCompute_eq_bool` reads the result back into `ZMod 2`. -/
-
-/-- `Bool` mirror of `lambdaCompute`: `true` for `1 : ZMod 2`, `false` for `0`. -/
-noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
-  if (x.den : ZMod p) = 0 then false
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then psiComputeBool p (fderiv a₂ a₄ p θ)
-       else psiComputeBool p ((x.num : ZMod p) - θ * (x.den : ZMod p))
-
-/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. This lets a certificate check the
-character matrix entirely over `Bool` and recover the `ZMod 2` value only at the end. -/
-theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
-    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
-  rw [lambdaCompute, lambdaComputeBool]
-  grind [psiCompute]
+  rw [lambdaCompute, lambdaComputeBool, lambda]
+  grind [mask_eq_psi]
 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
@@ -252,7 +238,7 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
 /-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
 provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
 denominator `xden`. -/
-theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
+public theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
     (tval xp xm xden : ℕ) (htval : (tval : ZMod p) = θ)
     (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden
@@ -261,7 +247,7 @@ theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ
   have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
   have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
-  rw [lambdaComputeBool, lambdaComputeBoolNatMask, psiComputeBool, psiComputeBool]
+  rw [lambdaComputeBool, lambdaComputeBoolNatMask]
   simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
 
 end ECCompute
