@@ -15,15 +15,9 @@ import Mathlib.RingTheory.Polynomial.RationalRoot
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
 
 On the short model `curve a₂ a₄ a₆` (`a₁ = a₃ = 0`), a nonzero rational `2`-torsion point is
-`(x, 0)` with `x` a root of the `2`-division cubic `X³ + a₂X² + a₄X + a₆`. So the `2`-torsion
-`{P | P + P = 0}` is the identity together with one point for each admissible root, and
-`|E(ℚ)[2]| ≤ Sx.card + 1` once the `x`-coordinates are confined to a finite set `Sx`
-(`card_twoTorsion_le_of_xcoords`). Each torsion mode fixes `Sx`:
-
-* `t = 2`: `Sx` is all roots of the cubic, at most three, so `|E(ℚ)[2]| ≤ 4`.
-* `t = 1`: an integer root `R` whose cofactor quadratic has no rational root pins every root to
-  `R`, so `Sx = {R}` and `|E(ℚ)[2]| ≤ 2`.
-* `t = 0`: the cubic has no rational root, so `Sx = ∅` and `|E(ℚ)[2]| ≤ 1`.
+`(x, 0)` with `x` a root of the `2`-division cubic `X³ + a₂X² + a₄X + a₆`. This file certifies the
+bound `|E(ℚ)[2]| ≤ 2 ^ t` on the rational `2`-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`, for
+`t = 0, 1, 2`, from kernel-`Bool` witnesses on the cubic.
 
 ## Main results
 
