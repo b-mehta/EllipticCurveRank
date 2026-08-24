@@ -161,15 +161,6 @@ private theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
 An integer root `R` whose cofactor quadratic has no rational root pins every rational root of the
 cubic to `R`, so `Sx = {R}` and the `2`-torsion has at most two elements. -/
 
-/-- Over `ℚ`, the `2`-division cubic factors as `F = (X - R) · q` at an integer root `R`: an
-identity in the coefficients, valid whenever `polyEval [a₆, a₄, a₂, 1] R = 0`. -/
-private theorem cubic_factor_at_root (hR : polyEval [a₆, a₄, a₂, 1] R = 0) {x : ℚ} :
-    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = (x - R) * (x ^ 2 + (a₂ + R) * x + (a₄ + R * (a₂ + R))) := by
-  have hRQ : (R : ℚ) ^ 3 + a₂ * R ^ 2 + a₄ * R + a₆ = 0 := by
-    rw [← polyEval_monicCubic_cast]
-    exact mod_cast hR
-  grind
-
 /-- The `t = 1` bound. If the short model's `2`-division cubic has an integer root `R` and its
 cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then every nonzero rational
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
@@ -184,7 +175,10 @@ private theorem card_twoTorsion_le_two_of_root_cofactor
   intro x y hns hP
   obtain ⟨-, hroot⟩ := twoTorsion_y_eq_zero_and_root _ hP
   rw [Cubic.mem_roots_iff (Cubic.monic_of_a_eq_one' ..).ne_zero] at hroot
-  grind [cubic_factor_at_root, no_rat_root_of_monicHasNoRootMod]
+  have hRQ : (R : ℚ) ^ 3 + a₂ * R ^ 2 + a₄ * R + a₆ = 0 := by
+    rw [← polyEval_monicCubic_cast]
+    exact mod_cast hR
+  grind [no_rat_root_of_monicHasNoRootMod]
 
 /-! ## Certificate-facing torsion bounds
 
