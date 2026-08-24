@@ -99,11 +99,11 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
 private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
     (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
-    Nat.card (Submodule.torsionBy ℤ H 2) ≤
-      Nat.card {P : (curve a₂ a₄ a₆).toAffine.Point // P + P = 0} := by
+    Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap : ∀ x : Submodule.torsionBy ℤ H 2,
-      ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) + ((x : H) : _) = 0 := by
+      ((x : H) : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
     intro x
+    rw [mem_twoTorsionPoints]
     have hx : (2 : ℤ) • (x : H) = 0 := (Submodule.mem_torsionBy_iff _ _).mp x.2
     rw [← two_zsmul, ← Submodule.coe_smul, hx, Submodule.coe_zero]
   refine Nat.card_le_card_of_injective (fun x => ⟨((x : H) : _), hmap x⟩) fun a b hab => ?_
@@ -126,7 +126,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hBlen : c.B.length = c.rho)
     (hMlen : c.M.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
-    (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
+    (htors : (curve c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t) :
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) := by
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
@@ -170,7 +170,7 @@ theorem hasRankGE_of_certificate (a₁ a₂ a₃ a₄ a₆ : ℤ) (c : Certifica
     (hlabC : checkLabels c.a₂ c.a₄ c.a₆ c.labels)
     (hB : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
-    (htors : Nat.card {P : (curve c.a₂ c.a₄ c.a₆).toAffine.Point // P + P = 0} ≤ 2 ^ c.t) :
+    (htors : (curve c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t) :
     HasRankGE W (c.rho - c.t) := by
   -- Reduce to the integral model `⟨a₁, …, a₆⟩`, which `W` equals by `hW`.
   rw [hW]
