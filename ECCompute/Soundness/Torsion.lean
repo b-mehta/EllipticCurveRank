@@ -21,11 +21,6 @@ On the short model `curve a₂ a₄ a₆` (`a₁ = a₃ = 0`), a nonzero rationa
   `R`, so `Sx = {R}` and `|E(ℚ)[2]| ≤ 2`.
 * `t = 0`: the cubic has no rational root, so `Sx = ∅` and `|E(ℚ)[2]| ≤ 1`.
 
-The `t = 0` witness is stated on the `u = 4x` scaled cubic `u³ + b₂ u² + 8 b₄ u + 16 b₆` having no
-root modulo a prime `ℓ` (via `ECCompute.monicHasNoRootMod`): that scaled form is what the
-certificate carries, so `t = 0` reaches it through the general-model root
-`exists_intRoot_of_isRoot`, where `t = 1` works on the short cubic directly.
-
 ## Main results
 
 * `ECCompute.certTorsionBound_zero`, `ECCompute.certTorsionBound_one`,
@@ -37,7 +32,7 @@ namespace ECCompute
 
 open WeierstrassCurve Affine Polynomial
 
-variable {a₁ a₂ a₃ a₄ a₆ : ℤ}
+variable {a₂ a₄ a₆ : ℤ}
 
 /-! ## Shared setup
 
@@ -112,13 +107,10 @@ private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     _ = Sx.card + 1 := Finset.card_insertNone Sx
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
-instance twoTorsion_finite {a₂ a₄ a₆ : ℤ} : Finite ↥(curve a₂ a₄ a₆).twoTorsionPoints :=
+instance twoTorsion_finite : Finite ↥(curve a₂ a₄ a₆).twoTorsionPoints :=
   (card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).1.to_subtype
 
-/-! ## The universal bound `t = 2`
-
-With `Sx` the full root set of the cubic (at most three elements), the `2`-torsion has at most
-four elements. -/
+/-! ## The universal bound `t = 2` -/
 
 /-- The rational `2`-torsion of the short model has at most four elements: the identity together
 with the (at most three) nonzero points `(x, 0)` for `x` a root of the `2`-division cubic. -/
@@ -127,10 +119,7 @@ private theorem card_twoTorsion_le_four : (curve a₂ a₄ a₆).twoTorsionPoint
 
 variable {ℓ : ℕ} {R : ℤ}
 
-/-! ## The `t = 0` bound
-
-The cubic has no rational root, so `Sx = ∅`: a rational root of the monic cubic is an integer, and
-`4` times it is an integer root of the scaled cubic the witness forbids. -/
+/-! ## The `t = 0` bound -/
 
 /-- The `t = 0` bound: if the scaled `2`-division cubic of the short model has no root modulo a
 witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the identity, so the
@@ -156,16 +145,13 @@ private theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     grind [polyEval_monicCubic_cast]
   exact mod_cast hQ
 
-/-! ## The `t = 1` bound
-
-An integer root `R` whose cofactor quadratic has no rational root pins every rational root of the
-cubic to `R`, so `Sx = {R}` and the `2`-torsion has at most two elements. -/
+/-! ## The `t = 1` bound -/
 
 /-- The `t = 1` bound. If the short model's `2`-division cubic has an integer root `R` and its
 cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then every nonzero rational
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
 private theorem card_twoTorsion_le_two_of_root_cofactor
-    (hR : polyEval [a₆, a₄, a₂, 1] R = 0) {ℓ : ℕ} (hℓ : 1 < ℓ)
+    (hR : polyEval [a₆, a₄, a₂, 1] R = 0) (hℓ : 1 < ℓ)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 := by
   suffices ∀ (x y : ℚ) (hns : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
