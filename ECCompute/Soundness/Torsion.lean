@@ -3,9 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.ForMathlib.TwoTorsion
-import ECCompute.Soundness.RootMod
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.ForMathlib.TwoTorsion
+public import ECCompute.Soundness.RootMod
+public import ECCompute.Theory.Descent.Defs
+
+import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
 # Certifying the rational 2-torsion dimension `t = dim_𝔽₂ E(ℚ)[2]`
@@ -41,14 +45,14 @@ the cubic; confining those `x`-coordinates to a finite set bounds the whole `2`-
 
 /-- The monic cubic `X³ + b X² + c X + d`, evaluated at `r` by `polyEval` and cast to `ℚ`, equals
 `r³ + b r² + c r + d`. -/
-private lemma polyEval_monicCubic_cast {b c d r : ℤ} :
+lemma polyEval_monicCubic_cast {b c d r : ℤ} :
     (polyEval [d, c, b, 1] r : ℚ) = r ^ 3 + b * r ^ 2 + c * r + d := by
   simp only [polyEval]
   grind
 
 /-- On the short model, a nonzero rational `2`-torsion point `some x y` has `y = 0`, and its
 `x`-coordinate is a root of the cubic `X³ + a₂X² + a₄X + a₆`. -/
-private theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
+theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hP : Point.some x y h ∈ (curve a₂ a₄ a₆).twoTorsionPoints) :
     y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
@@ -60,7 +64,7 @@ private theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
   grind [equation_curve, h.1]
 
 /-- Every nonzero rational `2`-torsion `x`-coordinate is a root of the `2`-division cubic. -/
-private theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
+theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hP : Point.some x y h ∈ (curve a₂ a₄ a₆).twoTorsionPoints) :
     x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots.toFinset :=
@@ -69,7 +73,7 @@ private theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
 /-- If the `x`-coordinates of all nonzero rational `2`-torsion points lie in a finite set `Sx`, then
 the `2`-torsion set is finite with at most `|Sx| + 1` elements: the identity together with one point
 `(x, 0)` for each allowed `x`. -/
-private theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
+theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     (hx : ∀ (x y : ℚ) (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
         Point.some x y h + Point.some x y h = 0 → x ∈ Sx) :
     (curve a₂ a₄ a₆).twoTorsionPoints.Finite ∧
@@ -113,7 +117,7 @@ instance : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
 
 /-- The rational `2`-torsion of the short model has at most four elements: the identity together
 with the (at most three) nonzero points `(x, 0)` for `x` a root of the `2`-division cubic. -/
-private theorem card_twoTorsion_le_four : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 4 := by
+theorem card_twoTorsion_le_four : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 4 := by
   grw [(card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).2, Cubic.card_roots_le]
 
 variable {ℓ : ℕ} {R : ℤ}
@@ -123,7 +127,7 @@ variable {ℓ : ℕ} {R : ℤ}
 /-- The `t = 0` bound: if the scaled `2`-division cubic of the short model has no root modulo a
 witness prime `ℓ` (`1 < ℓ`), then the only rational `2`-torsion point is the identity, so the
 `2`-torsion has at most one element. -/
-private theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
+theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 1 := by
   suffices ∀ (x y : ℚ) (hns : (curve a₂ a₄ a₆).toAffine.Nonsingular x y),
@@ -149,7 +153,7 @@ private theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
 /-- The `t = 1` bound. If the short model's `2`-division cubic has an integer root `R` and its
 cofactor quadratic has no rational root (via a prime `ℓ` (`1 < ℓ`)), then every nonzero rational
 `2`-torsion point has `x`-coordinate `R`, so the `2`-torsion has at most two elements. -/
-private theorem card_twoTorsion_le_two_of_root_cofactor
+theorem card_twoTorsion_le_two_of_root_cofactor
     (hR : polyEval [a₆, a₄, a₂, 1] R = 0) (hℓ : 1 < ℓ)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 := by
@@ -172,7 +176,7 @@ from a no-root witness, `t = 1` from an integer root whose cofactor has no root 
 unconditionally. -/
 
 /-- The `t = 0` certificate torsion bound from `Bool` witnesses. -/
-theorem certTorsionBound_zero (hp : Nat.blt 1 ℓ)
+public theorem certTorsionBound_zero (hp : Nat.blt 1 ℓ)
     (h : monicHasNoRootMod [64 * a₆, 16 * a₄, 4 * a₂] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 0 :=
   card_twoTorsion_le_one_of_monicHasNoRootMod (by simpa using hp) h
@@ -180,14 +184,14 @@ theorem certTorsionBound_zero (hp : Nat.blt 1 ℓ)
 /-- The `t = 1` certificate torsion bound from `Bool` witnesses: an integer root `R` of the
 `2`-division cubic (`polyEval [a₆, a₄, a₂, 1] R == 0`) whose cofactor quadratic has no root modulo
 a prime `ℓ` (`1 < ℓ`). Yields `|E(ℚ)[2]| ≤ 2 = 2^1`. -/
-theorem certTorsionBound_one (hp : Nat.blt 1 ℓ)
+public theorem certTorsionBound_one (hp : Nat.blt 1 ℓ)
     (hR : (polyEval [a₆, a₄, a₂, 1] R).beq' 0)
     (hq : monicHasNoRootMod [a₄ + R * (a₂ + R), a₂ + R] ℓ) :
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 1 :=
   card_twoTorsion_le_two_of_root_cofactor (by simpa [Int.beq'_eq] using hR) (by simpa using hp) hq
 
 /-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/
-theorem certTorsionBound_two : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 :=
+public theorem certTorsionBound_two : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 :=
   card_twoTorsion_le_four
 
 end ECCompute
