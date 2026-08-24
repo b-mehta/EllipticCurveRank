@@ -36,7 +36,7 @@ open WeierstrassCurve
 namespace WeierstrassCurve
 
 /-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
-def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
+@[expose] def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
   {P | P + P = 0}
 
 @[simp]
