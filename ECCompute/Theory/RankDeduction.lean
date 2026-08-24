@@ -62,15 +62,15 @@ lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
   rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
   exact ⟨y, by simp [LinearMap.lsmul_apply]⟩
 
-instance instFiniteModN [Module.Finite ℤ H] : Finite (ModN H 2) := by
+instance [Module.Finite ℤ H] : Finite (ModN H 2) := by
   have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
   exact Module.finite_of_fg_torsion (ModN H 2)
     (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
 
-instance instFiniteDimModN [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
+instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
 
-instance instFiniteTorsionBy [Module.Finite ℤ H] :
+instance [Module.Finite ℤ H] :
     Finite (Submodule.torsionBy ℤ H 2) :=
   Module.finite_of_fg_torsion _
     (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
