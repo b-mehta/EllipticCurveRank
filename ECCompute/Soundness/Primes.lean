@@ -3,9 +3,12 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Soundness.Fold
+module
+
+public import ECCompute.Soundness.Fold
+public import Mathlib.Data.Nat.Prime.Defs
+
 import ECCompute.ForLean
-import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Tactic.Linarith
 
 /-!
@@ -17,11 +20,8 @@ import Mathlib.Tactic.Linarith
 
 ## Main results
 
-* `primes_below_23`: the primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`.
-* `prime_of_passes`: if `2 ≤ n < 529` and `passes n [2, 3, 5, 7, 11, 13, 17, 19]`, then
-  `Nat.Prime n`.
-* `ECCompute.checkPrime_true` / `ECCompute.checkPrimes_true`: soundness of the kernel `Bool`
-  checkers `checkPrime` / `checkPrimes`.
+* `ECCompute.checkPrimes_true`: soundness of the kernel `Bool` checker `checkPrimes`, i.e. each
+  label's prime component really is prime.
 -/
 
 namespace ECCompute
@@ -63,7 +63,7 @@ theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
   grind [checkPrime, prime_of_passes]
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
-theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) :
+public theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) :
     ∀ l ∈ ls, l.1.Prime := by
   grind [checkPrimes, checkPrime_true]
 
