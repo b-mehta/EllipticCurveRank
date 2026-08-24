@@ -18,8 +18,8 @@ addition, subtraction, multiplication, powers and division.
 
 ## Main results
 
-* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
-  `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
+* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_div_ne_zero`:
+  closure of `(·.den : ZMod p) ≠ 0` under the field operations.
 * `Rat.den_cast_eq_zero_iff`, `Rat.ne_zero_of_den_eq_pow`: reductions of a power-base denominator
   `q.den = w ^ k`.
 -/
@@ -65,12 +65,6 @@ public theorem den_sub_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p)
 public theorem den_mul_ne_zero [Fact p.Prime] {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   ZMod.natCast_ne_zero_of_dvd (Rat.mul_den_dvd x y) (by rw [Nat.cast_mul]; exact mul_ne_zero hx hy)
-
-/-- `(·.den : ZMod p) ≠ 0` is closed under taking powers. -/
-public theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
-    ((x ^ n).den : ZMod p) ≠ 0 := by
-  rw [Rat.den_pow, Nat.cast_pow]
-  exact pow_ne_zero n hx
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under division by an element that is itself nonzero mod `p`. -/
 public theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
