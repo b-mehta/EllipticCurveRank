@@ -31,8 +31,6 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
-
 /-! ### Reducing `x` to `ZMod p`
 
 For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the rational cast) and
@@ -41,7 +39,7 @@ For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the ratio
 /-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
 public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
 
-variable {a₂ a₄ a₆ p}
+variable {p : ℕ}
 
 /-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
 public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
@@ -54,7 +52,7 @@ When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` a
 
 /-- The `y`-denominator reduces well whenever the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
-public theorem ydenom_ne_zero [Fact p.Prime] {x y : ℚ}
+public theorem ydenom_ne_zero {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : (x.den : ZMod p) ≠ 0) :
     (y.den : ZMod p) ≠ 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
