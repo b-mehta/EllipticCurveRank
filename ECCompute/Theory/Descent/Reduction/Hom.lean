@@ -224,7 +224,7 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
 reduces to the origin. Uses `den_addX_both_kernel`. -/
-private theorem redP_add_kernel (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {x₁ y₁ x₂ y₂ : ℚ}
+private theorem redP_add_kernel {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
@@ -272,7 +272,7 @@ private theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
     have hd2 : (x₂.den : ZMod p) = 0 := by
       grind [redP_of_den_ne, Affine.Point.some_ne_zero]
     rw [redP_of_den_zero a₂ a₄ a₆ p h₁ hd1, hQ0, add_zero]
-    exact redP_add_kernel a₂ a₄ a₆ p hΔ h₁ h₂ hPQ hd1 hd2
+    exact redP_add_kernel a₂ a₄ a₆ p h₁ h₂ hPQ hd1 hd2
   · -- `P` has good reduction; then so does `Q`, and they share reduced coordinates.
     have hd2 : (x₂.den : ZMod p) ≠ 0 := by
       grind [redP_of_den_ne, redP_of_den_zero, Affine.Point.some_ne_zero]
