@@ -93,8 +93,8 @@ public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
   have hbridge : lambdaComputeBoolNatMask a₂ a₄
       L.1 (qrMask L.1) (L.2 % L.1).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
         = lambdaComputeBool a₂ a₄ L.1 L.2 P.1 :=
-    lambdaComputeBoolNatMask_eq hp
-      (intResNat_cast hp.ne') (Int.toNat_sub_toNat_neg P.1.num).symm rfl
+    lambdaComputeBoolNatMask_eq hp (intResNat_cast hp.ne')
+      (Int.toNat_sub_toNat_neg P.1.num).symm rfl
   rw [F2Invert.toMat_apply (by lia), Fin.getElem_fin, hcell, hbridge, lambdaCompute_eq_bool]
 
 end ECCompute
