@@ -36,22 +36,22 @@ open Module
 namespace Module
 
 /-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
-public lemma natCard_eq_two_pow_finrank (V : Type*) [AddCommGroup V] [Module (ZMod 2) V]
+public lemma natCard_eq_two_pow_finrank {V : Type*} [AddCommGroup V] [Module (ZMod 2) V]
     [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
   have := Module.Finite.of_finite (R := ZMod 2) (M := V)
-  rw [Module.natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
+  rw [natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
 
 /-- A finite `ℤ`-module has free rank zero. -/
-lemma finrank_int_zero_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
+lemma finrank_int_zero_of_finite {D : Type*} [AddCommGroup D] [Finite D] :
     finrank ℤ D = 0 := by
   have : Module.Finite ℤ D := Module.Finite.of_finite
-  rw [Module.finrank_eq_zero_iff_isTorsion, ← isAddTorsion_iff_isTorsion_int]
+  rw [finrank_eq_zero_iff_isTorsion, ← isAddTorsion_iff_isTorsion_int]
   exact isAddTorsion_of_finite
 
 /-- The free rank of `F × D` equals that of `F` when `D` is finite. -/
-public lemma finrank_prod_finite (F : Type*) [AddCommGroup F] [Module.Finite ℤ F]
-    (D : Type*) [AddCommGroup D] [Finite D] :
+public lemma finrank_prod_finite {F : Type*} [AddCommGroup F] [Module.Finite ℤ F]
+    {D : Type*} [AddCommGroup D] [Finite D] :
     finrank ℤ (F × D) = finrank ℤ F := by
   have hkerD : finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
     rw [LinearMap.ker_fst, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)

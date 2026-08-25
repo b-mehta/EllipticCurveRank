@@ -268,7 +268,7 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
-    (h : l.length.beq n = true) : l.length = n := Nat.eq_of_beq_eq_true h
+    (h : l.length.beq n) : l.length = n := Nat.eq_of_beq_eq_true h
 
 /-- Build the `hasRankGE_of_certificate` proof term directly. The `Certificate.Valid` checks are
 packaged via its constructor: the five length checks and the five `Bool`

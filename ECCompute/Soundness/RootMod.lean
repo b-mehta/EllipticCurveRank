@@ -32,9 +32,9 @@ namespace ECCompute
 variable {cs : List ℤ} {ℓ r : ℕ}
 
 /-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
-public theorem intResNat_cast {p : ℕ} (hp : p ≠ 0) (z : ℤ) :
+public theorem intResNat_cast {p : ℕ} {z : ℤ} (hp : p ≠ 0) :
     ((z % (p : ℤ)).toNat : ZMod p) = (z : ZMod p) := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact mod_cast hp)
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (mod_cast hp)
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 
@@ -83,7 +83,7 @@ public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     grind
   intro hu
-  have hℓ0 : (0 : ℤ) < ℓ := by exact mod_cast (by lia : 0 < ℓ)
+  have hℓ0 : (0 : ℤ) < ℓ := mod_cast (by lia : 0 < ℓ)
   set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
@@ -99,7 +99,7 @@ open Polynomial in
 /-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
 rational root. -/
 public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
+    (h : monicHasNoRootMod [c, b] ℓ) {x : ℚ}
     (hx : x ^ 2 + b * x + c = 0) : False := by
   set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
   have hmonic : p.Monic := by simp only [p]; monicity!

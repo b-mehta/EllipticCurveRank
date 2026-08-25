@@ -67,7 +67,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 @[grind →]
 theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
-  grind [WeierstrassCurve.Affine.equation_iff, curve]
+  grind [Affine.equation_iff, curve]
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
 @[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
@@ -88,7 +88,7 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
       if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
 
 @[simp, grind =]
-theorem lambda_zero (θ : ZMod p) : lambda a₂ a₄ a₆ p θ 0 = 0 := rfl
+theorem lambda_zero {θ : ZMod p} : lambda a₂ a₄ a₆ p θ 0 = 0 := rfl
 
 /-! ### The hypotheses of the descent lemma
 

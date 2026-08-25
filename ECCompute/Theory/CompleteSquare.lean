@@ -48,40 +48,34 @@ public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
   completeSquare W • W
 
 @[simp]
-public theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ = 0 := by
-  grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₁]
+public theorem shortModel_a₁ {W : WeierstrassCurve ℚ} : (shortModel W).a₁ = 0 := by
+  grind [shortModel, completeSquare, variableChange_a₁]
 
 @[simp]
-public theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₂ {W : WeierstrassCurve ℚ} :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₂, inv_one,
-    Units.val_one, one_pow]
-  ring
+  grind [shortModel, completeSquare, variableChange_a₂, inv_one, Units.val_one, one_pow]
 
 @[simp]
-public theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
-  grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₃]
+public theorem shortModel_a₃ {W : WeierstrassCurve ℚ} : (shortModel W).a₃ = 0 := by
+  grind [shortModel, completeSquare, variableChange_a₃]
 
 @[simp]
-public theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₄ {W : WeierstrassCurve ℚ} :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₄, inv_one,
-    Units.val_one, one_pow]
-  ring
+  grind [shortModel, completeSquare, variableChange_a₄, inv_one, Units.val_one, one_pow]
 
 @[simp]
-public theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
+public theorem shortModel_a₆ {W : WeierstrassCurve ℚ} :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₆, inv_one,
-    Units.val_one, one_pow]
-  ring
+  grind [shortModel, completeSquare, variableChange_a₆, inv_one, Units.val_one, one_pow]
 
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
-theorem equation_completeSquare (W : WeierstrassCurve ℚ) (x y : ℚ) :
+theorem equation_completeSquare {W : WeierstrassCurve ℚ} {x y : ℚ} :
     W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
-  rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff]
+  rw [Affine.equation_iff, Affine.equation_iff]
   grind [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
 
 section GroupIso
@@ -93,7 +87,7 @@ variable (W : WeierstrassCurve ℚ)
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
 invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
-theorem or_ne_zero_sub_iff (A B σ : ℚ) :
+theorem or_ne_zero_sub_iff {A B σ : ℚ} :
     (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
   by_cases hB : B = 0 <;> simp [hB]
 
@@ -106,11 +100,10 @@ public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ 
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/
-theorem nonsingular_completeSquare (x y : ℚ) :
+theorem nonsingular_completeSquare {x y : ℚ} :
     W.toAffine.Nonsingular x y ↔
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
-  rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
-    ← equation_completeSquare]
+  rw [nonsingular_iff', nonsingular_iff', ← equation_completeSquare]
   refine and_congr_right fun _ ↦ ?_
   have e1 : (shortModel W).toAffine.a₁ * (y + (W.a₁ * x + W.a₃) / 2)
         - (3 * x ^ 2 + 2 * (shortModel W).toAffine.a₂ * x + (shortModel W).toAffine.a₄)
@@ -122,33 +115,31 @@ theorem nonsingular_completeSquare (x y : ℚ) :
       = 2 * y + W.toAffine.a₁ * x + W.toAffine.a₃ := by
     grind [shortModel_a₁, shortModel_a₃]
   rw [e1, e2]
-  exact or_ne_zero_sub_iff _ _ _
+  exact or_ne_zero_sub_iff
 
 /-- The `Y`-negation commutes with the completing-the-square shift. -/
-theorem negY_completeSquare (x y : ℚ) :
+theorem negY_completeSquare {x y : ℚ} :
     (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
       = W.toAffine.negY x y + (W.a₁ * x + W.a₃) / 2 := by
-  grind [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]
+  grind [negY, shortModel_a₁, shortModel_a₃]
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
-theorem addX_completeSquare (x₁ x₂ ℓ : ℚ) :
+theorem addX_completeSquare {x₁ x₂ ℓ : ℚ} :
     (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
       = W.toAffine.addX x₁ x₂ ℓ := by
-  grind [WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂]
+  grind [addX, shortModel_a₁, shortModel_a₂]
 
 /-- The `Y`-coordinate of the sum commutes with the shift. -/
-theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
+theorem addY_completeSquare {x₁ x₂ y₁ ℓ : ℚ} :
     (shortModel W).toAffine.addY x₁ x₂ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) (ℓ + W.a₁ / 2)
       = W.toAffine.addY x₁ x₂ y₁ ℓ
         + (W.a₁ * W.toAffine.addX x₁ x₂ ℓ + W.a₃) / 2 := by
-  grind [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
-    WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX, shortModel_a₁, shortModel_a₂,
-    shortModel_a₃]
+  grind [addY, negY, negAddY, addX, shortModel_a₁, shortModel_a₂, shortModel_a₃]
 
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
 in the non-degenerate branch of the addition law. -/
-theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
+theorem slope_completeSquare {x₁ x₂ y₁ y₂ : ℚ}
     (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂)
     (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
@@ -157,7 +148,7 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       = W.toAffine.slope x₁ x₂ y₁ y₂ + W.a₁ / 2 := by
   obtain rfl | hx := eq_or_ne x₁ x₂
   · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h ↦ hxy ⟨rfl, h⟩
-    have hyeq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ rfl hy
+    have hyeq : y₁ = y₂ := Y_eq_of_Y_ne h₁ h₂ rfl hy
     subst hyeq
     have hy' : y₁ + (W.a₁ * x₁ + W.a₃) / 2
         ≠ (shortModel W).toAffine.negY x₁ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) := by
@@ -165,11 +156,11 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
       intro hcontra
       exact hy (add_right_cancel hcontra)
     have hDval : y₁ - W.toAffine.negY x₁ y₁ = 2 * y₁ + W.a₁ * x₁ + W.a₃ := by
-      grind [WeierstrassCurve.Affine.negY]
+      grind [negY]
     have hDval' : (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
           - (shortModel W).toAffine.negY x₁ (y₁ + (W.a₁ * x₁ + W.a₃) / 2)
         = 2 * y₁ + W.a₁ * x₁ + W.a₃ := by
-      grind [WeierstrassCurve.Affine.negY, shortModel_a₁, shortModel_a₃]
+      grind [negY, shortModel_a₁, shortModel_a₃]
     have hden : 2 * y₁ + W.a₁ * x₁ + W.a₃ ≠ 0 := hDval ▸ sub_ne_zero.mpr hy
     rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hDval, hDval', div_add' _ _ _ hden,
       div_eq_div_iff hden hden]
@@ -183,7 +174,7 @@ def fwd :
     W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
-    .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W x y).mp h)
+    .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W).mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
 def bwd :
@@ -191,21 +182,21 @@ def bwd :
   | .zero => .zero
   | .some x y h =>
     .some x (y - (W.a₁ * x + W.a₃) / 2)
-      ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
+      ((nonsingular_completeSquare W).mpr
         (by simpa using h))
 
-@[simp] theorem fwd_some (x y : ℚ)
+@[simp] theorem fwd_some {x y : ℚ}
     (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h)
       = .some x (y + (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W x y).mp h) :=
+        ((nonsingular_completeSquare W).mp h) :=
   rfl
 
-@[simp] theorem bwd_some (x y : ℚ)
+@[simp] theorem bwd_some {x y : ℚ}
     (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)
       = .some x (y - (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
+        ((nonsingular_completeSquare W).mpr
           (by simpa using h)) :=
   rfl
 
@@ -227,7 +218,7 @@ theorem fwd_map_add (P Q : W.toAffine.Point) :
       refine hxy ⟨hx, ?_⟩
       rw [negY_completeSquare, hx] at hy
       exact add_right_cancel hy
-    have hℓ := slope_completeSquare W x₁ x₂ y₁ y₂ h₁.left h₂.left hxy
+    have hℓ := slope_completeSquare W h₁.left h₂.left hxy
     grind [Point.add_some, fwd_some, point_some_congr, addX_completeSquare, addY_completeSquare]
 
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group

@@ -106,7 +106,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
-  map_zero' := lambda_zero θ
+  map_zero' := lambda_zero
   map_add' := lambda_map_add a₂ a₄ a₆ p h
 
 end ECCompute

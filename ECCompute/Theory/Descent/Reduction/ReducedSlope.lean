@@ -170,13 +170,13 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
-theorem reduced_addX_eq (X L : ZMod p) :
+theorem reduced_addX_eq {X L : ZMod p} :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L
       = L ^ 2 - (a₂ : ZMod p) - X - X := by
   simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
-theorem reduced_addY_eq (X Y L : ZMod p) :
+theorem reduced_addY_eq {X Y L : ZMod p} :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addY X X Y L
       = -(L * (((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L - X)
         + Y) := by
