@@ -56,7 +56,7 @@ lemma torsionBy_two_eq_ker :
 /-! ### Finiteness of `H ⧸ 2H` -/
 
 /-- Doubling annihilates `ModN H 2`. -/
-lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
+lemma two_zsmul_modN {x : ModN H 2} : (2 : ℤ) • x = 0 := by
   obtain ⟨y, rfl⟩ := Submodule.mkQ_surjective (LinearMap.range (LinearMap.lsmul ℤ H 2)) x
   rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
   exact ⟨y, by simp [LinearMap.lsmul_apply]⟩
@@ -64,7 +64,7 @@ lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
 instance [Module.Finite ℤ H] : Finite (ModN H 2) := by
   have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
   exact Module.finite_of_fg_torsion (ModN H 2)
-    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
+    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN⟩)
 
 instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
@@ -160,8 +160,8 @@ lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
 
 /-- The identity for a free-times-finite decomposition. -/
 lemma natCard_modN_two_of_free_prod_finite
-    (F : Type*) [AddCommGroup F] [Module.Free ℤ F] [Module.Finite ℤ F] [NoZeroSMulDivisors ℤ F]
-    (D : Type*) [AddCommGroup D] [Finite D] :
+    {F : Type*} [AddCommGroup F] [Module.Free ℤ F] [Module.Finite ℤ F] [NoZeroSMulDivisors ℤ F]
+    {D : Type*} [AddCommGroup D] [Finite D] :
     Nat.card (ModN (F × D) 2) =
       2 ^ finrank ℤ F * Nat.card (Submodule.torsionBy ℤ (F × D) 2) := by
   rw [natCard_modN_two_prod, natCard_torsionBy_two_prod, ModN.natCard_eq F 2,
@@ -181,12 +181,12 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
     rw [iso.finrank_eq]
-    exact finrank_prod_finite _ _
+    exact finrank_prod_finite
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
           Nat.card (Submodule.torsionBy ℤ ((Fin n →₀ ℤ) × D) 2) :=
-        natCard_modN_two_of_free_prod_finite _ _
+        natCard_modN_two_of_free_prod_finite
     _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
         rw [hfrH, natCard_torsionBy_two_congr iso]
 
@@ -217,7 +217,7 @@ public theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ
     ρ ≤ finrank ℤ H + t := by
   have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep
   have key := natCard_modN_two (H := H)
-  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
+  rw [natCard_eq_two_pow_finrank] at key
   have hmono : (2 : ℕ) ^ ρ ≤ 2 ^ (finrank ℤ H + t) :=
     calc (2 : ℕ) ^ ρ ≤ 2 ^ finrank (ZMod 2) (ModN H 2) := Nat.pow_le_pow_right (by norm_num) h1
       _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := key

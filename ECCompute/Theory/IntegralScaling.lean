@@ -62,7 +62,7 @@ variable {W W' : WeierstrassCurve ℚ} {v : ℚ} (s : IsScaling W W' v)
 include s
 
 /-- The defining equation transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
-theorem equation_scale (x y : ℚ) :
+theorem equation_scale {x y : ℚ} :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff,
     s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
@@ -70,10 +70,10 @@ theorem equation_scale (x y : ℚ) :
     fun h ↦ mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
 
 /-- Nonsingularity transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
-theorem nonsingular_scale (x y : ℚ) :
+theorem nonsingular_scale {x y : ℚ} :
     W.toAffine.Nonsingular x y ↔ W'.toAffine.Nonsingular (v ^ 2 * x) (v ^ 3 * y) := by
   rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff']
-  refine and_congr (equation_scale s x y) ?_
+  refine and_congr (equation_scale s) ?_
   have eX : W'.a₁ * (v ^ 3 * y) - (3 * (v ^ 2 * x) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x) + W'.a₄)
       = v ^ 4 * (W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄)) := by
     grind [IsScaling.a₁, IsScaling.a₂, IsScaling.a₄]
@@ -82,9 +82,9 @@ theorem nonsingular_scale (x y : ℚ) :
   rw [eX, eY, mul_ne_zero_iff_left (pow_ne_zero 4 s.ne), mul_ne_zero_iff_left (pow_ne_zero 3 s.ne)]
 
 /-- Nonsingularity transfers along the inverse scaling `(X, Y) ↦ (X/v², Y/v³)`. -/
-theorem nonsingular_scale' (X Y : ℚ) :
+theorem nonsingular_scale' {X Y : ℚ} :
     W'.toAffine.Nonsingular X Y ↔ W.toAffine.Nonsingular (X / v ^ 2) (Y / v ^ 3) := by
-  rw [nonsingular_scale s (X / v ^ 2) (Y / v ^ 3),
+  rw [nonsingular_scale s,
     mul_div_cancel₀ X (pow_ne_zero 2 s.ne), mul_div_cancel₀ Y (pow_ne_zero 3 s.ne)]
 
 /-- The `Y`-negation scales by `v³`. -/
@@ -136,19 +136,19 @@ theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
 /-- The forward coordinate map `(x, y) ↦ (v²x, v³y)` on Mordell-Weil groups. -/
 def scaleFwd : W.toAffine.Point → W'.toAffine.Point
   | .zero => .zero
-  | .some x y h => .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s x y).mp h)
+  | .some x y h => .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s).mp h)
 
 /-- The inverse coordinate map `(X, Y) ↦ (X/v², Y/v³)`. -/
 def scaleBwd : W'.toAffine.Point → W.toAffine.Point
   | .zero => .zero
-  | .some X Y h => .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s X Y).mp h)
+  | .some X Y h => .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s).mp h)
 
 @[simp] theorem scaleFwd_some (x y : ℚ) (h : W.toAffine.Nonsingular x y) :
-    scaleFwd s (.some x y h) = .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s x y).mp h) :=
+    scaleFwd s (.some x y h) = .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s).mp h) :=
   rfl
 
 @[simp] theorem scaleBwd_some (X Y : ℚ) (h : W'.toAffine.Nonsingular X Y) :
-    scaleBwd s (.some X Y h) = .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s X Y).mp h) :=
+    scaleBwd s (.some X Y h) = .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s).mp h) :=
   rfl
 
 /-- The scaling forward map is additive. -/
@@ -211,17 +211,17 @@ integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 @[expose] public def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   ⟨a₁, a₂, a₃, a₄, a₆⟩
 
-lemma intShortModel_a₂ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₂ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
   simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
   grind
 
-lemma intShortModel_a₄ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₄ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
   simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
   grind
 
-lemma intShortModel_a₆ (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+lemma intShortModel_a₆ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
     (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
   simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
   grind
@@ -236,9 +236,9 @@ public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
       (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
       ⟨two_ne_zero,
         by simp only [intShortModel, curve, shortModel_a₁, mul_zero],
-        intShortModel_a₂ a₁ a₂ a₃ a₄ a₆,
+        intShortModel_a₂,
         by simp only [intShortModel, curve, shortModel_a₃, mul_zero],
-        intShortModel_a₄ a₁ a₂ a₃ a₄ a₆,
-        intShortModel_a₆ a₁ a₂ a₃ a₄ a₆⟩
+        intShortModel_a₄,
+        intShortModel_a₆⟩
 
 end ECCompute.IntegralScaling

@@ -90,7 +90,7 @@ variable (W : WeierstrassCurve ℚ)
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
 invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
-theorem or_ne_zero_sub_iff (A B σ : ℚ) :
+theorem or_ne_zero_sub_iff {A B σ : ℚ} :
     (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
   by_cases hB : B = 0 <;> simp [hB]
 
@@ -103,7 +103,7 @@ public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ 
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/
-theorem nonsingular_completeSquare (x y : ℚ) :
+theorem nonsingular_completeSquare {x y : ℚ} :
     W.toAffine.Nonsingular x y ↔
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
@@ -119,7 +119,7 @@ theorem nonsingular_completeSquare (x y : ℚ) :
       = 2 * y + W.toAffine.a₁ * x + W.toAffine.a₃ := by
     grind [shortModel_a₁, shortModel_a₃]
   rw [e1, e2]
-  exact or_ne_zero_sub_iff _ _ _
+  exact or_ne_zero_sub_iff
 
 /-- The `Y`-negation commutes with the completing-the-square shift. -/
 theorem negY_completeSquare (x y : ℚ) :
@@ -145,7 +145,7 @@ theorem addY_completeSquare (x₁ x₂ y₁ ℓ : ℚ) :
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
 in the non-degenerate branch of the addition law. -/
-theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
+theorem slope_completeSquare {x₁ x₂ y₁ y₂ : ℚ}
     (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂)
     (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
@@ -180,7 +180,7 @@ def fwd :
     W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
-    .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W x y).mp h)
+    .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W).mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
 def bwd :
@@ -188,21 +188,21 @@ def bwd :
   | .zero => .zero
   | .some x y h =>
     .some x (y - (W.a₁ * x + W.a₃) / 2)
-      ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
+      ((nonsingular_completeSquare W).mpr
         (by simpa using h))
 
 @[simp] theorem fwd_some (x y : ℚ)
     (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h)
       = .some x (y + (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W x y).mp h) :=
+        ((nonsingular_completeSquare W).mp h) :=
   rfl
 
 @[simp] theorem bwd_some (x y : ℚ)
     (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)
       = .some x (y - (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W x (y - (W.a₁ * x + W.a₃) / 2)).mpr
+        ((nonsingular_completeSquare W).mpr
           (by simpa using h)) :=
   rfl
 
@@ -224,7 +224,7 @@ theorem fwd_map_add (P Q : W.toAffine.Point) :
       refine hxy ⟨hx, ?_⟩
       rw [negY_completeSquare, hx] at hy
       exact add_right_cancel hy
-    have hℓ := slope_completeSquare W x₁ x₂ y₁ y₂ h₁.left h₂.left hxy
+    have hℓ := slope_completeSquare W h₁.left h₂.left hxy
     grind [Point.add_some, fwd_some, point_some_congr, addX_completeSquare, addY_completeSquare]
 
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
