@@ -79,7 +79,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       ((Int.castRingHom (ZMod p)) ∘ trep x y w) := by
   have hEq : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Equation
       ((Int.castRingHom (ZMod p)) ∘ trep x y w) :=
-    (trep_equation a₂ a₄ a₆ h.1 hden hden').map (Int.castRingHom (ZMod p))
+    (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
     have hz0 : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
