@@ -6,9 +6,9 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Defs
+public import ECCompute.ForMathlib.RatDenom
 
 import ECCompute.Theory.Descent.DenominatorSquare
-import ECCompute.ForMathlib.RatDenom
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Algebra.Field.ZMod
@@ -41,20 +41,21 @@ public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x 
 
 variable {p : ℕ}
 
-/-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
-public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
+/-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` for a `p`-integral rational. -/
+public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : Rat.IsPIntegral p x) :
     (x.num : ZMod p) = xbar p x * (x.den : ZMod p) := by
-  rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
+  rw [xbar, Rat.cast_def, div_mul_cancel₀ _ (Rat.mem_padicInteger_iff.mp hd)]
 
 /-! ### Elementary reduction mod `p`
 
-When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` and `y.den = w³`. -/
+For a `p`-integral `x` the `y`-coordinate is `p`-integral too, from `x.den = w²`, `y.den = w³`. -/
 
-/-- The `y`-denominator reduces well whenever the `x`-denominator does (since
+/-- The `y`-coordinate is `p`-integral whenever the `x`-coordinate is (since
 `x.den = w²`, `y.den = w³`). -/
-public theorem ydenom_ne_zero {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : (x.den : ZMod p) ≠ 0) :
-    (y.den : ZMod p) ≠ 0 := by
+public theorem ydenom_pIntegral {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : Rat.IsPIntegral p x) :
+    Rat.IsPIntegral p y := by
+  rw [Rat.mem_padicInteger_iff] at hdx ⊢
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]

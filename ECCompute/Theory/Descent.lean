@@ -41,22 +41,25 @@ variable {a₂ a₄ a₆ p}
 /-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate:
 `ψ_p(f'(θ))` when `xbar p x = θ`, and `ψ_p(xbar p x - θ)` otherwise. -/
 theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : Rat.IsPIntegral p x) :
     lambda a₂ a₄ a₆ p θ (.some x y h)
       = if xbar p x = θ then psi p (fderiv a₂ a₄ p θ) else psi p (xbar p x - θ) := by
+  have hd' := Rat.mem_padicInteger_iff.mp hd
   obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
   have hw : (w : ZMod p) ≠ 0 := by
-    intro h0; apply hd; rw [hxden]; grind
+    intro h0; apply hd'; rw [hxden]; grind
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; grind
   simp only [lambda]
   grind [psi_mul_sq]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
-theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
+theorem lambda_some_of_den_zero [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : ¬ Rat.IsPIntegral p x) :
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
-  simp only [lambda, if_pos hd]
+  have hd0 : (x.den : ZMod p) = 0 := by
+    by_contra hh; exact hd (Rat.mem_padicInteger_iff.mpr hh)
+  simp only [lambda, if_pos hd0]
 
 end ECCompute
 
@@ -85,9 +88,9 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
   | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
   | some x y hns =>
     rw [redCharHom, AddMonoidHom.comp_apply, redHom_apply]
-    by_cases hd : (x.den : ZMod p) = 0
-    · grind [lambda_some_of_den_zero, redP_of_den_zero]
+    by_cases hd : Rat.IsPIntegral p x
     · grind [lambda_some_of_den_ne, redP_of_den_ne, εpHom_apply, εpFinite_some, xbar]
+    · grind [lambda_some_of_den_zero, redP_of_den_zero]
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)

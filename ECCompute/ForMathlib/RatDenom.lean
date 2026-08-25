@@ -17,14 +17,14 @@ public import Mathlib.RingTheory.Valuation.Integers
 # `p`-integral rationals
 
 For a prime `p`, a rational is `p`-integral when it lies in the `p`-adic valuation ring,
-equivalently `p ∤ q.den` (`Rat.mem_padicInteger_iff`). Reduction mod `p` is the ring hom
-`Rat.padicReduce` on that subring, so subring `mem`/`map` lemmas handle the field operations;
-`Rat.inv_pIntegral` covers division by a `p`-adic unit.
+equivalently `p ∤ q.den` (`Rat.mem_padicInteger_iff`). Membership is closed under the field
+operations by the subring `add_mem`/`sub_mem`/`mul_mem`/`pow_mem`, with `Rat.inv_pIntegral` covering
+division by a `p`-adic unit; `Rat.cast_{add,sub,mul}_of_pIntegral` reduce the field operations.
 
 ## Main results
 
-* `Rat.IsPIntegral`, `Rat.mem_padicInteger_iff`, `Rat.padicReduce`: `p`-integrality as
-  valuation-ring membership and reduction as its residue ring hom.
+* `Rat.IsPIntegral`, `Rat.mem_padicInteger_iff`: `p`-integrality as valuation-ring membership,
+  matched with `(q.den : ZMod p) ≠ 0`.
 * `Rat.den_cast_eq_zero_iff`, `Rat.ne_zero_of_den_eq_pow`: reductions of a power-base denominator
   `q.den = w ^ k`.
 -/
@@ -56,44 +56,24 @@ public theorem mem_padicInteger_iff [Fact p.Prime] {x : ℚ} :
   rw [IsPIntegral, Valuation.mem_integer_iff, Rat.padicValuation_le_one_iff, Ne,
     ZMod.natCast_eq_zero_iff]
 
-/-- Reduction mod `p` as a ring homomorphism from the `p`-adic valuation ring to `ZMod p`, the
-rational cast restricted to `p`-integral rationals. `map_add`/`map_mul`/`map_pow` distribute the
-reduction with no side conditions. -/
-@[expose] public noncomputable def padicReduce (p : ℕ) [Fact p.Prime] :
-    (Rat.padicValuation p).integer →+* ZMod p where
-  toFun x := ((x : ℚ) : ZMod p)
-  map_one' := by simp
-  map_zero' := by simp
-  map_mul' x y := by
-    have hx := mem_padicInteger_iff.mp x.2
-    have hy := mem_padicInteger_iff.mp y.2
-    simpa only [Subring.coe_mul] using Rat.cast_mul_of_ne_zero hx hy
-  map_add' x y := by
-    have hx := mem_padicInteger_iff.mp x.2
-    have hy := mem_padicInteger_iff.mp y.2
-    simpa only [Subring.coe_add] using Rat.cast_add_of_ne_zero hx hy
-
-@[simp] public theorem padicReduce_apply [Fact p.Prime] (x : (Rat.padicValuation p).integer) :
-    padicReduce p x = ((x : ℚ) : ZMod p) := rfl
-
 /-- Every integer is `p`-integral. -/
 public theorem intCast_pIntegral [Fact p.Prime] (n : ℤ) : IsPIntegral p (n : ℚ) :=
   intCast_mem _ n
 
 /-- On `p`-integral rationals the reduction is additive: `↑(x + y) = ↑x + ↑y`. -/
 public theorem cast_add_of_pIntegral [Fact p.Prime] {x y : ℚ} (hx : IsPIntegral p x)
-    (hy : IsPIntegral p y) : ((x + y : ℚ) : ZMod p) = (x : ZMod p) + (y : ZMod p) := by
-  simpa using map_add (padicReduce p) ⟨x, hx⟩ ⟨y, hy⟩
+    (hy : IsPIntegral p y) : ((x + y : ℚ) : ZMod p) = (x : ZMod p) + (y : ZMod p) :=
+  Rat.cast_add_of_ne_zero (mem_padicInteger_iff.mp hx) (mem_padicInteger_iff.mp hy)
 
 /-- On `p`-integral rationals the reduction is subtractive: `↑(x - y) = ↑x - ↑y`. -/
 public theorem cast_sub_of_pIntegral [Fact p.Prime] {x y : ℚ} (hx : IsPIntegral p x)
-    (hy : IsPIntegral p y) : ((x - y : ℚ) : ZMod p) = (x : ZMod p) - (y : ZMod p) := by
-  simpa using map_sub (padicReduce p) ⟨x, hx⟩ ⟨y, hy⟩
+    (hy : IsPIntegral p y) : ((x - y : ℚ) : ZMod p) = (x : ZMod p) - (y : ZMod p) :=
+  Rat.cast_sub_of_ne_zero (mem_padicInteger_iff.mp hx) (mem_padicInteger_iff.mp hy)
 
 /-- On `p`-integral rationals the reduction is multiplicative: `↑(x * y) = ↑x * ↑y`. -/
 public theorem cast_mul_of_pIntegral [Fact p.Prime] {x y : ℚ} (hx : IsPIntegral p x)
-    (hy : IsPIntegral p y) : ((x * y : ℚ) : ZMod p) = (x : ZMod p) * (y : ZMod p) := by
-  simpa using map_mul (padicReduce p) ⟨x, hx⟩ ⟨y, hy⟩
+    (hy : IsPIntegral p y) : ((x * y : ℚ) : ZMod p) = (x : ZMod p) * (y : ZMod p) :=
+  Rat.cast_mul_of_ne_zero (mem_padicInteger_iff.mp hx) (mem_padicInteger_iff.mp hy)
 
 /-- The good-denominator property survives division by a rational that is nonzero mod `p`: the
 inverse is `p`-integral because such a divisor is a `p`-adic unit. -/
