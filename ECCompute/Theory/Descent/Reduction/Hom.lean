@@ -207,9 +207,14 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   apply redP_of_den_zero a₂ a₄ a₆ p hΔ
     (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left))
   by_contra hd3_s
+  have mx1 := Rat.mem_padicInteger_iff.mpr hd1
+  have mx2 := Rat.mem_padicInteger_iff.mpr hd2
+  have my1 := Rat.mem_padicInteger_iff.mpr hdy1
+  have my2 := Rat.mem_padicInteger_iff.mpr hdy2
+  have m3s := Rat.mem_padicInteger_iff.mpr hd3_s
   obtain ⟨-, htan⟩ :=
-    reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
-      (slope_den_of_addX_den a₂ a₄ a₆ p hd1 hd2 hd3_s) hd3_s
+    reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 mx1 mx2 my1 my2
+      (slope_den_of_addX_den a₂ a₄ a₆ p mx1 mx2 m3s) m3s
   have hYeq : (y₁ : ZMod p) = -(y₁ : ZMod p) := hYneg.trans (reduced_negY a₂ a₄ a₆ p _ _)
   have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by grind
   rw [hY0, mul_zero] at htan
@@ -245,20 +250,28 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
     simp only [WeierstrassCurve.Affine.addX, curve]; grind
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
-  have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
-    reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
-  have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
-  have hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
-    addX_den_ne a₂ a₄ a₆ p hℓden hd1 hd2 haddX
-  have hd3_s : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
+  have mx1 := Rat.mem_padicInteger_iff.mpr hd1
+  have mx2 := Rat.mem_padicInteger_iff.mpr hd2
+  have my1 := Rat.mem_padicInteger_iff.mpr hdy1
+  have my2 := Rat.mem_padicInteger_iff.mpr hdy2
+  have hℓden_s : Rat.IsPIntegral p ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) :=
+    reduced_slope_den a₂ a₄ a₆ p hne h₁.1 h₂.1 mx1 mx2 my1 my2 hy2
+  have hℓden : Rat.IsPIntegral p ℓ := by rwa [← hslX]
+  have hd3 : Rat.IsPIntegral p ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ) :=
+    addX_den_ne a₂ a₄ a₆ p hℓden mx1 mx2 haddX
+  have hd3_s : Rat.IsPIntegral p ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)) := by rwa [hslX]
   obtain ⟨hS2, htan⟩ :=
-    reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
+    reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 mx1 mx2 my1 my2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
-  have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
+  have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden mx1 my1 hd3
   have hns3 := WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
+  replace hℓden_s := Rat.mem_padicInteger_iff.mp hℓden_s
+  replace hℓden := Rat.mem_padicInteger_iff.mp hℓden
+  replace hd3 := Rat.mem_padicInteger_iff.mp hd3
+  replace hd3_s := Rat.mem_padicInteger_iff.mp hd3_s
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
 
