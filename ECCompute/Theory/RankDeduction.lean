@@ -190,26 +190,6 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
         rw [hfrH, natCard_torsionBy_two_congr iso]
 
-/-- For a finitely generated abelian group `H` whose 2-torsion has cardinality `2 ^ t`,
-`|H ⧸ 2H| = 2 ^ (rank H + t)`. -/
-theorem natCard_modN_two_pow [Module.Finite ℤ H] {t : ℕ}
-    (ht : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ t) :
-    Nat.card (ModN H 2) = 2 ^ (finrank ℤ H + t) := by
-  rw [natCard_modN_two, ht, ← pow_add]
-
-/-! ### The dimension identity -/
-
-/-- For a finitely generated abelian group `H`, `dim_{𝔽₂}(H ⧸ 2H) = rank H + dim_{𝔽₂} H[2]`, where
-the 2-torsion carries its `ZMod 2`-module structure. -/
-theorem finrank_modN_two [Module.Finite ℤ H] :
-    let : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
-    finrank (ZMod 2) (ModN H 2) =
-      finrank ℤ H + finrank (ZMod 2) (Submodule.torsionBy ℤ H 2) := by
-  let : Module (ZMod 2) (Submodule.torsionBy ℤ H 2) := AddSubgroup.torsionBy.zmodModule
-  have key := natCard_modN_two_pow (natCard_eq_two_pow_finrank (Submodule.torsionBy ℤ H 2))
-  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
-  exact Nat.pow_right_injective (le_refl 2) key
-
 /-! ### The deduction -/
 
 variable {ρ : ℕ}
@@ -228,20 +208,6 @@ theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
   have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) :=
     LinearIndependent.of_comp ψ (by simpa only [Function.comp_def, hψ] using hindep)
   simpa using hmk.fintype_card_le_finrank
-
-/-- If `ρ` group elements have `𝔽₂`-linearly independent images under a descent-character tuple
-`φ`, and the 2-torsion has cardinality `2 ^ t`, then `rank H ≥ ρ - t` (stated as
-`ρ ≤ rank H + t`). -/
-theorem rank_ge [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
-    (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
-    (ht : Nat.card (Submodule.torsionBy ℤ H 2) = 2 ^ t) :
-    ρ ≤ finrank ℤ H + t := by
-  have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep
-  have key := natCard_modN_two_pow ht
-  rw [natCard_eq_two_pow_finrank (ModN H 2)] at key
-  have h2 : finrank (ZMod 2) (ModN H 2) = finrank ℤ H + t :=
-    Nat.pow_right_injective (le_refl 2) key
-  lia
 
 /-- From `|H[2]| ≤ 2 ^ t` and `ρ` group elements whose images under `φ` are `𝔽₂`-linearly
 independent, `ρ ≤ rank H + t`. This is the form the certificate uses. -/
