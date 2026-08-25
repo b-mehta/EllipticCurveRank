@@ -35,7 +35,7 @@ variable {a₂ a₄ a₆ : ℤ}
 /-- The integer projective representative `![x.num · w, y.num, w³]` of the affine point
 `(x, y)`, where `w` is the square-root witness of the denominators (`x.den = w²`, `y.den = w³`).
 Over `ℚ` this is `w³ • [x : y : 1]` (see `trep_map_ℚ`). -/
-public def trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, w ^ 3]
+@[expose] public def trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, w ^ 3]
 
 /-- The image of `curveℤ` under `ℤ → ℚ`, in projective form, is the rational curve. -/
 theorem map_curveℤ_toProjective :

@@ -6,11 +6,11 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Reduction.Repr
+public import ECCompute.Theory.Descent.DenominatorSquare
+public import ECCompute.ForMathlib.RatDenom
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 public import Mathlib.Algebra.Field.ZMod
-
-import ECCompute.ForMathlib.RatDenom
 
 /-!
 # The reduction map on affine points
@@ -115,7 +115,7 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
 open Classical in
 /-- The reduction map on affine points: `P ↦` the affine point underlying `ℤ → ZMod p` applied
 to the integer representative `trep` of `P`. Requires good reduction (`hΔ`). -/
-public noncomputable def redP (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
+@[expose] public noncomputable def redP (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point
   | .zero => 0
