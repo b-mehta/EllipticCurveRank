@@ -64,15 +64,15 @@ private theorem discr_ne_zero_of_descentHyp {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
 private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho → ℕ × ℤ}
     (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1))
-    (pt : Fin c.rho → ℚ × ℚ)
+    {pt : Fin c.rho → ℚ × ℚ}
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
         = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
     (hBlen : c.B.length = c.rho) (hMlen : c.M.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
-    (φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2))
+    {φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2)}
     (hφ : φ = AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)))
-    (g : Fin c.rho → (curve c.a₂ c.a₄ c.a₆).toAffine.Point)
+    {g : Fin c.rho → (curve c.a₂ c.a₄ c.a₆).toAffine.Point}
     (hg : g = fun i ↦ .some (pt i).1 (pt i).2 (hns i)) :
     LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
   have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
@@ -84,7 +84,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
-private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
+private theorem card_torsionBy_le {a₂ a₄ a₆ : ℤ}
     (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
     Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap (x : Submodule.torsionBy ℤ H 2) :
@@ -98,7 +98,7 @@ private theorem card_torsionBy_le (a₂ a₄ a₆ : ℤ)
 certificate's points, labels, character matrix `B`, its `𝔽₂`-inverse, and its torsion witness all
 pass their checks, the rank is at least `c.rho - c.t`. -/
 theorem rank_ge_of_certificate (c : Certificate)
-    (pt : Fin c.rho → ℚ × ℚ) (lab : Fin c.rho → ℕ × ℤ)
+    {pt : Fin c.rho → ℚ × ℚ} {lab : Fin c.rho → ℕ × ℤ}
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
@@ -112,7 +112,7 @@ theorem rank_ge_of_certificate (c : Certificate)
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
   have hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) :=
-    fun j ↦ descentHyp_of_checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 (hlabC j) (hlabP j)
+    fun j ↦ descentHyp_of_checkLabel (hlabC j) (hlabP j)
   set φ : E →+ (Fin c.rho → ZMod 2) :=
     AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)) with hφ
   rcases Nat.eq_zero_or_pos c.rho with hrho0 | hrhopos
@@ -124,11 +124,11 @@ theorem rank_ge_of_certificate (c : Certificate)
   let (eq := hg) g (i : Fin c.rho) : E := .some (pt i).1 (pt i).2 (hns i)
   -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
   have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) :=
-    linearIndependent_descent hyp pt hns hB hBlen hMlen hinv φ hφ g hg
+    linearIndependent_descent hyp hns hB hBlen hMlen hinv hφ hg
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
-    (card_torsionBy_le c.a₂ c.a₄ c.a₆ H).trans htors
+    (card_torsionBy_le H).trans htors
   have hbound : c.rho ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
     (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
     (φ.comp H.subtype.toAddMonoidHom) hindep htorH
@@ -149,8 +149,7 @@ theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certifica
   have hlabC' (j : Fin c.rho) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
     checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
-    rank_ge_of_certificate c (fun i ↦ c.points[i]) (fun j ↦ c.labels[j])
-      (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
+    rank_ge_of_certificate c (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
