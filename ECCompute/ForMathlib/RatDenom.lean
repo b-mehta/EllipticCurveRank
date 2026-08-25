@@ -21,7 +21,7 @@ multiplication, powers and division.
 
 * `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
   `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
-* `Rat.den_cast_eq_zero_iff`, `Rat.ne_zero_of_den_eq_pow`: reductions of a power-base denominator
+* `Rat.den_cast_eq_zero_iff`: reductions of a power-base denominator
   `q.den = w ^ k`.
 -/
 
@@ -46,11 +46,6 @@ variable {p : ℕ}
 public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
     (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
   rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
-
-/-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0`. -/
-public theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) :
-    w ≠ 0 := by
-  rintro rfl; rw [zero_pow hk] at hden; exact q.den_nz hden
 
 /-- If `x` and `y` both reduce well mod `p`, so does `x + y`: the sum's denominator divides
 `x.den * y.den`. -/
