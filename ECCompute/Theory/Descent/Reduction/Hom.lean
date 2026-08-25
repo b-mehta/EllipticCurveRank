@@ -142,7 +142,7 @@ private theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
     have hStℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective
         (Int.castRingHom ℚ ∘ trep X Y w₃) = .some X Y hR :=
       toAffine_g_trep a₂ a₄ a₆ hR hd3 hd3'
-    have hid : T 2 • trep X Y w₃ = (trep X Y w₃) 2 • T :=
+    have hid : T 2 • trep X Y w₃ = trep X Y w₃ 2 • T :=
       int_smul_eq_of_toAffine_eq a₂ a₄ a₆ hStℚ hTℚ
     have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 •
           (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
