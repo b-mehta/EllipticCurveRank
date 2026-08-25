@@ -32,7 +32,7 @@ namespace ECCompute
 
 open Rat
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
 variable {x₁ y₁ x₂ y₂ : ℚ}
 
 /-! ### The reduced secant slope -/
@@ -87,9 +87,9 @@ theorem reduced_slope_den (hne : x₁ ≠ x₂)
     intro h0; apply hy2; rw [← Rat.cast_add_of_ne_zero hdy1 hdy2, h0, Rat.cast_zero]
   have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
       = (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ)) / (y₁ + y₂) := by
-    rw [eq_div_iff hy12]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
+    rw [eq_div_iff hy12]; exact slope_mul_add_eq hne h₁ h₂
   have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [Rat.cast_add_of_ne_zero hdy1 hdy2]
-  have hNden := (cast_secant_num a₂ a₄ p hd1 hd2).1
+  have hNden := (cast_secant_num (a₂ := a₂) (a₄ := a₄) hd1 hd2).1
   rw [halt]
   exact den_div_ne_zero hNden (den_add_ne_zero hdy1 hdy2) hy2'
 
@@ -124,10 +124,10 @@ theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       Rat.cast_add_of_ne_zero hd3 (by simp), Rat.cast_intCast] at hc
   · have hℓmul : ℓ * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + (a₂ : ℚ) * (x₁ + x₂) + (a₄ : ℚ) := by
-      rw [hℓdef]; exact slope_mul_add_eq a₂ a₄ a₆ hne h₁ h₂
+      rw [hℓdef]; exact slope_mul_add_eq hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
     rwa [Rat.cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
-      Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num a₂ a₄ p hd1 hd2).2] at hc
+      Rat.cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num hd1 hd2).2] at hc
 
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` has nonzero denominator mod `p`, then so
 does the slope. -/

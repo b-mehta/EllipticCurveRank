@@ -32,17 +32,18 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 variable [Fact p.Prime]
 
 /-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
-noncomputable def εpFinite (θ : ZMod p) :
+noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point → ZMod 2
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
+omit [Fact p.Prime] in
 @[simp]
 theorem εpFinite_zero {θ : ZMod p} :
     εpFinite a₂ a₄ a₆ p θ
@@ -55,7 +56,6 @@ theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
   rfl
 
-variable {a₂ a₄ a₆ p}
 variable {θ : ZMod p}
 
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
@@ -76,6 +76,7 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
     θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
   simpa [fval] using h.root
 
+omit [Fact p.Prime] in
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁}
@@ -193,7 +194,7 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
-  have hneg := reduced_negY a₂ a₄ a₆ p x y
+  have hneg := reduced_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) p x y
   have hyne : y ≠ ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
@@ -258,7 +259,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
-  map_zero' := εpFinite_zero a₂ a₄ a₆ p
+  map_zero' := εpFinite_zero
   map_add' := εpFinite_map_add h
 
 end ECCompute

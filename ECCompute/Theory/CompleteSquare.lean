@@ -82,7 +82,7 @@ section GroupIso
 
 open WeierstrassCurve.Affine
 
-variable (W : WeierstrassCurve ℚ)
+variable {W : WeierstrassCurve ℚ}
 
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
@@ -170,33 +170,33 @@ theorem slope_completeSquare {x₁ x₂ y₁ y₂ : ℚ}
     grind
 
 /-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
-def fwd :
+def fwd (W : WeierstrassCurve ℚ) :
     W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
-    .some x (y + (W.a₁ * x + W.a₃) / 2) ((nonsingular_completeSquare W).mp h)
+    .some x (y + (W.a₁ * x + W.a₃) / 2) (nonsingular_completeSquare.mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
-def bwd :
+def bwd (W : WeierstrassCurve ℚ) :
     (shortModel W).toAffine.Point → W.toAffine.Point
   | .zero => .zero
   | .some x y h =>
     .some x (y - (W.a₁ * x + W.a₃) / 2)
-      ((nonsingular_completeSquare W).mpr
+      (nonsingular_completeSquare.mpr
         (by simpa using h))
 
 @[simp] theorem fwd_some {x y : ℚ}
     (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h)
       = .some x (y + (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W).mp h) :=
+        (nonsingular_completeSquare.mp h) :=
   rfl
 
 @[simp] theorem bwd_some {x y : ℚ}
     (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)
       = .some x (y - (W.a₁ * x + W.a₃) / 2)
-        ((nonsingular_completeSquare W).mpr
+        (nonsingular_completeSquare.mpr
           (by simpa using h)) :=
   rfl
 
@@ -218,13 +218,13 @@ theorem fwd_map_add (P Q : W.toAffine.Point) :
       refine hxy ⟨hx, ?_⟩
       rw [negY_completeSquare, hx] at hy
       exact add_right_cancel hy
-    have hℓ := slope_completeSquare W h₁.left h₂.left hxy
+    have hℓ := slope_completeSquare h₁.left h₂.left hxy
     grind [Point.add_some, fwd_some, point_some_congr, addX_completeSquare, addY_completeSquare]
 
 /-- The completing-the-square change of variables `y ↦ y + (a₁x + a₃)/2` induces a group
 isomorphism between the Mordell-Weil groups of the general model `W` and the short model
 `shortModel W`, so any rank lower bound on the short model transfers back. -/
-public def pointAddEquiv :
+public def pointAddEquiv (W : WeierstrassCurve ℚ) :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
   AddEquiv.mk'
     ⟨fwd W, bwd W,
@@ -236,7 +236,7 @@ public def pointAddEquiv :
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by grind)⟩
-    (fwd_map_add W)
+    fwd_map_add
 
 end GroupIso
 

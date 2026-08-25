@@ -29,10 +29,10 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ)
+variable {a₂ a₄ a₆ : ℤ}
 
 /-- The integral Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℤ`, i.e. `a₁ = a₃ = 0`. -/
-public def curveℤ : WeierstrassCurve ℤ where
+public def curveℤ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℤ where
   a₁ := 0
   a₂ := a₂
   a₃ := 0

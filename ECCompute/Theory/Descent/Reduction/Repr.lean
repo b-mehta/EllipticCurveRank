@@ -28,7 +28,7 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ)
+variable {a₂ a₄ a₆ : ℤ}
 
 /-- The integer projective representative `![x.num · w, y.num, w³]` of the affine point
 `(x, y)`, where `w` is the square-root witness of the denominators (`x.den = w²`, `y.den = w³`).
@@ -39,7 +39,7 @@ def trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, (w : ℤ) 
 private theorem map_curveℤ_toProjective :
     (curveℤ a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curve a₂ a₄ a₆).toProjective := by
   change (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆
-  exact map_curveℤ_ℚ a₂ a₄ a₆
+  exact map_curveℤ_ℚ
 
 variable {x y : ℚ} {w : ℕ}
 
