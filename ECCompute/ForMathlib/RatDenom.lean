@@ -33,7 +33,7 @@ variable {p : ℕ}
 
 /-- If `a ∣ b` and `b`'s reduction mod `p` is nonzero, so is `a`'s. -/
 theorem natCast_ne_zero_of_dvd {a b : ℕ} (h : a ∣ b) (hb : (b : ZMod p) ≠ 0) :
-    (a : ZMod p) ≠ 0 := fun ha =>
+    (a : ZMod p) ≠ 0 := fun ha ↦
   hb ((ZMod.natCast_eq_zero_iff b p).mpr (((ZMod.natCast_eq_zero_iff a p).mp ha).trans h))
 
 end ZMod
@@ -79,13 +79,13 @@ public theorem den_pow_ne_zero [Fact p.Prime] {x : ℚ} (hx : (x.den : ZMod p) �
 public theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
     (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
     ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := fun h => ha0 (by rw [h, Rat.cast_zero])
+  have ha' : a ≠ 0 := fun h ↦ ha0 (by rw [h, Rat.cast_zero])
   have hnum : (a.num : ZMod p) ≠ 0 := by
     have hval : (a.num : ZMod p) = (a : ZMod p) * (a.den : ZMod p) := by
       rw [Rat.cast_def, div_mul_cancel₀ _ ha]
     rw [hval]
     exact mul_ne_zero ha0 ha
-  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h => hnum <| by
+  have hnatabs : ((a.num.natAbs : ℕ) : ZMod p) ≠ 0 := fun h ↦ hnum <| by
     rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
     exact (ZMod.natCast_eq_zero_iff _ _).mp h
   rw [div_eq_mul_inv]

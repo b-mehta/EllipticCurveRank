@@ -87,7 +87,7 @@ public lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
   constructor
   · rintro ⟨y, hy, rfl⟩
     rw [← map_smul, hy, map_zero]
-  · exact fun hz => ⟨e.symm z, by rw [← map_smul, hz, map_zero], by simp⟩
+  · exact fun hz ↦ ⟨e.symm z, by rw [← map_smul, hz, map_zero], by simp⟩
 
 end LinearEquiv
 

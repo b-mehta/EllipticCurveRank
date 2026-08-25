@@ -64,7 +64,7 @@ lemma two_zsmul_modN (x : ModN H 2) : (2 : ℤ) • x = 0 := by
 instance [Module.Finite ℤ H] : Finite (ModN H 2) := by
   have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
   exact Module.finite_of_fg_torsion (ModN H 2)
-    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
+    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN x⟩)
 
 instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
   Module.Finite.of_finite
@@ -72,7 +72,7 @@ instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
 instance [Module.Finite ℤ H] :
     Finite (Submodule.torsionBy ℤ H 2) :=
   Module.finite_of_fg_torsion _
-    (fun x => ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
+    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
 
 /-! ### The cardinality identity for finite groups -/
 
@@ -171,13 +171,13 @@ lemma natCard_modN_two_of_free_prod_finite
 theorem natCard_modN_two [Module.Finite ℤ H] :
     Nat.card (ModN H 2) = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
   obtain ⟨n, ι, fι, p, hp, ee, ⟨iso⟩⟩ := Module.equiv_free_prod_directSum ℤ H
-  set D := DirectSum ι fun i => ℤ ⧸ (ℤ ∙ p i ^ ee i)
-  have : ∀ i, NeZero (p i ^ ee i) := fun i => ⟨pow_ne_zero _ (hp i).ne_zero⟩
-  have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i =>
+  set D := DirectSum ι fun i ↦ ℤ ⧸ (ℤ ∙ p i ^ ee i)
+  have : ∀ i, NeZero (p i ^ ee i) := fun i ↦ ⟨pow_ne_zero _ (hp i).ne_zero⟩
+  have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i ↦
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
   have : Finite D := by
     classical
-    have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i => Fintype.ofFinite _
+    have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i ↦ Fintype.ofFinite _
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
     rw [iso.finrank_eq]
@@ -199,20 +199,20 @@ variable {ρ : ℕ}
 factors through `H ⧸ 2H`, since the target has characteristic 2.) -/
 theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     (φ : H →+ (Fin ρ → ZMod 2))
-    (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i))) :
+    (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i))) :
     ρ ≤ finrank (ZMod 2) (ModN H 2) := by
-  have hφ : ∀ h, (2 : ℕ) • φ h = 0 := fun h => by
+  have hφ : ∀ h, (2 : ℕ) • φ h = 0 := fun h ↦ by
     rw [← Nat.cast_smul_eq_nsmul (ZMod 2), ZMod.natCast_self, zero_smul]
   set ψ : ModN H 2 →ₗ[ZMod 2] (Fin ρ → ZMod 2) := ModN.liftEquiv'.symm ⟨φ, hφ⟩
-  have hψ : ∀ x, ψ (ModN.mkQ 2 x) = φ x := fun x => rfl
-  have hmk : LinearIndependent (ZMod 2) (fun i => ModN.mkQ 2 (g i)) :=
+  have hψ : ∀ x, ψ (ModN.mkQ 2 x) = φ x := fun x ↦ rfl
+  have hmk : LinearIndependent (ZMod 2) (fun i ↦ ModN.mkQ 2 (g i)) :=
     LinearIndependent.of_comp ψ (by simpa only [Function.comp_def, hψ] using hindep)
   simpa using hmk.fintype_card_le_finrank
 
 /-- From `|H[2]| ≤ 2 ^ t` and `ρ` group elements whose images under `φ` are `𝔽₂`-linearly
 independent, `ρ ≤ rank H + t`. This is the form the certificate uses. -/
 public theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ : H →+ (Fin ρ → ZMod 2))
-    (hindep : LinearIndependent (ZMod 2) (fun i => φ (g i)))
+    (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :
     ρ ≤ finrank ℤ H + t := by
   have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep

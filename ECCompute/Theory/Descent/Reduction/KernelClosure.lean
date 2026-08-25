@@ -93,7 +93,7 @@ and `E`, `G` nonzero. -/
 private theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
     (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
     (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
-    A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h => hne <| by
+    A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h ↦ hne <| by
   have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
   push_cast at h0
   grind [mul_right_cancel₀, pow_ne_zero]
@@ -144,7 +144,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
         ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
-    have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he => by
+    have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he ↦ by
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
       exact lt_irrefl _ hlt
@@ -199,7 +199,7 @@ private theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
   have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
-  have hW0 : W ≠ 0 := fun h => hpW (h ▸ dvd_zero _)
+  have hW0 : W ≠ 0 := fun h ↦ hpW (h ▸ dvd_zero _)
   have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
   have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
   have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
@@ -246,6 +246,6 @@ theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations a₂ a₄ a₆ p hpZ hne hA hC
     (by exact_mod_cast hEne) (by exact_mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
   exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC hcrux
-    (fun h => hpA (h ▸ dvd_zero _)) (fun h => hpC (h ▸ dvd_zero _)) hK0 hN0
+    (fun h ↦ hpA (h ▸ dvd_zero _)) (fun h ↦ hpC (h ▸ dvd_zero _)) hK0 hN0
 
 end ECCompute

@@ -66,8 +66,8 @@ theorem equation_scale (x y : ℚ) :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
   rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff,
     s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
-  exact ⟨fun h => by grind,
-    fun h => mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
+  exact ⟨fun h ↦ by grind,
+    fun h ↦ mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
 
 /-- Nonsingularity transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem nonsingular_scale (x y : ℚ) :
@@ -119,7 +119,7 @@ theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
         slope_of_Y_eq rfl hy, mul_zero]
     · have hy' : v ^ 3 * y₁ ≠ W'.toAffine.negY (v ^ 2 * x₁) (v ^ 3 * y₂) := by
         rw [negY_scale s]
-        exact fun hc => hy (mul_left_cancel₀ (pow_ne_zero 3 s.ne) hc)
+        exact fun hc ↦ hy (mul_left_cancel₀ (pow_ne_zero 3 s.ne) hc)
       have enum : 3 * (v ^ 2 * x₁) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x₁) + W'.a₄ - W'.a₁ * (v ^ 3 * y₁)
           = v ^ 3 * (v * (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)) := by
         grind [IsScaling.a₁, IsScaling.a₂, IsScaling.a₄]
@@ -127,7 +127,7 @@ theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
           = v ^ 3 * (y₁ - W.toAffine.negY x₁ y₁) := by grind
       rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, negY_scale s, enum, eden,
         mul_div_mul_left _ _ (pow_ne_zero 3 s.ne), mul_div_assoc]
-  · have hx' : v ^ 2 * x₁ ≠ v ^ 2 * x₂ := fun hc => hx (mul_left_cancel₀ (pow_ne_zero 2 s.ne) hc)
+  · have hx' : v ^ 2 * x₁ ≠ v ^ 2 * x₂ := fun hc ↦ hx (mul_left_cancel₀ (pow_ne_zero 2 s.ne) hc)
     have enum : v ^ 3 * y₁ - v ^ 3 * y₂ = v ^ 2 * (v * (y₁ - y₂)) := by grind
     have eden : v ^ 2 * x₁ - v ^ 2 * x₂ = v ^ 2 * (x₁ - x₂) := by grind
     rw [slope_of_X_ne hx', slope_of_X_ne hx, enum, eden,
@@ -175,13 +175,13 @@ theorem scaleFwd_map_add (P Q : W.toAffine.Point) :
 def scaleEquiv : W.toAffine.Point ≃+ W'.toAffine.Point :=
   AddEquiv.mk'
     ⟨scaleFwd s, scaleBwd s,
-      fun P => by
+      fun P ↦ by
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [scaleFwd_some, scaleBwd_some]
           exact point_some_congr (mul_div_cancel_left₀ _ (pow_ne_zero 2 s.ne))
             (mul_div_cancel_left₀ _ (pow_ne_zero 3 s.ne)),
-      fun P => by
+      fun P ↦ by
         rcases P with _ | ⟨X, Y, h⟩
         · rfl
         · rw [scaleBwd_some, scaleFwd_some]

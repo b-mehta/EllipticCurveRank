@@ -101,7 +101,7 @@ private theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
       Projective.Point.toAffine (curve a₂ a₄ a₆).toProjective ((Int.castRingHom ℚ) ∘ U)
         = .some X Y hR → (U 0 : ℚ) = X * U 2 ∧ (U 1 : ℚ) = Y * U 2 := by
     intro U hU
-    have hg : ∀ i, ((Int.castRingHom ℚ) ∘ U) i = (U i : ℚ) := fun i => by
+    have hg : ∀ i, ((Int.castRingHom ℚ) ∘ U) i = (U i : ℚ) := fun i ↦ by
       simp [Function.comp_apply]
     have hUz : ((Int.castRingHom ℚ) ∘ U) 2 ≠ 0 := by
       grind [Projective.Point.toAffine_of_Z_eq_zero, Affine.Point.some_ne_zero]
@@ -148,7 +148,7 @@ private theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
     have hprop : ((Int.castRingHom (ZMod p)) ∘ T) 2 •
           ((Int.castRingHom (ZMod p)) ∘ trep X Y w₃)
         = ((Int.castRingHom (ZMod p)) ∘ trep X Y w₃) 2 • ((Int.castRingHom (ZMod p)) ∘ T) := by
-      have h := congrArg (fun Q : Fin 3 → ℤ => (Int.castRingHom (ZMod p)) ∘ Q) hid
+      have h := congrArg (fun Q : Fin 3 → ℤ ↦ (Int.castRingHom (ZMod p)) ∘ Q) hid
       simpa only [Projective.comp_smul, Function.comp_apply] using h
     exact Projective.equiv_of_proportional (repr_nonsingular a₂ a₄ a₆ p hΔ (.some X Y hR)) hnsp
       hprop
@@ -205,7 +205,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   rw [redP_of_den_ne a₂ a₄ a₆ p hΔ h₁ hd1, Affine.Point.add_of_Y_eq rfl hYneg,
     Affine.Point.add_of_X_ne hne]
   apply redP_of_den_zero a₂ a₄ a₆ p hΔ
-    (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy => hne hxy.left))
+    (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left))
   by_contra hd3_s
   obtain ⟨-, htan⟩ :=
     reduced_tangent_eqs a₂ a₄ a₆ p hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
@@ -224,7 +224,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
         (den_isSquare_of_nonsingular a₂ a₄ a₆ h₁).choose_spec.1).mpr hd1)
   rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
-  exact hns.2.elim (fun hfd_ne => (Ne.symm hfd_ne) hfd) (fun hyne2 => hyne2 hYeq)
+  exact hns.2.elim (fun hfd_ne ↦ (Ne.symm hfd_ne) hfd) (fun hyne2 ↦ hyne2 hYeq)
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
 `redP (P + Q)` is the tangent doubling of the common reduced point `P̄`. Both reduced `x`- and
@@ -258,7 +258,7 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq a₂ a₄ a₆ p hYneg h2Yne hXbar hYbar htan
   have hy3cast := addY_cast_eq a₂ a₄ a₆ p (x₂ := x₂) hℓden hd1 hdy1 hd3
-  have hns3 := WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy => hne hxy.left)
+  have hns3 := WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
 

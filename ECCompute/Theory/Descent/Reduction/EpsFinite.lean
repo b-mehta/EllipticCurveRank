@@ -69,7 +69,7 @@ private theorem reduced_equation {X Y : ZMod p}
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 private theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
-  fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
+  fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
 private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
@@ -97,25 +97,25 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
         + (if x₂ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₂ - θ)) := by
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc =>
+  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ
       hσ₁ hσ₂ hσ₃ hθroot hc
-  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc =>
+  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
       (by grind) (by grind) (by grind)
       hθroot hc
-  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc =>
+  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
       (by grind) (by grind) (by grind)
       hθroot hc
   obtain rfl | c1 := eq_or_ne x₁ θ
-  · have hX2ne : x₂ ≠ x₁ := fun hc => hne hc.symm
-    have hX3ne : X₃ ≠ x₁ := fun hc => hfd_ne (by grind)
+  · have hX2ne : x₂ ≠ x₁ := fun hc ↦ hne hc.symm
+    have hX3ne : X₃ ≠ x₁ := fun hc ↦ hfd_ne (by grind)
     rw [if_neg hX3ne, if_pos rfl, if_neg hX2ne, hfd1 rfl,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   obtain rfl | c2 := eq_or_ne x₂ θ
-  · have hX3ne : X₃ ≠ x₂ := fun hc => hfd_ne (by grind)
+  · have hX3ne : X₃ ≠ x₂ := fun hc ↦ hfd_ne (by grind)
     rw [if_neg hX3ne, if_neg c1, if_pos rfl, hfd2 rfl,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
