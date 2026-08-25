@@ -79,16 +79,13 @@ public theorem cast_mul_of_pIntegral [Fact p.Prime] {x y : ℚ} (hx : IsPIntegra
 inverse is `p`-integral because such a divisor is a `p`-adic unit. -/
 public theorem inv_pIntegral [Fact p.Prime] {a : ℚ} (ha : IsPIntegral p a)
     (ha0 : (a : ZMod p) ≠ 0) : IsPIntegral p a⁻¹ := by
-  have ha' : a ≠ 0 := fun h ↦ ha0 (by rw [h, Rat.cast_zero])
-  rw [mem_padicInteger_iff, Rat.den_inv_of_ne_zero ha']
+  have ha' : a ≠ 0 := by grind [Rat.cast_zero]
   have had := mem_padicInteger_iff.mp ha
   have hnum : (a.num : ZMod p) ≠ 0 := by
-    rw [show (a.num : ZMod p) = (a : ZMod p) * (a.den : ZMod p) by
-      rw [Rat.cast_def, div_mul_cancel₀ _ had]]
-    exact mul_ne_zero ha0 had
-  exact fun h ↦ hnum <| by
-    rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
-    exact (ZMod.natCast_eq_zero_iff _ _).mp h
+    have hval : (a.num : ZMod p) = a * a.den := by rw [Rat.cast_def, div_mul_cancel₀ _ had]
+    grind
+  rwa [mem_padicInteger_iff, Rat.den_inv_of_ne_zero ha', ne_eq, ZMod.natCast_eq_zero_iff,
+    ← Int.natCast_dvd_natCast, Int.dvd_natAbs, ← ZMod.intCast_zmod_eq_zero_iff_dvd]
 
 end Rat
 
