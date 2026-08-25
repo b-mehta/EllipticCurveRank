@@ -54,9 +54,8 @@ public theorem shortModel_a₁ (W : WeierstrassCurve ℚ) : (shortModel W).a₁ 
 @[simp]
 public theorem shortModel_a₂ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₂, inv_one,
+  grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₂, inv_one,
     Units.val_one, one_pow]
-  ring
 
 @[simp]
 public theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ = 0 := by
@@ -65,16 +64,14 @@ public theorem shortModel_a₃ (W : WeierstrassCurve ℚ) : (shortModel W).a₃ 
 @[simp]
 public theorem shortModel_a₄ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₄, inv_one,
+  grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₄, inv_one,
     Units.val_one, one_pow]
-  ring
 
 @[simp]
 public theorem shortModel_a₆ (W : WeierstrassCurve ℚ) :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  simp only [shortModel, completeSquare, WeierstrassCurve.variableChange_a₆, inv_one,
+  grind [shortModel, completeSquare, WeierstrassCurve.variableChange_a₆, inv_one,
     Units.val_one, one_pow]
-  ring
 
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
