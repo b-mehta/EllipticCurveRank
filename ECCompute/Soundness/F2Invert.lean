@@ -134,7 +134,7 @@ theorem checkInvRow_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) (hc : che
     cases k' with
     | zero =>
       have hbnd : b &&& m < 2 ^ n := Nat.and_lt_two_pow b (hM m (by simp))
-      grind [popParityK_eq, Bool.rec_eq]
+      grind [popParityK_eq]
     | succ k'' =>
       grind
 
