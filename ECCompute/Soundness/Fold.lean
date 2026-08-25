@@ -13,8 +13,8 @@ import Mathlib.Data.List.Basic
 # Soundness of the `Bool` folds
 
 `allBelow_iff` and `allList_iff` characterize the kernel folds `ECCompute.allBelow` and
-`ECCompute.allList` (from `Kernel`) as a bounded `∀` and a list `∀`, the `succ`/`cons` lemmas peel
-one step, and `Nat.beq_eq'` identifies `Nat.beq` with the `BEq`-dispatched `==`.
+`ECCompute.allList` (from `Kernel`) as a bounded `∀` and a list `∀`, and the `succ`/`cons` lemmas
+peel one step.
 -/
 
 section
@@ -48,10 +48,6 @@ namespace ECCompute
   induction l with
   | nil => simp
   | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
-
-/-- `Nat.beq` and the `BEq`-dispatched `==` agree on `ℕ`. -/
-public theorem _root_.Nat.beq_eq' (a b : ℕ) : a.beq b = (a == b) := by
-  cases hab : a == b <;> cases hnb : a.beq b <;> simp_all [beq_iff_eq, Nat.beq_eq]
 
 end ECCompute
 
