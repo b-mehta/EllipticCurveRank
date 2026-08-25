@@ -21,7 +21,7 @@ matching point.
 
 namespace ECCompute
 
-variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {labN : List (ℕ × ℕ × ℕ)} {B : List ℕ}
+variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
   {pt : List (ℚ × ℚ)}
 
 @[simp, grind =]
@@ -34,77 +34,67 @@ theorem checkBRow_cons {l : ℕ × ℕ × ℕ} {ls : List (ℕ × ℕ × ℕ)} :
 
 @[simp, grind =]
 theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
-    checkBGo a₂ a₄ labN (b :: bs) (p :: ps) =
-      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
-        (checkBGo a₂ a₄ labN bs ps) := rfl
+    checkBGo a₂ a₄ ls (b :: bs) (p :: ps) =
+      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+        (checkBGo a₂ a₄ ls bs ps) := rfl
+
+variable {i j : ℕ}
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b labN) {j : ℕ}
-    (hj : j < labN.length) :
-    b.testBit j = lambdaComputeBoolNatMask a₂ a₄
-      labN[j].1 labN[j].2.2 labN[j].2.1 xnp xnm xden := by
-  induction labN generalizing b j with
+theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) {j : ℕ} (hj : j < ls.length) :
+    b.testBit j = lambdaComputeBoolNatMask a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
+  induction ls generalizing b j with
   | nil => grind
   | cons l ls ih =>
-    cases j <;> grind [Nat.testBit_succ, Nat.beq_eq, Bool.rec_eq]
+    cases j <;> grind [Nat.testBit_succ]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row (h : checkBGo a₂ a₄ labN B pt) (i : ℕ)
-    (hi : i < B.length) (hip : i < pt.length) :
+theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
     checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat
-      pt[i].1.den B[i] labN := by
-  induction B generalizing pt i with
-  | nil => grind
-  | cons b bs ih =>
-    cases pt with
-    | nil => grind
-    | cons p ps => cases i <;> grind
+      pt[i].1.den B[i] ls := by
+  induction B generalizing pt i with grind [cases List]
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true (h : checkMaskList labN) {j : ℕ} (hj : j < labN.length) :
-    qrMask labN[j].1 = labN[j].2.2 := by
+theorem checkMaskList_true (h : checkMaskList ls) {j : ℕ} (hj : j < ls.length) :
+    qrMask ls[j].1 = ls[j].2.2 := by
   grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
 public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
     (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : lab.length = ρ)
     (hqlen : q.length = ρ)
-    (hpr : ∀ j : Fin ρ, (lab[j].1).Prime)
+    (hpr : ∀ j : Fin ρ, lab[j].1.Prime)
     (h : checkB a₂ a₄ lab q B pt) (i j : Fin ρ) :
-    F2Invert.toMat B ρ i j =
-      lambdaCompute a₂ a₄ lab[j].1 (lab[j].2 : ZMod lab[j].1) pt[i].1 := by
+    F2Invert.toMat B ρ i j = lambdaCompute a₂ a₄ lab[j].1 lab[j].2 pt[i].1 := by
   set L := lab[j] with hL
   set P := pt[i] with hP
   -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
   simp only [Fin.getElem_fin] at hL hP
   have hp : 0 < L.1 := (hpr j).pos
-  have : Fact L.1.Prime := ⟨hpr j⟩
-  have : NeZero L.1 := ⟨hp.ne'⟩
-  set labN := toLabN lab q with hlabNdef
-  have hlabN : labN.length = ρ := by
-    rw [hlabNdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : labN[j.val]'(by rw [hlabN]; exact j.isLt)
+  set ls := toLabN lab q with hlsdef
+  have hls : ls.length = ρ := by
+    rw [hlsdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
+  have hgetN : ls[j.val]'(by rw [hls]; exact j.isLt)
       = (L.1, (L.2 % (L.1 : ℤ)).toNat, q[j]) := by
-    simp only [hlabNdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
+    simp only [hlsdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
-    have := checkMaskList_true hmask (by rw [hlabN]; exact j.isLt)
+    have := checkMaskList_true hmask (by rw [hls]; exact j.isLt)
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
-  have hrow := checkBGo_row hgo i.val (hBlen ▸ i.isLt) (hplen ▸ i.isLt)
-  have hcell := checkBRow_true hrow (by rw [hlabN]; exact j.isLt)
+  have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
+  have hcell := checkBRow_true (j := j) hrow (by lia)
   rw [hgetN] at hcell
   -- rewrite the supplied mask to `qrMask L.1`, then bridge the mask cell to `lambdaComputeBool`
   rw [← hqok, ← hP] at hcell
   have hbridge : lambdaComputeBoolNatMask a₂ a₄
-      L.1 (qrMask L.1) (L.2 % (L.1 : ℤ)).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
-      = lambdaComputeBool a₂ a₄ L.1 (L.2 : ZMod L.1) P.1 :=
-    lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp (L.2 : ZMod L.1) P.1 _ _ _ _
+      L.1 (qrMask L.1) (L.2 % L.1).toNat P.1.num.toNat (-P.1.num).toNat P.1.den
+        = lambdaComputeBool a₂ a₄ L.1 L.2 P.1 :=
+    lambdaComputeBoolNatMask_eq a₂ a₄ L.1 hp L.2 P.1 _ _ _ _
       (intResNat_cast hp.ne' L.2) (Int.toNat_sub_toNat_neg P.1.num).symm rfl
-  rw [F2Invert.toMat_apply (by rw [hBlen]; exact i.isLt), Fin.getElem_fin, hcell, hbridge,
-    lambdaCompute_eq_bool]
+  rw [F2Invert.toMat_apply (by lia), Fin.getElem_fin, hcell, hbridge, lambdaCompute_eq_bool]
 
 end ECCompute
