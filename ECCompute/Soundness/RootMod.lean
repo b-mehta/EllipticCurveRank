@@ -99,7 +99,7 @@ open Polynomial in
 /-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
 rational root. -/
 public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
-    (h : monicHasNoRootMod [c, b] ℓ) (x : ℚ)
+    (h : monicHasNoRootMod [c, b] ℓ) {x : ℚ}
     (hx : x ^ 2 + b * x + c = 0) : False := by
   set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
   have hmonic : p.Monic := by simp only [p]; monicity!
