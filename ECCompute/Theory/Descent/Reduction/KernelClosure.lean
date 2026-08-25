@@ -27,19 +27,6 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
 /-! ### Integer data attached to a kernel point -/
 
-/-- From the integer identity `N * S = K * W` with `p ∣ S`, `¬ p ∣ W` and all factors nonzero,
-conclude `v_p(N) < v_p(K)`. -/
-private theorem padicValInt_lt_of_mul_eq {N S K W : ℤ} (hid : N * S = K * W)
-    (hpS : (p : ℤ) ∣ S) (hpW : ¬ (p : ℤ) ∣ W)
-    (hN0 : N ≠ 0) (hS0 : S ≠ 0) (hK0 : K ≠ 0) (hW0 : W ≠ 0) :
-    padicValInt p N < padicValInt p K := by
-  have hSval : 1 ≤ padicValInt p S :=
-    one_le_padicValNat_of_dvd (Int.natAbs_ne_zero.mpr hS0)
-      (Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hpS))
-  have e1 := padicValInt.mul (p := p) hN0 hS0
-  rw [hid, padicValInt.mul (p := p) hK0 hW0, padicValInt.eq_zero_of_not_dvd hpW] at e1
-  lia
-
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
 private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
