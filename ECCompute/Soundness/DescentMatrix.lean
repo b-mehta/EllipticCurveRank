@@ -89,8 +89,7 @@ public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
   -- read off the mask-based cell value at `(i, j)`
   have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
   have hcell := checkBRow_true (j := j) hrow (by lia)
-  rw [hgetN] at hcell
-  rw [← hqok, ← hP] at hcell
+  rw [hgetN, ← hqok, ← hP] at hcell
   rw [F2Invert.toMat_apply (by lia), Fin.getElem_fin, hcell]
 
 end ECCompute
