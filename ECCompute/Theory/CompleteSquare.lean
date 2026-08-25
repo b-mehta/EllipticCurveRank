@@ -111,7 +111,7 @@ theorem nonsingular_completeSquare (x y : ℚ) :
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
     ← equation_completeSquare]
-  refine and_congr_right fun _ => ?_
+  refine and_congr_right fun _ ↦ ?_
   have e1 : (shortModel W).toAffine.a₁ * (y + (W.a₁ * x + W.a₃) / 2)
         - (3 * x ^ 2 + 2 * (shortModel W).toAffine.a₂ * x + (shortModel W).toAffine.a₄)
       = (W.toAffine.a₁ * y - (3 * x ^ 2 + 2 * W.toAffine.a₂ * x + W.toAffine.a₄))
@@ -156,7 +156,7 @@ theorem slope_completeSquare (x₁ x₂ y₁ y₂ : ℚ)
         (y₂ + (W.a₁ * x₂ + W.a₃) / 2)
       = W.toAffine.slope x₁ x₂ y₁ y₂ + W.a₁ / 2 := by
   obtain rfl | hx := eq_or_ne x₁ x₂
-  · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h => hxy ⟨rfl, h⟩
+  · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h ↦ hxy ⟨rfl, h⟩
     have hyeq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ rfl hy
     subst hyeq
     have hy' : y₁ + (W.a₁ * x₁ + W.a₃) / 2
@@ -237,11 +237,11 @@ public def pointAddEquiv :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
   AddEquiv.mk'
     ⟨fwd W, bwd W,
-      fun P => by
+      fun P ↦ by
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [fwd_some, bwd_some]; exact point_some_congr rfl (by grind),
-      fun P => by
+      fun P ↦ by
         rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [bwd_some, fwd_some]; exact point_some_congr rfl (by grind)⟩

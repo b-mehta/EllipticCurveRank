@@ -42,7 +42,7 @@ theorem equiv_of_proportional (hU : W.Nonsingular U) (hV : W.Nonsingular V)
     exact Setoid.trans (equiv_zero_of_Z_eq_zero hU hUz)
       (Setoid.symm (equiv_zero_of_Z_eq_zero hV hVz))
   · -- `U z ≠ 0`; deduce `V z ≠ 0` and use `equiv_of_X_eq_of_Y_eq`.
-    have hVz : V 2 ≠ 0 := fun hVz => by
+    have hVz : V 2 ≠ 0 := fun hVz ↦ by
       rw [nonsingular_of_Z_eq_zero hVz] at hV
       grind [mul_eq_zero]
     exact equiv_of_X_eq_of_Y_eq hUz hVz (by grind) (by grind)

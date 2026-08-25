@@ -142,7 +142,7 @@ theorem slope_den_of_addX_den
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]; exact den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2
   rw [Rat.den_pow, Nat.cast_pow] at hℓ2
-  exact fun h => hℓ2 (by grind)
+  exact fun h ↦ hℓ2 (by grind)
 
 /-- The doubled `x`-coordinate `addX x₁ x₂ ℓ` survives reduction when the slope, `x₁` and `x₂`
 all do: `addX = ℓ² - a₂ - x₁ - x₂` has nonzero denominator mod `p`. -/
