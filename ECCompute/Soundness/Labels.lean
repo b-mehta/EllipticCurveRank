@@ -54,7 +54,7 @@ theorem curve_Δ_num :
   rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
-theorem discrInt_emod (p : ℕ) :
+theorem discrInt_emod {p : ℕ} :
     (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
   have h : ∀ a : ℤ, ((a % (p : ℤ)) : ZMod p) = (a : ZMod p) := fun a ↦ by
     rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
@@ -63,7 +63,7 @@ theorem discrInt_emod (p : ℕ) :
   ring
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
-theorem fval_iff (θ : ℤ) {p : ℕ} (hp : 1 < p) :
+theorem fval_iff {θ : ℤ} {p : ℕ} (hp : 1 < p) :
     (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have hp0 : p ≠ 0 := by lia
@@ -82,7 +82,7 @@ theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
 end
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
-public theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ℤ)
+public theorem descentHyp_of_checkLabel {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
     (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
@@ -93,12 +93,12 @@ public theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : �
     rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
     simpa [Nat.beq_eq_beq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
-    rw [curve_Δ_num, Ne, ← discrInt_emod p, ← discrIntK_eq,
+    rw [curve_Δ_num, Ne, ← discrInt_emod, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
     have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fval_iff θ hp.one_lt).mp hf
+      (fval_iff hp.one_lt).mp hf
     rw [fval]
     grind
 

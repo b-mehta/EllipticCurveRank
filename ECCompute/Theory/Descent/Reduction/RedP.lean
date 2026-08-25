@@ -67,7 +67,7 @@ private theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 private theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).Δ ≠ 0 := by
-  rw [WeierstrassCurve.map_Δ]; simpa [eq_intCast] using hΔ
+  rw [map_Δ]; simpa [eq_intCast] using hΔ
 
 /-! ### Nonsingularity of the reduced representative -/
 
@@ -79,7 +79,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       ((Int.castRingHom (ZMod p)) ∘ trep x y w) := by
   have hEq : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Equation
       ((Int.castRingHom (ZMod p)) ∘ trep x y w) :=
-    (trep_equation a₂ a₄ a₆ h.1 hden hden').map (Int.castRingHom (ZMod p))
+    (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
     have hz0 : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
@@ -94,7 +94,8 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       have hpw : p ∣ w := (ZMod.natCast_eq_zero_iff w p).mp hwz
       have hpw3 : (p : ℤ) ∣ (w : ℤ) ^ 3 :=
         (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
-      have hunit : IsUnit (p : ℤ) := (trep_primitive hden').isUnit_of_dvd' hpy hpw3
+      have hunit : IsUnit (p : ℤ) :=
+        y.isCoprime_num_den.isUnit_of_dvd' hpy (by rwa [hden', Nat.cast_pow])
       have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
       grind [Int.isUnit_iff]
     rw [hX0]
@@ -103,7 +104,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     have hzne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 ≠ 0 := by
       rw [trep_map_two]; exact pow_ne_zero 3 hwz
     rw [Projective.nonsingular_of_Z_ne_zero hzne]
-    exact (WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero
+    exact (Affine.equation_iff_nonsingular_of_Δ_ne_zero
       (map_Δ_ne a₂ a₄ a₆ p hΔ)).mp ((Projective.equation_of_Z_ne_zero hzne).mp hEq)
 
 /-! ### The reduction map -/

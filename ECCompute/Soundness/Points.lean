@@ -24,7 +24,7 @@ variable {a₁ a₂ a₃ a₄ a₆ : ℤ}
 
 /-- `checkPoint a₁ a₂ a₃ a₄ a₆ x y` holds iff `(x, y)` satisfies the affine Weierstrass equation of
 the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
-theorem checkPoint_iff (x y : ℚ) :
+theorem checkPoint_iff {x y : ℚ} :
     checkPoint a₁ a₂ a₃ a₄ a₆ x y ↔
       (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
   simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
@@ -40,7 +40,7 @@ theorem checkPoint_iff (x y : ℚ) :
   exact ⟨fun h ↦ mul_left_cancel₀ hD (by grind), fun h ↦ by grind⟩
 
 /-- `checkPoints` holds iff every listed point satisfies the equation. -/
-public theorem checkPoints_iff (pts : List (ℚ × ℚ)) :
+public theorem checkPoints_iff {pts : List (ℚ × ℚ)} :
     checkPoints a₁ a₂ a₃ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_iff, checkPoint_iff]

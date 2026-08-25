@@ -43,7 +43,7 @@ square mod `p`.
 -/
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
-theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
+theorem shiftRight_land_one_eq_one_iff {m a : ℕ} :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
   grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
@@ -52,7 +52,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
-theorem testBit_qrMaskGo (p a f : ℕ) :
+theorem testBit_qrMaskGo {p a f : ℕ} :
     Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
   induction f with
   | zero =>
@@ -77,7 +77,7 @@ theorem testBit_qrMaskGo (p a f : ℕ) :
 
 /-- For `0 < a < p`, `p` an odd prime: `a` is a residue witnessed in the lower half `[1, (p-1)/2]`
 iff it is a nonzero square in `ZMod p`. -/
-theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+theorem exists_sq_iff {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2) {a : ℕ} (ha : a < p) :
     (∃ j, 1 ≤ j ∧ j ≤ (p - 1) / 2 ∧ j * j % p = a) ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   have hpp : p.Prime := hp.out
   have hodd : p % 2 = 1 := hpp.eq_two_or_odd.resolve_left hp2
@@ -126,16 +126,16 @@ theorem exists_sq_iff (p : ℕ) [hp : Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (h
       rw [hsq, haeq]
 
 /-- Bit `a` of `qrMask p` is set iff `a` is a nonzero square mod the odd prime `p` (for `a < p`). -/
-theorem qrMask_testBit (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+theorem qrMask_testBit {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) {a : ℕ} (ha : a < p) :
     ((qrMask p).shiftRight a).land 1 = 1 ↔ a ≠ 0 ∧ IsSquare (a : ZMod p) := by
   rw [shiftRight_land_one_eq_one_iff, qrMask, testBit_qrMaskGo]
-  exact exists_sq_iff p hp2 a ha
+  exact exists_sq_iff hp2 ha
 
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
 prime). -/
-theorem qrLookupBool_spec (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (a : ℕ) (ha : a < p) :
+theorem qrLookupBool_spec {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) {a : ℕ} (ha : a < p) :
     qrLookupBool (qrMask p) a = decide (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
-  have hmask := qrMask_testBit p hp2 a ha
+  have hmask := qrMask_testBit hp2 ha
   grind [qrLookupBool]
 
 /-! ### `Bool` character and its `ZMod 2` lift -/
@@ -155,7 +155,7 @@ public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p)
   if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
-public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+public theorem lambdaCompute_eq_bool {a₂ a₄ : ℤ} {p : ℕ} {θ : ZMod p} {x : ℚ} :
     lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
   rw [lambdaCompute]
 
@@ -166,7 +166,7 @@ private theorem mask_eq_psi (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p
   have hval' : (a.val : ZMod p) = a := ZMod.natCast_zmod_val a
   have hvlt : a.val < p := ZMod.val_lt a
   have ha0 : a.val ≠ 0 := fun h ↦ ha (by rw [← hval', h, Nat.cast_zero])
-  have hspec := qrLookupBool_spec p hp2 a.val hvlt
+  have hspec := qrLookupBool_spec hp2 hvlt
   rw [hval'] at hspec
   rw [hspec]
   simp only [ne_eq, ha0, not_false_eq_true, true_and, psi]
@@ -194,7 +194,7 @@ quadratic-residue mask `qmask` of `p`. It agrees with `lambdaComputeBool` throug
 represent the inputs). -/
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
-private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
+private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) {tval xp xm xden : ℕ} :
     (alphaResNat p tval xp xm xden : ZMod p)
       = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
   have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le
@@ -203,7 +203,7 @@ private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) 
   ring
 
 /-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
-private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ) (tval xp xm xden : ℕ)
+private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) {θ : ZMod p} {x : ℚ} {tval xp xm xden : ℕ}
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * (x.den : ZMod p)).val := by
   have hcast : (alphaResNat p tval xp xm xden : ZMod p)
@@ -215,7 +215,7 @@ private theorem alphaResNat_eq_val {p : ℕ} (hp : 0 < p) (θ : ZMod p) (x : ℚ
   rw [← hcast, ZMod.val_cast_of_lt hlt]
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ : ZMod p) (tval : ℕ)
+private theorem fderivResNat_cast {p : ℕ} (hp : 0 < p) {a₂ a₄ : ℤ} {θ : ZMod p} {tval : ℕ}
     (htval : (tval : ZMod p) = θ) :
     (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ p θ := by
   simp only [fderivResNat]
@@ -232,17 +232,17 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
     fderivResNat a₂ a₄ p tval = (fderiv a₂ a₄ p θ).val := by
   have hlt : fderivResNat a₂ a₄ p tval < p := by
     simp only [fderivResNat]; exact polyModL_lt hp
-  rw [← fderivResNat_cast hp a₂ a₄ θ tval htval, ZMod.val_cast_of_lt hlt]
+  rw [← fderivResNat_cast hp htval, ZMod.val_cast_of_lt hlt]
 
 /-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
 provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
 denominator `xden`. -/
-public theorem lambdaComputeBoolNatMask_eq (a₂ a₄ : ℤ) (p : ℕ) (hp : 0 < p) (θ : ZMod p) (x : ℚ)
-    (tval xp xm xden : ℕ) (htval : (tval : ZMod p) = θ)
+public theorem lambdaComputeBoolNatMask_eq {a₂ a₄ : ℤ} {p : ℕ} (hp : 0 < p) {θ : ZMod p} {x : ℚ}
+    {tval xp xm xden : ℕ} (htval : (tval : ZMod p) = θ)
     (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
     lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden
       = lambdaComputeBool a₂ a₄ p θ x := by
-  have halpha := alphaResNat_eq_val hp θ x tval xp xm xden htval hxnum hxden
+  have halpha := alphaResNat_eq_val hp htval hxnum hxden
   have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
   have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
