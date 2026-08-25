@@ -176,7 +176,7 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (labN : Lis
 noncomputable def checkBGo (a₂ a₄ : Int) (labN : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
-    (fun b _ ih pt ↦ pt.rec (motive := fun _ ↦ Bool) true
+    (fun b _ ih pt ↦ pt.rec true
       (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
         (ih ps))) pt
 
