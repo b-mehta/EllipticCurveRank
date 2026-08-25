@@ -39,20 +39,15 @@ variable {x y : ℚ} {w : ℕ}
 
 theorem trep_map_zero :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
-  simp only [Function.comp_apply, trep, Matrix.cons_val_zero, eq_intCast]
-  push_cast
-  grind
+  simp [trep]
 
 theorem trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 = (y.num : ZMod p) := by
-  simp only [Function.comp_apply, trep, Matrix.cons_val_one, Matrix.cons_val_zero, eq_intCast]
+  simp [trep]
 
 theorem trep_map_two :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = (w : ZMod p) ^ 3 := by
-  simp only [Function.comp_apply, trep, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons,
-    eq_intCast]
-  push_cast
-  grind
+  simp [trep]
 
 theorem trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2
@@ -93,13 +88,12 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     have hYne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 ≠ 0 := by
       rw [trep_map_one, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
       intro hpy
-      have hp : p.Prime := Fact.out
       have hpw : p ∣ w := (ZMod.natCast_eq_zero_iff w p).mp hwz
       have hpw3 : (p : ℤ) ∣ (w : ℤ) ^ 3 :=
         (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
       have hunit : IsUnit (p : ℤ) :=
         y.isCoprime_num_den.isUnit_of_dvd' hpy (by rwa [hden', Nat.cast_pow])
-      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
+      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast (Fact.out : p.Prime).two_le
       grind [Int.isUnit_iff]
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
