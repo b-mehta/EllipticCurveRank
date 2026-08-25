@@ -102,8 +102,7 @@ public theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ 
     have hval : (curve a₂ a₄ a₆).Δ
         = ((16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
             + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
-      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+      simp only [curve, Δ, b₂, b₄, b₆, b₈]
       grind [pow_two]
     rw [hval, Rat.num_intCast]
   intro hfd
