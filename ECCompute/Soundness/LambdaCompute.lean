@@ -206,19 +206,16 @@ and `x` has numerator `xp - xm` and denominator `xden`. -/
 public theorem lambdaComputeBoolNatMask_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) {tval xp xm xden : ℕ}
-    (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
-    (if lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden then (1 : ZMod 2) else 0)
+    (htval : (tval : ZMod p) = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
+    (if lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
       = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have : Fact p.Prime := ⟨hyp.prime⟩
   have hp : 0 < p := hyp.prime.pos
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   have halpha := alphaResNat_eq_val hp htval hxnum hxden
-  have hfdv := fderivResNat_eq_val hp a₂ a₄ θ tval htval
-  have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
-    rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
+  have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
+    rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
   rw [lambdaComputeBoolNatMask, lambda]
-  simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfdv, hden, ZMod.val_eq_zero]
-  grind [mask_eq_psi]
+  grind [mask_eq_psi, ZMod.val_eq_zero, fderivResNat_eq_val, alphaResNat_eq_val, fderiv_ne_zero]
 
 end ECCompute
