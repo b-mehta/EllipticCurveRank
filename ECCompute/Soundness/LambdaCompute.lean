@@ -43,7 +43,7 @@ square mod `p`.
 -/
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `Nat.testBit m a`. -/
-theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
+theorem shiftRight_land_one_eq_one_iff {m a : ℕ} :
     (m.shiftRight a).land 1 = 1 ↔ m.testBit a := by
   grind [Nat.shiftRight_eq', Nat.shiftRight_eq_div_pow, Nat.land_eq]
 
@@ -52,7 +52,7 @@ theorem shiftRight_land_one_eq_one_iff (m a : ℕ) :
     qrMaskGo p (k + 1) = (qrMaskGo p k).lor (Nat.shiftLeft 1 ((k.succ.mul k.succ).mod p)) := rfl
 
 /-- Bit `a` of the fold is set iff some `1 ≤ j ≤ fuel` has `j² % p = a`. -/
-theorem testBit_qrMaskGo (p a f : ℕ) :
+theorem testBit_qrMaskGo {p a f : ℕ} :
     Nat.testBit (qrMaskGo p f) a ↔ ∃ j, 1 ≤ j ∧ j ≤ f ∧ j * j % p = a := by
   induction f with
   | zero =>
@@ -155,7 +155,7 @@ public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p)
   if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
 
 /-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
-public theorem lambdaCompute_eq_bool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) :
+public theorem lambdaCompute_eq_bool {a₂ a₄ : ℤ} {p : ℕ} {θ : ZMod p} {x : ℚ} :
     lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
   rw [lambdaCompute]
 
@@ -194,7 +194,7 @@ quadratic-residue mask `qmask` of `p`. It agrees with `lambdaComputeBool` throug
 represent the inputs). -/
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
-private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) (tval xp xm xden : ℕ) :
+private theorem alphaResNat_cast {p : ℕ} (hp : 0 < p) {tval xp xm xden : ℕ} :
     (alphaResNat p tval xp xm xden : ZMod p)
       = (xp : ZMod p) - ((xm : ZMod p) + (tval : ZMod p) * (xden : ZMod p)) := by
   have hle : (xm + tval * xden) % p ≤ p := (Nat.mod_lt _ hp).le

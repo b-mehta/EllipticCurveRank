@@ -41,7 +41,7 @@ variable {R : Type*} [CommRing R] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R)
 theorem cubic_sub_lineSq_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) (x : R) :
+    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) {x : R} :
     x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2
       = (x - x₁) * (x - x₂) * (x - x₃) := by
   grind

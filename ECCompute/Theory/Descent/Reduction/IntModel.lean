@@ -49,7 +49,7 @@ public theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom
 
 /-- The reduction of the integral model modulo `p`: mapping the coefficients through the ring
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
-public theorem map_curveℤ_zmod (p : ℕ) :
+public theorem map_curveℤ_zmod {p : ℕ} :
     (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p)) =
       { a₁ := 0, a₂ := (a₂ : ZMod p), a₃ := 0, a₄ := (a₄ : ZMod p), a₆ := (a₆ : ZMod p) } := by
   ext <;> simp [curveℤ]
