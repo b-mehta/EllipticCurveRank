@@ -3,8 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Soundness.F2Invert
-import ECCompute.Soundness.LambdaCompute
+module
+
+public import ECCompute.Soundness.F2Invert
+public import ECCompute.Soundness.LambdaCompute
+
+import Mathlib.Data.Nat.Bitwise
+import ECCompute.ForLean
 
 /-!
 # Soundness of the descent-matrix check
@@ -62,7 +67,7 @@ theorem checkMaskList_true (h : checkMaskList labN) {j : ℕ} (hj : j < labN.len
   grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the computed descent character. -/
-theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
+public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
     (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : lab.length = ρ)
     (hqlen : q.length = ρ)
     (hpr : ∀ j : Fin ρ, (lab[j].1).Prime)
