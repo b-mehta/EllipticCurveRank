@@ -50,16 +50,14 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     intro h0; apply hd'; rw [hxden]; grind
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; grind
-  simp only [lambda]
+  simp only [lambda, if_pos hd]
   grind [psi_mul_sq]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : ¬ Rat.IsPIntegral p x) :
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
-  have hd0 : (x.den : ZMod p) = 0 := by
-    by_contra hh; exact hd (Rat.mem_padicInteger_iff.mpr hh)
-  simp only [lambda, if_pos hd0]
+  simp only [lambda, if_neg hd]
 
 end ECCompute
 
@@ -93,10 +91,9 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
     · grind [lambda_some_of_den_zero, redP_of_den_zero]
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
-theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+theorem lambda_map_add [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
-  have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
       rw [← map_curveℤ_ℚ, map_Δ, eq_intCast]
@@ -107,9 +104,10 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 @[simps]
 noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
-    (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
-  toFun := lambda a₂ a₄ a₆ p θ
-  map_zero' := lambda_zero
-  map_add' := lambda_map_add a₂ a₄ a₆ p h
+    (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
+  haveI : Fact p.Prime := ⟨h.prime⟩
+  { toFun := lambda a₂ a₄ a₆ p θ
+    map_zero' := lambda_zero
+    map_add' := lambda_map_add a₂ a₄ a₆ p h }
 
 end ECCompute

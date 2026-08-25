@@ -77,18 +77,19 @@ theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation
 @[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
   3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
+open Classical in
 /-- The descent character as a raw function. -/
-@[expose] noncomputable def lambda (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
+@[expose] noncomputable def lambda (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] (θ : ZMod p) :
     (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
-    if (x.den : ZMod p) = 0 then 0
-    else
+    if Rat.IsPIntegral p x then
       let α : ZMod p := x.num - θ * x.den
       if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
+    else 0
 
 @[simp, grind =]
-theorem lambda_zero {θ : ZMod p} : lambda a₂ a₄ a₆ p θ 0 = 0 := rfl
+theorem lambda_zero [Fact p.Prime] {θ : ZMod p} : lambda a₂ a₄ a₆ p θ 0 = 0 := rfl
 
 /-! ### The hypotheses of the descent lemma
 

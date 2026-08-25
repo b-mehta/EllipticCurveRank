@@ -77,6 +77,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
   have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
     ext i j
+    haveI : Fact ((lab j).1).Prime := ⟨(hyp j).prime⟩
     rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg, ← lambdaCompute_eq (hyp j) (hns i)]
     simp [hB]
   rw [hrow]

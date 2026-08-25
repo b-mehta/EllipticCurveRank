@@ -174,15 +174,14 @@ private theorem mask_eq_psi (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p
 
 /-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
 an affine point. -/
-public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime] {θ : ZMod p}
     (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
-  have : Fact p.Prime := ⟨hyp.prime⟩
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   rw [lambdaCompute, lambdaComputeBool, lambda]
-  grind [mask_eq_psi]
+  grind [mask_eq_psi, Rat.mem_padicInteger_iff]
 
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
