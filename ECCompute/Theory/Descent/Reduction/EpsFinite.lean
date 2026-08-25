@@ -49,7 +49,7 @@ theorem εpFinite_zero (θ : ZMod p) :
       (0 : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) = 0 :=
   rfl
 
-theorem εpFinite_some (θ : ZMod p) {X Y : ZMod p}
+theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
     (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
