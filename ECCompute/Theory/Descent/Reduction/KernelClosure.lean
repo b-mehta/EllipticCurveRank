@@ -30,7 +30,7 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
 private theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
     (q.num : ℚ) = q * (w : ℚ) ^ k := by
-  rw [(div_eq_iff (by exact_mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
+  rw [(div_eq_iff (mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
 /-- The numerator of a rational with square denominator `w²` is coprime to any `p ∣ w`. -/
 private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
@@ -52,7 +52,7 @@ private theorem kernel_point_data {x y : ℚ}
   have hp : p.Prime := Fact.out
   obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
   have hpw : (p : ℤ) ∣ (w : ℤ) := by
-    exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
+    exact mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
   have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
     not_dvd_num p (by grind) hpw, hwne⟩
@@ -66,7 +66,7 @@ private theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
   have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
       + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
     grind
-  exact_mod_cast hq
+  exact mod_cast hq
 
 /-! ### The certificate scalars -/
 
@@ -134,9 +134,9 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
   · rw [h0, sub_zero]; exact ⟨hqv, pow_ne_zero 2 hN0⟩
   · have hsplit : ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ)
         = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by grind
-    have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast pow_ne_zero 2 hN0
+    have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := mod_cast pow_ne_zero 2 hN0
     have hr0 : (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
-      have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := by exact_mod_cast h0
+      have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := mod_cast h0
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
@@ -152,7 +152,7 @@ private theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < pa
     intro he
     apply hqrne
     rw [← hsplit]
-    exact_mod_cast he
+    exact mod_cast he
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
@@ -169,11 +169,11 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
       pow_two, padicValInt.mul hK0 hK0]
     grind
   have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
-    exact_mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
+    exact mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
     rw [eq_div_iff hDen3Q]; exact hMain
   have hx3neg : padicValRat p x₃ < 0 := by
-    rw [hx3div, padicValRat.div (by exact_mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
+    rw [hx3div, padicValRat.div (mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
       hDenval]
     grind
   have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
@@ -244,7 +244,7 @@ theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     rw [hKdef, hNdef]; exact addX_single_fraction a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
   -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
   obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations a₂ a₄ a₆ p hpZ hne hA hC
-    (by exact_mod_cast hEne) (by exact_mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
+    (mod_cast hEne) (mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
   exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC hcrux
     (fun h ↦ hpA (h ▸ dvd_zero _)) (fun h ↦ hpC (h ▸ dvd_zero _)) hK0 hN0
 

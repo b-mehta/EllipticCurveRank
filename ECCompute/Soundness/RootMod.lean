@@ -34,7 +34,7 @@ variable {cs : List ℤ} {ℓ r : ℕ}
 /-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
 public theorem intResNat_cast {p : ℕ} (hp : p ≠ 0) (z : ℤ) :
     ((z % (p : ℤ)).toNat : ZMod p) = (z : ZMod p) := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (by exact mod_cast hp)
+  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (mod_cast hp)
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 
@@ -83,7 +83,7 @@ public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     grind
   intro hu
-  have hℓ0 : (0 : ℤ) < ℓ := by exact mod_cast (by lia : 0 < ℓ)
+  have hℓ0 : (0 : ℤ) < ℓ := mod_cast (by lia : 0 < ℓ)
   set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
