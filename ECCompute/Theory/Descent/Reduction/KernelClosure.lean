@@ -64,11 +64,10 @@ private theorem kernel_point_data {x y : ℚ}
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
   have hp : p.Prime := Fact.out
   obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
-  have hpw : (p : ℤ) ∣ (w : ℤ) := by
-    exact_mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
-  have hwne : (w : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (Rat.ne_zero_of_den_eq_pow two_ne_zero hxd)
-  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw,
-    not_dvd_num p (by grind) hpw, hwne⟩
+  have hpw : (p : ℤ) ∣ (w : ℤ) :=
+    mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
+  have hwne : w ≠ 0 := by grind [Rat.den_ne_zero]
+  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num p (by grind) hpw, by positivity⟩
 
 /-- For a point `(A/E², B/E³)` on `y² = x³ + a₂x² + a₄x + a₆`, the integer relation
 `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
