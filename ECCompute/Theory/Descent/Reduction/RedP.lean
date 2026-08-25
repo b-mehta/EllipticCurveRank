@@ -38,25 +38,25 @@ variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 variable {x y : ℚ} {w : ℕ}
 
 theorem trep_map_zero :
-    ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
   simp
 
 theorem trep_map_one :
-    ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 = (y.num : ZMod p) := by
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 1 = (y.num : ZMod p) := by
   simp
 
 theorem trep_map_two :
-    ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = (w : ZMod p) ^ 3 := by
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = (w : ZMod p) ^ 3 := by
   simp
 
 theorem trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
-    ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 0 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2
       = (x : ZMod p) := by
   rw [trep_map_zero, trep_map_two, Rat.cast_def, hden]
   grind
 
 theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
-    ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 / ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 1 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2
       = (y : ZMod p) := by
   rw [trep_map_one, trep_map_two, Rat.cast_def, hden']
   push_cast
@@ -74,18 +74,18 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Nonsingular
-      ((Int.castRingHom (ZMod p)) ∘ trep x y w) := by
+      (Int.castRingHom (ZMod p) ∘ trep x y w) := by
   have hEq : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Equation
-      ((Int.castRingHom (ZMod p)) ∘ trep x y w) :=
+      (Int.castRingHom (ZMod p) ∘ trep x y w) :=
     (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
-    have hz0 : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
+    have hz0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
     rw [nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
-    have hX0 : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 = 0 :=
+    have hX0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 0 = 0 :=
       X_eq_zero_of_Z_eq_zero hEq hz0
-    have hYne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 ≠ 0 := by
+    have hYne : (Int.castRingHom (ZMod p) ∘ trep x y w) 1 ≠ 0 := by
       rw [trep_map_one, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
       intro hpy
       have hpw : p ∣ w := (ZMod.natCast_eq_zero_iff w p).mp hwz
@@ -98,7 +98,7 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
-    have hzne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 ≠ 0 := by
+    have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
       rw [trep_map_two]; exact pow_ne_zero 3 hwz
     rw [nonsingular_of_Z_ne_zero hzne]
     exact (Affine.equation_iff_nonsingular_of_Δ_ne_zero
@@ -133,7 +133,7 @@ public theorem redP_of_den_zero (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
   set w := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hwz : (w : ZMod p) = 0 := (Rat.den_cast_eq_zero_iff two_ne_zero hden).mp hd
-  have hz0 : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
+  have hz0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = 0 := by grind [trep_map_two]
   simp only [redP]
   exact Point.toAffineLift_of_Z_eq_zero _ hz0
 
@@ -144,7 +144,7 @@ public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMo
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular
       (x : ZMod p) (y : ZMod p) := by
   have hns := red_nonsingular a₂ a₄ a₆ p hΔ h hden hden'
-  have hzne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 ≠ 0 := by
+  have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
     rw [trep_map_two]; exact pow_ne_zero 3 hwne
   rw [nonsingular_of_Z_ne_zero hzne] at hns
   rwa [trep_coord_zero p hden hwne, trep_coord_one p hden' hwne] at hns
@@ -164,7 +164,7 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
   have hden : x.den = w ^ 2 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1
   have hden' : y.den = w ^ 3 := (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.2
   have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
-  have hzne : ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 ≠ 0 := by
+  have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
     rw [trep_map_two]; exact pow_ne_zero 3 hwne
   simp only [redP]
   rw [Point.toAffineLift_of_Z_ne_zero hzne]
