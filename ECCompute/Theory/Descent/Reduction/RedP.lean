@@ -39,15 +39,15 @@ variable {x y : ℚ} {w : ℕ}
 
 theorem trep_map_zero :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 = (x.num : ZMod p) * (w : ZMod p) := by
-  simp [trep]
+  simp
 
 theorem trep_map_one :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 1 = (y.num : ZMod p) := by
-  simp [trep]
+  simp
 
 theorem trep_map_two :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2 = (w : ZMod p) ^ 3 := by
-  simp [trep]
+  simp
 
 theorem trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     ((Int.castRingHom (ZMod p)) ∘ trep x y w) 0 / ((Int.castRingHom (ZMod p)) ∘ trep x y w) 2
@@ -109,7 +109,7 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
 open Classical in
 /-- The reduction map on affine points: `P ↦` the affine point underlying `ℤ → ZMod p` applied
 to the integer representative `trep` of `P`. Requires good reduction (`hΔ`). -/
-@[expose] public noncomputable def redP (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
+public noncomputable def redP (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →
       ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point
   | .zero => 0
