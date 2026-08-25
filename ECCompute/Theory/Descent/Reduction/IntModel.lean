@@ -41,11 +41,11 @@ public def curveℤ : WeierstrassCurve ℤ where
 
 /-- The base change of the integral model to `ℚ` is the original rational curve. -/
 theorem baseChange_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).baseChange ℚ = curve a₂ a₄ a₆ := by
-  ext <;> simp [WeierstrassCurve.baseChange, curveℤ, curve]
+  ext <;> simp [baseChange, curveℤ, curve]
 
 /-- The integral model maps to the rational curve under `ℤ → ℚ`. -/
 public theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
-  rw [← baseChange_curveℤ_ℚ, WeierstrassCurve.baseChange, algebraMap_int_eq]
+  rw [← baseChange_curveℤ_ℚ, baseChange, algebraMap_int_eq]
 
 /-- The reduction of the integral model modulo `p`: mapping the coefficients through the ring
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
@@ -58,7 +58,7 @@ public theorem map_curveℤ_zmod (p : ℕ) :
 @[grind =]
 public theorem reduced_negY (p : ℕ) (x y : ZMod p) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y = -y :=
-  WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod])
+  Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod])
     (by simp [map_curveℤ_zmod]) x y
 
 end ECCompute
