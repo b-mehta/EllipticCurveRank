@@ -64,15 +64,14 @@ include s
 /-- The defining equation transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem equation_scale (x y : ℚ) :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
-  rw [WeierstrassCurve.Affine.equation_iff, WeierstrassCurve.Affine.equation_iff,
-    s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
+  rw [Affine.equation_iff, Affine.equation_iff, s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
   exact ⟨fun h ↦ by grind,
     fun h ↦ mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
 
 /-- Nonsingularity transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem nonsingular_scale (x y : ℚ) :
     W.toAffine.Nonsingular x y ↔ W'.toAffine.Nonsingular (v ^ 2 * x) (v ^ 3 * y) := by
-  rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff']
+  rw [nonsingular_iff', nonsingular_iff']
   refine and_congr (equation_scale s x y) ?_
   have eX : W'.a₁ * (v ^ 3 * y) - (3 * (v ^ 2 * x) ^ 2 + 2 * W'.a₂ * (v ^ 2 * x) + W'.a₄)
       = v ^ 4 * (W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄)) := by
@@ -90,24 +89,24 @@ theorem nonsingular_scale' (X Y : ℚ) :
 /-- The `Y`-negation scales by `v³`. -/
 theorem negY_scale {x y : ℚ} :
     W'.toAffine.negY (v ^ 2 * x) (v ^ 3 * y) = v ^ 3 * W.toAffine.negY x y := by
-  grind [WeierstrassCurve.Affine.negY, IsScaling.a₁, IsScaling.a₃]
+  grind [negY, IsScaling.a₁, IsScaling.a₃]
 
 /-- The `X`-coordinate of the sum scales by `v²` (the slope scales by `v`). -/
 theorem addX_scale {x₁ x₂ ℓ : ℚ} :
     W'.toAffine.addX (v ^ 2 * x₁) (v ^ 2 * x₂) (v * ℓ) = v ^ 2 * W.toAffine.addX x₁ x₂ ℓ := by
-  grind [WeierstrassCurve.Affine.addX, IsScaling.a₁, IsScaling.a₂]
+  grind [addX, IsScaling.a₁, IsScaling.a₂]
 
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
 theorem negAddY_scale {x₁ x₂ y₁ ℓ : ℚ} :
     W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by
-  grind [WeierstrassCurve.Affine.negAddY, addX_scale]
+  grind [negAddY, addX_scale]
 
 /-- The `Y`-coordinate of the sum scales by `v³`. -/
 theorem addY_scale {x₁ x₂ y₁ ℓ : ℚ} :
     W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by
-  grind [WeierstrassCurve.Affine.addY, addX_scale, negAddY_scale, negY_scale]
+  grind [addY, addX_scale, negAddY_scale, negY_scale]
 
 /-- The slope scales by `v`. -/
 theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :

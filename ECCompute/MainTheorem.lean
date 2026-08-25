@@ -39,7 +39,7 @@ open WeierstrassCurve Module CompleteSquare IntegralScaling
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
 def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
-  ∃ H : Submodule ℤ W.toAffine.Point, Module.Finite ℤ H ∧ n ≤ Module.finrank ℤ H
+  ∃ H : Submodule ℤ W.toAffine.Point, Module.Finite ℤ H ∧ n ≤ finrank ℤ H
 
 /-- If the Mordell-Weil groups of `W₁` and `W₂` are isomorphic as additive groups, then any
 certified rank lower bound for `W₂` is also one for `W₁`. -/
@@ -120,7 +120,7 @@ theorem rank_ge_of_certificate (c : Certificate)
   obtain ⟨j₀⟩ : Nonempty (Fin c.rho) := ⟨⟨0, hrhopos⟩⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
   have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
-    (WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
+    (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   let (eq := hg) g (i : Fin c.rho) : E := .some (pt i).1 (pt i).2 (hns i)
   -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
   have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) :=
@@ -129,7 +129,7 @@ theorem rank_ge_of_certificate (c : Certificate)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
     (card_torsionBy_le c.a₂ c.a₄ c.a₆ H).trans htors
-  have hbound : c.rho ≤ Module.finrank ℤ H + c.t := RankDeduction.rank_ge_le
+  have hbound : c.rho ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
     (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
     (φ.comp H.subtype.toAddMonoidHom) hindep htorH
   exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
