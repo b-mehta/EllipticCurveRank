@@ -95,7 +95,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       have hpw3 : (p : ℤ) ∣ (w : ℤ) ^ 3 :=
         (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
       have hunit : IsUnit (p : ℤ) := (trep_primitive hden').isUnit_of_dvd' hpy hpw3
-      have h2 : (2 : ℤ) ≤ (p : ℤ) := by exact_mod_cast hp.two_le
+      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
       grind [Int.isUnit_iff]
     rw [hX0]
     simpa using pow_ne_zero 2 hYne

@@ -115,9 +115,9 @@ private theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   funext i
   fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
   · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by grind
-    exact_mod_cast this
+    exact mod_cast this
   · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by grind
-    exact_mod_cast this
+    exact mod_cast this
   · exact mul_comm _ _
 
 /-- Reduction is well-defined on classes: any integer projective representative `T` whose
