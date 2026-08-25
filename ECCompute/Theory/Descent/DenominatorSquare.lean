@@ -46,7 +46,7 @@ natural number `w` with `x.den = w²` and `y.den = w³`. -/
 public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
   have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
-    have := (WeierstrassCurve.Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
+    have := (Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
     simpa [curve] using this
   have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
     (div_eq_iff (mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
