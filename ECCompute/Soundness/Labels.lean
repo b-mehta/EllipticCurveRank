@@ -91,7 +91,7 @@ public theorem descentHyp_of_checkLabel (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : �
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
     rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
-    simpa [Nat.beq_eq', beq_eq_false_iff_ne] using h6
+    simpa [Nat.beq_eq_beq, beq_eq_false_iff_ne] using h6
   · -- `p ∤ Δ`
     rw [curve_Δ_num, Ne, ← discrInt_emod p, ← discrIntK_eq,
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]

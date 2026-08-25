@@ -72,7 +72,7 @@ lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
-  simp only [popParityK, Nat.land_eq, Nat.beq_eq', Nat.xor_eq, Nat.shiftRight_eq',
+  simp only [popParityK, Nat.land_eq, Nat.beq_eq_beq, Nat.xor_eq, Nat.shiftRight_eq',
     land_one_beq_one, Nat.testBit_xor, Nat.testBit_shiftRight, Nat.reduceAdd, xorBits, List.range,
     List.range.loop, List.foldr_cons, List.foldr_nil, Bool.xor_false, bId_xor]
   grind
