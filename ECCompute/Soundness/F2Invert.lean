@@ -72,7 +72,7 @@ lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
   rw [popParity_eq_xorBits]
   apply bId_inj
-  simp only [popParityK, Nat.land_eq, Nat.beq_eq', Nat.xor_eq, Nat.shiftRight_eq',
+  simp only [popParityK, Nat.land_eq, Nat.beq_eq_beq, Nat.xor_eq, Nat.shiftRight_eq',
     land_one_beq_one, Nat.testBit_xor, Nat.testBit_shiftRight, Nat.reduceAdd, xorBits, List.range,
     List.range.loop, List.foldr_cons, List.foldr_nil, Bool.xor_false, bId_xor]
   grind
@@ -134,7 +134,7 @@ theorem checkInvRow_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) (hc : che
     cases k' with
     | zero =>
       have hbnd : b &&& m < 2 ^ n := Nat.and_lt_two_pow b (hM m (by simp))
-      grind [popParityK_eq, Bool.rec_eq]
+      grind [popParityK_eq]
     | succ k'' =>
       grind
 

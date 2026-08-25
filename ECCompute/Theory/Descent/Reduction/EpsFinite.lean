@@ -44,12 +44,12 @@ noncomputable def εpFinite (θ : ZMod p) :
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
-theorem εpFinite_zero (θ : ZMod p) :
+theorem εpFinite_zero {θ : ZMod p} :
     εpFinite a₂ a₄ a₆ p θ
       (0 : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) = 0 :=
   rfl
 
-theorem εpFinite_some (θ : ZMod p) {X Y : ZMod p}
+theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
     (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
@@ -62,14 +62,14 @@ variable {θ : ZMod p}
 private theorem reduced_equation {X Y : ZMod p}
     (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
-  have := (WeierstrassCurve.Affine.equation_iff
+  have := (Affine.equation_iff
     (W := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine) X Y).mp h.1
   simpa [map_curveℤ_zmod] using this
 
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 private theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
-  fun hp => h.ne_six (hp ▸ ⟨3, rfl⟩)
+  fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
 private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
@@ -97,25 +97,25 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
         + (if x₂ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₂ - θ)) := by
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc =>
+  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ
       hσ₁ hσ₂ hσ₃ hθroot hc
-  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc =>
+  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
       (by grind) (by grind) (by grind)
       hθroot hc
-  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc =>
+  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
       (by grind) (by grind) (by grind)
       hθroot hc
   obtain rfl | c1 := eq_or_ne x₁ θ
-  · have hX2ne : x₂ ≠ x₁ := fun hc => hne hc.symm
-    have hX3ne : X₃ ≠ x₁ := fun hc => hfd_ne (by grind)
+  · have hX2ne : x₂ ≠ x₁ := fun hc ↦ hne hc.symm
+    have hX3ne : X₃ ≠ x₁ := fun hc ↦ hfd_ne (by grind)
     rw [if_neg hX3ne, if_pos rfl, if_neg hX2ne, hfd1 rfl,
       psi_mul h.prime (sub_ne_zero.mpr hX2ne) (sub_ne_zero.mpr hX3ne)]
     grind
   obtain rfl | c2 := eq_or_ne x₂ θ
-  · have hX3ne : X₃ ≠ x₂ := fun hc => hfd_ne (by grind)
+  · have hX3ne : X₃ ≠ x₂ := fun hc ↦ hfd_ne (by grind)
     rw [if_neg hX3ne, if_neg c1, if_pos rfl, hfd2 rfl,
       psi_mul h.prime (sub_ne_zero.mpr c1) (sub_ne_zero.mpr hX3ne)]
     grind
@@ -135,13 +135,13 @@ theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
-  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hne]
+  rw [Affine.Point.add_of_X_ne hne]
   simp only [εpFinite_some]
   set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x₁ x₂ ℓ with hX3def
   have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
+    rw [hℓdef, Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
@@ -152,7 +152,7 @@ theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
       = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
     rw [hm2]; exact reduced_equation h₂
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
-    rw [hX3def]; simp [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]
+    rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
@@ -200,13 +200,13 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
     reduced_equation hP
   have hθroot := h.root'
   have hXθ : x ≠ θ := by grind
-  rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne]
+  rw [Affine.Point.add_self_of_Y_ne hyne]
   simp only [εpFinite_some]
   set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x x y y with hℓdef
   set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
     have hsub : y - -y = 2 * y := by grind
-    rw [hℓdef, WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
+    rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp [map_curveℤ_zmod]
     grind
   set m : ZMod p := y - ℓ * x with hmb
@@ -217,7 +217,7 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
     grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
-    rw [hX3def]; simp [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; ring
+    rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
     ℓ m x X₃ hpt htan hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
@@ -235,7 +235,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
   by_cases hxy : x₁ = x₂ ∧
       y₁ = ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
-    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
+    rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
@@ -258,7 +258,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
-  map_zero' := εpFinite_zero a₂ a₄ a₆ p θ
+  map_zero' := εpFinite_zero a₂ a₄ a₆ p
   map_add' := εpFinite_map_add h
 
 end ECCompute

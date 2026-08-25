@@ -142,7 +142,7 @@ theorem slope_den_of_addX_den
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]; exact den_add_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2
   rw [Rat.den_pow, Nat.cast_pow] at hℓ2
-  exact fun h => hℓ2 (by grind)
+  exact fun h ↦ hℓ2 (by grind)
 
 /-- The doubled `x`-coordinate `addX x₁ x₂ ℓ` survives reduction when the slope, `x₁` and `x₂`
 all do: `addX = ℓ² - a₂ - x₁ - x₂` has nonzero denominator mod `p`. -/
@@ -170,13 +170,13 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
-theorem reduced_addX_eq (X L : ZMod p) :
+theorem reduced_addX_eq {X L : ZMod p} :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L
       = L ^ 2 - (a₂ : ZMod p) - X - X := by
   simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
-theorem reduced_addY_eq (X Y L : ZMod p) :
+theorem reduced_addY_eq {X Y L : ZMod p} :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addY X X Y L
       = -(L * (((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX X X L - X)
         + Y) := by

@@ -50,7 +50,7 @@ public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
 public theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
   have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ => ⟨s / w, by grind⟩, fun ⟨r, hr⟩ => ⟨w * r, by rw [hr]; ring⟩⟩
+    ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
   unfold psi
   rw [hiff]
 
@@ -102,8 +102,7 @@ public theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ 
     have hval : (curve a₂ a₄ a₆).Δ
         = ((16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
             + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
-      simp only [curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+      simp only [curve, Δ, b₂, b₄, b₆, b₈]
       grind [pow_two]
     rw [hval, Rat.num_intCast]
   intro hfd
