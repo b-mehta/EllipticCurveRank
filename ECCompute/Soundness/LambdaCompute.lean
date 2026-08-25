@@ -23,12 +23,9 @@ the bit test `((Q >>> a) &&& 1).beq 1`. The kernel `Bool`/`Nat` builders (`qrMas
 
 ## Main declarations
 
-* `ECCompute.lambdaCompute`: the `ZMod 2`-valued evaluation of `λ` on an affine point.
-* `ECCompute.lambdaCompute_eq`: it agrees with the abstract `lambda`.
-* `ECCompute.lambdaComputeBool`: the `Bool` mirror used by the certificate matrix checks.
-* `ECCompute.lambdaCompute_eq_bool`: reads the `Bool` mirror back into `ZMod 2`.
-* `ECCompute.lambdaComputeBoolNatMask_eq`: the fully-`Nat` kernel mirror agrees with
-  `lambdaComputeBool`.
+* `ECCompute.qrLookupBool_spec`: the mask bit test decides whether `a` is a nonzero square mod `p`.
+* `ECCompute.lambdaComputeBoolNatMask_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,
+  agrees with the abstract character `lambda`.
 -/
 
 namespace ECCompute
@@ -138,26 +135,7 @@ theorem qrLookupBool_spec {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) {a : ℕ} (ha
   have hmask := qrMask_testBit hp2 ha
   grind [qrLookupBool]
 
-/-! ### `Bool` character and its `ZMod 2` lift -/
-
-/-- `Bool`-valued evaluation of the descent character `λ_{p,θ}` on an affine point with
-`x`-coordinate `x`, read from the quadratic-residue mask of `p`: `true` where `λ` is `1`, `false`
-where it is `0`. -/
-public noncomputable def lambdaComputeBool (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : Bool :=
-  if (x.den : ZMod p) = 0 then false
-  else if (x.num : ZMod p) - θ * (x.den : ZMod p) = 0 then
-    !(qrLookupBool (qrMask p) (fderiv a₂ a₄ p θ).val)
-  else !(qrLookupBool (qrMask p) ((x.num : ZMod p) - θ * (x.den : ZMod p)).val)
-
-/-- The `ZMod 2`-valued evaluation of `λ_{p,θ}`: the `Bool` value `lambdaComputeBool` read into
-`ZMod 2` (`true ↦ 1`, `false ↦ 0`). -/
-public noncomputable def lambdaCompute (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) (x : ℚ) : ZMod 2 :=
-  if lambdaComputeBool a₂ a₄ p θ x then 1 else 0
-
-/-- `lambdaCompute` is `lambdaComputeBool` read into `ZMod 2`. -/
-public theorem lambdaCompute_eq_bool {a₂ a₄ : ℤ} {p : ℕ} {θ : ZMod p} {x : ℚ} :
-    lambdaCompute a₂ a₄ p θ x = if lambdaComputeBool a₂ a₄ p θ x then 1 else 0 := by
-  rw [lambdaCompute]
+/-! ### The residue mask as the Legendre character -/
 
 /-- For `p` an odd prime and `a ≠ 0`, reading the residue mask of `p` into `ZMod 2` gives the
 abstract Legendre character `psi`. -/
@@ -172,25 +150,13 @@ private theorem mask_eq_psi (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) {a : ZMod p
   simp only [ne_eq, ha0, not_false_eq_true, true_and, psi]
   by_cases hsq : IsSquare a <;> simp [hsq]
 
-/-- Under the descent hypotheses, `lambdaCompute` agrees with the abstract character `lambda` on
-an affine point. -/
-public theorem lambdaCompute_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
-    (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
-    lambdaCompute a₂ a₄ p θ x = lambda a₂ a₄ a₆ p θ (.some x y h) := by
-  have : Fact p.Prime := ⟨hyp.prime⟩
-  have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
-  rw [lambdaCompute, lambdaComputeBool, lambda]
-  grind [mask_eq_psi]
-
 /-! ### Fully `Nat` mirror: signed inputs as `mp - mn` pairs
 
-`lambdaComputeBool` casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`. `lambdaComputeBoolNatMask`
+`lambda` casts the signed `x.num`, `a₂`, `a₄` into `ZMod p`. `lambdaComputeBoolNatMask`
 does the same computation in `Nat`: each signed value arrives as a difference `mp - mn` of two `ℕ`,
 the modulus reduction is `(mp % p + (p - mn % p)) % p`, and the characters are bit tests against the
-quadratic-residue mask `qmask` of `p`. It agrees with `lambdaComputeBool` through
-`lambdaComputeBoolNatMask_eq` (given `qmask = qrMask p`, `p` an odd prime, and that the pairs
+quadratic-residue mask `qmask` of `p`. Read into `ZMod 2`, it agrees with `lambda` through
+`lambdaComputeBoolNatMask_eq` (given `qmask = qrMask p`, the descent hypotheses, and that the pairs
 represent the inputs). -/
 
 /-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
@@ -234,19 +200,25 @@ private theorem fderivResNat_eq_val {p : ℕ} (hp : 0 < p) (a₂ a₄ : ℤ) (θ
     simp only [fderivResNat]; exact polyModL_lt hp
   rw [← fderivResNat_cast hp htval, ZMod.val_cast_of_lt hlt]
 
-/-- `lambdaComputeBoolNatMask` with the mask `qrMask p` equals the abstract `lambdaComputeBool`,
-provided its `Nat` inputs encode the arguments: `θ = tval`, and `x` has numerator `xp - xm` and
-denominator `xden`. -/
-public theorem lambdaComputeBoolNatMask_eq {a₂ a₄ : ℤ} {p : ℕ} (hp : 0 < p) {θ : ZMod p} {x : ℚ}
-    {tval xp xm xden : ℕ} (htval : (tval : ZMod p) = θ)
-    (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
-    lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden
-      = lambdaComputeBool a₂ a₄ p θ x := by
+/-- `lambdaComputeBoolNatMask` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
+character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
+and `x` has numerator `xp - xm` and denominator `xden`. -/
+public theorem lambdaComputeBoolNatMask_eq {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+    (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) {tval xp xm xden : ℕ}
+    (htval : (tval : ZMod p) = θ) (hxnum : x.num = (xp : ℤ) - xm) (hxden : xden = x.den) :
+    (if lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden then (1 : ZMod 2) else 0)
+      = lambda a₂ a₄ a₆ p θ (.some x y h) := by
+  have : Fact p.Prime := ⟨hyp.prime⟩
+  have hp : 0 < p := hyp.prime.pos
+  have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
+  have hfd : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero hyp
   have halpha := alphaResNat_eq_val hp htval hxnum hxden
-  have hfd := fderivResNat_eq_val hp a₂ a₄ θ tval htval
+  have hfdv := fderivResNat_eq_val hp a₂ a₄ θ tval htval
   have hden : (xden.mod p = 0) = ((x.den : ZMod p) = 0) := by
     rw [hxden, Nat.mod_eq_mod, ← Nat.dvd_iff_mod_eq_zero, eq_iff_iff, ZMod.natCast_eq_zero_iff]
-  rw [lambdaComputeBool, lambdaComputeBoolNatMask]
-  simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfd, hden, ZMod.val_eq_zero]
+  rw [lambdaComputeBoolNatMask, lambda]
+  simp only [Bool.rec_eq, Nat.beq_eq, Bool.not'_eq_not, halpha, hfdv, hden, ZMod.val_eq_zero]
+  grind [mask_eq_psi]
 
 end ECCompute
