@@ -56,12 +56,6 @@ theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
   simp only [lambda, if_pos hd]
 
-end ECCompute
-
-namespace ECCompute
-
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
-
 /-! ### Additivity via the reduction factorization
 
 Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : E(ℚ) → E(𝔽ₚ)`
