@@ -65,7 +65,7 @@ theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).Δ ≠ 0 := by
-  rw [map_Δ]; simpa [eq_intCast] using hΔ
+  simpa [map_Δ, eq_intCast] using hΔ
 
 /-! ### Nonsingularity of the reduced representative -/
 
