@@ -69,18 +69,15 @@ inverse also has good denominator. -/
 public theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
     (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
     ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := fun h ↦ ha0 (by rw [h, Rat.cast_zero])
+  have ha' : a ≠ 0 := by grind [Rat.cast_zero]
   have hnum : (a.num : ZMod p) ≠ 0 := by
-    have hval : (a.num : ZMod p) = (a : ZMod p) * (a.den : ZMod p) := by
-      rw [Rat.cast_def, div_mul_cancel₀ _ ha]
-    rw [hval]; exact mul_ne_zero ha0 ha
+    have hval : (a.num : ZMod p) = a * a.den := by rw [Rat.cast_def, div_mul_cancel₀ _ ha]
+    grind
   have hinv : (a⁻¹.den : ZMod p) ≠ 0 := by
-    rw [Rat.den_inv_of_ne_zero ha']
-    exact fun h ↦ hnum <| by
-      rw [ZMod.intCast_zmod_eq_zero_iff_dvd, ← Int.dvd_natAbs, Int.natCast_dvd_natCast]
-      exact (ZMod.natCast_eq_zero_iff _ _).mp h
-  rw [div_eq_mul_inv, ← mem_padicInteger_iff]
-  exact mul_mem (mem_padicInteger_iff.mpr hb) (mem_padicInteger_iff.mpr hinv)
+    rwa [Rat.den_inv_of_ne_zero ha', ne_eq, ZMod.natCast_eq_zero_iff, ← Int.natCast_dvd_natCast,
+      Int.dvd_natAbs, ← ZMod.intCast_zmod_eq_zero_iff_dvd]
+  rw [div_eq_mul_inv]
+  apply den_mul_ne_zero hb hinv
 
 end Rat
 
