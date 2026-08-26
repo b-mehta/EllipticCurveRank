@@ -22,8 +22,8 @@ is closed under the field operations through that subring.
 
 ## Main results
 
-* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_div_ne_zero`:
-  closure of `(·.den : ZMod p) ≠ 0` under the field operations.
+* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
+  `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
 -/
 
 section
@@ -56,6 +56,12 @@ public theorem den_mul_ne_zero (hp : p.Prime) (hx : (x.den : ZMod p) ≠ 0)
     (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   have : Fact p.Prime := ⟨hp⟩
   mem_padicInteger_iff.mp (mul_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
+
+/-- `(·.den : ZMod p) ≠ 0` is closed under powers. -/
+public theorem den_pow_ne_zero (hp : p.Prime) (hx : (x.den : ZMod p) ≠ 0) (n : ℕ) :
+    ((x ^ n).den : ZMod p) ≠ 0 :=
+  have : Fact p.Prime := ⟨hp⟩
+  mem_padicInteger_iff.mp (pow_mem (mem_padicInteger_iff.mpr hx) n)
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under division by an element with `p`-unit numerator, since
 then the inverse also has good denominator. -/
