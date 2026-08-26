@@ -62,7 +62,7 @@ private theorem discr_ne_zero_of_descentHyp {p : ℕ} {θ : ZMod p}
     (h : DescentHyp a₂ a₄ a₆ p θ) : (curve a₂ a₄ a₆).Δ ≠ 0 :=
   fun hΔ ↦ h.discr (by simp [hΔ])
 
-variable (c : Certificate) {pt : Fin c.rho → ℚ × ℚ} {lab : Fin c.rho → ℕ × ℤ}
+variable {c : Certificate} {pt : Fin c.rho → ℚ × ℚ} {lab : Fin c.rho → ℕ × ℤ}
 
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
@@ -133,7 +133,7 @@ theorem rank_ge_of_certificate
   let (eq := hg) g (i : Fin c.rho) : E := .some (pt i).1 (pt i).2 (hns i)
   -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
   have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) :=
-    linearIndependent_descent c hyp hns hB hBlen hMlen hinv hφ hg
+    linearIndependent_descent hyp hns hB hBlen hMlen hinv hφ hg
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
@@ -158,7 +158,7 @@ theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certifica
   have hlabC' (j : Fin c.rho) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
     checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
-    rank_ge_of_certificate c (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
+    rank_ge_of_certificate (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
