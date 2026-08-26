@@ -27,12 +27,10 @@ open WeierstrassCurve
 variable {W : WeierstrassCurve ℚ}
 
 /-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ · q`. -/
-theorem j_eq_iff [W.IsElliptic] {q : ℚ} :
-    W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
+theorem j_eq_iff [W.IsElliptic] {q : ℚ} : W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
   rw [j, Units.inv_mul_eq_iff_eq_mul, coe_Δ']
 
 /-- Over `ℚ`, a nonzero discriminant makes a model an elliptic curve (so `j` is defined). -/
-theorem isElliptic_of_Δ_ne_zero (hΔ : W.Δ ≠ 0) : W.IsElliptic :=
-  ⟨isUnit_iff_ne_zero.mpr hΔ⟩
+theorem isElliptic_of_Δ_ne_zero (hΔ : W.Δ ≠ 0) : W.IsElliptic := ⟨isUnit_iff_ne_zero.mpr hΔ⟩
 
 end ECCompute
