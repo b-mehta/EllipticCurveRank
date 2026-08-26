@@ -180,7 +180,7 @@ def scaleEquiv : W.toAffine.Point ≃+ W'.toAffine.Point :=
           exact point_some_congr (mul_div_cancel_left₀ _ (pow_ne_zero 2 s.ne))
             (mul_div_cancel_left₀ _ (pow_ne_zero 3 s.ne)),
       fun P ↦ by
-        rcases P with _ | ⟨X, Y, h⟩
+        rcases P with _ | ⟨x, y, h⟩
         · rfl
         · rw [scaleBwd_some, scaleFwd_some]
           exact point_some_congr (mul_div_cancel₀ _ (pow_ne_zero 2 s.ne))
