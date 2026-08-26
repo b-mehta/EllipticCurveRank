@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 import ECCompute.Theory.CompleteSquare
 
@@ -98,14 +98,12 @@ theorem addX_scale {x₁ x₂ ℓ : ℚ} :
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
 theorem negAddY_scale {x₁ x₂ y₁ ℓ : ℚ} :
     W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
-      = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by
-  grind [negAddY, addX_scale]
+      = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by grind [negAddY, addX_scale]
 
 /-- The `Y`-coordinate of the sum scales by `v³`. -/
 theorem addY_scale {x₁ x₂ y₁ ℓ : ℚ} :
     W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
-      = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by
-  grind [addY, addX_scale, negAddY_scale, negY_scale]
+      = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by grind [addY, addX_scale, negAddY_scale, negY_scale]
 
 /-- The slope scales by `v`. -/
 theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :

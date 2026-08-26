@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Rat.Lemmas

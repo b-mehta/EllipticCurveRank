@@ -5,18 +5,18 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 import ECCompute.Theory.Descent.Collinearity
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
-# The Legendre character `ψ_p` and the simple-root fact (shared base)
+# The Legendre character `ψ_p` and the simple-root fact
 
-The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, shared between the two sides of
-the descent factorization `λ = εpFinite ∘ redP`: `ECCompute.Descent` (the rational character
-`λ`) and `ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εpFinite`).
+The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, used on both sides of the descent
+factorization `λ = εpFinite ∘ redP`: by `ECCompute.Descent` (the rational character `λ`) and by
+`ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εpFinite`).
 
 ## Main declarations
 
@@ -78,7 +78,7 @@ public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq_zmod a₂ a₄ a₆ p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
+  have hprod := prod_sub_theta_eq_lineSq_zmod p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
   have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
   have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
   have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃

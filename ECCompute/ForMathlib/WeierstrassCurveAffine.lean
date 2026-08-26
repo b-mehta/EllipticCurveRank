@@ -27,7 +27,6 @@ variable {R : Type*} [CommRing R]
 /-- On a Weierstrass curve with `a₁ = a₃ = 0`, negation is `negY x y = -y`. -/
 @[grind =]
 theorem negY_of_a₁_a₃_eq_zero (W : WeierstrassCurve R) (ha1 : W.a₁ = 0) (ha3 : W.a₃ = 0)
-    (x y : R) : W.toAffine.negY x y = -y := by
-  simp [negY, ha1, ha3]
+    (x y : R) : W.toAffine.negY x y = -y := by simp [negY, ha1, ha3]
 
 end WeierstrassCurve.Affine

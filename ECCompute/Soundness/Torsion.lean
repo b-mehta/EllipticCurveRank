@@ -7,7 +7,7 @@ module
 
 public import ECCompute.ForMathlib.TwoTorsion
 public import ECCompute.Soundness.RootMod
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 import Mathlib.RingTheory.Polynomial.RationalRoot
 
@@ -104,7 +104,7 @@ theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     _ = Sx.card + 1 := Finset.card_insertNone Sx
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
-instance : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
+public instance : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
   (card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).1.to_subtype
 
 /-! ## The universal bound `t = 2` -/

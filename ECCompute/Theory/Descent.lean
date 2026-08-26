@@ -5,8 +5,8 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Defs
-public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Theory.Descent.Character
+public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.Reduction.RedP
@@ -17,7 +17,7 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 # The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
+`ECCompute.Descent.Character`. Additivity is obtained by factoring `λ` through the reduction map
 `redP : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εpFinite`, both of which are
 additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 `ECCompute.Descent.Reduction.EpsFinite`).
@@ -62,16 +62,15 @@ Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : 
 
 /-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
 as an `AddMonoidHom E(ℚ) → ZMod 2`. See `lambda_map_add`. -/
-noncomputable def redCharHom (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ)
+noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
-  (εpHom h).comp (redHom a₂ a₄ a₆ p hΔ)
+  (εpHom h).comp (redHom hΔ)
 
 /-- On each point, `λ_{p,θ}` agrees with the reduction composition `εpFinite θ ∘ redP`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambda a₂ a₄ a₆ p θ P = redCharHom a₂ a₄ a₆ p h hΔ P := by
+    lambda a₂ a₄ a₆ p θ P = redCharHom h hΔ P := by
   cases P with
   | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
   | some x y hns =>
@@ -94,8 +93,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 @[expose, simps]
-public noncomputable def lambdaHom (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ) :
+public noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero
