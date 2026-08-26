@@ -96,6 +96,7 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
       grind [Point.toAffine_of_Z_ne_zero, Affine.Point.some_ne_zero]
     have hTz' : T 2 = 0 := by simpa [Function.comp_apply] using hTz
     have hfTz : (Int.castRingHom (ZMod p) ∘ T) 2 = 0 := by simp [Function.comp_apply, hTz']
+    rw [repr_zero]
     exact Setoid.symm (equiv_zero_of_Z_eq_zero hnsp hfTz)
   | some X Y hR =>
     obtain ⟨w₃, hd3, hd3'⟩ := den_isSquare_of_nonsingular hR

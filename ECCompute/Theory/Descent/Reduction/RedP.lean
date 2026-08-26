@@ -102,6 +102,9 @@ public noncomputable def repr (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] :
   | .some x y h =>
       Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare_of_nonsingular h).choose
 
+/-- `repr` of the origin is the fixed representative `![0, 1, 0]`. -/
+public theorem repr_zero : repr a₂ a₄ a₆ p .zero = ![0, 1, 0] := by simp [repr]
+
 /-- `repr` of a `some` point, through any witness `w` with `x.den = w²`, `y.den = w³`. -/
 public theorem repr_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
