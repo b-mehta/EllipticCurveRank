@@ -3,7 +3,11 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Certificate
+module
+
+public import ECCompute.Certificate
+public import ECCompute.Theory.RankDeduction
+public import ECCompute.Theory.IntegralScaling
 import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.Primes
@@ -11,8 +15,6 @@ import ECCompute.Soundness.DescentMatrix
 import ECCompute.Soundness.Torsion
 import ECCompute.Theory.Descent
 import ECCompute.Soundness.LambdaCompute
-import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.IntegralScaling
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
 
@@ -25,8 +27,6 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
 
 ## Main results
 
-* `rank_ge_of_certificate`: the bound on the short integral model `curve c.a₂ c.a₄ c.a₆`, where the
-  descent character lives.
 * `hasRankGE_of_certificate`: the bound for an arbitrary curve `W` whose coefficients are the
   integers `a₁ … a₆`, obtained by transporting the short-model bound along
   `IntegralScaling.generalToShortEquiv`.
@@ -38,7 +38,7 @@ open WeierstrassCurve Module CompleteSquare IntegralScaling
 
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
-def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
+public def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
   ∃ H : Submodule ℤ W.toAffine.Point, Module.Finite ℤ H ∧ n ≤ finrank ℤ H
 
 /-- If the Mordell-Weil groups of `W₁` and `W₂` are isomorphic as additive groups, then any
@@ -59,7 +59,7 @@ variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {ls : Fin c.ρ → ℕ
 
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
-private theorem linearIndependent_descent
+theorem linearIndependent_descent
     (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2)
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j
@@ -85,7 +85,7 @@ private theorem linearIndependent_descent
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
-private theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
+theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
     Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap (x : Submodule.torsionBy ℤ H 2) :
       (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
@@ -137,7 +137,8 @@ theorem rank_ge_of_certificate
 /-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), a proof that the
 short model of these coefficients is the certificate's curve (`hmodel`), and a certificate
 satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.ρ - c.t`. -/
-theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate) (W : WeierstrassCurve ℚ)
+public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate)
+    (W : WeierstrassCurve ℚ)
     (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
