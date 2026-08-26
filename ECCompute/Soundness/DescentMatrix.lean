@@ -16,7 +16,7 @@ import ECCompute.ForLean
 
 `checkB_true` proves the kernel-reducible `checkB` (`ECCompute.Kernel`) sound: when it passes, every
 entry of the certificate matrix `B` equals the kernel-computed descent character
-`lambdaComputeBoolNatMask`, read into `ZMod 2`, at the matching point.
+`lambdaK`, read into `ZMod 2`, at the matching point.
 -/
 
 namespace ECCompute
@@ -28,8 +28,8 @@ variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)
 theorem checkBRow_cons {l : ℕ × ℕ × ℕ} {ls : List (ℕ × ℕ × ℕ)} :
     checkBRow a₂ a₄ xnp xnm xden b (l :: ls) =
       (((b % 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (checkBRow a₂ a₄ xnp xnm xden (b / 2) ls) := rfl
 
 @[simp, grind =]
@@ -43,7 +43,7 @@ variable {i j : ℕ}
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
 theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) {j : ℕ} (hj : j < ls.length) :
-    b.testBit j = lambdaComputeBoolNatMask a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
+    b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
   induction ls generalizing b j with
   | nil => grind
   | cons l ls ih =>
@@ -67,7 +67,7 @@ public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
     (hqlen : q.length = ρ)
     (h : checkB a₂ a₄ lab q B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
-      if lambdaComputeBoolNatMask a₂ a₄ lab[j].1 (qrMask lab[j].1)
+      if lambdaK a₂ a₄ lab[j].1 (qrMask lab[j].1)
           (lab[j].2 % lab[j].1).toNat
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
   set L := lab[j] with hL
