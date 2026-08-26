@@ -85,8 +85,7 @@ private theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
 rational affine point is `R` reduces mod `p` to a representative equivalent to `repr R`. -/
 private theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (R : (curve a₂ a₄ a₆).toAffine.Point) {T : Fin 3 → ℤ}
-    (hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
-      (Int.castRingHom (ZMod p) ∘ T))
+    (hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ T))
     (hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ T))
     (hTℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = R) :
     (repr a₂ a₄ a₆ p R) ≈ (Int.castRingHom (ZMod p) ∘ T) := by
@@ -129,8 +128,7 @@ private theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
       (repr a₂ a₄ a₆ p P) (repr a₂ a₄ a₆ p Q) = Int.castRingHom (ZMod p) ∘ V) :
     repr a₂ a₄ a₆ p (P + Q) ≈ (Int.castRingHom (ZMod p) ∘ V) := by
-  have hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
-      (Int.castRingHom (ZMod p) ∘ V) := by
+  have hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ V) := by
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular a₂ a₄ a₆ p hΔ _)
       (repr_nonsingular a₂ a₄ a₆ p hΔ _)
@@ -178,8 +176,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
     grind
   obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h₁
-  have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular
-      (x₁ : ZMod p) (y₁ : ZMod p) :=
+  have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁ hden1 hden1'
       (mt (Rat.den_cast_eq_zero_iff two_ne_zero hden1).mpr hd1)
   rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns

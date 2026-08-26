@@ -171,15 +171,13 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
 theorem reduced_addX_eq {X L : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L
-      = L ^ 2 - (a₂ : ZMod p) - X - X := by
+    (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L = L ^ 2 - (a₂ : ZMod p) - X - X := by
   simp only [WeierstrassCurve.Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
 theorem reduced_addY_eq {X Y L : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY X X Y L
-      = -(L * ((curveZMod a₂ a₄ a₆ p).toAffine.addX X X L - X)
-        + Y) := by
+      = -(L * ((curveZMod a₂ a₄ a₆ p).toAffine.addX X X L - X) + Y) := by
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
     WeierstrassCurve.Affine.negAddY, map_curveℤ_zmod]; grind
 

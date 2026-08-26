@@ -79,8 +79,7 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
     {h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁}
-    {h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) :
+    {h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂} (hx : x₁ = x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
@@ -131,8 +130,7 @@ distinct `x`-coordinates over `𝔽ₚ`. -/
 theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ZMod p}
     (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂)
-    (hne : x₁ ≠ x₂) :
+    (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   rw [Affine.Point.add_of_X_ne hne]
@@ -188,8 +186,7 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
 /-- Additivity of `εpFinite` in the doubling case: `εpFinite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
 theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
-    (hP : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y)
-    (hy0 : y ≠ 0) :
+    (hP : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
@@ -246,8 +243,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       have hy1ne0 : y₁ ≠ 0 := by grind
       subst hyeq
       have hpt : (Affine.Point.some x₁ y₁ h₂ :
-          (curveZMod a₂ a₄ a₆ p).toAffine.Point)
-          = Affine.Point.some x₁ y₁ h₁ := rfl
+          (curveZMod a₂ a₄ a₆ p).toAffine.Point) = Affine.Point.some x₁ y₁ h₁ := rfl
       rw [hpt, CharTwo.add_self_eq_zero]
       exact εpFinite_double h h₁ hy1ne0
     · -- Secant: `x₁ ≠ x₂`.
