@@ -62,28 +62,28 @@ theorem checkMaskList_true (h : checkMaskList ls) {j : ℕ} (hj : j < ls.length)
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
 read into `ZMod 2`. -/
-public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
-    (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : lab.length = ρ)
+public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
+    (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : ls.length = ρ)
     (hqlen : q.length = ρ)
-    (h : checkB a₂ a₄ lab q B pt) (i j : Fin ρ) :
+    (h : checkB a₂ a₄ ls q B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
-      if lambdaK a₂ a₄ lab[j].1 (qrMask lab[j].1)
-          (lab[j].2 % lab[j].1).toNat
+      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1)
+          (ls[j].2 % ls[j].1).toNat
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
-  set L := lab[j] with hL
+  set L := ls[j] with hL
   set P := pt[i] with hP
   -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
   simp only [Fin.getElem_fin] at hL hP
-  set ls := toLabN lab q with hlsdef
-  have hls : ls.length = ρ := by
-    rw [hlsdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : ls[j.val] = (L.1, (L.2 % L.1).toNat, q[j]) := by
-    simp only [hlsdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
+  set ns := toLs ls q with hnsdef
+  have hns : ns.length = ρ := by
+    rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
+  have hgetN : ns[j.val] = (L.1, (L.2 % L.1).toNat, q[j]) := by
+    simp only [hnsdef, toLs, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
-    have := checkMaskList_true hmask (by rw [hls]; exact j.isLt)
+    have := checkMaskList_true hmask (by rw [hns]; exact j.isLt)
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
   have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
