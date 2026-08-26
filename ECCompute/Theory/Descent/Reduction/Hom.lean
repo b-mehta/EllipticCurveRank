@@ -204,7 +204,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq hYneg h2Yne hXbar hYbar htan
-  have hy3cast := addY_cast_eq (x₂ := x₂) hℓden hd1 hdy1 hd3
+  have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
   have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
