@@ -44,10 +44,12 @@ theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p :
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
     (by have := (Fact.out : p.Prime).two_le; lia)
 
+variable {x y : ℚ}
+
 /-- Coordinate data for a kernel point. If `(x, y)` satisfies the curve equation and reduces to
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
-theorem kernel_point_data {x y : ℚ}
+theorem kernel_point_data
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
     ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
@@ -60,7 +62,7 @@ theorem kernel_point_data {x y : ℚ}
 
 /-- For a point `(A/E², B/E³)` on `y² = x³ + a₂x² + a₄x + a₆`, the integer relation
 `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
-theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
+theorem int_curve_relation {A B E : ℤ}
     (hcv : y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆)
     (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
     B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
@@ -71,10 +73,13 @@ theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
 
 /-! ### The certificate scalars -/
 
+section
+variable {x₁ y₁ x₂ y₂ : ℚ} {A B C D E G : ℤ}
+
 omit [Fact p.Prime] in
 /-- The scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit when `p ∣ E` and
 `A`, `C` are `p`-units. -/
-theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
+theorem not_dvd_W_cert (hpZ : Prime (p : ℤ))
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C) (hpE : (p : ℤ) ∣ E) :
     ¬ (p : ℤ) ∣ (-A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
       + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2)) := by
@@ -91,7 +96,7 @@ theorem not_dvd_W_cert {A C E G : ℤ} (hpZ : Prime (p : ℤ))
 
 /-- The scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`, given `A = x₁E²`, `C = x₂G²`
 and `E`, `G` nonzero. -/
-theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
+theorem K_ne_zero (hne : x₁ ≠ x₂)
     (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
     (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
     A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h ↦ hne <| by
@@ -101,7 +106,7 @@ theorem K_ne_zero {x₁ x₂ : ℚ} {A C E G : ℤ} (hne : x₁ ≠ x₂)
 
 /-- The single-fraction identity `x₃·(A·C·K²) = N² - a₆E²G²K²` for the doubled `x`-coordinate,
 with `K = AG² - CE²` and `N = ADE - BCG`. -/
-theorem addX_single_fraction {x₁ y₁ x₂ y₂ ℓ x₃ : ℚ} {A B C D E G : ℤ}
+theorem addX_single_fraction {ℓ x₃ : ℚ}
     (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (hcv1 : y₁ ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (hcv2 : y₂ ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆)
@@ -157,7 +162,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
-theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
+theorem den_zero_of_cert {x₃ : ℚ} {K N M : ℤ}
     (hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ))
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
     (hcrux : padicValInt p N < padicValInt p K)
@@ -183,7 +188,7 @@ theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
 
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
-theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
+theorem crux_of_int_relations (hpZ : Prime (p : ℤ))
     (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
     (hEne : (E : ℚ) ≠ 0) (hGne : (G : ℚ) ≠ 0) (hpE : (p : ℤ) ∣ E) (hpG : (p : ℤ) ∣ G)
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
@@ -211,6 +216,8 @@ theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime
     apply one_le_padicValNat_of_dvd (by grind)
     rwa [← Int.ofNat_dvd_left]
   grind
+
+end
 
 /-! ### Closure of the kernel -/
 
