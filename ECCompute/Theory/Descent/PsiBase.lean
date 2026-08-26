@@ -71,9 +71,9 @@ end Psi
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
 `ψ_p (X₁ - θ) + ψ_p (X₂ - θ) + ψ_p (X₃ - θ) = 0`. -/
 public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
-    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
-    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
-    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - (a₆ : ZMod p))
+    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
     (hroot : fval a₂ a₄ a₆ p θ = 0)
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
