@@ -123,9 +123,9 @@ theorem rank_ge_of_certificate
     fun j ↦ descentHyp_of_checkLabel (hlabC j) (hlabP j)
   set φ : E →+ (Fin c.ρ → ZMod 2) :=
     AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)) with hφ
-  rcases Nat.eq_zero_or_pos c.ρ with hrho0 | hrhopos
-  · exact ⟨⊥, inferInstance, by simp [hrho0]⟩
-  obtain ⟨j₀⟩ : Nonempty (Fin c.ρ) := ⟨⟨0, hrhopos⟩⟩
+  rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
+  · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
+  obtain ⟨j₀⟩ : Nonempty (Fin c.ρ) := ⟨⟨0, hρpos⟩⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
   have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
     (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)

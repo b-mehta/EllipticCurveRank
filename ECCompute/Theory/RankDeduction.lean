@@ -197,7 +197,7 @@ variable {ρ : ℕ}
 /-- If `ρ` group elements have `𝔽₂`-linearly independent images under an additive hom
 `φ : H →+ (Fin ρ → ZMod 2)`, then `H ⧸ 2H` has dimension at least `ρ`. (The hom automatically
 factors through `H ⧸ 2H`, since the target has characteristic 2.) -/
-theorem rho_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
+theorem ρ_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
     (φ : H →+ (Fin ρ → ZMod 2))
     (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i))) :
     ρ ≤ finrank (ZMod 2) (ModN H 2) := by
@@ -215,7 +215,7 @@ public theorem rank_ge_le [Module.Finite ℤ H] {t : ℕ} (g : Fin ρ → H) (φ
     (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ t) :
     ρ ≤ finrank ℤ H + t := by
-  have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := rho_le_finrank_modN_two g φ hindep
+  have h1 : ρ ≤ finrank (ZMod 2) (ModN H 2) := ρ_le_finrank_modN_two g φ hindep
   have key := natCard_modN_two (H := H)
   rw [natCard_eq_two_pow_finrank] at key
   have hmono : (2 : ℕ) ^ ρ ≤ 2 ^ (finrank ℤ H + t) :=

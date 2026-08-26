@@ -202,12 +202,12 @@ integer-valued rational coefficients. Returns the rank `ρ`, the original curve 
 five integer coefficient values. -/
 private def readGoal (goal : MVarId) :
     MetaM (Nat × Expr × Int × Int × Int × Int × Int) := do
-  let (``HasRankGE, #[curveE, rhoE]) := (← goal.getType).getAppFnArgs
+  let (``HasRankGE, #[curveE, ρE]) := (← goal.getType).getAppFnArgs
     | throwError "certify_curve: goal must be `HasRankGE _ _`"
   let (``WeierstrassCurve.mk, #[_, q1E, q2E, q3E, q4E, q6E]) := (← whnf curveE).getAppFnArgs
     | throwError "certify_curve: the curve must reduce to a `WeierstrassCurve` literal; \
         `unfold` your curve definition and its coefficient abbreviations first"
-  return (← getNatE rhoE, curveE,
+  return (← getNatE ρE, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
 /-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
@@ -222,21 +222,21 @@ private def readEntries {α} (what : String) (parse : String → Option α) (pat
 
 /-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
 `ρ` entries. -/
-private def readData (path lpath : String) (rho : Nat) :
+private def readData (path lpath : String) (ρ : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
   let pts ← readEntries "points" parseLine path
   let lbls ← readEntries "labels" parseLabel lpath
-  if pts.size ≠ rho then
-    throwError "certify_curve: points file has {pts.size} points but the goal rank is {rho}"
-  if lbls.size ≠ rho then
-    throwError "certify_curve: labels file has {lbls.size} labels but the goal rank is {rho}"
+  if pts.size ≠ ρ then
+    throwError "certify_curve: points file has {pts.size} points but the goal rank is {ρ}"
+  if lbls.size ≠ ρ then
+    throwError "certify_curve: labels file has {lbls.size} labels but the goal rank is {ρ}"
   return (pts, lbls)
 
 /-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
-private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (rho : Nat) :
+private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (ρ : Nat) :
     MetaM (List Nat × List Nat) := do
   let B := CertifyEval.computeB sA2 sA4 xs ls
-  let some M := CertifyEval.invF2 B.toArray rho
+  let some M := CertifyEval.invF2 B.toArray ρ
     | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
   return (B, M)
 
@@ -252,7 +252,7 @@ private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr 
     mkApp2 (mkConst ``IntegralScaling.intShortA₆) a3E a6E)
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
-private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
+private def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
     (B M : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
@@ -263,7 +263,7 @@ private def mkCertExpr (rho : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls 
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
   let q := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
   return mkAppN (mkConst ``Certificate.mk)
-    #[sA2E, sA4E, sA6E, toExpr rho, pointsE,
+    #[sA2E, sA4E, sA6E, toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
@@ -285,11 +285,11 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
     #[wModel, wCurve, rb, rb, rb, rb, rb]
-  let rhoE := mkApp (mkConst ``Certificate.ρ) cExpr
+  let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
     mkAppN (mkConst ``List.length_beq_eq [Level.zero])
-      #[elemTy, mkApp (mkConst field) cExpr, rhoE, rb]
+      #[elemTy, mkApp (mkConst field) cExpr, ρE, rb]
   let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))
@@ -320,17 +320,17 @@ and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑
 `ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
 private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
-  let (rhoGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
+  let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
   let a1E := toExpr v1
   let a2E := toExpr v2
   let a3E := toExpr v3
   let a4E := toExpr v4
   let a6E := toExpr v6
-  let rho := rhoGoal + t
-  let (pts, lbls) ← readData path lpath rho
+  let ρ := ρGoal + t
+  let (pts, lbls) ← readData path lpath ρ
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
-  let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList rho
-  let cExpr ← mkCertExpr rho pts lbls B M t tpNat a1E a2E a3E a4E a6E
+  let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList ρ
+  let cExpr ← mkCertExpr ρ pts lbls B M t tpNat a1E a2E a3E a4E a6E
   -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=
