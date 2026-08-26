@@ -46,7 +46,7 @@ public noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
-public theorem εpFinite_zero {θ : ZMod p} :
+theorem εpFinite_zero {θ : ZMod p} :
     εpFinite a₂ a₄ a₆ p θ
       (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
   rfl
@@ -254,7 +254,7 @@ public theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p
 public noncomputable def εpHom [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
-  map_zero' := εpFinite_zero
+  map_zero' := rfl
   map_add' := εpFinite_map_add h
 
 end ECCompute
