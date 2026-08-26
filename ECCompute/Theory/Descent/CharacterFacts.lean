@@ -40,21 +40,23 @@ transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p 
 
 section Psi
 
+variable {a b : ZMod p}
+
 /-- `ψ_p` vanishes on squares. -/
-public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 := if_pos ha
+public theorem psi_of_isSquare (ha : IsSquare a) : psi p a = 0 := if_pos ha
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
-public theorem psi_mul_sq (hp : p.Prime) {a w : ZMod p} (hw : w ≠ 0) :
-    psi p (w ^ 2 * a) = psi p a := by
+public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
+    psi p (b ^ 2 * a) = psi p a := by
   have : Fact p.Prime := ⟨hp⟩
-  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
+  have hiff : IsSquare (b ^ 2 * a) ↔ IsSquare a :=
+    ⟨fun ⟨s, hs⟩ ↦ ⟨s / b, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨b * r, by rw [hr]; ring⟩⟩
   unfold psi
   rw [hiff]
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
-public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
+public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
   have : Fact p.Prime := ⟨hp⟩
   -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
@@ -67,10 +69,12 @@ public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 
 
 end Psi
 
+variable {θ : ZMod p}
+
 /-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
 `ψ_p (X₁ - θ) + ψ_p (X₂ - θ) + ψ_p (X₃ - θ) = 0`. -/
-public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
+public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
@@ -88,7 +92,7 @@ public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
-public theorem fderiv_ne_zero {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ p θ ≠ 0 := by
   have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
