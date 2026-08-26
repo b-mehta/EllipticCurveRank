@@ -40,11 +40,9 @@ def popParity : ℕ → ℕ → Bool
   | fuel + 1, a => (a.testBit 0).xor (popParity fuel (a / 2))
 
 /-- The XOR over `v.testBit j` for `j` in a list. -/
-def xorBits (v : ℕ) (l : List ℕ) : Bool :=
-  l.foldr (fun j r ↦ (v.testBit j).xor r) false
+def xorBits (v : ℕ) (l : List ℕ) : Bool := l.foldr (fun j r ↦ (v.testBit j).xor r) false
 
-theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by
-  grind
+theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
 theorem popParity_eq_xorBits {fuel a : ℕ} :
@@ -116,7 +114,7 @@ public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
 public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B.length) :
     toMat B n i j = if B[i].testBit j then 1 else 0 := by
-  rw [toMat, Matrix.of_apply, List.getD_eq_getElem (hn := h), Fin.getElem_fin]
+  rw [toMat, Matrix.of_apply, List.getD_eq_getElem _ _ h, Fin.getElem_fin]
 
 /-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMatCols (M : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) := (toMat M n).transpose
@@ -135,8 +133,7 @@ theorem checkInvRow_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) (hc : che
     | zero =>
       have hbnd : b &&& m < 2 ^ n := Nat.and_lt_two_pow b (hM m (by simp))
       grind [popParityK_eq]
-    | succ k'' =>
-      grind
+    | succ k'' => grind
 
 /-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
 column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/

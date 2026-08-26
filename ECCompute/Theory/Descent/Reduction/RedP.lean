@@ -90,7 +90,7 @@ and `ℤ → ZMod p` applied to the integer representative `trep` otherwise. -/
 public noncomputable def repr (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] :
     (curve a₂ a₄ a₆).toAffine.Point → Fin 3 → ZMod p
   | .zero => ![0, 1, 0]
-  | .some x y h => Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare_of_nonsingular h).choose
+  | .some x y h => Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare h.1).choose
 
 /-- `repr` of the origin is the fixed representative `![0, 1, 0]`. -/
 public theorem repr_zero : repr a₂ a₄ a₆ p .zero = ![0, 1, 0] := by simp [repr]
@@ -99,8 +99,8 @@ public theorem repr_zero : repr a₂ a₄ a₆ p .zero = ![0, 1, 0] := by simp [
 public theorem repr_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     repr a₂ a₄ a₆ p (.some x y h) = Int.castRingHom (ZMod p) ∘ trep x y w := by
-  obtain rfl : w = (den_isSquare_of_nonsingular h).choose := by
-    have h1 := (den_isSquare_of_nonsingular h).choose_spec.1
+  obtain rfl : w = (den_isSquare h.1).choose := by
+    have h1 := (den_isSquare h.1).choose_spec.1
     exact Nat.pow_left_injective two_ne_zero (hden.symm.trans h1)
   rfl
 
@@ -111,7 +111,7 @@ public theorem repr_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
   cases P with
   | zero => exact nonsingular_zero
   | some x y h =>
-      obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
+      obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
       rw [repr_some h hden hden']
       exact red_nonsingular hΔ h hden hden'
 
@@ -146,7 +146,7 @@ origin. -/
 public theorem redP_of_den_zero (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hd : (x.den : ZMod p) = 0) :
     redP a₂ a₄ a₆ p (.some x y h) = 0 := by
-  obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
+  obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   rw [redP_some h hden hden']
   exact Point.toAffine_of_Z_eq_zero (by simpa [hden] using hd)
 
@@ -154,7 +154,7 @@ public theorem redP_of_den_zero (h : (curve a₂ a₄ a₆).toAffine.Nonsingular
 public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x : ZMod p) (y : ZMod p) := by
-  obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
+  obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular hΔ h hden hden'
   rwa [nonsingular_of_Z_ne_zero (by simp [hwne]), trep_coord_zero hden hwne,
@@ -166,7 +166,7 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     redP a₂ a₄ a₆ p (.some x y h)
       = .some (x : ZMod p) (y : ZMod p) (red_nonsingular_affine hΔ h hd) := by
-  obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
+  obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular hΔ h hden hden'
   rw [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne])]

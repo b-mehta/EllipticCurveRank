@@ -95,7 +95,7 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     rw [repr_zero]
     exact Setoid.symm (equiv_zero_of_Z_eq_zero hnsp hfTz)
   | some X Y hR =>
-    obtain ⟨w₃, hd3, hd3'⟩ := den_isSquare_of_nonsingular hR
+    obtain ⟨w₃, hd3, hd3'⟩ := den_isSquare hR.1
     have hrepr : repr a₂ a₄ a₆ p (.some X Y hR) = Int.castRingHom (ZMod p) ∘ trep X Y w₃ :=
       repr_some hR hd3 hd3'
     have hStℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective
@@ -204,7 +204,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq hYneg h2Yne hXbar hYbar htan
-  have hy3cast := addY_cast_eq (x₂ := x₂) hℓden hd1 hdy1 hd3
+  have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
   have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
@@ -371,8 +371,8 @@ theorem redP_map_add_some (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) 
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) :
     redP a₂ a₄ a₆ p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP a₂ a₄ a₆ p (.some x₁ y₁ h₁) + redP a₂ a₄ a₆ p (.some x₂ y₂ h₂) := by
-  obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare_of_nonsingular h₁
-  obtain ⟨w₂, hden2, hden2'⟩ := den_isSquare_of_nonsingular h₂
+  obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare h₁.1
+  obtain ⟨w₂, hden2, hden2'⟩ := den_isSquare h₂.1
   have hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁) :=
     nonsingular_of_toAffine_some (toAffine_g_trep h₁ hden1 hden1')
   have hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂) :=

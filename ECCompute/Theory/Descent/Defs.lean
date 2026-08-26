@@ -7,6 +7,7 @@ module
 
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 public import Mathlib.Data.ZMod.Basic
+public import ECCompute.Theory.Curve
 
 /-!
 # The descent character: basic definitions
@@ -24,25 +25,11 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 ## Main declarations
 
 * `ECCompute.psi`: the Legendre symbol into `ZMod 2`.
-* `ECCompute.curve`: the Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
 * `ECCompute.lambda`: the raw function `E(ℚ) → ZMod 2`.
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 -/
 
 public section
-
-open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-/-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
-@[expose] def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point := {P | P + P = 0}
-
-@[simp]
-lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
-    P ∈ W.twoTorsionPoints ↔ P + P = 0 := Iff.rfl
-
-end WeierstrassCurve
 
 namespace ECCompute
 
@@ -51,20 +38,7 @@ open Classical in
 non-squares. -/
 @[expose] noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 := if IsSquare a then 0 else 1
 
-/-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
-@[expose] def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
-  a₁ := 0
-  a₂ := a₂
-  a₃ := 0
-  a₄ := a₄
-  a₆ := a₆
-
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
-
-/-- The affine equation of `curve a₂ a₄ a₆` in cleared form. -/
-@[grind →]
-theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
-    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve]
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
 @[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p := θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
