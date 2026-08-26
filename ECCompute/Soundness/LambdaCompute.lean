@@ -135,7 +135,7 @@ theorem alphaResNat_eq_val (hp : p ≠ 0) {x : ℚ}
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
 theorem fderivResNat_cast (hp : p ≠ 0) (htval : tval = θ) :
-    (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ p θ := by
+    (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ θ := by
   simp only [fderivResNat]
   rw [polyModL_cast hp]
   simp only [polyEval, Int.add_def, Int.mul_def]
@@ -146,7 +146,7 @@ theorem fderivResNat_cast (hp : p ≠ 0) (htval : tval = θ) :
 
 /-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
 theorem fderivResNat_eq_val (hp : p ≠ 0) (htval : tval = θ) :
-    fderivResNat a₂ a₄ p tval = (fderiv a₂ a₄ p θ).val := by
+    fderivResNat a₂ a₄ p tval = (fderiv a₂ a₄ θ).val := by
   have hlt : fderivResNat a₂ a₄ p tval < p := by simp only [fderivResNat]; exact polyModL_lt hp
   rw [← fderivResNat_cast hp htval, ZMod.val_cast_of_lt hlt]
 
