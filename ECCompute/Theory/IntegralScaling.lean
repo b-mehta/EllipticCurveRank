@@ -61,7 +61,7 @@ section Scaling
 variable {W W' : WeierstrassCurve ℚ} {v : ℚ} (s : IsScaling W W' v)
 include s
 
-variable {x y X Y x₁ x₂ y₁ ℓ : ℚ}
+variable {x y x₁ x₂ ℓ : ℚ}
 
 /-- The defining equation transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem equation_scale :
@@ -81,11 +81,11 @@ theorem nonsingular_scale :
       = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by grind [s.a₁, s.a₃]
   rw [eX, eY, mul_ne_zero_iff_left (pow_ne_zero 4 s.ne), mul_ne_zero_iff_left (pow_ne_zero 3 s.ne)]
 
-/-- Nonsingularity transfers along the inverse scaling `(X, Y) ↦ (X/v², Y/v³)`. -/
+/-- Nonsingularity transfers along the inverse scaling `(x, y) ↦ (x/v², y/v³)`. -/
 theorem nonsingular_scale' :
-    W'.toAffine.Nonsingular X Y ↔ W.toAffine.Nonsingular (X / v ^ 2) (Y / v ^ 3) := by
+    W'.toAffine.Nonsingular x y ↔ W.toAffine.Nonsingular (x / v ^ 2) (y / v ^ 3) := by
   rw [nonsingular_scale s,
-    mul_div_cancel₀ X (pow_ne_zero 2 s.ne), mul_div_cancel₀ Y (pow_ne_zero 3 s.ne)]
+    mul_div_cancel₀ x (pow_ne_zero 2 s.ne), mul_div_cancel₀ y (pow_ne_zero 3 s.ne)]
 
 /-- The `Y`-negation scales by `v³`. -/
 theorem negY_scale :
@@ -99,13 +99,13 @@ theorem addX_scale :
 
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
 theorem negAddY_scale :
-    W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
-      = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by grind [negAddY, addX_scale]
+    W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y) (v * ℓ)
+      = v ^ 3 * W.toAffine.negAddY x₁ x₂ y ℓ := by grind [negAddY, addX_scale]
 
 /-- The `Y`-coordinate of the sum scales by `v³`. -/
 theorem addY_scale :
-    W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
-      = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by grind [addY, addX_scale, negAddY_scale, negY_scale]
+    W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y) (v * ℓ)
+      = v ^ 3 * W.toAffine.addY x₁ x₂ y ℓ := by grind [addY, addX_scale, negAddY_scale, negY_scale]
 
 /-- The slope scales by `v`. -/
 theorem slope_scale (x₁ x₂ y₁ y₂ : ℚ) :
@@ -145,8 +145,8 @@ def scaleBwd : W'.toAffine.Point → W.toAffine.Point
     scaleFwd s (.some x y h) = .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s).mp h) :=
   rfl
 
-@[simp] theorem scaleBwd_some (h : W'.toAffine.Nonsingular X Y) :
-    scaleBwd s (.some X Y h) = .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s).mp h) :=
+@[simp] theorem scaleBwd_some (h : W'.toAffine.Nonsingular x y) :
+    scaleBwd s (.some x y h) = .some (x / v ^ 2) (y / v ^ 3) ((nonsingular_scale' s).mp h) :=
   rfl
 
 /-- The scaling forward map is additive. -/
