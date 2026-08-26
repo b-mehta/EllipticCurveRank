@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.CharacterFacts
+public import ECCompute.Theory.Descent.Character
 public import ECCompute.Soundness.RootMod
 
 import Mathlib.Data.Nat.Bitwise

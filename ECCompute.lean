@@ -35,8 +35,6 @@ public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Tactic.CertifyEval
 public import ECCompute.Theory.CompleteSquare
 public import ECCompute.Theory.Descent.Character
-public import ECCompute.Theory.Descent.CharacterFacts
-public import ECCompute.Theory.Descent.Collinearity
 public import ECCompute.Theory.Descent.LambdaHom
 public import ECCompute.Theory.Descent.PointArith
 public import ECCompute.Theory.Descent.Reduction.FiniteCharacter

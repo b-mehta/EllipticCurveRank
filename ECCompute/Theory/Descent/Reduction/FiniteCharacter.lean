@@ -5,10 +5,9 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.CharacterFacts
+public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Model
 public import Mathlib.Algebra.Field.ZMod
-import ECCompute.Theory.Descent.Collinearity
 import ECCompute.ForMathlib.WeierstrassCurveAffine
 
 /-!
