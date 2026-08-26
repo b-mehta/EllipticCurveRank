@@ -69,7 +69,7 @@ private theorem linearIndependent_descent
     (hBlen : c.B.length = c.ρ) (hMlen : c.M.length = c.ρ)
     (hinv : F2Invert.checkInv c.ρ c.B c.M)
     {φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.ρ → ZMod 2)}
-    (hφ : φ = AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (ls j).1 (hyp j)))
+    (hφ : φ = AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)))
     {g : Fin c.ρ → (curve c.a₂ c.a₄ c.a₆).toAffine.Point}
     (hg : g = fun i ↦ .some (pt i).1 (pt i).2 (hns i)) :
     LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
@@ -115,7 +115,7 @@ theorem rank_ge_of_certificate
   have hyp (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
     descentHyp_of_checkLabel (hlsC j) (hlsP j)
   set φ : E →+ (Fin c.ρ → ZMod 2) :=
-    AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (ls j).1 (hyp j)) with hφ
+    AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)) with hφ
   rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
   · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp ⟨0, hρpos⟩).discr (by simp [hΔ0])
