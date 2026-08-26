@@ -72,8 +72,7 @@ public theorem shortModel_a₆ {W : WeierstrassCurve ℚ} :
 
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
-theorem equation_completeSquare {W : WeierstrassCurve ℚ} {x y : ℚ} :
-    W.toAffine.Equation x y ↔
+theorem equation_completeSquare {W : WeierstrassCurve ℚ} {x y : ℚ} : W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [Affine.equation_iff, Affine.equation_iff]
   grind [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
@@ -87,8 +86,7 @@ variable {W : WeierstrassCurve ℚ}
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
 invertible substitution `(F_X, F_Y) ↦ (F_X - σ F_Y, F_Y)`. -/
-theorem or_ne_zero_sub_iff {A B σ : ℚ} :
-    (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
+theorem or_ne_zero_sub_iff {A B σ : ℚ} : (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * B ≠ 0 ∨ B ≠ 0) := by
   by_cases hB : B = 0 <;> simp [hB]
 
 /-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
@@ -100,8 +98,7 @@ public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ 
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/
-theorem nonsingular_completeSquare {x y : ℚ} :
-    W.toAffine.Nonsingular x y ↔
+theorem nonsingular_completeSquare {x y : ℚ} : W.toAffine.Nonsingular x y ↔
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [nonsingular_iff', nonsingular_iff', ← equation_completeSquare]
   refine and_congr_right fun _ ↦ ?_
@@ -118,14 +115,12 @@ theorem nonsingular_completeSquare {x y : ℚ} :
   exact or_ne_zero_sub_iff
 
 /-- The `Y`-negation commutes with the completing-the-square shift. -/
-theorem negY_completeSquare {x y : ℚ} :
-    (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
+theorem negY_completeSquare {x y : ℚ} : (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
       = W.toAffine.negY x y + (W.a₁ * x + W.a₃) / 2 := by
   grind [negY, shortModel_a₁, shortModel_a₃]
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
-theorem addX_completeSquare {x₁ x₂ ℓ : ℚ} :
-    (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
+theorem addX_completeSquare {x₁ x₂ ℓ : ℚ} : (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
       = W.toAffine.addX x₁ x₂ ℓ := by
   grind [addX, shortModel_a₁, shortModel_a₂]
 
@@ -170,15 +165,13 @@ theorem slope_completeSquare {x₁ x₂ y₁ y₂ : ℚ}
     grind
 
 /-- Forward coordinate map on Mordell-Weil groups: `(x, y) ↦ (x, y + (a₁x + a₃)/2)`. -/
-def fwd (W : WeierstrassCurve ℚ) :
-    W.toAffine.Point → (shortModel W).toAffine.Point
+def fwd (W : WeierstrassCurve ℚ) : W.toAffine.Point → (shortModel W).toAffine.Point
   | .zero => .zero
   | .some x y h =>
     .some x (y + (W.a₁ * x + W.a₃) / 2) (nonsingular_completeSquare.mp h)
 
 /-- Inverse coordinate map: `(x, y) ↦ (x, y - (a₁x + a₃)/2)`. -/
-def bwd (W : WeierstrassCurve ℚ) :
-    (shortModel W).toAffine.Point → W.toAffine.Point
+def bwd (W : WeierstrassCurve ℚ) : (shortModel W).toAffine.Point → W.toAffine.Point
   | .zero => .zero
   | .some x y h =>
     .some x (y - (W.a₁ * x + W.a₃) / 2)
@@ -201,8 +194,7 @@ def bwd (W : WeierstrassCurve ℚ) :
   rfl
 
 /-- The forward map is additive: it commutes with the affine group law on both models. -/
-theorem fwd_map_add (P Q : W.toAffine.Point) :
-    fwd W (P + Q) = fwd W P + fwd W Q := by
+theorem fwd_map_add (P Q : W.toAffine.Point) : fwd W (P + Q) = fwd W P + fwd W Q := by
   rcases P with _ | ⟨x₁, y₁, h₁⟩ <;> rcases Q with _ | ⟨x₂, y₂, h₂⟩
   any_goals rfl
   by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
