@@ -33,14 +33,13 @@ public import ECCompute.Soundness.RootMod
 public import ECCompute.Soundness.Torsion
 public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Tactic.CertifyEval
-public import ECCompute.Theory.CompleteSquare
 public import ECCompute.Theory.Descent.Additivity
 public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Descent.FiniteCharacter
 public import ECCompute.Theory.Descent.PointArith
 public import ECCompute.Theory.Descent.ReductionHom
 public import ECCompute.Theory.Descent.ReductionMap
-public import ECCompute.Theory.IntegralScaling
 public import ECCompute.Theory.Model
 public import ECCompute.Theory.RankDeduction
+public import ECCompute.Theory.ShortModel
 public import ECCompute.Theory.VariableChangePoint
