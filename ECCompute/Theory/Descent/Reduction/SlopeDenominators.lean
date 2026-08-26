@@ -148,8 +148,7 @@ public theorem slope_den_of_addX_den (hp : p.Prime)
     simp only [Affine.addX, curve]; grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]
-    exact den_add_ne_zero hp
-      (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
+    exact den_add_ne_zero hp (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
   rw [den_pow, Nat.cast_pow] at hℓ2
   exact fun h ↦ hℓ2 (by grind)
 
