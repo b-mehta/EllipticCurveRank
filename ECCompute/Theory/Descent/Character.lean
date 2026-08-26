@@ -10,7 +10,7 @@ public import Mathlib.Data.ZMod.Basic
 public import ECCompute.Theory.Curve
 
 /-!
-# The descent character: basic definitions
+# The descent character
 
 For an elliptic curve `E : y² = f(x)` with `f = x³ + a₂x² + a₄x + a₆` a monic integral cubic
 of non-zero discriminant, a prime `p ∤ 6Δ`, and a root `θ ∈ 𝔽ₚ` of `f`, this file defines the

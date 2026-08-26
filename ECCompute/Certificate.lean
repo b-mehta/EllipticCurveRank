@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Data.Rat.Defs
 public import ECCompute.Soundness.F2Invert
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 /-!
 # The rank-bound certificate data type
