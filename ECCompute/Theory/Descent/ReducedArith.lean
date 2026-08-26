@@ -57,8 +57,9 @@ When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` a
 public theorem ydenom_eq_zero_iff {a₂ a₄ a₆ : ℤ} (hp : p.Prime) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
-  have : Fact p.Prime := ⟨hp⟩
   obtain ⟨w, hxw, hyw⟩ := den_isSquare h
-  simp_all
+  rw [ZMod.natCast_eq_zero_iff, ZMod.natCast_eq_zero_iff, hxw, hyw]
+  exact ⟨fun hd ↦ (hp.dvd_of_dvd_pow hd).trans (dvd_pow_self w (by norm_num)),
+    fun hd ↦ (hp.dvd_of_dvd_pow hd).trans (dvd_pow_self w (by norm_num))⟩
 
 end ECCompute
