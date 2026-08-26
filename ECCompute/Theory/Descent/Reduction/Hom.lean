@@ -272,14 +272,12 @@ theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {
       exact redP_add_neg hΔ h₁ h₂ hPQ hd1 rfl hYbar
     · -- `x₁ ≠ x₂` over `ℚ` but the reduced points coincide: the tangent-mod-`p` case, split on
       -- whether the common reduced point is `2`-torsion.
+      have hdy1 : (y₁.den : ZMod p) ≠ 0 := by grind [ydenom_eq_zero_iff, h₁.1]
+      have hdy2 : (y₂.den : ZMod p) ≠ 0 := by grind [ydenom_eq_zero_iff, h₂.1]
       by_cases hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
           (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p)
-      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2
-          (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1])
-          hXbar hYbar hYneg
-      · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2
-          (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1])
-          hXbar hYbar hYneg
+      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
+      · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
 
 /-! ### The homomorphism -/
 
