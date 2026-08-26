@@ -185,7 +185,7 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     redP a₂ a₄ a₆ p (.some x y h)
       = .some (x : ZMod p) (y : ZMod p)
-          (red_nonsingular_affine hΔ h
+          (red_nonsingular_affine (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) (p := p) hΔ h
             (den_isSquare_of_nonsingular h).choose_spec.1
             (den_isSquare_of_nonsingular h).choose_spec.2
             (mt (Rat.den_cast_eq_zero_iff two_ne_zero
