@@ -34,8 +34,11 @@ namespace ECCompute
 
 open Rat
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 variable {x₁ y₁ x₂ y₂ : ℚ}
+
+section
+variable [Fact p.Prime]
 
 /-! ### The reduced secant slope -/
 
@@ -130,32 +133,39 @@ public theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     rwa [cast_mul_of_ne_zero hℓden (den_add_ne_zero Fact.out hdy1 hdy2),
       cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num hd1 hd2).2] at hc
 
+end
+
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` has nonzero denominator mod `p`, then so
 does the slope. -/
-public theorem slope_den_of_addX_den
+public theorem slope_den_of_addX_den (hp : p.Prime)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
+  have : Fact p.Prime := ⟨hp⟩
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   have he : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by
     simp only [Affine.addX, curve]; grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]
-    exact den_add_ne_zero Fact.out
-      (den_add_ne_zero Fact.out (den_add_ne_zero Fact.out hd3 (by simp)) hd1) hd2
+    exact den_add_ne_zero hp
+      (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
   rw [den_pow, Nat.cast_pow] at hℓ2
   exact fun h ↦ hℓ2 (by grind)
 
 /-- The doubled `x`-coordinate `addX x₁ x₂ ℓ` survives reduction when the slope, `x₁` and `x₂`
 all do: `addX = ℓ² - a₂ - x₁ - x₂` has nonzero denominator mod `p`. -/
-public theorem addX_den_ne {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
+public theorem addX_den_ne (hp : p.Prime) {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂) :
     (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 := by
+  have : Fact p.Prime := ⟨hp⟩
   rw [haddX]
-  exact den_sub_ne_zero Fact.out (den_sub_ne_zero Fact.out (den_sub_ne_zero Fact.out
+  exact den_sub_ne_zero hp (den_sub_ne_zero hp (den_sub_ne_zero hp
     (by rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hℓden) (by simp)) hd1) hd2
+
+section
+variable [Fact p.Prime]
 
 /-! ### The reduced addition formulas -/
 
@@ -197,5 +207,7 @@ public theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZMo
   rw [haddY, cast_neg,
     cast_add_of_ne_zero (den_mul_ne_zero Fact.out hℓden (den_sub_ne_zero Fact.out hd3 hd1)) hdy1,
     cast_mul_of_ne_zero hℓden (den_sub_ne_zero Fact.out hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
+
+end
 
 end ECCompute
