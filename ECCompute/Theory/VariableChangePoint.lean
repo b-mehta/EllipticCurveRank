@@ -51,20 +51,24 @@ variable {C}
 theorem u_ne_zero : (C.u : ℚ) ≠ 0 := C.u.ne_zero
 
 theorem mapX_invX {X : ℚ} : C.mapX (C.invX X) = X := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
-  simp only [mapX, invX]; field_simp; ring
+  simp only [mapX, invX]
+  field_simp [u_ne_zero]
+  ring
 
 theorem mapY_invY {X Y : ℚ} : C.mapY (C.invX X) (C.invY X Y) = Y := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
-  simp only [mapY, invX, invY]; field_simp; ring
+  simp only [mapY, invX, invY]
+  field_simp [u_ne_zero]
+  ring
 
 theorem invX_mapX {x : ℚ} : C.invX (C.mapX x) = x := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
-  simp only [invX, mapX]; field_simp; ring
+  simp only [invX, mapX]
+  field_simp [u_ne_zero]
+  ring
 
 theorem invY_mapY {x y : ℚ} : C.invY (C.mapX x) (C.mapY x y) = y := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
-  simp only [invY, mapX, mapY]; field_simp; ring
+  simp only [invY, mapX, mapY]
+  field_simp [u_ne_zero]
+  ring
 
 theorem mapX_injective : Function.Injective C.mapX := by
   intro a b h
@@ -105,16 +109,15 @@ end Affine
 /-- A point `(x, y)` lies on `W` iff its image lies on `C • W`. -/
 theorem equation_variableChange_iff {x y : ℚ} :
     W.toAffine.Equation x y ↔ (C • W).toAffine.Equation (C.mapX x) (C.mapY x y) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   rw [equation_iff, equation_iff, mapX, mapY, variableChange_a₁, variableChange_a₂,
     variableChange_a₃, variableChange_a₄, variableChange_a₆]
   simp only [Units.val_inv_eq_inv_val]
   constructor
   · intro h
-    field_simp
+    field_simp [u_ne_zero]
     linear_combination h
   · intro h
-    field_simp at h
+    field_simp [u_ne_zero] at h
     linear_combination h
 
 /-- Nonsingularity transfers forward along the change of variables. -/
@@ -144,33 +147,29 @@ theorem nonsingular_variableChange_iff {x y : ℚ} :
 
 theorem variableChange_negY {x y : ℚ} :
     (C • W).toAffine.negY (C.mapX x) (C.mapY x y) = C.mapY x (W.toAffine.negY x y) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   simp only [negY, mapX, mapY, variableChange_a₁, variableChange_a₃, Units.val_inv_eq_inv_val]
-  field_simp
+  field_simp [u_ne_zero]
   ring
 
 theorem variableChange_addX {x₁ x₂ ℓ : ℚ} :
     (C • W).toAffine.addX (C.mapX x₁) (C.mapX x₂) (C.mapSlope ℓ)
       = C.mapX (W.toAffine.addX x₁ x₂ ℓ) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   simp only [addX, mapX, mapSlope, variableChange_a₁, variableChange_a₂, Units.val_inv_eq_inv_val]
-  field_simp
+  field_simp [u_ne_zero]
   ring
 
 theorem variableChange_addY {x₁ x₂ y₁ ℓ : ℚ} :
     (C • W).toAffine.addY (C.mapX x₁) (C.mapX x₂) (C.mapY x₁ y₁) (C.mapSlope ℓ)
       = C.mapY (W.toAffine.addX x₁ x₂ ℓ) (W.toAffine.addY x₁ x₂ y₁ ℓ) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   simp only [addY, negAddY, addX, negY, mapX, mapY, mapSlope, variableChange_a₁, variableChange_a₂,
     variableChange_a₃, Units.val_inv_eq_inv_val]
-  field_simp
+  field_simp [u_ne_zero]
   ring
 
 theorem variableChange_slope {x₁ x₂ y₁ y₂ : ℚ} (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂) (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
     (C • W).toAffine.slope (C.mapX x₁) (C.mapX x₂) (C.mapY x₁ y₁) (C.mapY x₂ y₂)
       = C.mapSlope (W.toAffine.slope x₁ x₂ y₁ y₂) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   obtain rfl | hx := eq_or_ne x₁ x₂
   · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h ↦ hxy ⟨rfl, h⟩
     have hyeq : y₁ = y₂ := Y_eq_of_Y_ne h₁ h₂ rfl hy
@@ -186,7 +185,7 @@ theorem variableChange_slope {x₁ x₂ y₁ y₂ : ℚ} (h₁ : W.toAffine.Equa
         = ((C.u : ℚ)⁻¹
             * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
               - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁) := by
-      rw [mapSlope]; field_simp
+      rw [mapSlope]; field_simp [u_ne_zero]
     rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hs, div_eq_div_iff hd2 hd1]
     simp only [negY, mapX, mapY, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, Units.val_inv_eq_inv_val]
@@ -196,7 +195,7 @@ theorem variableChange_slope {x₁ x₂ y₁ y₂ : ℚ} (h₁ : W.toAffine.Equa
     have hd' : C.mapX x₁ - C.mapX x₂ ≠ 0 := sub_ne_zero.mpr hx'
     have hs : C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
         = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂) := by
-      rw [mapSlope]; field_simp
+      rw [mapSlope]; field_simp [u_ne_zero]
     rw [slope_of_X_ne hx', slope_of_X_ne hx, hs, div_eq_div_iff hd' hd]
     simp only [mapX, mapY]
     ring
@@ -207,8 +206,7 @@ namespace VariableChange
 
 /-- An admissible change of variables `C` induces a group isomorphism between the Mordell-Weil
 groups of `W` and `C • W`, sending `(x, y)` to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))`. -/
-public def pointAddEquiv (C : VariableChange ℚ) :
-    W.toAffine.Point ≃+ (C • W).toAffine.Point :=
+public def pointAddEquiv (C : VariableChange ℚ) : W.toAffine.Point ≃+ (C • W).toAffine.Point :=
   AddEquiv.mk'
     { toFun := fun P ↦ match P with
         | .zero => .zero
