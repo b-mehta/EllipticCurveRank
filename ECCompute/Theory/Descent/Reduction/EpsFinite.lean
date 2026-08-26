@@ -63,12 +63,10 @@ theorem reduced_equation {X Y : ZMod p}
   simpa [map_curveℤ_zmod] using this
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
-theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
-  fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
+theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
-theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
-    θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by
+theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by
   simpa [fval] using h.root
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
@@ -140,10 +138,8 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
     rw [hm1, reduced_equation h₁]
   have hpt2 : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆ := by
     rw [hm2, reduced_equation h₂]
-  have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-    rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots _ _ _ ℓ m
-    x₁ x₂ X₃ hne hx3 hpt1 hpt2
+  have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots _ _ _ ℓ m x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
 /-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
@@ -194,8 +190,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by rw [hm, reduced_equation hP]
-  have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by
-    rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
+  have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root _ _ _ ℓ m x X₃ hpt (by grind) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 

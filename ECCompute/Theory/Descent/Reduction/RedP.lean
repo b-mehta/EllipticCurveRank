@@ -127,8 +127,7 @@ public noncomputable def redP (p : ℕ) [Fact p.Prime]
 
 /-- `redP` is `toAffine` of the fixed representative. -/
 public theorem redP_eq_toAffine (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    redP p P = Point.toAffine (curveZMod a₂ a₄ a₆ p).toProjective (repr p P) := by
-  simp only [redP]
+    redP p P = Point.toAffine (curveZMod a₂ a₄ a₆ p).toProjective (repr p P) := by simp only [redP]
 
 @[simp]
 public theorem redP_zero : redP p (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := by
