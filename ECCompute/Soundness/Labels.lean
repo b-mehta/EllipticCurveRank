@@ -38,8 +38,7 @@ def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
-section
-variable {a₂ a₄ a₆ : ℤ}
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
 theorem curve_Δ_eq :
@@ -54,7 +53,7 @@ theorem curve_Δ_num :
   rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
-theorem discrInt_emod {p : ℕ} :
+theorem discrInt_emod :
     (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
   have h : ∀ a : ℤ, ((a % (p : ℤ)) : ZMod p) = (a : ZMod p) := fun a ↦ by
     rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
@@ -63,7 +62,7 @@ theorem discrInt_emod {p : ℕ} :
   ring
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
-theorem fval_iff {θ : ℤ} {p : ℕ} (hp : 1 < p) :
+theorem fval_iff (hp : 1 < p) :
     (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have hp0 : p ≠ 0 := by lia
@@ -79,10 +78,8 @@ theorem fval_iff {θ : ℤ} {p : ℕ} (hp : 1 < p) :
 theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   grind [discrIntK, discrInt]
 
-end
-
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
-public theorem descentHyp_of_checkLabel {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
+public theorem descentHyp_of_checkLabel
     (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
@@ -103,7 +100,7 @@ public theorem descentHyp_of_checkLabel {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : �
     grind
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
-public theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
+public theorem checkLabels_true {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
   rwa [checkLabels, allList_iff] at h
