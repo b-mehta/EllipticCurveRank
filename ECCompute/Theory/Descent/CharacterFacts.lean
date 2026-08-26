@@ -78,7 +78,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
-    (hroot : fval a₂ a₄ a₆ p θ = 0)
+    (hroot : fval (R := ZMod p) a₂ a₄ a₆ θ = 0)
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
@@ -93,7 +93,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
-    fderiv a₂ a₄ p θ ≠ 0 := by
+    fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
       = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2

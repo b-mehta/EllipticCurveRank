@@ -40,11 +40,11 @@ non-squares. -/
 
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
-/-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
-@[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p := θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
+/-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
+@[expose] def fval {R : Type*} [CommRing R] (a₂ a₄ a₆ θ : R) : R := θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
 
-/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-@[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p := 3 * θ ^ 2 + 2 * a₂ * θ + a₄
+/-- The value `f'(θ) = 3θ² + 2a₂θ + a₄`. -/
+@[expose] def fderiv {R : Type*} [CommRing R] (a₂ a₄ θ : R) : R := 3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
 /-- The descent character as a raw function. -/
 @[expose] noncomputable def lambda (θ : ZMod p) :
@@ -54,7 +54,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
     if (x.den : ZMod p) = 0 then 0
     else
       let α : ZMod p := x.num - θ * x.den
-      if α = 0 then psi p (fderiv a₂ a₄ p θ) else psi p α
+      if α = 0 then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p α
 
 @[simp, grind =]
 theorem lambda_zero {θ : ZMod p} :
@@ -74,7 +74,7 @@ structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where
   /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
   discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
-  root : fval a₂ a₄ a₆ p θ = 0
+  root : fval (R := ZMod p) a₂ a₄ a₆ θ = 0
 
 attribute [grind →] DescentHyp.discr DescentHyp.root
 
