@@ -59,4 +59,11 @@ public theorem trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
     equation_smul _ (isUnit_iff_ne_zero.2 (by positivity)), equation_some,
     map_curveℤ_toProjective]
 
+/-- The three coordinates of `trep x y w`. -/
+@[simp] public theorem trep_zero : trep x y w 0 = x.num * w := by simp [trep]
+
+@[simp] public theorem trep_one : trep x y w 1 = y.num := by simp [trep]
+
+@[simp] public theorem trep_two : trep x y w 2 = w ^ 3 := by simp [trep]
+
 end ECCompute
