@@ -39,7 +39,6 @@ namespace Module
 public lemma natCard_eq_two_pow_finrank {V : Type*} [AddCommGroup V] [Module (ZMod 2) V]
     [Finite V] :
     Nat.card V = 2 ^ finrank (ZMod 2) V := by
-  have := Module.Finite.of_finite (R := ZMod 2) (M := V)
   rw [natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
 
 /-- A finite `ℤ`-module has free rank zero. -/

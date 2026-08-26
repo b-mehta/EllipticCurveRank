@@ -43,8 +43,7 @@ def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_eq :
-    (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
+theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
   simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]
   grind
 
@@ -55,12 +54,8 @@ theorem curve_Δ_num :
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod :
-    (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = (discrInt a₂ a₄ a₆ : ZMod p) := by
-  have h : ∀ a : ℤ, ((a % (p : ℤ)) : ZMod p) = (a : ZMod p) := fun a ↦ by
-    rw [ZMod.intCast_eq_intCast_iff']; exact Int.emod_emod_of_dvd a dvd_rfl
-  simp only [discrInt]
-  push_cast [h]
-  ring
+    (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = discrInt a₂ a₄ a₆ := by
+  simp [discrInt]
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
 theorem fval_iff (hp : 1 < p) :
