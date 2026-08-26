@@ -116,7 +116,7 @@ public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
 /-- Entry `(i, j)` of `toMat B n`, for a row index in range: bit `j` of row `i` of `B`. -/
 public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B.length) :
     toMat B n i j = if B[i].testBit j then 1 else 0 := by
-  rw [toMat, Matrix.of_apply, List.getD_eq_getElem (hn := h), Fin.getElem_fin]
+  rw [toMat, Matrix.of_apply, List.getD_eq_getElem _ _ h, Fin.getElem_fin]
 
 /-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
 def toMatCols (M : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) := (toMat M n).transpose
