@@ -64,25 +64,25 @@ def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :
 
 /-- Pack booleans `p 0, …, p (n-1)` into a `Nat` bitmask: bit `j` set iff `p j`. -/
 def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
-  (List.range n).foldl (fun acc j => if p j then acc ||| (1 <<< j) else acc) 0
+  (List.range n).foldl (fun acc j ↦ if p j then acc ||| (1 <<< j) else acc) 0
 
 /-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `ls[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
 def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
-  xs.map fun x =>
-    bitmaskOf ls.length (fun j => let l := ls[j]!; lambdaEval a₂ a₄ l.1 l.2 x.1 x.2)
+  xs.map fun x ↦
+    bitmaskOf ls.length (fun j ↦ let l := ls[j]!; lambdaEval a₂ a₄ l.1 l.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
 def qrMaskNat (p : Nat) : Nat :=
-  (List.range ((p - 1) / 2)).foldl (fun acc k => acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
+  (List.range ((p - 1) / 2)).foldl (fun acc k ↦ acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
 `none` if the matrix is singular. -/
 def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
-  let mut inv : Array Nat := (Array.range n).map (fun i => (1 <<< i : Nat))
+  let mut inv : Array Nat := (Array.range n).map (fun i ↦ (1 <<< i : Nat))
   for col in [0:n] do
     let mut piv : Option Nat := none
     for r in [col:n] do
@@ -99,8 +99,8 @@ def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
         if r2 != col && a[r2]!.testBit col then
           a := a.set! r2 (a[r2]! ^^^ a[col]!)
           inv := inv.set! r2 (inv[r2]! ^^^ inv[col]!)
-  return some <| (List.range n).map fun k =>
-    bitmaskOf n (fun j => inv[j]!.testBit k)
+  return some <| (List.range n).map fun k ↦
+    bitmaskOf n (fun j ↦ inv[j]!.testBit k)
 
 end ECCompute.CertifyEval
 
@@ -214,7 +214,7 @@ private def readGoal (goal : MVarId) :
 line kind in the error message. -/
 private def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
     MetaM (Array α) := do
-  ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l => do
+  ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l ↦ do
     if (strTrim l).isEmpty then return none
     match parse l with
     | some a => return some a
@@ -256,12 +256,12 @@ private def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls :
     (B M : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
-  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) =>
+  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) ↦
     mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
-  let q := ls.toList.map fun l => CertifyEval.qrMaskNat l.1
+  let q := ls.toList.map fun l ↦ CertifyEval.qrMaskNat l.1
   return mkAppN (mkConst ``Certificate.mk)
     #[sA2E, sA4E, sA6E, toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
@@ -328,7 +328,7 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let a6E := toExpr v6
   let ρ := ρGoal + t
   let (pts, ls) ← readData path lpath ρ
-  let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
+  let xs := (pts.map fun (xn, xd, _, _) ↦ (xn, xd)).toList
   let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs ls.toList ρ
   let cExpr ← mkCertExpr ρ pts ls B M t tpNat a1E a2E a3E a4E a6E
   -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
