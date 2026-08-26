@@ -82,8 +82,7 @@ public theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (h₂ : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆) :
     x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
-      x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧
-        x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
+      x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧ x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
   grind (ringSteps := 200000)
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
