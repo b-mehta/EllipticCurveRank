@@ -43,8 +43,7 @@ noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
 
 @[simp]
 theorem εpFinite_zero {θ : ZMod p} :
-    εpFinite a₂ a₄ a₆ p θ
-      (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
+    εpFinite a₂ a₄ a₆ p θ (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
   rfl
 
 theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
@@ -59,8 +58,7 @@ variable {θ : ZMod p}
 private theorem reduced_equation {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
-  have := (Affine.equation_iff
-    (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
+  have := (Affine.equation_iff (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
   simpa [map_curveℤ_zmod] using this
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
@@ -93,8 +91,7 @@ private theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
   have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ
-      hσ₁ hσ₂ hσ₃ hθroot hc
+    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot hc
   have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
     fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
       (by grind) (by grind) (by grind)
@@ -123,8 +120,7 @@ private theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p
 
 /-- Additivity of `εpFinite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
 distinct `x`-coordinates over `𝔽ₚ`. -/
-theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
-    {x₁ y₁ x₂ y₂ : ZMod p}
+theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x₁ y₁ x₂ y₂ : ZMod p}
     (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
@@ -205,10 +201,8 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
-      = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by
-    rwa [hm]
-  have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by
-    grind
+      = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by rwa [hm]
+  have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by grind
   have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
     rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
@@ -219,22 +213,19 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
 theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curveZMod a₂ a₄ a₆ p).toAffine.Point) :
-    εpFinite a₂ a₄ a₆ p θ (P + Q)
-      = εpFinite a₂ a₄ a₆ p θ P + εpFinite a₂ a₄ a₆ p θ Q := by
+    εpFinite a₂ a₄ a₆ p θ (P + Q) = εpFinite a₂ a₄ a₆ p θ P + εpFinite a₂ a₄ a₆ p θ Q := by
   rcases P with _ | ⟨x₁, y₁, h₁⟩
   · rw [← Affine.Point.zero_def, zero_add, εpFinite_zero, zero_add]
   rcases Q with _ | ⟨x₂, y₂, h₂⟩
   · rw [← Affine.Point.zero_def, add_zero, εpFinite_zero, add_zero]
-  by_cases hxy : x₁ = x₂ ∧
-      y₁ = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₂ y₂
+  by_cases hxy : x₁ = x₂ ∧ y₁ = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
     rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
       have hyne' : y₁ ≠ -y₂ := by grind
-      have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by
-        rw [reduced_equation h₁, reduced_equation h₂]
+      have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by rw [reduced_equation h₁, reduced_equation h₂]
       have hyeq : y₁ = y₂ := by grind
       have hy1ne0 : y₁ ≠ 0 := by grind
       subst hyeq

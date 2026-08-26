@@ -30,8 +30,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
 /-! ### Integer data attached to a kernel point -/
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
-theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) :
-    (q.num : ℚ) = q * (w : ℚ) ^ k := by
+theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) : (q.num : ℚ) = q * (w : ℚ) ^ k := by
   rw [(div_eq_iff (mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
 /-- The numerator of a rational with square denominator `w²` is coprime to any `p ∣ w`. -/
@@ -65,8 +64,7 @@ theorem int_curve_relation {x y : ℚ} {A B E : ℤ}
     (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
     B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
   have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
-      + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by
-    grind
+      + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by grind
   exact mod_cast hq
 
 /-! ### The certificate scalars -/
@@ -141,8 +139,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono (p := p) (a := K ^ 2) (b := M * K ^ 2)
-        ⟨M, by ring⟩ h0
+      have hle := padicValInt_mono (p := p) (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he ↦ by
@@ -174,12 +171,10 @@ theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
     rw [eq_div_iff hDen3Q]; exact hMain
   have hx3neg : padicValRat p x₃ < 0 := by
-    rw [hx3div, padicValRat.div (mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int,
-      hDenval]
+    rw [hx3div, padicValRat.div (mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int, hDenval]
     grind
   have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
-  exact (ZMod.natCast_eq_zero_iff _ p).mpr
-    ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
+  exact (ZMod.natCast_eq_zero_iff _ p).mpr ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
 
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
@@ -226,10 +221,8 @@ public theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
-  have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by
-    grind [Affine.slope_of_X_ne]
-  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-    rw [hx3def]; simp only [Affine.addX, curve]; grind
+  have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
+  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp only [Affine.addX, curve]; grind
   have hcv1 := equation_curve h₁
   have hcv2 := equation_curve h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data h₁ hd1
