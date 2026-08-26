@@ -77,7 +77,8 @@ model `scaling 2 • shortModel ⟨a₁, a₂, a₃, a₄, a₆⟩` (equal to `i
 `scaling_smul_shortModel`), on which the descent character is stated. -/
 public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Point ≃+
-      (scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)).toAffine.Point :=
+      (scaling 2 two_ne_zero
+          • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)).toAffine.Point :=
   (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans (VariableChange.pointAddEquiv (scaling 2 two_ne_zero))
 
 end ECCompute.IntegralScaling
