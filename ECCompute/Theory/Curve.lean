@@ -47,4 +47,9 @@ variable {a₂ a₄ a₆ : ℤ}
 theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve]
 
+/-- On the short model `curve a₂ a₄ a₆`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
+theorem curve_addX {x₁ x₂ ℓ : ℚ} :
+    (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
+  simp only [Affine.addX, curve]; grind
+
 end ECCompute
