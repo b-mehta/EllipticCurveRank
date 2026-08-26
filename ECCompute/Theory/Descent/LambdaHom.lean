@@ -10,7 +10,7 @@ public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Cast
 import ECCompute.Theory.Descent.Reduction.RedP
-import ECCompute.Theory.Descent.Reduction.Hom
+import ECCompute.Theory.Descent.Reduction.RedHom
 import ECCompute.Theory.Descent.Reduction.EpsFinite
 
 /-!
@@ -19,7 +19,7 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
 `ECCompute.Descent.Character`. Additivity is obtained by factoring `λ` through the reduction map
 `redP : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εpFinite`, both of which are
-additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
+additive homomorphisms (see `ECCompute.Descent.Reduction.RedHom` and
 `ECCompute.Descent.Reduction.EpsFinite`).
 
 ## Main declarations
@@ -57,7 +57,7 @@ theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
 /-! ### Additivity via the reduction factorization
 
 Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : E(ℚ) → E(𝔽ₚ)`
-(`ECCompute.Descent.Reduction.Hom`) and `εpFinite : E(𝔽ₚ) → ZMod 2`
+(`ECCompute.Descent.Reduction.RedHom`) and `εpFinite : E(𝔽ₚ) → ZMod 2`
 (`ECCompute.Descent.Reduction.EpsFinite`) both `AddMonoidHom`s. See `lambda_map_add`. -/
 
 /-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
