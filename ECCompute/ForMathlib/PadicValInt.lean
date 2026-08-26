@@ -24,7 +24,7 @@ product identity.
 
 public section
 
-variable (p : ℕ) [Fact p.Prime]
+variable {p : ℕ} [Fact p.Prime]
 
 /-- `padicValInt p` is monotone under divisibility for a nonzero target. -/
 theorem padicValInt_mono {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
