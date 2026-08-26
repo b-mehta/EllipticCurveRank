@@ -39,18 +39,18 @@ variable [Fact p.Prime]
 /-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
 noncomputable def εpFinite (θ : ZMod p) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point → ZMod 2
+    (curveZMod a₂ a₄ a₆ p).toAffine.Point → ZMod 2
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
 theorem εpFinite_zero {θ : ZMod p} :
     εpFinite a₂ a₄ a₆ p θ
-      (0 : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) = 0 :=
+      (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
   rfl
 
 theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
-    (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
+    (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
   rfl
@@ -60,10 +60,10 @@ variable {θ : ZMod p}
 
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
 private theorem reduced_equation {X Y : ZMod p}
-    (h : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular X Y) :
+    (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
   have := (Affine.equation_iff
-    (W := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine) X Y).mp h.1
+    (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
   simpa [map_curveℤ_zmod] using this
 
 omit [Fact p.Prime] in
@@ -78,8 +78,8 @@ private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
-    {h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁}
-    {h₂ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₂ y₂}
+    {h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁}
+    {h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
@@ -130,15 +130,15 @@ private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x�
 distinct `x`-coordinates over `𝔽ₚ`. -/
 theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
     {x₁ y₁ x₂ y₂ : ZMod p}
-    (h₁ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₁ y₁)
-    (h₂ : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x₂ y₂)
+    (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂)
     (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   rw [Affine.Point.add_of_X_ne hne]
   simp only [εpFinite_some]
-  set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x₁ x₂ ℓ with hX3def
+  set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hX3def
   have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
@@ -188,13 +188,13 @@ private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m 
 /-- Additivity of `εpFinite` in the doubling case: `εpFinite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
 theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
-    (hP : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular x y)
+    (hP : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y)
     (hy0 : y ≠ 0) :
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
   have hneg := reduced_negY a₂ a₄ a₆ p x y
-  have hyne : y ≠ ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x y := by grind
+  have hyne : y ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x y := by grind
   have hcurve : y ^ 2
       = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
     reduced_equation hP
@@ -202,8 +202,8 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
   have hXθ : x ≠ θ := by grind
   rw [Affine.Point.add_self_of_Y_ne hyne]
   simp only [εpFinite_some]
-  set ℓ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.slope x x y y with hℓdef
-  set X₃ := ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.addX x x ℓ with hX3def
+  set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
+  set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
     have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
@@ -225,7 +225,7 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
 theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P Q : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point) :
+    (P Q : (curveZMod a₂ a₄ a₆ p).toAffine.Point) :
     εpFinite a₂ a₄ a₆ p θ (P + Q)
       = εpFinite a₂ a₄ a₆ p θ P + εpFinite a₂ a₄ a₆ p θ Q := by
   rcases P with _ | ⟨x₁, y₁, h₁⟩
@@ -233,7 +233,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
   rcases Q with _ | ⟨x₂, y₂, h₂⟩
   · rw [← Affine.Point.zero_def, add_zero, εpFinite_zero, add_zero]
   by_cases hxy : x₁ = x₂ ∧
-      y₁ = ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.negY x₂ y₂
+      y₁ = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
     rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
       εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
@@ -246,7 +246,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       have hy1ne0 : y₁ ≠ 0 := by grind
       subst hyeq
       have hpt : (Affine.Point.some x₁ y₁ h₂ :
-          ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point)
+          (curveZMod a₂ a₄ a₆ p).toAffine.Point)
           = Affine.Point.some x₁ y₁ h₁ := rfl
       rw [hpt, CharTwo.add_self_eq_zero]
       exact εpFinite_double h h₁ hy1ne0
@@ -256,7 +256,7 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
 /-- The finite-field descent character `εpFinite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
 @[simps]
 noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point →+ ZMod 2 where
+    (curveZMod a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
   map_zero' := εpFinite_zero a₂ a₄ a₆ p
   map_add' := εpFinite_map_add h

@@ -54,7 +54,7 @@ theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
 
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).Δ ≠ 0 := by
+    (curveZMod a₂ a₄ a₆ p).Δ ≠ 0 := by
   simpa [map_Δ, eq_intCast] using hΔ
 
 /-! ### Nonsingularity of the reduced representative -/
@@ -63,9 +63,9 @@ theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
 public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Nonsingular
+    (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
       (Int.castRingHom (ZMod p) ∘ trep x y w) := by
-  have hEq : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Equation
+  have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation
       (Int.castRingHom (ZMod p) ∘ trep x y w) :=
     (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
@@ -116,7 +116,7 @@ public theorem repr_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
 /-- `repr P` is a nonsingular representative on the reduced curve (needs good reduction `hΔ`). -/
 public theorem repr_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective.Nonsingular
+    (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
       (repr a₂ a₄ a₆ p P) := by
   cases P with
   | zero => exact nonsingular_zero
@@ -130,15 +130,15 @@ public theorem repr_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
 /-- The reduction map on affine points: the affine point of the reduced projective
 representative `repr`. -/
 public noncomputable def redP (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Point :=
+    (curveZMod a₂ a₄ a₆ p).toAffine.Point :=
   Point.toAffine
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective (repr a₂ a₄ a₆ p P)
+    (curveZMod a₂ a₄ a₆ p).toProjective (repr a₂ a₄ a₆ p P)
 
 /-- `redP` is `toAffine` of the fixed representative. -/
 public theorem redP_eq_toAffine (P : (curve a₂ a₄ a₆).toAffine.Point) :
     redP a₂ a₄ a₆ p P
       = Point.toAffine
-          ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective (repr a₂ a₄ a₆ p P) := by
+          (curveZMod a₂ a₄ a₆ p).toProjective (repr a₂ a₄ a₆ p P) := by
   simp only [redP]
 
 @[simp]
@@ -150,7 +150,7 @@ public theorem redP_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     redP a₂ a₄ a₆ p (.some x y h)
       = Point.toAffine
-          ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective
+          (curveZMod a₂ a₄ a₆ p).toProjective
           (Int.castRingHom (ZMod p) ∘ trep x y w) := by
   rw [redP_eq_toAffine, repr_some a₂ a₄ a₆ p h hden hden']
 
@@ -169,7 +169,7 @@ public theorem redP_of_den_zero (h : (curve a₂ a₄ a₆).toAffine.Nonsingular
 public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3)
     (hwne : (w : ZMod p) ≠ 0) :
-    ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular
+    (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular
       (x : ZMod p) (y : ZMod p) := by
   have hns := red_nonsingular a₂ a₄ a₆ p hΔ h hden hden'
   have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
