@@ -275,11 +275,11 @@ theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {
       by_cases hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
           (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p)
       · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2
-          (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1])
-          hXbar hYbar hYneg
+          (by grind [ydenom_eq_zero_iff, Affine.Nonsingular.equation])
+          (by grind [ydenom_eq_zero_iff, Affine.Nonsingular.equation]) hXbar hYbar hYneg
       · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2
-          (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1])
-          hXbar hYbar hYneg
+          (by grind [ydenom_eq_zero_iff, Affine.Nonsingular.equation])
+          (by grind [ydenom_eq_zero_iff, Affine.Nonsingular.equation]) hXbar hYbar hYneg
 
 /-! ### The homomorphism -/
 
