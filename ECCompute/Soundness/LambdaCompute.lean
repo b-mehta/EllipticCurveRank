@@ -124,17 +124,17 @@ theorem alphaResNat_cast (hp : p ≠ 0) :
 
 /-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
 theorem alphaResNat_eq_val (hp : p ≠ 0) {x : ℚ}
-    (htval : (tval : ZMod p) = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
-    alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * x.den).val := by
-  have hcast : (alphaResNat p tval xp xm xden : ZMod p) = (x.num : ZMod p) - θ * x.den := by
+    (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
+    alphaResNat p tval xp xm xden = (x.num - θ * x.den).val := by
+  have hcast : (alphaResNat p tval xp xm xden : ZMod p) = x.num - θ * x.den := by
     rw [alphaResNat_cast hp, ← htval, ← hxden]
-    have : (x.num : ZMod p) = (xp : ZMod p) - xm := by rw [hxnum]; push_cast; ring
+    have : (x.num : ZMod p) = xp - xm := by rw [hxnum]; push_cast; ring
     grind
   have hlt : alphaResNat p tval xp xm xden < p := Nat.mod_lt _ hp.bot_lt
   rw [← hcast, ZMod.val_cast_of_lt hlt]
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-theorem fderivResNat_cast (hp : p ≠ 0) (htval : (tval : ZMod p) = θ) :
+theorem fderivResNat_cast (hp : p ≠ 0) (htval : tval = θ) :
     (fderivResNat a₂ a₄ p tval : ZMod p) = fderiv a₂ a₄ p θ := by
   simp only [fderivResNat]
   rw [polyModL_cast hp]
@@ -145,7 +145,7 @@ theorem fderivResNat_cast (hp : p ≠ 0) (htval : (tval : ZMod p) = θ) :
   ring
 
 /-- `fderivResNat` is the `ZMod p`-value of `f'(θ)`. -/
-theorem fderivResNat_eq_val (hp : p ≠ 0) (htval : (tval : ZMod p) = θ) :
+theorem fderivResNat_eq_val (hp : p ≠ 0) (htval : tval = θ) :
     fderivResNat a₂ a₄ p tval = (fderiv a₂ a₄ p θ).val := by
   have hlt : fderivResNat a₂ a₄ p tval < p := by simp only [fderivResNat]; exact polyModL_lt hp
   rw [← fderivResNat_cast hp htval, ZMod.val_cast_of_lt hlt]
@@ -155,7 +155,7 @@ character `lambda` at the affine point, provided its `Nat` inputs encode the arg
 and `x` has numerator `xp - xm` and denominator `xden`. -/
 public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
-    (htval : (tval : ZMod p) = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
+    (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
     (if lambdaK a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
       = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have hp : p ≠ 0 := hyp.prime.ne_zero
