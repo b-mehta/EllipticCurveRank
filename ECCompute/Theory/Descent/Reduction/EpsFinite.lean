@@ -42,9 +42,7 @@ noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
-theorem εpFinite_zero {θ : ZMod p} :
-    εpFinite a₂ a₄ a₆ p θ (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
-  rfl
+theorem εpFinite_zero {θ : ZMod p} : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rfl
 
 theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
