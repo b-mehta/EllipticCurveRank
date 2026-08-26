@@ -182,8 +182,7 @@ private theorem εp_double_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a�
 /-- Additivity of `εpFinite` in the doubling case: `εpFinite` vanishes on `2P` for a point
 `P = (x, y)` that is not `2`-torsion (`y ≠ 0`). -/
 theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
-    (hP : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y)
-    (hy0 : y ≠ 0) :
+    (hP : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) (hy0 : y ≠ 0) :
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
