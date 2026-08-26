@@ -21,8 +21,6 @@ multiplication, powers and division.
 
 * `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
   `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
-* `Rat.den_cast_eq_zero_iff`: reductions of a power-base denominator
-  `q.den = w ^ k`.
 -/
 
 section
@@ -41,11 +39,6 @@ end ZMod
 namespace Rat
 
 variable {p : ℕ}
-
-/-- With `q.den = w ^ k` (`k ≠ 0`), the denominator vanishes mod `p` iff `w` does. -/
-public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
-    (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
-  rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
 
 /-- If `x` and `y` both reduce well mod `p`, so does `x + y`: the sum's denominator divides
 `x.den * y.den`. -/

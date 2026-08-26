@@ -24,7 +24,8 @@ and `ECCompute.Descent.Reduction.Hom`.
 
 * `ECCompute.xbar`: the reduced `x`-coordinate `(x : ZMod p)` as a plain field element.
 * `ECCompute.num_eq_xbar_mul_den`: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`.
-* `ECCompute.ydenom_ne_zero`: the `y`-denominator survives reduction when the `x`-denominator does.
+* `ECCompute.ydenom_eq_zero_iff`: the `y`-denominator vanishes mod `p` iff the `x`-denominator
+  does.
 -/
 
 open WeierstrassCurve
@@ -50,11 +51,11 @@ public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod 
 
 When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` and `y.den = w³`. -/
 
-/-- The `y`-denominator reduces well whenever the `x`-denominator does (since
+/-- The `y`-denominator vanishes mod `p` iff the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
-public theorem ydenom_ne_zero {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
+public theorem ydenom_eq_zero_iff {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
-    (x.den : ZMod p) = 0 ↔ (y.den : ZMod p) = 0 := by
+    (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare h
   simp_all
 
