@@ -54,10 +54,11 @@ When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` a
 
 /-- The `y`-denominator vanishes mod `p` iff the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
-public theorem ydenom_eq_zero_iff {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
+public theorem ydenom_eq_zero_iff {a₂ a₄ a₆ : ℤ} (hp : p.Prime) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare h
-  simp_all
+  simp only [ZMod.natCast_eq_zero_iff]
+  grind [hp.prime.dvd_pow_iff_dvd]
 
 end ECCompute
