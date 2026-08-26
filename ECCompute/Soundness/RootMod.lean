@@ -33,8 +33,8 @@ variable {cs : List ℤ} {ℓ r : ℕ}
 
 /-- The `Nat` residue `(z % p).toNat` casts back to `z` in `ZMod p`. -/
 public theorem intResNat_cast {p : ℕ} {z : ℤ} (hp : p ≠ 0) :
-    ((z % (p : ℤ)).toNat : ZMod p) = z := by
-  have hnn : 0 ≤ z % (p : ℤ) := Int.emod_nonneg z (mod_cast hp)
+    ((z % p).toNat : ZMod p) = z := by
+  have hnn : 0 ≤ z % p := Int.emod_nonneg z (mod_cast hp)
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 
