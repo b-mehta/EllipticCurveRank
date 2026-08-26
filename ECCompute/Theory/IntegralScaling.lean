@@ -7,7 +7,7 @@ module
 
 public import ECCompute.Theory.Descent.Character
 
-import ECCompute.Theory.CompleteSquare
+public import ECCompute.Theory.CompleteSquare
 
 /-!
 # The general-to-integer-short-model change of variables
@@ -43,7 +43,7 @@ open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 
 /-- The pure scaling change of variables `⟨1/v, 0, 0, 0⟩` (`v ≠ 0`), whose action `C • W` scales the
 coefficients by `W.aᵢ ↦ vⁱ · W.aᵢ` and points by `(x, y) ↦ (v²x, v³y)`. -/
-def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
+public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
 
 /-! ## The integral short model and the change of variables -/
 
