@@ -57,8 +57,7 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
           + a₆ * (x.den : ℤ) ^ 3) * (y.den : ℤ) ^ 2 := by
     have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
-            + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by
-      grind
+            + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by grind
     exact mod_cast hQ
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3
@@ -74,8 +73,7 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
   have hdvd2 : (y.den : ℤ) ^ 2 ∣ (x.den : ℤ) ^ 3 := by
     have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := hcy.symm.pow_left.pow_right
     exact hc.dvd_of_dvd_mul_left ⟨N, by grind⟩
-  exact exists_sq_cube_of_cube_eq_sq
-    (Nat.dvd_antisymm (mod_cast hdvd1) (mod_cast hdvd2))
+  exact exists_sq_cube_of_cube_eq_sq (Nat.dvd_antisymm (mod_cast hdvd1) (mod_cast hdvd2))
 
 /-- Point form of `den_isSquare`: for a point `.some x y h` on the integral curve, there is
 `w` with `x.den = w²` and `y.den = w³`. -/

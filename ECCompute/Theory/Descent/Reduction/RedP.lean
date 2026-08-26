@@ -48,8 +48,7 @@ theorem trep_coord_one (hden' : y.den = w ^ 3) :
 
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
-    (curveZMod a₂ a₄ a₆ p).Δ ≠ 0 := by
-  simpa [map_Δ, eq_intCast] using hΔ
+    (curveZMod a₂ a₄ a₆ p).Δ ≠ 0 := by simpa [map_Δ, eq_intCast] using hΔ
 
 /-! ### Nonsingularity of the reduced representative -/
 
@@ -65,8 +64,7 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     have hz0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = 0 := by simp [hwz]
     rw [nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
-    have hX0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 0 = 0 :=
-      X_eq_zero_of_Z_eq_zero hEq hz0
+    have hX0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 0 = 0 := X_eq_zero_of_Z_eq_zero hEq hz0
     have hYne : (Int.castRingHom (ZMod p) ∘ trep x y w) 1 ≠ 0 := by
       simp only [Function.comp_apply, trep_one, eq_intCast]
       rw [Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
@@ -92,8 +90,10 @@ and `ℤ → ZMod p` applied to the integer representative `trep` otherwise. -/
 public noncomputable def repr (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] :
     (curve a₂ a₄ a₆).toAffine.Point → Fin 3 → ZMod p
   | .zero => ![0, 1, 0]
-  | .some x y h =>
-      Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare_of_nonsingular h).choose
+  | .some x y h => Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare_of_nonsingular h).choose
+
+/-- `repr` of the origin is the fixed representative `![0, 1, 0]`. -/
+public theorem repr_zero : repr a₂ a₄ a₆ p .zero = ![0, 1, 0] := by simp [repr]
 
 /-- `repr` of a `some` point, through any witness `w` with `x.den = w²`, `y.den = w³`. -/
 public theorem repr_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
@@ -126,9 +126,7 @@ public noncomputable def redP (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
 
 /-- `redP` is `toAffine` of the fixed representative. -/
 public theorem redP_eq_toAffine (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    redP a₂ a₄ a₆ p P
-      = Point.toAffine
-          (curveZMod a₂ a₄ a₆ p).toProjective (repr a₂ a₄ a₆ p P) := by
+    redP a₂ a₄ a₆ p P = Point.toAffine (curveZMod a₂ a₄ a₆ p).toProjective (repr a₂ a₄ a₆ p P) := by
   simp only [redP]
 
 @[simp]
