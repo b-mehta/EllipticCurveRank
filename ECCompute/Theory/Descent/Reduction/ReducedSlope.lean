@@ -92,7 +92,8 @@ public theorem reduced_slope_den (hne : x₁ ≠ x₂)
     rw [eq_div_iff hy12]; exact slope_mul_add_eq hne h₁ h₂
   have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [cast_add_of_ne_zero hdy1 hdy2]
   rw [halt]
-  exact den_div_ne_zero (cast_secant_num hd1 hd2).1 (den_add_ne_zero Fact.out hdy1 hdy2) hy2'
+  exact den_div_ne_zero Fact.out (cast_secant_num hd1 hd2).1
+    (fun h ↦ hy2' (by rw [Rat.cast_def, h, zero_div]))
 
 /-- The reduced coordinates satisfy the reduced `addX` relation `S² = X̄₃ + a₂ + X̄₁ + X̄₂` and the
 alternate-slope identity `S·(Ȳ₁ + Ȳ₂) = X̄₁² + X̄₁X̄₂ + X̄₂² + a₂(X̄₁ + X̄₂) + a₄`, for the reduced

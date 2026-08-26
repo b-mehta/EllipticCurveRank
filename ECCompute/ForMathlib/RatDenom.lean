@@ -55,19 +55,15 @@ public theorem den_mul_ne_zero (hp : p.Prime) {x y : ℚ} (hx : (x.den : ZMod p)
   have : Fact p.Prime := ⟨hp⟩
   mem_padicInteger_iff.mp (mul_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
 
-/-- `(·.den : ZMod p) ≠ 0` is closed under division by an element nonzero mod `p`, since then the
-inverse also has good denominator. -/
-public theorem den_div_ne_zero [Fact p.Prime] {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
-    (ha : (a.den : ZMod p) ≠ 0) (ha0 : (a : ZMod p) ≠ 0) :
-    ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := by grind [Rat.cast_zero]
-  have hnum : (a.num : ZMod p) ≠ 0 := by
-    have hval : (a.num : ZMod p) = a * a.den := by rw [Rat.cast_def, div_mul_cancel₀ _ ha]
-    grind
+/-- `(·.den : ZMod p) ≠ 0` is closed under division by an element with `p`-unit numerator, since
+then the inverse also has good denominator. -/
+public theorem den_div_ne_zero (hp : p.Prime) {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
+    (ha0 : (a.num : ZMod p) ≠ 0) : ((b / a).den : ZMod p) ≠ 0 := by
+  have ha' : a ≠ 0 := by rintro rfl; simp at ha0
   have hinv : (a⁻¹.den : ZMod p) ≠ 0 := by
     rwa [Rat.den_inv_of_ne_zero ha', ne_eq, ZMod.natCast_eq_zero_iff, ← Int.natCast_dvd_natCast,
       Int.dvd_natAbs, ← ZMod.intCast_zmod_eq_zero_iff_dvd]
-  rw [div_eq_mul_inv]; exact den_mul_ne_zero Fact.out hb hinv
+  rw [div_eq_mul_inv]; exact den_mul_ne_zero hp hb hinv
 
 end Rat
 
