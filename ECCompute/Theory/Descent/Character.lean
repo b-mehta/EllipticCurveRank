@@ -168,7 +168,7 @@ theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x�
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ
+  prod_sub_theta_eq_lineSq (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃ θ
     hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
@@ -202,6 +202,7 @@ public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
 public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
     psi p (b ^ 2 * a) = psi p a := by
+  have : Fact p.Prime := ⟨hp⟩
   rcases eq_or_ne a 0 with rfl | ha
   · rw [mul_zero]
   · rw [psi_mul hp (pow_ne_zero 2 hb) ha, psi_of_isSquare ⟨b, by ring⟩, zero_add]
