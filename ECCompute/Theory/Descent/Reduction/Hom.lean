@@ -269,8 +269,6 @@ private theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   · -- `P` has good reduction; then so does `Q`, and they share reduced coordinates.
     have hd2 : (x₂.den : ZMod p) ≠ 0 := by
       grind [redP_of_den_ne, redP_of_den_zero, Affine.Point.some_ne_zero]
-    have hdy1 : (y₁.den : ZMod p) ≠ 0 := ydenom_ne_zero h₁.1 hd1
-    have hdy2 : (y₂.den : ZMod p) ≠ 0 := ydenom_ne_zero h₂.1 hd2
     rw [redP_of_den_ne hΔ h₁ hd1, redP_of_den_ne hΔ h₂ hd2,
       Affine.Point.some.injEq] at hred
     obtain ⟨hXbar, hYbar⟩ := hred
@@ -287,10 +285,13 @@ private theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
       -- whether the common reduced point is `2`-torsion.
       by_cases hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
           (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p)
-      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2
-          hXbar hYbar hYneg
-      · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2
-          hXbar hYbar hYneg
+      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2
+          (by grind [ydenom_ne_zero, h₁.1]) (by grind [ydenom_ne_zero, h₂.1]) hXbar hYbar hYneg
+        -- TODO: add a `grind →` lemma for Nonsingular => Equation, then drop the h_.1 above
+        -- TODO: add ydenom_ne_zero to grind, probably as _=_
+        -- TODO: find a better name for ydenom_ne_zero
+      · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2
+          (by grind [ydenom_ne_zero, h₁.1]) (by grind [ydenom_ne_zero, h₂.1]) hXbar hYbar hYneg
 
 /-! ### The homomorphism -/
 
