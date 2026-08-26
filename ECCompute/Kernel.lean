@@ -108,7 +108,7 @@ noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
 /-- The value of the descent character `λ_{p,θ}` at a point. -/
-noncomputable def lambdaComputeBoolNatMask (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
+noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResNat p tval xp xm xden).beq 0).rec
       ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
@@ -168,8 +168,8 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (labN : Lis
   labN.rec (fun _ ↦ true)
     (fun l _ ih b ↦
       (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaComputeBoolNatMask a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
+        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
+        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (ih (b.div 2))) b
 
 /-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
