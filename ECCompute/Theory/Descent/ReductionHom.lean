@@ -169,11 +169,11 @@ variable [Fact p.Prime]
 /-! ### The reduced addition formulas -/
 
 /-- In the genuine-tangent case the reduced secant slope equals the reduced tangent slope `ℓ`:
-`slope X̄₁ X̄₁ Ȳ₁ Ȳ₁ = ℓ`, matched via the reduced tangent identity `htan` and `X̄₁ = X̄₂`. -/
-theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
-    (hYneg : ¬ y₁ = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁)
-    (h2Yne : y₁ + y₁ ≠ 0) (hXbar : x₁ = x₂) (hYbar : y₁ = y₂)
-    (htan : ℓ * (y₁ + y₂) = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄) :
+`slope x₁ x₁ y₁ y₁ = ℓ`, from the reduced tangent identity `htan`. -/
+theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
+    (hYneg : y₁ ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁)
+    (h2Yne : y₁ + y₁ ≠ 0)
+    (htan : ℓ * (y₁ + y₁) = x₁ ^ 2 + x₁ * x₁ + x₁ ^ 2 + a₂ * (x₁ + x₁) + a₄) :
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
@@ -181,15 +181,15 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
   rw [div_mul_cancel₀ _ h2Yne]
   grind
 
-/-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
-theorem reduced_addX_eq {X L : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L = L ^ 2 - a₂ - X - X := by
+/-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
+theorem reduced_addX_eq {x ℓ : ZMod p} :
+    (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ = ℓ ^ 2 - a₂ - x - x := by
   simp only [Affine.addX, map_curveℤ_zmod]; grind
 
-/-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
-theorem reduced_addY_eq {X Y L : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addY X X Y L
-      = -(L * ((curveZMod a₂ a₄ a₆ p).toAffine.addX X X L - X) + Y) := by
+/-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
+theorem reduced_addY_eq {x y ℓ : ZMod p} :
+    (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
+      = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
   simp only [Affine.addY, Affine.negY, Affine.negAddY, map_curveℤ_zmod]; grind
 
 /-- When the slope, `x`-coordinates and `y`-coordinate have nonzero denominators mod `p`, the cast
@@ -624,7 +624,8 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
-  have hℓd := reduced_slope_eq hYneg h2Yne hXbar hYbar htan
+  rw [← hXbar, ← hYbar] at htan
+  have hℓd := reduced_slope_eq hYneg h2Yne htan
   have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
   have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
