@@ -27,16 +27,18 @@ open Polynomial
 
 namespace WeierstrassCurve
 
-variable {F : Type*} [Field F] (W : WeierstrassCurve F)
+variable {F : Type*} [Field F] (W : WeierstrassCurve F) {x : F}
 
 /-- Evaluate the 2-torsion polynomial at `x`, expanded via the `bᵢ` coefficients. -/
 @[grind =]
-public lemma eval_twoTorsionPolynomial_toPoly {x : F} :
+public lemma eval_twoTorsionPolynomial_toPoly :
     W.twoTorsionPolynomial.toPoly.eval x = 4 * x ^ 3 + W.b₂ * x ^ 2 + 2 * W.b₄ * x + W.b₆ := by
   simp [twoTorsionPolynomial, Cubic.toPoly]
 
+variable [DecidableEq F]
+
 /-- A nonzero affine point `some x y h` with `P + P = 0` satisfies `y = W.negY x y`. -/
-public theorem Y_eq_negY_of_add_self [DecidableEq F] {x y : F} (h : W.toAffine.Nonsingular x y)
+public theorem Y_eq_negY_of_add_self {y : F} (h : W.toAffine.Nonsingular x y)
     (hP : (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0) :
     y = W.toAffine.negY x y := by
   by_contra hne
@@ -45,7 +47,7 @@ public theorem Y_eq_negY_of_add_self [DecidableEq F] {x y : F} (h : W.toAffine.N
 
 /-- A nonzero affine `2`-torsion point `some x y h` of `W` (with `P + P = 0`) has `X`-coordinate a
 root of `W.twoTorsionPolynomial`. -/
-public theorem isRoot_twoTorsionPolynomial_of_add_self [DecidableEq F] {x y : F}
+public theorem isRoot_twoTorsionPolynomial_of_add_self {y : F}
     (h : W.toAffine.Nonsingular x y)
     (hP : (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0) :
     W.twoTorsionPolynomial.toPoly.IsRoot x := by
@@ -60,8 +62,7 @@ public theorem isRoot_twoTorsionPolynomial_of_add_self [DecidableEq F] {x y : F}
 /-- `x` is a root of the `2`-torsion polynomial of a Weierstrass curve of characteristic
 different from `2` with nonzero discriminant if and only if it is the `X`-coordinate of a nonzero
 affine `2`-torsion point. -/
-public theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (hΔ : W.Δ ≠ 0)
-    {x : F} :
+public theorem isRoot_twoTorsionPolynomial_iff (h2 : (2 : F) ≠ 0) (hΔ : W.Δ ≠ 0) :
     W.twoTorsionPolynomial.toPoly.IsRoot x ↔
       ∃ y, ∃ h : W.toAffine.Nonsingular x y,
         (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0 := by
