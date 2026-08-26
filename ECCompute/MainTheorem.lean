@@ -67,7 +67,9 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     {pt : Fin c.rho → ℚ × ℚ}
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
-        = lambdaCompute c.a₂ c.a₄ (lab j).1 ((lab j).2 : ZMod (lab j).1) (pt i).1)
+        = if lambdaComputeBoolNatMask c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
+            ((lab j).2 % (lab j).1).toNat
+            (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
     (hBlen : c.B.length = c.rho) (hMlen : c.M.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
     {φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.rho → ZMod 2)}
@@ -77,8 +79,10 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
   have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
     ext i j
-    have : Fact ((lab j).1).Prime := ⟨(hyp j).prime⟩
-    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg, ← lambdaCompute_eq (hyp j) (hns i)]
+    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
+      ← lambdaComputeBoolNatMask_eq (hyp j) (hns i)
+        (intResNat_cast (hyp j).prime.ne_zero)
+        (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
     simp [hB]
   rw [hrow]
   exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hBlen hMlen hinv)
@@ -104,7 +108,9 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j =
-      lambdaCompute c.a₂ c.a₄ (lab j).1 (lab j).2 (pt i).1)
+      if lambdaComputeBoolNatMask c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
+          ((lab j).2 % (lab j).1).toNat
+          (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
     (hBlen : c.B.length = c.rho)
     (hMlen : c.M.length = c.rho)
     (hinv : F2Invert.checkInv c.rho c.B c.M)
@@ -151,7 +157,7 @@ theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certifica
     checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
     rank_ge_of_certificate c (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
-      (checkB_true hlenB hlenP hlenL hlenQ hlabP' hB) hlenB hlenM hinv htors
+      (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
 end ECCompute

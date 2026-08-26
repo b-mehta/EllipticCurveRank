@@ -52,7 +52,7 @@ partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
   return if n == 1 then acc else 0
 
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
-`xnum / xden`, mirroring `ECCompute.lambdaComputeBool` (`true` = nontrivial). `a₂ a₄` are the
+`xnum / xden`, mirroring `ECCompute.lambdaComputeBoolNatMask` (`true` = nontrivial). `a₂ a₄` are the
 short-model coefficients; the cubic's constant term `a₆` does not enter the character. -/
 def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
   if (xden : Int) % (p : Int) == 0 then false
