@@ -52,6 +52,10 @@ theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
   push_cast
   rw [div_eq_div_iff (pow_ne_zero 3 hwne) (pow_ne_zero 3 hwne)]
 
+theorem trep_two_ne_zero (hw : (w : ZMod p) ≠ 0) :
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
+  simpa using pow_ne_zero 3 hw
+
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).Δ ≠ 0 := by
@@ -88,8 +92,7 @@ public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
-    have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
-      simpa using pow_ne_zero 3 hwz
+    have hzne := trep_two_ne_zero (x := x) (y := y) p hwz
     rw [nonsingular_of_Z_ne_zero hzne]
     exact (Affine.equation_iff_nonsingular_of_Δ_ne_zero
       (map_Δ_ne a₂ a₄ a₆ p hΔ)).mp ((equation_of_Z_ne_zero hzne).mp hEq)
@@ -167,8 +170,7 @@ public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMo
     (hwne : (w : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x : ZMod p) (y : ZMod p) := by
   have hns := red_nonsingular a₂ a₄ a₆ p hΔ h hden hden'
-  have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
-    simpa using pow_ne_zero 3 hwne
+  have hzne := trep_two_ne_zero (x := x) (y := y) p hwne
   rw [nonsingular_of_Z_ne_zero hzne] at hns
   rwa [trep_coord_zero p hden hwne, trep_coord_one p hden' hwne] at hns
 
@@ -185,8 +187,7 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
               (den_isSquare_of_nonsingular a₂ a₄ a₆ h).choose_spec.1).mpr hd)) := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
   have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
-  have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
-    simpa using pow_ne_zero 3 hwne
+  have hzne := trep_two_ne_zero (x := x) (y := y) p hwne
   rw [redP_some a₂ a₄ a₆ p h hden hden',
     Point.toAffine_of_Z_ne_zero (red_nonsingular a₂ a₄ a₆ p hΔ h hden hden') hzne]
   simp only [trep_coord_zero p hden hwne, trep_coord_one p hden' hwne]
