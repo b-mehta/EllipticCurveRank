@@ -27,7 +27,6 @@ is then automatic.
 ## Main declarations
 
 * `ECCompute.εpFinite`: the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
-* `ECCompute.εpFinite_map_add`: additivity of `εpFinite`.
 * `ECCompute.εpHom`: `εpFinite` packaged as an `AddMonoidHom`.
 -/
 
