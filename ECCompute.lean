@@ -41,7 +41,7 @@ public import ECCompute.Theory.Descent.CharacterFacts
 public import ECCompute.Theory.Descent.Collinearity
 public import ECCompute.Theory.Descent.DenominatorSquare
 public import ECCompute.Theory.Descent.LambdaHom
-public import ECCompute.Theory.Descent.Reduction.EpsFinite
+public import ECCompute.Theory.Descent.Reduction.FiniteCharacter
 public import ECCompute.Theory.Descent.Reduction.IntModel
 public import ECCompute.Theory.Descent.Reduction.KernelClosure
 public import ECCompute.Theory.Descent.Reduction.RedHom
