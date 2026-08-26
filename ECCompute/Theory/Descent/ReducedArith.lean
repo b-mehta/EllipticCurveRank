@@ -44,7 +44,7 @@ variable {p : ℕ}
 
 /-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
 public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
-    (x.num : ZMod p) = xbar p x * (x.den : ZMod p) := by
+    x.num = xbar p x * x.den := by
   rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
 
 /-! ### Elementary reduction mod `p`
