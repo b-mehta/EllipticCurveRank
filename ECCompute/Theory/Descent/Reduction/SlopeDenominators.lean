@@ -47,8 +47,7 @@ reduction is the corresponding polynomial in `X̄₁, X̄₂`. -/
 theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0) :
     ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄).den : ZMod p) ≠ 0
       ∧ ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ : ℚ) : ZMod p)
-        = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
-          + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
+        = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
   have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1
   have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
@@ -86,7 +85,7 @@ public theorem reduced_slope_den (hne : x₁ ≠ x₂)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
-    (hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0) :
+    (hy2 : (y₁ : ZMod p) + y₂ ≠ 0) :
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
   have hy12 : y₁ + y₂ ≠ 0 := by
     intro h0; apply hy2; rw [← cast_add_of_ne_zero hdy1 hdy2, h0, cast_zero]
@@ -110,12 +109,11 @@ public theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
     ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) ^ 2
-        = ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂) : ZMod p)
-          + (a₂ : ZMod p) + (x₁ : ZMod p) + (x₂ : ZMod p)
-      ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * ((y₁ : ZMod p) + (y₂ : ZMod p))
-        = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
-          + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
+        = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)
+          + a₂ + x₁ + x₂
+      ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * (y₁ + y₂)
+        = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     simp only [Affine.addX, curve]; grind
@@ -183,7 +181,7 @@ public theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
 public theorem reduced_addX_eq {X L : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L = L ^ 2 - (a₂ : ZMod p) - X - X := by
+    (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L = L ^ 2 - a₂ - X - X := by
   simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
@@ -198,8 +196,7 @@ public theorem addY_cast_eq {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hdy1 : (y₁.den : ZMod p) ≠ 0)
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :
     ((curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
-      = -((ℓ : ZMod p) * (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p) - (x₁ : ZMod p))
-        + (y₁ : ZMod p)) := by
+      = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
   have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
       = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
     simp only [Affine.addY, Affine.negY, Affine.negAddY, curve]; grind
