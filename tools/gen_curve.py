@@ -224,7 +224,7 @@ def def_block(cid, a):
     """The inlined `def curve<id>` matching the curve-abbrev design: one line if it fits
     under 100 columns, else break after `:=`, else split `a₆` onto its own line."""
     tup = f"⟨{a[0]}, {a[1]}, {a[2]}, {a[3]}, {a[4]}⟩"
-    head = f"def curve{cid} : WeierstrassCurve ℚ :="
+    head = f"@[expose] public def curve{cid} : WeierstrassCurve ℚ :="
     if len(f"{head} {tup}") <= 100:
         return f"{head} {tup}"
     if len(f"  {tup}") <= 100:
@@ -344,14 +344,14 @@ def main():
     defblock = gate(f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(cid, ainvs)}")
     rankblock = gate(
         f"/-- ICARM leaderboard curve {cid} has Mordell-Weil rank at least `{rank_goal}`. -/\n"
-        f"theorem curve{cid}_hasRankGE_{rank_goal} : HasRankGE curve{cid} {rank_goal} := by\n"
+        f"public theorem curve{cid}_hasRankGE_{rank_goal} : HasRankGE curve{cid} {rank_goal} := by\n"
         f"  unfold curve{cid}\n  {tactic}")
     ellblock = gate(
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
-        f"instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
+        f"public instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
     jblock = gate(
         f"/-- The `j`-invariant of curve {cid}. -/\n"
-        f"theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)")
+        f"public theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)")
     template = (Path(__file__).parent / "curve_template.lean").read_text()
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
                            coeffs=coeff_block(ainvs[3], ainvs[4]),
