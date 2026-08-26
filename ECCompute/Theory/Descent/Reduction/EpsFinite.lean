@@ -79,7 +79,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 /-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
 line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
@@ -87,14 +87,15 @@ theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {�
     (if X₃ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X₃ - θ))
       = (if x₁ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₁ - θ))
         + (if x₂ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₂ - θ)) := by
+  have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod hσ₁ hσ₂ hσ₃ hθroot hc
-  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod (ℓ := ℓ) (m := m) (by grind) (by grind) (by grind) hθroot hc
-  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc ↦
-    fderiv_eq_prod (ℓ := ℓ) (m := m) (by grind) (by grind) (by grind) hθroot hc
+  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) :=
+    fderiv_eq_prod hσ₁ hσ₂ hσ₃ hθroot
+  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) :=
+    fderiv_eq_prod (ℓ := ℓ) (m := m) (by grind) (by grind) (by grind) hθroot
+  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) :=
+    fderiv_eq_prod (ℓ := ℓ) (m := m) (by grind) (by grind) (by grind) hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
   · have hX2ne : x₂ ≠ x₁ := fun hc ↦ hne hc.symm
     have hX3ne : X₃ ≠ x₁ := fun hc ↦ hfd_ne (by grind)
@@ -140,12 +141,13 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
 
 /-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
 descent-character value at `X₃` is `0`. -/
-theorem εp_double_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
+theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
     (hXθ : x ≠ θ)
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x * x + x * X₃ + x * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x * x * X₃ = m ^ 2 - a₆) :
     (if X₃ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X₃ - θ)) = 0 := by
+  have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
     prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hθroot

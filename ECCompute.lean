@@ -4,7 +4,7 @@ import ECCompute.ForLean
 import ECCompute.Certificate
 
 -- Pure mathematics
-import ECCompute.Theory.Descent
+import ECCompute.Theory.Descent.LambdaHom
 import ECCompute.Theory.Descent.Character
 import ECCompute.Theory.Descent.Cast
 import ECCompute.Theory.Descent.DenominatorSquare

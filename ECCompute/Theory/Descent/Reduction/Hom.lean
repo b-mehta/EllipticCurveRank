@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Reduction.RedP
-public import ECCompute.Theory.Descent.Reduction.ReducedSlope
+public import ECCompute.Theory.Descent.Reduction.SlopeDenominators
 import ECCompute.Theory.Descent.Reduction.KernelClosure
 import ECCompute.Theory.Descent.Cast
 import ECCompute.ForMathlib.WeierstrassCurveAffine
@@ -236,7 +236,7 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {x₁
   have hyneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
       (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
-      Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl x₂ y₂
+      Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
     grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]

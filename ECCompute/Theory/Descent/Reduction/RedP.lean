@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.Repr
+public import ECCompute.Theory.Descent.Reduction.Representative
 public import ECCompute.Theory.Descent.DenominatorSquare
 public import ECCompute.ForMathlib.RatDenom
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
