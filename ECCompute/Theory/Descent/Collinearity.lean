@@ -80,7 +80,7 @@ public theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (h₂ : (ℓ * x₂ + m) ^ 2 = fval a₂ a₄ a₆ x₂) :
     x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
       x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧ x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
-  grind [fval] (ringSteps := 200000)
+  grind (ringSteps := 200000) [fval]
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
