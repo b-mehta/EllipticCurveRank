@@ -156,8 +156,7 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hXbar : (x₁ : ZMod p) = x₂) (hYbar : (y₁ : ZMod p) = y₂)
-    (hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
-      (Int.castRingHom (ZMod p))).toAffine.negY x₁ y₁) :
+    (hYneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
   rw [redP_of_den_ne hΔ h₁ hd1, Affine.Point.add_of_Y_eq rfl hYneg, Affine.Point.add_of_X_ne hne]
@@ -186,8 +185,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hXbar : (x₁ : ZMod p) = x₂) (hYbar : (y₁ : ZMod p) = y₂)
-    (hYneg : ¬ (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
-      (Int.castRingHom (ZMod p))).toAffine.negY x₁ y₁) :
+    (hYneg : ¬ (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
@@ -236,8 +234,8 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
   have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := y_eq_negY_of_X_eq h₁ h₂ hx12 hPQ
   rw [Affine.Point.add_of_Y_eq hx12 hy, redP_zero, redP_of_den_ne hΔ h₁ hd1]
-  have hyneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
-      (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p) := by
+  have hyneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
+      (x₁ : ZMod p) (y₁ : ZMod p) := by
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
       Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl
     have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
@@ -278,8 +276,8 @@ theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       have hp : p.Prime := Fact.out
       have hdy1 : (y₁.den : ZMod p) ≠ 0 := by grind [ydenom_eq_zero_iff, h₁.1]
       have hdy2 : (y₂.den : ZMod p) ≠ 0 := by grind [ydenom_eq_zero_iff, h₂.1]
-      by_cases hYneg : (y₁ : ZMod p) = ((curveℤ a₂ a₄ a₆).map
-          (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p)
+      by_cases hYneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
+          (x₁ : ZMod p) (y₁ : ZMod p)
       · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
       · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
 
