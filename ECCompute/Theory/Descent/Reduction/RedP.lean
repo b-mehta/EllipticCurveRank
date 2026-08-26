@@ -87,7 +87,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 /-- The fixed `ZMod p`-projective representative of an affine point: `![0, 1, 0]` for the origin,
 and `ℤ → ZMod p` applied to the integer representative `trep` otherwise. -/
-public noncomputable def repr {a₂ a₄ a₆ : ℤ} (p : ℕ) [Fact p.Prime] :
+public noncomputable def repr (p : ℕ) [Fact p.Prime] :
     (curve a₂ a₄ a₆).toAffine.Point → Fin 3 → ZMod p
   | .zero => ![0, 1, 0]
   | .some x y h => Int.castRingHom (ZMod p) ∘ trep x y (den_isSquare h.1).choose
@@ -120,7 +120,7 @@ public theorem repr_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
 
 /-- The reduction map on affine points: the affine point of the reduced projective
 representative `repr`. -/
-public noncomputable def redP {a₂ a₄ a₆ : ℤ} (p : ℕ) [Fact p.Prime]
+public noncomputable def redP (p : ℕ) [Fact p.Prime]
     (P : (curve a₂ a₄ a₆).toAffine.Point) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point :=
   Point.toAffine (curveZMod a₂ a₄ a₆ p).toProjective (repr p P)
