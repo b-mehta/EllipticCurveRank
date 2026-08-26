@@ -3,10 +3,13 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.PsiBase
-import ECCompute.Theory.Descent.Reduction.IntModel
+module
+
+public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Theory.Descent.Reduction.IntModel
+public import Mathlib.Algebra.Field.ZMod
+import ECCompute.Theory.Descent.Collinearity
 import ECCompute.ForMathlib.WeierstrassCurveAffine
-import Mathlib.Algebra.Field.ZMod
 
 /-!
 # The finite-field descent character `εpFinite` and its additivity
@@ -38,18 +41,19 @@ variable [Fact p.Prime]
 
 /-- The finite-field descent character. On `O` it is `0`; on an affine point `(X, Y)` it is
 `ψ_p(f'(θ))` in the tangent case `X = θ` and `ψ_p(X - θ)` otherwise. -/
-noncomputable def εpFinite (θ : ZMod p) :
+@[expose]
+public noncomputable def εpFinite (θ : ZMod p) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point → ZMod 2
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ)
 
 @[simp]
-theorem εpFinite_zero {θ : ZMod p} :
+public theorem εpFinite_zero {θ : ZMod p} :
     εpFinite a₂ a₄ a₆ p θ
       (0 : (curveZMod a₂ a₄ a₆ p).toAffine.Point) = 0 :=
   rfl
 
-theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
+public theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X - θ) :=
@@ -59,7 +63,7 @@ variable {a₂ a₄ a₆ p}
 variable {θ : ZMod p}
 
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
-private theorem reduced_equation {X Y : ZMod p}
+theorem reduced_equation {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
   have := (Affine.equation_iff
@@ -68,11 +72,11 @@ private theorem reduced_equation {X Y : ZMod p}
 
 omit [Fact p.Prime] in
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
-private theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
+theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 :=
   fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
-private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
+theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
     θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
   simpa [fval] using h.root
 
@@ -86,7 +90,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 /-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
 line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-private theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
@@ -157,7 +161,7 @@ theorem εpFinite_map_add_of_X_ne (h : DescentHyp a₂ a₄ a₆ p θ)
 
 /-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
 descent-character value at `X₃` is `0`. -/
-private theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
+theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
     (hXθ : x ≠ θ)
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
     (hσ₂ : x * x + x * X₃ + x * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
@@ -221,7 +225,7 @@ theorem εpFinite_double (h : DescentHyp a₂ a₄ a₆ p θ) {x y : ZMod p}
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
-theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
+public theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curveZMod a₂ a₄ a₆ p).toAffine.Point) :
     εpFinite a₂ a₄ a₆ p θ (P + Q)
       = εpFinite a₂ a₄ a₆ p θ P + εpFinite a₂ a₄ a₆ p θ Q := by
@@ -250,8 +254,8 @@ theorem εpFinite_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
       exact εpFinite_map_add_of_X_ne h h₁ h₂ hne
 
 /-- The finite-field descent character `εpFinite θ` as an `AddMonoidHom E(𝔽ₚ) → ZMod 2`. -/
-@[simps]
-noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
+@[expose, simps]
+public noncomputable def εpHom (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
   map_zero' := εpFinite_zero a₂ a₄ a₆ p
