@@ -40,11 +40,13 @@ transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p 
 section Psi
 
 /-- A nonzero element of `ZMod p` (`p` prime) has value coprime to `p`. -/
-private theorem val_coprime (hp : p.Prime) {w : ZMod p} (hw : w ≠ 0) :
-    Nat.Coprime w.val p := by
+private theorem val_gcd_one (hp : p.Prime) {w : ZMod p} (hw : w ≠ 0) :
+    (w.val : ℤ).gcd p = 1 := by
   have : NeZero p := ⟨hp.pos.ne'⟩
-  rw [Nat.coprime_comm, hp.coprime_iff_not_dvd]
-  exact fun hdvd ↦ (ZMod.val_ne_zero w).2 hw (Nat.eq_zero_of_dvd_of_lt hdvd (ZMod.val_lt w))
+  have h : ¬ p ∣ w.val := fun hd ↦
+    (ZMod.val_ne_zero w).2 hw (Nat.eq_zero_of_dvd_of_lt hd (ZMod.val_lt w))
+  rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]
+  exact (hp.coprime_iff_not_dvd.mpr h).symm
 
 /-- `jacobiSym (·.val) p` is multiplicative: it only sees the residue mod `p`. -/
 private theorem jacobiSym_val_mul [NeZero p] (a b : ZMod p) :
@@ -66,28 +68,20 @@ public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 := b
 public theorem psi_mul_sq (hp : p.Prime) {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
   have : NeZero p := ⟨hp.pos.ne'⟩
-  have hcop : (w.val : ℤ).gcd p = 1 := by
-    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp hw
-  have hw1 : jacobiSym (w.val : ℤ) p ^ 2 = 1 := jacobiSym.sq_one hcop
   rw [sq, mul_assoc]
   unfold psi
-  rw [jacobiSym_val_mul, jacobiSym_val_mul,
-    show jacobiSym (w.val : ℤ) p * (jacobiSym (w.val : ℤ) p * jacobiSym (a.val : ℤ) p)
-      = jacobiSym (w.val : ℤ) p ^ 2 * jacobiSym (a.val : ℤ) p from by ring, hw1, one_mul]
+  rw [jacobiSym_val_mul, jacobiSym_val_mul, ← mul_assoc, ← pow_two,
+    jacobiSym.sq_one (val_gcd_one hp hw), one_mul]
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
   have : NeZero p := ⟨hp.pos.ne'⟩
-  have hca : (a.val : ℤ).gcd p = 1 := by
-    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp ha
-  have hcb : (b.val : ℤ).gcd p = 1 := by
-    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp hb
   unfold psi
   rw [jacobiSym_val_mul]
-  rcases jacobiSym.eq_one_or_neg_one hca with h | h <;>
-    rcases jacobiSym.eq_one_or_neg_one hcb with h' | h' <;> rw [h, h'] <;> decide
+  rcases jacobiSym.eq_one_or_neg_one (val_gcd_one hp ha) with h | h <;>
+    rcases jacobiSym.eq_one_or_neg_one (val_gcd_one hp hb) with h' | h' <;> rw [h, h'] <;> decide
 
 end Psi
 
