@@ -5,10 +5,9 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.CharacterFacts
+public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Model
 public import Mathlib.Algebra.Field.ZMod
-import ECCompute.Theory.Descent.Collinearity
 import ECCompute.ForMathlib.WeierstrassCurveAffine
 
 /-!
@@ -91,11 +90,11 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X
   have hθroot := h.root'
   have hfd_ne : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := fderiv_ne_zero h
   have hfd1 : x₁ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₂ - θ) * (X₃ - θ) :=
-    fderiv_eq_prod _ _ _ ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot
+    fderiv_eq_prod ℓ m hσ₁ hσ₂ hσ₃ hθroot
   have hfd2 : x₂ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (X₃ - θ) :=
-    fderiv_eq_prod _ _ _ ℓ m x₂ x₁ X₃ θ (by grind) (by grind) (by grind) hθroot
+    fderiv_eq_prod ℓ m (by grind) (by grind) (by grind) hθroot
   have hfd3 : X₃ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₂ - θ) :=
-    fderiv_eq_prod _ _ _ ℓ m X₃ x₁ x₂ θ (by grind) (by grind) (by grind) hθroot
+    fderiv_eq_prod ℓ m (by grind) (by grind) (by grind) hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
   · rw [if_neg (by grind), if_pos rfl, if_neg hne.symm, hfd1 rfl,
       psi_mul h.prime (by grind) (by grind)]
@@ -130,7 +129,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   have hpt2 : (ℓ * x₂ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₂ := by
     rw [hm2, reduced_equation h₂]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots _ _ _ ℓ m x₁ x₂ X₃ hne hx3 hpt1 hpt2
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
 /-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
@@ -144,10 +143,10 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ :
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
-    prod_sub_theta_eq_lineSq _ _ _ ℓ m x x X₃ θ
-      hσ₁ hσ₂ hσ₃ hθroot
+    prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hθroot
   obtain rfl | c3 := eq_or_ne X₃ θ
-  · rw [if_pos rfl, fderiv_eq_prod _ _ _ ℓ m X₃ x x X₃ (by grind) (by grind) (by grind) hθroot rfl]
+  · rw [if_pos rfl,
+      fderiv_eq_prod ℓ m (x₂ := x) (x₃ := x) (by grind) (by grind) (by grind) hθroot rfl]
     exact psi_of_isSquare ⟨x - X₃, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
@@ -179,7 +178,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root _ _ _ ℓ m x X₃ hpt (by grind [fderiv]) hx3
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root hpt (by grind [fderiv]) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism

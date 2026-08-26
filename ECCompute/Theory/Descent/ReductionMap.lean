@@ -5,7 +5,8 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.Representative
+public import ECCompute.Theory.Model
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 public import ECCompute.Theory.Descent.PointArith
 public import ECCompute.ForMathlib.RatDenom
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
@@ -15,15 +16,16 @@ public import Mathlib.Algebra.Field.ZMod
 /-!
 # The reduction map on affine points
 
-For an integral curve `y² = x³ + a₂x² + a₄x + a₆` and a prime `p`, this file defines the
-`ZMod p`-projective representative `repr` of an affine point, applying `ℤ → ZMod p` to its
-integer representative `trep x y w`, and the reduction map `redP`, the affine point of `repr`.
+For a point `P = (x, y)` on the integral curve `y² = x³ + a₂x² + a₄x + a₆` and a prime `p`, this
+file builds the integer projective representative `trep x y w = ![x.num·w, y.num, w³]` (where
+`x.den = w²`, `y.den = w³`), applies `ℤ → ZMod p` to it to get the `ZMod p`-projective
+representative `repr`, and takes its affine point to define the reduction map `redP`.
 
 ## Main declarations
 
+* `ECCompute.trep`: the integer representative `![x.num · w, y.num, w³]`.
 * `ECCompute.repr`: the `ZMod p`-projective representative of an affine point.
 * `ECCompute.redP`: the reduction map, `toAffine` of `repr`.
-* `ECCompute.redP_zero`: `redP 0 = 0`.
 * `ECCompute.redP_of_den_zero`: `redP (x, y) = 0` when `p ∣ x.den`.
 * `ECCompute.redP_of_den_ne`: `redP (x, y) = (x̄, ȳ)` when `p ∤ x.den`.
 -/
@@ -32,11 +34,47 @@ open WeierstrassCurve Projective
 
 namespace ECCompute
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
+variable {a₂ a₄ a₆ : ℤ}
 
-/-! ### Coordinates of the reduced representative -/
+/-! ### The integer projective representative -/
+
+/-- The integer projective representative `![x.num · w, y.num, w³]` of the affine point
+`(x, y)`, where `w` is the square-root witness of the denominators (`x.den = w²`, `y.den = w³`).
+Over `ℚ` this is `w³ • [x : y : 1]` (see `trep_map_ℚ`). -/
+public def trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, w ^ 3]
+
+/-- The image of `curveℤ` under `ℤ → ℚ`, in projective form, is the rational curve. -/
+theorem map_curveℤ_toProjective :
+    (curveℤ a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curve a₂ a₄ a₆).toProjective :=
+  map_curveℤ_ℚ
 
 variable {x y : ℚ} {w : ℕ}
+
+/-- Over `ℚ`, the integer representative equals `w³ • [x : y : 1]`. -/
+public theorem trep_map_ℚ (hxden : x.den = w ^ 2) (hyden : y.den = w ^ 3) :
+    Int.castRingHom ℚ ∘ trep x y w = (w ^ 3 : ℚ) • ![x, y, 1] := by
+  simp [trep, comp_fin3, ← Rat.mul_den_eq_num, hxden, hyden]
+  grind
+
+/-- The integer representative lies on the integral projective curve. -/
+theorem trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
+    (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
+    (curveℤ a₂ a₄ a₆).toProjective.Equation (trep x y w) := by
+  have hw : w ≠ 0 := by grind [Rat.den_ne_zero]
+  rwa [← map_equation _ (Int.castRingHom ℚ).injective_int, trep_map_ℚ hden hden',
+    equation_smul _ (isUnit_iff_ne_zero.2 (by positivity)), equation_some,
+    map_curveℤ_toProjective]
+
+/-- The three coordinates of `trep x y w`. -/
+@[simp] theorem trep_zero : trep x y w 0 = x.num * w := by simp [trep]
+
+@[simp] theorem trep_one : trep x y w 1 = y.num := by simp [trep]
+
+@[simp] theorem trep_two : trep x y w 2 = w ^ 3 := by simp [trep]
+
+variable {p : ℕ}
+
+/-! ### Coordinates of the reduced representative -/
 
 section
 variable [Fact p.Prime]
