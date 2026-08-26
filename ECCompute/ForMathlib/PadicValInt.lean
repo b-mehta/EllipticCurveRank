@@ -22,12 +22,11 @@ product identity.
 
 public section
 
-variable {p : ℕ} [Fact p.Prime]
+variable {p : ℕ}
 
 /-- `padicValInt p` is monotone under divisibility for a nonzero target. -/
-theorem padicValInt_mono {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
+theorem padicValInt_mono (hp : p.Prime) {a b : ℤ} (hab : a ∣ b) (hb : b ≠ 0) :
     padicValInt p a ≤ padicValInt p b := by
-  have hp : p.Prime := Fact.out
   rcases eq_or_ne a 0 with rfl | ha
   · simp [padicValInt]
   · simp only [padicValInt, ← Nat.factorization_def _ hp]

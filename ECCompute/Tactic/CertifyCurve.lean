@@ -67,10 +67,10 @@ def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
   (List.range n).foldl (fun acc j => if p j then acc ||| (1 <<< j) else acc) 0
 
 /-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
-character of label `labs[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
-def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (labs : List (Nat × Int)) : List Nat :=
+character of label `ls[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
+def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
   xs.map fun x =>
-    bitmaskOf labs.length (fun j => let lab := labs[j]!; lambdaEval a₂ a₄ lab.1 lab.2 x.1 x.2)
+    bitmaskOf ls.length (fun j => let l := ls[j]!; lambdaEval a₂ a₄ l.1 l.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
@@ -225,12 +225,12 @@ private def readEntries {α} (what : String) (parse : String → Option α) (pat
 private def readData (path lpath : String) (ρ : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
   let pts ← readEntries "points" parseLine path
-  let lbls ← readEntries "labels" parseLabel lpath
+  let ls ← readEntries "labels" parseLabel lpath
   if pts.size ≠ ρ then
     throwError "certify_curve: points file has {pts.size} points but the goal rank is {ρ}"
-  if lbls.size ≠ ρ then
-    throwError "certify_curve: labels file has {lbls.size} labels but the goal rank is {ρ}"
-  return (pts, lbls)
+  if ls.size ≠ ρ then
+    throwError "certify_curve: labels file has {ls.size} labels but the goal rank is {ρ}"
+  return (pts, ls)
 
 /-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
 private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (ρ : Nat) :
@@ -327,10 +327,10 @@ private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : 
   let a4E := toExpr v4
   let a6E := toExpr v6
   let ρ := ρGoal + t
-  let (pts, lbls) ← readData path lpath ρ
+  let (pts, ls) ← readData path lpath ρ
   let xs := (pts.map fun (xn, xd, _, _) => (xn, xd)).toList
-  let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs lbls.toList ρ
-  let cExpr ← mkCertExpr ρ pts lbls B M t tpNat a1E a2E a3E a4E a6E
+  let (B, M) ← buildMats (v1 ^ 2 + 4 * v2) (16 * v4 + 8 * v1 * v3) xs ls.toList ρ
+  let cExpr ← mkCertExpr ρ pts ls B M t tpNat a1E a2E a3E a4E a6E
   -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
   let castE (aE : Expr) : Expr :=

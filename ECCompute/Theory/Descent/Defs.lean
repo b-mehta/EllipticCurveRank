@@ -36,8 +36,7 @@ open WeierstrassCurve
 namespace WeierstrassCurve
 
 /-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
-@[expose] def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
-  {P | P + P = 0}
+@[expose] def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point := {P | P + P = 0}
 
 @[simp]
 lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
@@ -50,8 +49,7 @@ namespace ECCompute
 open Classical in
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
 non-squares. -/
-@[expose] noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 :=
-  if IsSquare a then 0 else 1
+@[expose] noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 := if IsSquare a then 0 else 1
 
 /-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
 @[expose] def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
@@ -66,16 +64,13 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 /-- The affine equation of `curve a₂ a₄ a₆` in cleared form. -/
 @[grind →]
 theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
-    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by
-  grind [Affine.equation_iff, curve]
+    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve]
 
 /-- The value `f(θ) = θ³ + a₂θ² + a₄θ + a₆` in `ZMod p`. -/
-@[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
-  θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
+@[expose] def fval (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p := θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆
 
 /-- The value `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
-@[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p :=
-  3 * θ ^ 2 + 2 * a₂ * θ + a₄
+@[expose] def fderiv (a₂ a₄ : ℤ) (p : ℕ) (θ : ZMod p) : ZMod p := 3 * θ ^ 2 + 2 * a₂ * θ + a₄
 
 /-- The descent character as a raw function. -/
 @[expose] noncomputable def lambda (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
