@@ -31,7 +31,7 @@ variable {F : Type*} [Field F] (W : WeierstrassCurve F)
 
 /-- Evaluate the 2-torsion polynomial at `x`, expanded via the `bᵢ` coefficients. -/
 @[grind =]
-public lemma eval_twoTorsionPolynomial_toPoly (x : F) :
+public lemma eval_twoTorsionPolynomial_toPoly {x : F} :
     W.twoTorsionPolynomial.toPoly.eval x = 4 * x ^ 3 + W.b₂ * x ^ 2 + 2 * W.b₄ * x + W.b₆ := by
   simp [twoTorsionPolynomial, Cubic.toPoly]
 
@@ -61,7 +61,7 @@ public theorem isRoot_twoTorsionPolynomial_of_add_self [DecidableEq F] {x y : F}
 different from `2` with nonzero discriminant if and only if it is the `X`-coordinate of a nonzero
 affine `2`-torsion point. -/
 public theorem isRoot_twoTorsionPolynomial_iff [DecidableEq F] (h2 : (2 : F) ≠ 0) (hΔ : W.Δ ≠ 0)
-    (x : F) :
+    {x : F} :
     W.twoTorsionPolynomial.toPoly.IsRoot x ↔
       ∃ y, ∃ h : W.toAffine.Nonsingular x y,
         (Affine.Point.some x y h : W.toAffine.Point) + Affine.Point.some x y h = 0 := by
