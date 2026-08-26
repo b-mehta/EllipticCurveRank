@@ -26,15 +26,20 @@ import Mathlib.Tactic.Linarith
 
 namespace ECCompute
 
-@[simp, grind =] theorem passes_nil {x : ℕ} : passes x [] := rfl
+section
+variable {x : ℕ}
 
-@[simp, grind =] theorem passes_cons {x a : ℕ} {t : List ℕ} :
+@[simp, grind =] theorem passes_nil : passes x [] := rfl
+
+@[simp, grind =] theorem passes_cons {a : ℕ} {t : List ℕ} :
     passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
 
 /-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
-@[grind =] theorem passes_iff {x : ℕ} {L : List ℕ} : passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
+@[grind =] theorem passes_iff {L : List ℕ} : passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L <;> grind
+
+end
 
 /-- The primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`. -/
 theorem primes_below_23 {p : ℕ} (hlt : p < 23) (hp : p.Prime) :
