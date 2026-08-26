@@ -40,23 +40,23 @@ transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p 
 
 section Psi
 
-variable {a : ZMod p}
+variable {a b : ZMod p}
 
 /-- `ψ_p` vanishes on squares. -/
 public theorem psi_of_isSquare (ha : IsSquare a) : psi p a = 0 := if_pos ha
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
-public theorem psi_mul_sq (hp : p.Prime) {w : ZMod p} (hw : w ≠ 0) :
-    psi p (w ^ 2 * a) = psi p a := by
+public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
+    psi p (b ^ 2 * a) = psi p a := by
   have : Fact p.Prime := ⟨hp⟩
-  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
+  have hiff : IsSquare (b ^ 2 * a) ↔ IsSquare a :=
+    ⟨fun ⟨s, hs⟩ ↦ ⟨s / b, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨b * r, by rw [hr]; ring⟩⟩
   unfold psi
   rw [hiff]
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
-public theorem psi_mul (hp : p.Prime) {b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
+public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
   have : Fact p.Prime := ⟨hp⟩
   -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
