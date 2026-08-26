@@ -8,7 +8,7 @@ module
 public import ECCompute.MainTheorem
 import ECCompute.Soundness.Torsion
 meta import Mathlib.Lean.Expr.Rat
-meta import ECCompute.Tactic.CertifyEval
+public meta import ECCompute.Tactic.CertifyEval
 
 /-!
 # The `certify_curve` tactic
