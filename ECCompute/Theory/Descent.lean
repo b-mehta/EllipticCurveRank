@@ -39,7 +39,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 `ψ_p(f'(θ))` when `xbar p x = θ`, and `ψ_p(xbar p x - θ)` otherwise. -/
 theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
-    lambda a₂ a₄ a₆ p θ (.some x y h)
+    lambda θ (.some x y h)
       = if xbar p x = θ then psi p (fderiv a₂ a₄ p θ) else psi p (xbar p x - θ) := by
   obtain ⟨w, hxden, _⟩ := den_isSquare h.1
   have hw : (w : ZMod p) ≠ 0 := by intro h0; apply hd; rw [hxden]; grind
@@ -52,7 +52,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
-    lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by simp only [lambda, if_pos hd]
+    lambda θ (.some x y h) = 0 := by simp only [lambda, if_pos hd]
 
 /-! ### Additivity via the reduction factorization
 
@@ -70,7 +70,7 @@ noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a
 /-- On each point, `λ_{p,θ}` agrees with the reduction composition `εpFinite θ ∘ redP`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambda a₂ a₄ a₆ p θ P = redCharHom h hΔ P := by
+    lambda θ P = redCharHom h hΔ P := by
   cases P with
   | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
   | some x y hns =>
@@ -82,7 +82,7 @@ theorem lambda_eq_εp_red [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
-    lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
+    lambda θ (P + Q) = lambda θ P + lambda θ Q := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = (curveℤ a₂ a₄ a₆).Δ := by
@@ -95,7 +95,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 @[expose, simps]
 public noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
-  toFun := lambda a₂ a₄ a₆ p θ
+  toFun := lambda θ
   map_zero' := lambda_zero
   map_add' := by exact lambda_map_add h
 

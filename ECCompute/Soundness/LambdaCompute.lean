@@ -157,7 +157,7 @@ public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
     (if lambdaK a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
-      = lambda a₂ a₄ a₆ p θ (.some x y h) := by
+      = lambda θ (.some x y h) := by
   have hp : p ≠ 0 := hyp.prime.ne_zero
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have halpha := alphaResNat_eq_val hp htval hxnum hxden
