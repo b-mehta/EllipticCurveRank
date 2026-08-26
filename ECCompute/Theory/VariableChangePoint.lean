@@ -17,7 +17,7 @@ is a group isomorphism `W.toAffine.Point ≃+ (C • W).toAffine.Point` on Morde
 
 ## Main results
 
-* `WeierstrassCurve.VariableChange.variableChangePointEquiv`: the change of variables as a group
+* `WeierstrassCurve.VariableChange.pointAddEquiv`: the change of variables as a group
   isomorphism.
 -/
 
@@ -209,7 +209,7 @@ namespace VariableChange
 
 /-- An admissible change of variables `C` induces a group isomorphism between the Mordell-Weil
 groups of `W` and `C • W`, sending `(x, y)` to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))`. -/
-public def variableChangePointEquiv (C : VariableChange ℚ) :
+public def pointAddEquiv (C : VariableChange ℚ) :
     W.toAffine.Point ≃+ (C • W).toAffine.Point :=
   AddEquiv.mk'
     { toFun := fun P => match P with

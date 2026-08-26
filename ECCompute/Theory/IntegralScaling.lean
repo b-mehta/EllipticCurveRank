@@ -79,6 +79,6 @@ public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
       (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
   (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans
     (scaling_smul_shortModel a₁ a₂ a₃ a₄ a₆ ▸
-      VariableChange.variableChangePointEquiv (scaling 2 two_ne_zero))
+      VariableChange.pointAddEquiv (scaling 2 two_ne_zero))
 
 end ECCompute.IntegralScaling
