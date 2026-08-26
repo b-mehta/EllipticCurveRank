@@ -153,8 +153,8 @@ theorem fderivResNat_eq_val (hp : p ≠ 0) (htval : (tval : ZMod p) = θ) :
 /-- `lambdaComputeBoolNatMask` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
 and `x` has numerator `xp - xm` and denominator `xden`. -/
-public theorem lambdaComputeBoolNatMask_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+public theorem lambdaComputeBoolNatMask_eq [Fact p.Prime] (hyp : DescentHyp a₂ a₄ a₆ p θ)
+    {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
     (if lambdaComputeBoolNatMask a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
       = lambda a₂ a₄ a₆ p θ (.some x y h) := by
@@ -163,7 +163,7 @@ public theorem lambdaComputeBoolNatMask_eq (hyp : DescentHyp a₂ a₄ a₆ p θ
   have halpha := alphaResNat_eq_val hp htval hxnum hxden
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
-  rw [lambdaComputeBoolNatMask, lambda]
+  rw [lambdaComputeBoolNatMask, lambda.eq_def]
   grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResNat_eq_val, alphaResNat_eq_val,
     fderiv_ne_zero, Rat.mem_padicInteger_iff]
 
