@@ -57,7 +57,7 @@ public theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
 public theorem map_curveℤ_zmod {p : ℕ} :
     curveZMod a₂ a₄ a₆ p =
-      { a₁ := 0, a₂ := (a₂ : ZMod p), a₃ := 0, a₄ := (a₄ : ZMod p), a₆ := (a₆ : ZMod p) } := by
+      { a₁ := 0, a₂ := a₂, a₃ := 0, a₄ := a₄, a₆ := a₆ } := by
   ext <;> simp [curveℤ]
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
