@@ -18,7 +18,7 @@ import Mathlib.Data.Rat.Lemmas
 
 Elementary lemmas for reducing an affine point of `curve a₂ a₄ a₆` mod `p`: the cast of the
 `x`-coordinate, and survival of denominators under reduction, shared between `ECCompute.Descent`
-and `ECCompute.Descent.Reduction.Hom`.
+and `ECCompute.Descent.Reduction.RedHom`.
 
 ## Main declarations
 

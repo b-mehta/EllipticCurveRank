@@ -1,54 +1,52 @@
--- Foundations
-import ECCompute.Kernel
-import ECCompute.ForLean
-import ECCompute.Certificate
+module  -- shake: keep-all --deprecated_module: ignore
 
--- Pure mathematics
-import ECCompute.Theory.Descent.LambdaHom
-import ECCompute.Theory.Descent.Character
-import ECCompute.Theory.Descent.Cast
-import ECCompute.Theory.Descent.DenominatorSquare
-import ECCompute.Theory.Descent.Collinearity
-import ECCompute.Theory.Descent.CharacterFacts
-import ECCompute.Theory.RankDeduction
-import ECCompute.Theory.IntegralScaling
-import ECCompute.Theory.CompleteSquare
-
--- Soundness of the checkers
-import ECCompute.Soundness.Fold
-import ECCompute.Soundness.Primes
-import ECCompute.Soundness.F2Invert
-import ECCompute.Soundness.RootMod
-import ECCompute.Soundness.Points
-import ECCompute.Soundness.JInvariant
-import ECCompute.Soundness.Labels
-import ECCompute.Soundness.LambdaCompute
-import ECCompute.Soundness.DescentMatrix
-import ECCompute.Soundness.Torsion
-
--- Main theory
-import ECCompute.MainTheorem
-
--- Certificate tactic
-import ECCompute.Tactic.CertifyCurve
-
--- Certified curves
-import ECCompute.Curves.Curve7
-import ECCompute.Curves.Curve8
-import ECCompute.Curves.Curve9
-import ECCompute.Curves.Curve10
-import ECCompute.Curves.Curve11
-import ECCompute.Curves.Curve12
-import ECCompute.Curves.Curve13
-import ECCompute.Curves.Curve14
-import ECCompute.Curves.Curve74
-import ECCompute.Curves.Curve273
-import ECCompute.Curves.Curve302
-
--- Upstream candidates
-import ECCompute.ForMathlib.ModuleTorsionQuotient
-import ECCompute.ForMathlib.PadicValInt
-import ECCompute.ForMathlib.RatDenom
-import ECCompute.ForMathlib.TwoTorsion
-import ECCompute.ForMathlib.WeierstrassCurveAffine
-import ECCompute.ForMathlib.WeierstrassCurveProjective
+public import ECCompute.Certificate
+public import ECCompute.Curves.Curve10
+public import ECCompute.Curves.Curve11
+public import ECCompute.Curves.Curve12
+public import ECCompute.Curves.Curve13
+public import ECCompute.Curves.Curve14
+public import ECCompute.Curves.Curve273
+public import ECCompute.Curves.Curve302
+public import ECCompute.Curves.Curve7
+public import ECCompute.Curves.Curve74
+public import ECCompute.Curves.Curve8
+public import ECCompute.Curves.Curve9
+public import ECCompute.ForLean
+public import ECCompute.ForMathlib.ModuleTorsionQuotient
+public import ECCompute.ForMathlib.PadicValInt
+public import ECCompute.ForMathlib.RatDenom
+public import ECCompute.ForMathlib.TwoTorsion
+public import ECCompute.ForMathlib.WeierstrassCurveAffine
+public import ECCompute.ForMathlib.WeierstrassCurveProjective
+public import ECCompute.Kernel
+public import ECCompute.MainTheorem
+public import ECCompute.Soundness.DescentMatrix
+public import ECCompute.Soundness.F2Invert
+public import ECCompute.Soundness.Fold
+public import ECCompute.Soundness.JInvariant
+public import ECCompute.Soundness.Labels
+public import ECCompute.Soundness.LambdaCompute
+public import ECCompute.Soundness.Points
+public import ECCompute.Soundness.Primes
+public import ECCompute.Soundness.RootMod
+public import ECCompute.Soundness.Torsion
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Tactic.CertifyEval
+public import ECCompute.Theory.CompleteSquare
+public import ECCompute.Theory.Curve
+public import ECCompute.Theory.Descent.Cast
+public import ECCompute.Theory.Descent.Character
+public import ECCompute.Theory.Descent.CharacterFacts
+public import ECCompute.Theory.Descent.Collinearity
+public import ECCompute.Theory.Descent.DenominatorSquare
+public import ECCompute.Theory.Descent.LambdaHom
+public import ECCompute.Theory.Descent.Reduction.FiniteCharacter
+public import ECCompute.Theory.Descent.Reduction.IntModel
+public import ECCompute.Theory.Descent.Reduction.KernelClosure
+public import ECCompute.Theory.Descent.Reduction.Map
+public import ECCompute.Theory.Descent.Reduction.RedHom
+public import ECCompute.Theory.Descent.Reduction.Representative
+public import ECCompute.Theory.Descent.Reduction.SlopeDenominators
+public import ECCompute.Theory.IntegralScaling
+public import ECCompute.Theory.RankDeduction
