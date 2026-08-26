@@ -56,12 +56,6 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
   · rwa [← emap.finrank_eq]
 
 variable {a₂ a₄ a₆ : ℤ}
-
-/-- A descent hypothesis for `curve a₂ a₄ a₆` witnesses that its discriminant is nonzero. -/
-private theorem discr_ne_zero_of_descentHyp {p : ℕ} {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ) : (curve a₂ a₄ a₆).Δ ≠ 0 :=
-  fun hΔ ↦ h.discr (by simp [hΔ])
-
 variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {lab : Fin c.ρ → ℕ × ℤ}
 
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
@@ -126,7 +120,7 @@ theorem rank_ge_of_certificate
   rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
   · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
   obtain ⟨j₀⟩ : Nonempty (Fin c.ρ) := ⟨⟨0, hρpos⟩⟩
-  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := discr_ne_zero_of_descentHyp (hyp j₀)
+  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp j₀).discr (by simp [hΔ0])
   have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
     (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
