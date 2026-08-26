@@ -92,8 +92,7 @@ private theorem linearIndependent_descent
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
-private theorem card_torsionBy_le
-    (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
+private theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
     Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap (x : Submodule.torsionBy ℤ H 2) :
       (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
