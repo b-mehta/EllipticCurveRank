@@ -8,7 +8,7 @@ module
 public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.DenominatorSquare
-import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.Theory.Descent.Cast
 import ECCompute.Theory.Descent.Reduction.RedP
 import ECCompute.Theory.Descent.Reduction.Hom
 import ECCompute.Theory.Descent.Reduction.EpsFinite

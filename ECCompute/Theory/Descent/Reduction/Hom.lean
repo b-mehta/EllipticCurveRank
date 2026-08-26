@@ -8,7 +8,7 @@ module
 public import ECCompute.Theory.Descent.Reduction.RedP
 public import ECCompute.Theory.Descent.Reduction.ReducedSlope
 import ECCompute.Theory.Descent.Reduction.KernelClosure
-import ECCompute.Theory.Descent.ReducedArith
+import ECCompute.Theory.Descent.Cast
 import ECCompute.ForMathlib.WeierstrassCurveAffine
 import ECCompute.ForMathlib.WeierstrassCurveProjective
 

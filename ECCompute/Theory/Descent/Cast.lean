@@ -14,7 +14,7 @@ import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
 
 /-!
-# Elementary reduction arithmetic
+# Casting an affine point mod `p`
 
 Elementary lemmas for reducing an affine point of `curve a₂ a₄ a₆` mod `p`: the cast of the
 `x`-coordinate, and survival of denominators under reduction, shared between `ECCompute.Descent`
