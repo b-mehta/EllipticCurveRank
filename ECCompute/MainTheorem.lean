@@ -38,6 +38,7 @@ open WeierstrassCurve Module CompleteSquare IntegralScaling
 
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
+@[expose]
 public def HasRankGE (W : WeierstrassCurve ℚ) (n : ℕ) : Prop :=
   ∃ H : Submodule ℤ W.toAffine.Point, Module.Finite ℤ H ∧ n ≤ finrank ℤ H
 
