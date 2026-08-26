@@ -67,9 +67,11 @@ public theorem shortModel_a₄ : (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ 
 public theorem shortModel_a₆ : (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
   grind [shortModel, completeSquare, variableChange_a₆, inv_one, Units.val_one, one_pow]
 
+variable {x y x₁ x₂ y₁ y₂ : ℚ}
+
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
-theorem equation_completeSquare {x y : ℚ} : W.toAffine.Equation x y ↔
+theorem equation_completeSquare : W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [Affine.equation_iff, Affine.equation_iff]
   grind [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
@@ -85,14 +87,14 @@ theorem or_ne_zero_sub_iff {A B σ : ℚ} : (A ≠ 0 ∨ B ≠ 0) ↔ (A - σ * 
   by_cases hB : B = 0 <;> simp [hB]
 
 /-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-public theorem point_some_congr {C : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂ : ℚ}
+public theorem point_some_congr {C : WeierstrassCurve ℚ}
     {h₁ : C.toAffine.Nonsingular x₁ y₁} {h₂ : C.toAffine.Nonsingular x₂ y₂}
     (hx : x₁ = x₂) (hy : y₁ = y₂) :
     (Point.some x₁ y₁ h₁ : C.toAffine.Point) = Point.some x₂ y₂ h₂ := by subst hx hy; rfl
 
 /-- A point `(x, y)` is nonsingular on the general model `W` iff `(x, y + (a₁x + a₃)/2)` is
 nonsingular on the short model. -/
-theorem nonsingular_completeSquare {x y : ℚ} : W.toAffine.Nonsingular x y ↔
+theorem nonsingular_completeSquare : W.toAffine.Nonsingular x y ↔
       (shortModel W).toAffine.Nonsingular x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [nonsingular_iff', nonsingular_iff', ← equation_completeSquare]
   refine and_congr_right fun _ ↦ ?_
@@ -108,15 +110,15 @@ theorem nonsingular_completeSquare {x y : ℚ} : W.toAffine.Nonsingular x y ↔
   exact or_ne_zero_sub_iff
 
 /-- The `Y`-negation commutes with the completing-the-square shift. -/
-theorem negY_completeSquare {x y : ℚ} : (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
+theorem negY_completeSquare : (shortModel W).toAffine.negY x (y + (W.a₁ * x + W.a₃) / 2)
       = W.toAffine.negY x y + (W.a₁ * x + W.a₃) / 2 := by grind [negY, shortModel_a₁, shortModel_a₃]
 
 /-- The `X`-coordinate of the sum is unchanged by the shift (the slope shifts by `a₁/2`). -/
-theorem addX_completeSquare {x₁ x₂ ℓ : ℚ} : (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
+theorem addX_completeSquare {ℓ : ℚ} : (shortModel W).toAffine.addX x₁ x₂ (ℓ + W.a₁ / 2)
       = W.toAffine.addX x₁ x₂ ℓ := by grind [addX, shortModel_a₁, shortModel_a₂]
 
 /-- The `Y`-coordinate of the sum commutes with the shift. -/
-theorem addY_completeSquare {x₁ x₂ y₁ ℓ : ℚ} :
+theorem addY_completeSquare {ℓ : ℚ} :
     (shortModel W).toAffine.addY x₁ x₂ (y₁ + (W.a₁ * x₁ + W.a₃) / 2) (ℓ + W.a₁ / 2)
       = W.toAffine.addY x₁ x₂ y₁ ℓ
         + (W.a₁ * W.toAffine.addX x₁ x₂ ℓ + W.a₃) / 2 := by
@@ -125,7 +127,7 @@ theorem addY_completeSquare {x₁ x₂ y₁ ℓ : ℚ} :
 /-- The slope commutes with the shift, up to the additive constant `a₁/2` coming from the
 straightening of the tangent/secant line. Requires both points to lie on the general model and to be
 in the non-degenerate branch of the addition law. -/
-theorem slope_completeSquare {x₁ x₂ y₁ y₂ : ℚ}
+theorem slope_completeSquare
     (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂)
     (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
@@ -164,11 +166,11 @@ def bwd (W : WeierstrassCurve ℚ) : (shortModel W).toAffine.Point → W.toAffin
   | .some x y h =>
     .some x (y - (W.a₁ * x + W.a₃) / 2) (nonsingular_completeSquare.mpr (by simpa using h))
 
-@[simp] theorem fwd_some {x y : ℚ} (h : W.toAffine.Nonsingular x y) :
+@[simp] theorem fwd_some (h : W.toAffine.Nonsingular x y) :
     fwd W (.some x y h) = .some x (y + (W.a₁ * x + W.a₃) / 2) (nonsingular_completeSquare.mp h) :=
   rfl
 
-@[simp] theorem bwd_some {x y : ℚ} (h : (shortModel W).toAffine.Nonsingular x y) :
+@[simp] theorem bwd_some (h : (shortModel W).toAffine.Nonsingular x y) :
     bwd W (.some x y h)
       = .some x (y - (W.a₁ * x + W.a₃) / 2) (nonsingular_completeSquare.mpr (by simpa using h)) :=
   rfl
