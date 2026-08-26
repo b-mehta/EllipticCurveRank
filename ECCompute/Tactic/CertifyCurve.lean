@@ -56,14 +56,11 @@ meta def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? 
 /-- ASCII-trim `s`, returning a `String`. -/
 meta def strTrim (s : String) : String := s.trimAscii.toString
 
-/-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`. -/
+/-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`, using
+the same `mkRat` normalisation the emitted term (`coordExpr`) uses. -/
 meta def parseCoord (s : String) : Int × Nat :=
   match (strTrim s).splitOn "/" with
-  | [a, b] =>
-    let num := (strTrim a).toInt!
-    let den := (strTrim b).toNat!
-    let g := Nat.gcd num.natAbs den
-    if g == 0 then (num, den) else (num / (g : Int), den / g)
+  | [a, b] => let q := mkRat (strTrim a).toInt! (strTrim b).toNat!; (q.num, q.den)
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
