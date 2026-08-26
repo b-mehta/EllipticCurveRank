@@ -212,18 +212,18 @@ groups of `W` and `C • W`, sending `(x, y)` to `(u⁻²(x - r), u⁻³(y - s(x
 public def pointAddEquiv (C : VariableChange ℚ) :
     W.toAffine.Point ≃+ (C • W).toAffine.Point :=
   AddEquiv.mk'
-    { toFun := fun P => match P with
+    { toFun := fun P ↦ match P with
         | .zero => .zero
         | .some x y h => .some (C.mapX x) (C.mapY x y) (nonsingular_variableChange_iff.mp h)
-      invFun := fun P => match P with
+      invFun := fun P ↦ match P with
         | .zero => .zero
         | .some X Y h => .some (C.invX X) (C.invY X Y)
             (nonsingular_variableChange_iff.mpr (by rw [mapX_invX, mapY_invY]; exact h))
-      left_inv := fun P => by
+      left_inv := fun P ↦ by
         cases P with
         | zero => rfl
         | some x y h => exact Affine.point_some_congr invX_mapX invY_mapY
-      right_inv := fun P => by
+      right_inv := fun P ↦ by
         cases P with
         | zero => rfl
         | some X Y h => exact Affine.point_some_congr mapX_invX mapY_invY }
