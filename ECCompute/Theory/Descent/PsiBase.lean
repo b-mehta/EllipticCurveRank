@@ -88,30 +88,18 @@ public theorem psi_collinear (hp : p.Prime) {θ ℓ m X₁ X₂ X₃ : ZMod p}
 
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
-public theorem fderiv_ne_zero [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+public theorem fderiv_ne_zero {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv a₂ a₄ p θ ≠ 0 := by
-  have hroot : θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
-    simpa [fval] using h.root
+  have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
       = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
         + 18 * a₂ * a₄ * a₆) := by
-    have hval : (curve a₂ a₄ a₆).Δ
-        = ((16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
-            + 18 * a₂ * a₄ * a₆) : ℤ) : ℚ) := by
-      simp only [curve, Δ, b₂, b₄, b₆, b₈]
-      grind [pow_two]
-    rw [hval, Rat.num_intCast]
+    simp [curve, Δ, b₂, b₄, b₆, b₈]
+    norm_cast
+    grind
   intro hfd
   apply h.discr
   rw [hΔ]
-  have hfd' : 3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p) = 0 := by
-    simpa [fderiv] using hfd
-  push_cast
-  linear_combination
-    (16 * (-3 * θ ^ 2 - 2 * (a₂ : ZMod p) * θ + (a₂ : ZMod p) ^ 2 - 4 * (a₄ : ZMod p)) *
-      (3 * θ ^ 2 + 2 * (a₂ : ZMod p) * θ + (a₄ : ZMod p))) * hfd'
-    + (16 * (-4 * (a₂ : ZMod p) ^ 3 + 18 * (a₂ : ZMod p) * (a₄ : ZMod p)
-      + 27 * (a₂ : ZMod p) * θ ^ 2 + 27 * (a₄ : ZMod p) * θ - 27 * (a₆ : ZMod p) + 27 * θ ^ 3))
-        * hroot
+  grind [fderiv]
 
 end ECCompute
