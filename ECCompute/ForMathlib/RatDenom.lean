@@ -25,8 +25,7 @@ division by a `p`-adic unit; `Rat.cast_{add,sub,mul}_of_pIntegral` reduce the fi
 
 * `Rat.IsPIntegral`, `Rat.mem_padicInteger_iff`: `p`-integrality as valuation-ring membership,
   matched with `(q.den : ZMod p) ≠ 0`.
-* `Rat.den_cast_eq_zero_iff`, `Rat.ne_zero_of_den_eq_pow`: reductions of a power-base denominator
-  `q.den = w ^ k`.
+* `Rat.den_cast_eq_zero_iff`: reduction of a power-base denominator `q.den = w ^ k` mod `p`.
 -/
 
 section
@@ -39,11 +38,6 @@ variable {p : ℕ}
 public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
     (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
   rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
-
-/-- If `q.den = w ^ k` with `k ≠ 0`, then `w ≠ 0`. -/
-public theorem ne_zero_of_den_eq_pow {q : ℚ} {w k : ℕ} (hk : k ≠ 0) (hden : q.den = w ^ k) :
-    w ≠ 0 := by
-  rintro rfl; rw [zero_pow hk] at hden; exact q.den_nz hden
 
 /-- A rational is `p`-integral, `x ∈ ℤ₍ₚ₎`, when it lies in the `p`-adic valuation ring. Stated
 as subring membership so `add_mem`/`sub_mem`/`mul_mem`/`pow_mem` are the closure lemmas. -/
