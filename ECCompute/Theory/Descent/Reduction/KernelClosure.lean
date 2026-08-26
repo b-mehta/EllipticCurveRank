@@ -25,7 +25,7 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime]
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
 
 /-! ### Integer data attached to a kernel point -/
 
@@ -52,11 +52,11 @@ theorem kernel_point_data {x y : ℚ}
     ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
   have hp : p.Prime := Fact.out
-  obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
+  obtain ⟨w, hxd, hyd⟩ := den_isSquare h
   have hpw : (p : ℤ) ∣ (w : ℤ) :=
     mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
   have hwne : w ≠ 0 := by grind [Rat.den_ne_zero]
-  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num p (by grind) hpw, by positivity⟩
+  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num (by grind) hpw, by positivity⟩
 
 /-- For a point `(A/E², B/E³)` on `y² = x³ + a₂x² + a₄x + a₆`, the integer relation
 `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
@@ -141,7 +141,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono p (a := K ^ 2) (b := M * K ^ 2)
+      have hle := padicValInt_mono (p := p) (a := K ^ 2) (b := M * K ^ 2)
         ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
@@ -163,7 +163,7 @@ theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     (hcrux : padicValInt p N < padicValInt p K)
     (hA0 : A ≠ 0) (hC0 : C ≠ 0) (hK0 : K ≠ 0) (hN0 : N ≠ 0) :
     (x₃.den : ZMod p) = 0 := by
-  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) p hcrux hN0 hK0
+  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) hcrux hN0 hK0
   have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
@@ -199,12 +199,12 @@ theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime
     grind
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
-  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert a₄ a₆ p hpZ hpA hpC hpE
+  have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert hpZ hpA hpC hpE
   have hW0 : W ≠ 0 := fun h ↦ hpW (h ▸ dvd_zero _)
   have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
   have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
   have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
-  exact ⟨padicValInt_lt_of_mul_eq p hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
+  exact ⟨padicValInt_lt_of_mul_eq hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
     hN0, hK0⟩
 
 /-! ### Closure of the kernel -/
@@ -227,26 +227,26 @@ public theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     rw [hx3def]; simp only [Affine.addX, curve]; grind
   have hcv1 := equation_curve h₁
   have hcv2 := equation_curve h₂
-  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data a₂ a₄ a₆ p h₁ hd1
-  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data a₂ a₄ a₆ p h₂ hd2
+  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data h₁ hd1
+  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data h₂ hd2
   set A : ℤ := x₁.num
   set B : ℤ := y₁.num
   set C : ℤ := x₂.num
   set D : ℤ := y₂.num
   -- integer curve relations
   have hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 :=
-    int_curve_relation a₂ a₄ a₆ hcv1 hA hB
+    int_curve_relation hcv1 hA hB
   have hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6 :=
-    int_curve_relation a₂ a₄ a₆ hcv2 hC hD
+    int_curve_relation hcv2 hC hD
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
   set N : ℤ := A * D * E - B * C * G with hNdef
   -- the single-fraction identity for the final valuation certificate
   have hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - a₆ * E ^ 2 * G ^ 2 * K ^ 2 : ℤ) : ℚ) := by
-    rw [hKdef, hNdef]; exact addX_single_fraction a₂ a₄ a₆ hℓ haddX hcv1 hcv2 hA hB hC hD
+    rw [hKdef, hNdef]; exact addX_single_fraction hℓ haddX hcv1 hcv2 hA hB hC hD
   -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
-  obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations a₂ a₄ a₆ p hpZ hne hA hC
+  obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations hpZ hne hA hC
     (mod_cast hEne) (mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
-  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) p hMain hpA hpC hcrux
+  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) hMain hpA hpC hcrux
     (fun h ↦ hpA (h ▸ dvd_zero _)) (fun h ↦ hpC (h ▸ dvd_zero _)) hK0 hN0
 
 end ECCompute

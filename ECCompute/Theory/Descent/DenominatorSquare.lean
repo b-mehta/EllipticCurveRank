@@ -29,7 +29,7 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ)
+variable {a₂ a₄ a₆ : ℤ}
 
 theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
     ∃ w : ℕ, d = w ^ 2 ∧ g = w ^ 3 := by
@@ -82,6 +82,6 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
 public theorem den_isSquare_of_nonsingular {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 :=
-  den_isSquare a₂ a₄ a₆ h.1
+  den_isSquare h.1
 
 end ECCompute

@@ -31,7 +31,7 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
@@ -39,8 +39,6 @@ On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-
 transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 
 section Psi
-
-variable {p}
 
 /-- `ψ_p` vanishes on squares. -/
 public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
@@ -68,8 +66,6 @@ public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 
   grind [psi]
 
 end Psi
-
-variable {a₂ a₄ a₆ p}
 
 /-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
