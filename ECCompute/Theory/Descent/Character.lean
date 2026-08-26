@@ -168,7 +168,7 @@ theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x�
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval (R := ZMod p) a₂ a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq a₂ (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ x₃ θ
+  prod_sub_theta_eq_lineSq (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃ θ
     hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
@@ -234,7 +234,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
-    fderiv a₂ a₄ θ ≠ 0 := by
+    fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
   have hΔ : (curve a₂ a₄ a₆).Δ.num
       = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
