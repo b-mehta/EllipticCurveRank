@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.RedP
+public import ECCompute.Theory.Descent.Reduction.Map
 public import ECCompute.Theory.Descent.Reduction.SlopeDenominators
 import ECCompute.Theory.Descent.Reduction.KernelClosure
 import ECCompute.Theory.Descent.Cast
