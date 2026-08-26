@@ -13,7 +13,7 @@ import ECCompute.Soundness.Points
 import ECCompute.Soundness.Primes
 import ECCompute.Soundness.DescentMatrix
 import ECCompute.Soundness.Torsion
-import ECCompute.Theory.Descent.LambdaHom
+import ECCompute.Theory.Descent.Additivity
 import ECCompute.Soundness.LambdaCompute
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Group.Pi.Lemmas
