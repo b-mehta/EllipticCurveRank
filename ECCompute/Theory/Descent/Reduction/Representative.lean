@@ -8,7 +8,7 @@ module
 public import ECCompute.Theory.Model
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
 
-import ECCompute.Theory.Descent.DenominatorSquare
+import ECCompute.Theory.Descent.PointArith
 import ECCompute.ForMathlib.RatDenom
 
 /-!

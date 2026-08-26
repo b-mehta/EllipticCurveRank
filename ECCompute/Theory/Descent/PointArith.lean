@@ -6,22 +6,27 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Character
+public import Mathlib.Algebra.Field.ZMod
 
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.RingTheory.Int.Basic
 import Mathlib.RingTheory.Coprime.Lemmas
+import ECCompute.ForMathlib.RatDenom
+import Mathlib.Data.Rat.Cast.Defs
 
 /-!
-# The denominator of an affine point is a perfect square
+# Reducing a rational affine point mod `p`
 
-For the integral Weierstrass curve `E : y² = x³ + a₂x² + a₄x + a₆` over `ℚ` and a solution
-`(x, y)`, this file proves there is a natural number `w` with `x.den = w²` and `y.den = w³`,
-so a point is `(u/w², v/w³)` in lowest terms.
+For the integral curve `E : y² = x³ + a₂x² + a₄x + a₆` over `ℚ` and a solution `(x, y)`: the
+denominator is a perfect square (`den_isSquare`, giving `w` with `x.den = w²` and `y.den = w³`, so
+a point is `(u/w², v/w³)` in lowest terms), and the coordinates cast to `ZMod p`.
 
 ## Main declarations
 
 * `ECCompute.den_isSquare`: from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
+* `ECCompute.xbar`: the reduced `x`-coordinate `(x : ZMod p)` as a plain field element.
+* `ECCompute.ydenom_eq_zero_iff`: the `y`-denominator vanishes mod `p` iff the `x`-denominator does.
 -/
 
 open WeierstrassCurve
@@ -73,5 +78,25 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
     have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := hcy.symm.pow_left.pow_right
     exact hc.dvd_of_dvd_mul_left ⟨N, by grind⟩
   exact exists_sq_cube_of_cube_eq_sq (Nat.dvd_antisymm (mod_cast hdvd1) (mod_cast hdvd2))
+
+/-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
+@[expose]
+public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
+
+variable {p : ℕ}
+
+/-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
+public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
+    x.num = xbar p x * x.den := by
+  rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
+
+/-- The `y`-denominator vanishes mod `p` iff the `x`-denominator does (since
+`x.den = w²`, `y.den = w³`). -/
+public theorem ydenom_eq_zero_iff (hp : p.Prime) {x y : ℚ}
+    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+    (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
+  obtain ⟨w, hxw, hyw⟩ := den_isSquare h
+  simp only [ZMod.natCast_eq_zero_iff]
+  grind [hp.prime.dvd_pow_iff_dvd]
 
 end ECCompute
