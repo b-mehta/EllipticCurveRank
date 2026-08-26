@@ -117,8 +117,7 @@ theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-    simp only [Affine.addX, curve]; grind
+  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
   refine ⟨?_, ?_⟩
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
@@ -144,8 +143,7 @@ theorem slope_den_of_addX_den (hp : p.Prime)
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
   have : Fact p.Prime := ⟨hp⟩
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
-  have he : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by
-    simp only [Affine.addX, curve]; grind
+  have he : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]
     exact den_add_ne_zero hp (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
@@ -182,11 +180,13 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
+@[grind =]
 theorem reduced_addX_eq {x ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ = ℓ ^ 2 - a₂ - x - x := by
   simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
+@[grind =]
 theorem reduced_addY_eq {x y ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
       = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
@@ -418,7 +418,7 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
-  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp only [Affine.addX, curve]; grind
+  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_addX]
   have hcv1 := equation_curve h₁
   have hcv2 := equation_curve h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
@@ -611,8 +611,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
     Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
-  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-    simp only [Affine.addX, curve]; grind
+  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
@@ -628,8 +627,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   have hℓd := reduced_slope_eq hYneg h2Yne htan
   have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
   have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
-  grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
-    Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
+  grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
 reduces to the origin. Uses `den_addX_both_kernel`. -/
