@@ -22,7 +22,6 @@ so a point is `(u/w², v/w³)` in lowest terms.
 ## Main declarations
 
 * `ECCompute.den_isSquare`: from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
-* `ECCompute.den_isSquare_of_nonsingular`: the same for the coordinates of a point `.some x y h`.
 -/
 
 open WeierstrassCurve
@@ -74,12 +73,5 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
     have hc : IsCoprime ((y.den : ℤ) ^ 2) (y.num ^ 2) := hcy.symm.pow_left.pow_right
     exact hc.dvd_of_dvd_mul_left ⟨N, by grind⟩
   exact exists_sq_cube_of_cube_eq_sq (Nat.dvd_antisymm (mod_cast hdvd1) (mod_cast hdvd2))
-
-/-- Point form of `den_isSquare`: for a point `.some x y h` on the integral curve, there is
-`w` with `x.den = w²` and `y.den = w³`. -/
-public theorem den_isSquare_of_nonsingular {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) :
-    ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 :=
-  den_isSquare h.1
 
 end ECCompute
