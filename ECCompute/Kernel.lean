@@ -156,16 +156,16 @@ end F2Invert
 
 /-! ## Descent matrix -/
 
-/-- The `Nat` label triples `(p, (θ % p).toNat, m)`, one for each label `(p, θ)` in `lab` paired
+/-- The `Nat` label triples `(p, (θ % p).toNat, m)`, one for each label `(p, θ)` in `ls` paired
 with its quadratic-residue mask `m` in `q`. -/
-noncomputable def toLabN (lab : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
-  List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) lab q
+noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
+  List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
 
-/-- `true` iff bit `j` of `b` matches label `labN[j]`'s descent character at point
+/-- `true` iff bit `j` of `b` matches label `ls[j]`'s descent character at point
 `(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/
-noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (labN : List (Nat × Nat × Nat)) :
+noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List (Nat × Nat × Nat)) :
     Bool :=
-  labN.rec (fun _ ↦ true)
+  ls.rec (fun _ ↦ true)
     (fun l _ ih b ↦
       (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
         (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
@@ -173,23 +173,23 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (labN : Lis
         (ih (b.div 2))) b
 
 /-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
-noncomputable def checkBGo (a₂ a₄ : Int) (labN : List (Nat × Nat × Nat)) (B : List Nat)
+noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec true
-      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b labN).and'
+      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
         (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
-noncomputable def checkMaskList (labN : List (Nat × Nat × Nat)) : Bool :=
-  allList (fun l ↦ (qrMask l.1).beq l.2.2) labN
+noncomputable def checkMaskList (ls : List (Nat × Nat × Nat)) : Bool :=
+  allList (fun l ↦ (qrMask l.1).beq l.2.2) ls
 
 /-- `true` iff every entry of `B` equals the descent character at its point in `pt`, with each
 mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
-noncomputable def checkB (a₂ a₄ : Int) (lab : List (Nat × Int)) (q B : List Nat)
+noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
-  (checkMaskList (toLabN lab q)).and'
-    (checkBGo a₂ a₄ (toLabN lab q) B pt)
+  (checkMaskList (toLs ls q)).and'
+    (checkBGo a₂ a₄ (toLs ls q) B pt)
 
 /-! ## Point on curve -/
 
