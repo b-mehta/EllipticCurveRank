@@ -6,6 +6,8 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.MainTheorem
+import ECCompute.Soundness.Torsion
+import Mathlib.Lean.Expr.Rat
 
 /-!
 # The `certify_curve` tactic
