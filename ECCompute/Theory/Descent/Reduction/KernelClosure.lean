@@ -62,7 +62,7 @@ theorem kernel_point_data (hp : p.Prime)
 `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
 theorem int_curve_relation {A B E : ℤ}
     (hcv : y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆)
-    (hA : (A : ℚ) = x * (E : ℚ) ^ 2) (hB : (B : ℚ) = y * (E : ℚ) ^ 3) :
+    (hA : (A : ℚ) = x * E ^ 2) (hB : (B : ℚ) = y * E ^ 3) :
     B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6 := by
   have hq : (B : ℚ) ^ 2 = (A : ℚ) ^ 3 + a₂ * (A : ℚ) ^ 2 * (E : ℚ) ^ 2
       + a₄ * (A : ℚ) * (E : ℚ) ^ 4 + a₆ * (E : ℚ) ^ 6 := by grind
@@ -93,7 +93,7 @@ theorem not_dvd_W_cert (hpZ : Prime (p : ℤ))
 /-- The scalar `K = A·G² - C·E²` is nonzero when `x₁ ≠ x₂`, given `A = x₁E²`, `C = x₂G²`
 and `E`, `G` nonzero. -/
 theorem K_ne_zero (hne : x₁ ≠ x₂)
-    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hA : (A : ℚ) = x₁ * E ^ 2) (hC : (C : ℚ) = x₂ * G ^ 2)
     (hEQ : (E : ℚ) ≠ 0) (hGQ : (G : ℚ) ≠ 0) :
     A * G ^ 2 - C * E ^ 2 ≠ 0 := fun h ↦ hne <| by
   have h0 : ((A * G ^ 2 - C * E ^ 2 : ℤ) : ℚ) = 0 := by rw [h]; simp
@@ -106,8 +106,8 @@ theorem addX_single_fraction {ℓ x₃ : ℚ}
     (hℓ : ℓ * (x₁ - x₂) = y₁ - y₂) (haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (hcv1 : y₁ ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆)
     (hcv2 : y₂ ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆)
-    (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hB : (B : ℚ) = y₁ * (E : ℚ) ^ 3)
-    (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2) (hD : (D : ℚ) = y₂ * (G : ℚ) ^ 3) :
+    (hA : (A : ℚ) = x₁ * E ^ 2) (hB : (B : ℚ) = y₁ * E ^ 3)
+    (hC : (C : ℚ) = x₂ * G ^ 2) (hD : (D : ℚ) = y₂ * G ^ 3) :
     x₃ * ((A * C * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ)
       = (((A * D * E - B * C * G) ^ 2
         - a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 - C * E ^ 2) ^ 2 : ℤ) : ℚ) := by
@@ -184,7 +184,7 @@ theorem den_zero_of_cert (hp : p.Prime) {x₃ : ℚ} {K N M : ℤ}
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
 theorem crux_of_int_relations (hpZ : Prime (p : ℤ))
-    (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * (E : ℚ) ^ 2) (hC : (C : ℚ) = x₂ * (G : ℚ) ^ 2)
+    (hne : x₁ ≠ x₂) (hA : (A : ℚ) = x₁ * E ^ 2) (hC : (C : ℚ) = x₂ * G ^ 2)
     (hEne : (E : ℚ) ≠ 0) (hGne : (G : ℚ) ≠ 0) (hpE : (p : ℤ) ∣ E) (hpG : (p : ℤ) ∣ G)
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
     (hCR1 : B ^ 2 = A ^ 3 + a₂ * A ^ 2 * E ^ 2 + a₄ * A * E ^ 4 + a₆ * E ^ 6)
