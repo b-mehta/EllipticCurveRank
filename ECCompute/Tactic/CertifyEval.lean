@@ -63,8 +63,8 @@ public def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
     | none => return none
     | some r =>
       if r != col then
-        let ta := a[col]!; a := a.set! col a[r]!; a := a.set! r ta
-        let ti := inv[col]!; inv := inv.set! col inv[r]!; inv := inv.set! r ti
+        a := a.swapIfInBounds col r
+        inv := inv.swapIfInBounds col r
       for r2 in [0:n] do
         if r2 != col && a[r2]!.testBit col then
           a := a.set! r2 (a[r2]! ^^^ a[col]!)
