@@ -46,19 +46,18 @@ theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMo
       ∧ ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ : ℚ) : ZMod p)
         = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
           + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
-  have hp : p.Prime := Fact.out
   have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1
   have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2
-  have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero hp hd1 hd2
-  have esum : ((x₁ + x₂ : ℚ).den : ZMod p) ≠ 0 := den_add_ne_zero hp hd1 hd2
-  have e1 := den_add_ne_zero hp hx1sq hprod
-  have e2 := den_add_ne_zero hp e1 hx2sq
-  have e3 : ((a₂ * (x₁ + x₂)).den : ZMod p) ≠ 0 := den_mul_ne_zero hp (by simp) esum
-  have e4 := den_add_ne_zero hp e2 e3
+  have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero Fact.out hd1 hd2
+  have esum : ((x₁ + x₂ : ℚ).den : ZMod p) ≠ 0 := den_add_ne_zero Fact.out hd1 hd2
+  have e1 := den_add_ne_zero Fact.out hx1sq hprod
+  have e2 := den_add_ne_zero Fact.out e1 hx2sq
+  have e3 : ((a₂ * (x₁ + x₂)).den : ZMod p) ≠ 0 := den_mul_ne_zero Fact.out (by simp) esum
+  have e4 := den_add_ne_zero Fact.out e2 e3
   have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄).den : ZMod p) ≠ 0 :=
-    den_add_ne_zero hp e4 (by simp)
+    den_add_ne_zero Fact.out e4 (by simp)
   refine ⟨hd, ?_⟩
   rw [cast_add_of_ne_zero e4 (by simp), cast_add_of_ne_zero e2 e3,
     cast_add_of_ne_zero e1 hx2sq, cast_add_of_ne_zero hx1sq hprod, cast_pow,
@@ -86,7 +85,6 @@ public theorem reduced_slope_den (hne : x₁ ≠ x₂)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0) :
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
-  have hp : p.Prime := Fact.out
   have hy12 : y₁ + y₂ ≠ 0 := by
     intro h0; apply hy2; rw [← cast_add_of_ne_zero hdy1 hdy2, h0, cast_zero]
   have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
@@ -95,7 +93,7 @@ public theorem reduced_slope_den (hne : x₁ ≠ x₂)
   have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [cast_add_of_ne_zero hdy1 hdy2]
   have hNden := (cast_secant_num (a₂ := a₂) (a₄ := a₄) hd1 hd2).1
   rw [halt]
-  exact den_div_ne_zero hNden (den_add_ne_zero hp hdy1 hdy2) hy2'
+  exact den_div_ne_zero hNden (den_add_ne_zero Fact.out hdy1 hdy2) hy2'
 
 /-- The reduced coordinates satisfy the reduced `addX` relation `S² = X̄₃ + a₂ + X̄₁ + X̄₂` and the
 alternate-slope identity `S·(Ȳ₁ + Ȳ₂) = X̄₁² + X̄₁X̄₂ + X̄₂² + a₂(X̄₁ + X̄₂) + a₄`, for the reduced
@@ -115,7 +113,6 @@ public theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * ((y₁ : ZMod p) + (y₂ : ZMod p))
         = (x₁ : ZMod p) ^ 2 + (x₁ : ZMod p) * (x₂ : ZMod p) + (x₂ : ZMod p) ^ 2
           + (a₂ : ZMod p) * ((x₁ : ZMod p) + (x₂ : ZMod p)) + (a₄ : ZMod p) := by
-  have hp : p.Prime := Fact.out
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     simp only [Affine.addX, curve]; grind
@@ -123,13 +120,14 @@ public theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     rwa [cast_pow,
-      cast_add_of_ne_zero (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2,
-      cast_add_of_ne_zero (den_add_ne_zero hp hd3 (by simp)) hd1,
+      cast_add_of_ne_zero
+        (den_add_ne_zero Fact.out (den_add_ne_zero Fact.out hd3 (by simp)) hd1) hd2,
+      cast_add_of_ne_zero (den_add_ne_zero Fact.out hd3 (by simp)) hd1,
       cast_add_of_ne_zero hd3 (by simp), cast_intCast] at hc
   · have hℓmul : ℓ * (y₁ + y₂) = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
       rw [hℓdef]; exact slope_mul_add_eq hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
-    rwa [cast_mul_of_ne_zero hℓden (den_add_ne_zero hp hdy1 hdy2),
+    rwa [cast_mul_of_ne_zero hℓden (den_add_ne_zero Fact.out hdy1 hdy2),
       cast_add_of_ne_zero hdy1 hdy2, (cast_secant_num hd1 hd2).2] at hc
 
 /-- If the doubled `x`-coordinate `addX x₁ x₂ (slope …)` has nonzero denominator mod `p`, then so
@@ -139,13 +137,13 @@ public theorem slope_den_of_addX_den
     (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
     (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
-  have hp : p.Prime := Fact.out
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   have he : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by
     simp only [Affine.addX, curve]; grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]
-    exact den_add_ne_zero hp (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
+    exact den_add_ne_zero Fact.out
+      (den_add_ne_zero Fact.out (den_add_ne_zero Fact.out hd3 (by simp)) hd1) hd2
   rw [den_pow, Nat.cast_pow] at hℓ2
   exact fun h ↦ hℓ2 (by grind)
 
@@ -155,9 +153,8 @@ public theorem addX_den_ne {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂) :
     (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 := by
-  have hp : p.Prime := Fact.out
   rw [haddX]
-  exact den_sub_ne_zero hp (den_sub_ne_zero hp (den_sub_ne_zero hp
+  exact den_sub_ne_zero Fact.out (den_sub_ne_zero Fact.out (den_sub_ne_zero Fact.out
     (by rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hℓden) (by simp)) hd1) hd2
 
 /-! ### The reduced addition formulas -/
@@ -194,12 +191,11 @@ public theorem addY_cast_eq {x₁ y₁ x₂ ℓ : ℚ} (hℓden : (ℓ.den : ZMo
     ((curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
       = -((ℓ : ZMod p) * (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ : ZMod p) - (x₁ : ZMod p))
         + (y₁ : ZMod p)) := by
-  have hp : p.Prime := Fact.out
   have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
       = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
     simp only [Affine.addY, Affine.negY, Affine.negAddY, curve]; grind
   rw [haddY, cast_neg,
-    cast_add_of_ne_zero (den_mul_ne_zero hp hℓden (den_sub_ne_zero hp hd3 hd1)) hdy1,
-    cast_mul_of_ne_zero hℓden (den_sub_ne_zero hp hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
+    cast_add_of_ne_zero (den_mul_ne_zero Fact.out hℓden (den_sub_ne_zero Fact.out hd3 hd1)) hdy1,
+    cast_mul_of_ne_zero hℓden (den_sub_ne_zero Fact.out hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
 
 end ECCompute

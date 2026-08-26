@@ -39,24 +39,21 @@ public theorem mem_padicInteger_iff [Fact p.Prime] {x : ℚ} :
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under addition. -/
 public theorem den_add_ne_zero (hp : p.Prime) {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x + y).den : ZMod p) ≠ 0 := by
+    (hy : (y.den : ZMod p) ≠ 0) : ((x + y).den : ZMod p) ≠ 0 :=
   have : Fact p.Prime := ⟨hp⟩
-  exact mem_padicInteger_iff.mp
-    (add_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
+  mem_padicInteger_iff.mp (add_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under subtraction. -/
 public theorem den_sub_ne_zero (hp : p.Prime) {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x - y).den : ZMod p) ≠ 0 := by
+    (hy : (y.den : ZMod p) ≠ 0) : ((x - y).den : ZMod p) ≠ 0 :=
   have : Fact p.Prime := ⟨hp⟩
-  exact mem_padicInteger_iff.mp
-    (sub_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
+  mem_padicInteger_iff.mp (sub_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under multiplication. -/
 public theorem den_mul_ne_zero (hp : p.Prime) {x y : ℚ} (hx : (x.den : ZMod p) ≠ 0)
-    (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 := by
+    (hy : (y.den : ZMod p) ≠ 0) : ((x * y).den : ZMod p) ≠ 0 :=
   have : Fact p.Prime := ⟨hp⟩
-  exact mem_padicInteger_iff.mp
-    (mul_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
+  mem_padicInteger_iff.mp (mul_mem (mem_padicInteger_iff.mpr hx) (mem_padicInteger_iff.mpr hy))
 
 /-- `(·.den : ZMod p) ≠ 0` is closed under division by an element nonzero mod `p`, since then the
 inverse also has good denominator. -/
