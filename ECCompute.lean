@@ -34,7 +34,6 @@ public import ECCompute.Soundness.Torsion
 public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Tactic.CertifyEval
 public import ECCompute.Theory.CompleteSquare
-public import ECCompute.Theory.Model
 public import ECCompute.Theory.Descent.Cast
 public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Descent.CharacterFacts
@@ -48,4 +47,5 @@ public import ECCompute.Theory.Descent.Reduction.RedHom
 public import ECCompute.Theory.Descent.Reduction.Representative
 public import ECCompute.Theory.Descent.Reduction.SlopeDenominators
 public import ECCompute.Theory.IntegralScaling
+public import ECCompute.Theory.Model
 public import ECCompute.Theory.RankDeduction
