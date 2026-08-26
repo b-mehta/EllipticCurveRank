@@ -125,8 +125,8 @@ theorem alphaResNat_cast (hp : p ≠ 0) :
 /-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
 theorem alphaResNat_eq_val (hp : p ≠ 0) {x : ℚ}
     (htval : (tval : ZMod p) = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
-    alphaResNat p tval xp xm xden = ((x.num : ZMod p) - θ * x.den).val := by
-  have hcast : (alphaResNat p tval xp xm xden : ZMod p) = (x.num : ZMod p) - θ * x.den := by
+    alphaResNat p tval xp xm xden = (x.num - θ * x.den).val := by
+  have hcast : (alphaResNat p tval xp xm xden : ZMod p) = x.num - θ * x.den := by
     rw [alphaResNat_cast hp, ← htval, ← hxden]
     have : (x.num : ZMod p) = (xp : ZMod p) - xm := by rw [hxnum]; push_cast; ring
     grind
