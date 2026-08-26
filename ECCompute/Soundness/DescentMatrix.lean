@@ -25,7 +25,7 @@ variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)
   {pt : List (ℚ × ℚ)}
 
 @[simp, grind =]
-theorem checkBRow_cons {l : ℕ × ℕ × ℕ} {ls : List (ℕ × ℕ × ℕ)} :
+theorem checkBRow_cons {l : ℕ × ℕ × ℕ} :
     checkBRow a₂ a₄ xnp xnm xden b (l :: ls) =
       (((b % 2).beq 1).rec (motive := fun _ ↦ Bool)
         (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
@@ -42,7 +42,7 @@ variable {i j : ℕ}
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
-theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) {j : ℕ} (hj : j < ls.length) :
+theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls.length) :
     b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
   induction ls generalizing b j with
   | nil => grind
@@ -55,7 +55,7 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip :
   induction B generalizing pt i with grind [cases List]
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true (h : checkMaskList ls) {j : ℕ} (hj : j < ls.length) :
+theorem checkMaskList_true (h : checkMaskList ls) (hj : j < ls.length) :
     qrMask ls[j].1 = ls[j].2.2 := by grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,

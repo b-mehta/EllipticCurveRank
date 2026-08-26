@@ -85,7 +85,7 @@ theorem popParity_sum {fuel a : ℕ} :
     simp [Nat.testBit_succ]
 
 section
-variable {v n : ℕ}
+variable {n : ℕ}
 
 /-- Extra high bits (`≥ n`) are zero when `v < 2 ^ n`, so they drop out of the XOR. -/
 theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popParity n v := by
@@ -159,7 +159,7 @@ theorem checkInv_true_of (h : checkInv n B M) :
   grind [checkInv, maskBelow_iff]
 
 /-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
-theorem checkInv_true {i k : ℕ} (hi : i < B.length) (hk : k < M.length) (h : checkInv n B M) :
+theorem checkInv_true (hi : i < B.length) (hk : k < M.length) (h : checkInv n B M) :
     popParity n (B[i] &&& M[k]) = (i == k) := by
   obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
   simpa using checkInvGo_true hn hM hB hgo hi hk

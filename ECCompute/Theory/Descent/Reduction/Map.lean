@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.Repr
+public import ECCompute.Theory.Descent.Reduction.Representative
 public import ECCompute.Theory.Descent.DenominatorSquare
 public import ECCompute.ForMathlib.RatDenom
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
@@ -32,11 +32,14 @@ open WeierstrassCurve Projective
 
 namespace ECCompute
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-! ### Coordinates of the reduced representative -/
 
 variable {x y : ℚ} {w : ℕ}
+
+section
+variable [Fact p.Prime]
 
 theorem trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
     (Int.castRingHom (ZMod p) ∘ trep x y w) 0 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = x := by
@@ -46,6 +49,8 @@ theorem trep_coord_one (hden' : y.den = w ^ 3) :
     (Int.castRingHom (ZMod p) ∘ trep x y w) 1 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = y := by
   simp [field, Rat.cast_def, hden']
 
+end
+
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).Δ ≠ 0 := by simpa [map_Δ, eq_intCast] using hΔ
@@ -53,10 +58,11 @@ theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
 /-! ### Nonsingularity of the reduced representative -/
 
 /-- The reduced integer representative is a nonsingular projective point of the reduced curve. -/
-theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ trep x y w) := by
+  have : Fact p.Prime := ⟨hp⟩
   have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation (Int.castRingHom (ZMod p) ∘ trep x y w) :=
     (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
@@ -74,7 +80,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
         (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
       have hunit : IsUnit (p : ℤ) :=
         y.isCoprime_num_den.isUnit_of_dvd' hpy (by rwa [hden', Nat.cast_pow])
-      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast (Fact.out : p.Prime).two_le
+      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
       grind [Int.isUnit_iff]
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
@@ -82,6 +88,9 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     rw [nonsingular_of_Z_ne_zero (by simp [hwz])]
     exact (Affine.equation_iff_nonsingular_of_Δ_ne_zero
       (map_Δ_ne hΔ)).mp ((equation_of_Z_ne_zero (by simp [hwz])).mp hEq)
+
+section
+variable [Fact p.Prime]
 
 /-! ### The projective representative -/
 
@@ -114,7 +123,7 @@ public theorem repr_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
   | some x y h =>
       obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
       rw [repr_some h hden hden']
-      exact red_nonsingular hΔ h hden hden'
+      exact red_nonsingular Fact.out hΔ h hden hden'
 
 /-! ### The reduction map -/
 
@@ -153,10 +162,10 @@ public theorem redP_of_den_zero (h : (curve a₂ a₄ a₆).toAffine.Nonsingular
 /-- The reduced affine coordinates lie on the reduced curve and are nonsingular. -/
 public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
-    (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x : ZMod p) (y : ZMod p) := by
+    (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
-  have hns := red_nonsingular hΔ h hden hden'
+  have hns := red_nonsingular Fact.out hΔ h hden hden'
   rwa [nonsingular_of_Z_ne_zero (by simp [hwne]), trep_coord_zero hden hwne,
     trep_coord_one hden'] at hns
 
@@ -165,11 +174,13 @@ public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMo
 public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     redP p (.some x y h)
-      = .some (x : ZMod p) (y : ZMod p) (red_nonsingular_affine hΔ h hd) := by
+      = .some x y (red_nonsingular_affine hΔ h hd) := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
-  have hns := red_nonsingular hΔ h hden hden'
+  have hns := red_nonsingular Fact.out hΔ h hden hden'
   rw [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne])]
   simp only [trep_coord_zero hden hwne, trep_coord_one hden']
+
+end
 
 end ECCompute
