@@ -7,7 +7,6 @@ module
 
 public import ECCompute.MainTheorem
 import ECCompute.Soundness.Torsion
-meta import Mathlib.Lean.Expr.Rat
 public meta import ECCompute.Tactic.CertifyEval
 
 /-!
@@ -29,7 +28,6 @@ theorem hasRankGE_example : HasRankGE curveExample 29 := by
   certify_curve torsion 67 "data/example.txt" "data/example-labels.txt"
 ```
 -/
-
 
 open Lean Elab Tactic Meta
 
