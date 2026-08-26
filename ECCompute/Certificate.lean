@@ -60,7 +60,6 @@ public structure Certificate where
   /-- A prime witnessing the `2`-torsion claim (for `t = 0`, one at which the `2`-division cubic has
   no root). -/
   torsionPrime : ℕ
-  deriving Repr, DecidableEq
 
 /-- The checks a certificate must pass on its own data: the five lists have length
 `ρ`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is

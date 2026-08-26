@@ -44,14 +44,11 @@ namespace RankDeduction
 
 variable {H : Type*} [AddCommGroup H]
 
-/-- Notation-free abbreviation for the 2-torsion subgroup as a `ℤ`-submodule. -/
-local notation3 M "⟦2⟧" => Submodule.torsionBy ℤ M 2
-
 /-! ### The 2-torsion as kernel of doubling -/
 
 /-- The 2-torsion `H[2]` is the kernel of the doubling map `x ↦ 2 • x`. -/
 lemma torsionBy_two_eq_ker :
-    (Submodule.torsionBy ℤ H 2) = LinearMap.ker (LinearMap.lsmul ℤ H 2) := rfl
+    Submodule.torsionBy ℤ H 2 = LinearMap.ker (LinearMap.lsmul ℤ H 2) := rfl
 
 /-! ### Finiteness of `H ⧸ 2H` -/
 
