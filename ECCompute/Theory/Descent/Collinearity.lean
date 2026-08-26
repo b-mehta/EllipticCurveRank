@@ -42,9 +42,7 @@ theorem cubic_sub_lineSq_eq_prod
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) {x : R} :
-    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2
-      = (x - x₁) * (x - x₂) * (x - x₃) := by
-  grind
+    x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ - (ℓ * x + m) ^ 2 = (x - x₁) * (x - x₂) * (x - x₃) := by grind
 
 /-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
@@ -53,8 +51,7 @@ public theorem prod_sub_theta_eq_lineSq
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) :
-    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
-  grind [cubic_sub_lineSq_eq_prod]
+    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by grind [cubic_sub_lineSq_eq_prod]
 
 /-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
 slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
@@ -93,8 +90,7 @@ public theorem fderiv_eq_prod
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hθ : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0) (h1 : x₁ = θ) :
-    3 * θ ^ 2 + 2 * a₂ * θ + a₄ = (x₂ - θ) * (x₃ - θ) := by
-  grind [cubic_sub_lineSq_eq_prod]
+    3 * θ ^ 2 + 2 * a₂ * θ + a₄ = (x₂ - θ) * (x₃ - θ) := by grind [cubic_sub_lineSq_eq_prod]
 
 end Field
 
