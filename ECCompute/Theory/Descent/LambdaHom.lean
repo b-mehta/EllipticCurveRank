@@ -6,7 +6,6 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Character
-public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.PointArith
 import ECCompute.Theory.Descent.Reduction.Map
 import ECCompute.Theory.Descent.Reduction.RedHom
