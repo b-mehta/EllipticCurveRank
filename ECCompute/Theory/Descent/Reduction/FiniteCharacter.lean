@@ -146,10 +146,8 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ :
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
     prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hθroot
   obtain rfl | c3 := eq_or_ne X₃ θ
-  · rw [if_pos rfl]
-    have hfd : fderiv (a₂ : ZMod p) a₄ X₃ = (x - X₃) * (x - X₃) :=
-      fderiv_eq_prod ℓ m (by grind) (by grind) (by grind) hθroot rfl
-    rw [hfd]
+  · rw [if_pos rfl,
+      fderiv_eq_prod ℓ m (x₂ := x) (x₃ := x) (by grind) (by grind) (by grind) hθroot rfl]
     exact psi_of_isSquare ⟨x - X₃, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
