@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Defs
-public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.Reduction.RedP
