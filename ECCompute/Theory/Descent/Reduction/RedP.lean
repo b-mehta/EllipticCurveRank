@@ -165,9 +165,10 @@ public theorem redP_of_den_zero (h : (curve a₂ a₄ a₆).toAffine.Nonsingular
 
 /-- The reduced affine coordinates lie on the reduced curve and are nonsingular. -/
 public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3)
-    (hwne : (w : ZMod p) ≠ 0) :
+    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x : ZMod p) (y : ZMod p) := by
+  obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
+  have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
   have hns := red_nonsingular hΔ h hden hden'
   have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
     simpa using pow_ne_zero 3 hwne
@@ -179,12 +180,7 @@ public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMo
 public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     redP a₂ a₄ a₆ p (.some x y h)
-      = .some (x : ZMod p) (y : ZMod p)
-          (red_nonsingular_affine hΔ h
-            (den_isSquare_of_nonsingular h).choose_spec.1
-            (den_isSquare_of_nonsingular h).choose_spec.2
-            (mt (Rat.den_cast_eq_zero_iff two_ne_zero
-              (den_isSquare_of_nonsingular h).choose_spec.1).mpr hd)) := by
+      = .some (x : ZMod p) (y : ZMod p) (red_nonsingular_affine hΔ h hd) := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
   have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
   have hzne : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 ≠ 0 := by
