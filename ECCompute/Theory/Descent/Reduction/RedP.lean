@@ -59,7 +59,7 @@ theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
 /-! ### Nonsingularity of the reduced representative -/
 
 /-- The reduced integer representative is a nonsingular projective point of the reduced curve. -/
-public theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ trep x y w) := by
@@ -141,7 +141,7 @@ public theorem redP_zero : redP a₂ a₄ a₆ p 0 = 0 := by
   rw [redP_eq_toAffine]; exact Point.toAffine_zero
 
 /-- `redP` on a `some` point, through any witness `w` with `x.den = w²`, `y.den = w³`. -/
-public theorem redP_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+theorem redP_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     redP a₂ a₄ a₆ p (.some x y h)
       = Point.toAffine
