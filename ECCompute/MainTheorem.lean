@@ -51,8 +51,7 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
   let el : W₁.toAffine.Point ≃ₗ[ℤ] W₂.toAffine.Point := e.toIntLinearEquiv
   set emap := el.symm.submoduleMap H
   refine ⟨H.map (el.symm : W₂.toAffine.Point →ₗ[ℤ] W₁.toAffine.Point), ?_, ?_⟩
-  · -- The image of `H` under the inverse equivalence is isomorphic to `H`, hence f.g.
-    exact Module.Finite.equiv (M := H) emap
+  · exact Module.Finite.equiv emap
   · rwa [← emap.finrank_eq]
 
 variable {a₂ a₄ a₆ : ℤ}
@@ -61,7 +60,7 @@ variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {lab : Fin c.ρ → �
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
 private theorem linearIndependent_descent
-    (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1))
+    (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j
         = if lambdaK c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
@@ -92,7 +91,7 @@ private theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAf
       (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
     rw [mem_twoTorsionPoints, ← two_zsmul, ← Submodule.coe_smul, Submodule.smul_coe_torsionBy,
       Submodule.coe_zero]
-  refine Nat.card_le_card_of_injective (fun x ↦ ⟨((x : H) : _), hmap x⟩) fun a b hab ↦ ?_
+  refine Nat.card_le_card_of_injective (fun x ↦ ⟨x, hmap x⟩) fun a b hab ↦ ?_
   grind
 
 /-- Soundness on the short integral model `curve c.a₂ c.a₄ c.a₆` (`a₁ = a₃ = 0`): when the
@@ -113,14 +112,13 @@ theorem rank_ge_of_certificate
     HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) := by
   classical
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
-  have hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1) :=
-    fun j ↦ descentHyp_of_checkLabel (hlabC j) (hlabP j)
+  have hyp (j) : DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2 :=
+    descentHyp_of_checkLabel (hlabC j) (hlabP j)
   set φ : E →+ (Fin c.ρ → ZMod 2) :=
     AddMonoidHom.pi (fun j ↦ lambdaHom c.a₂ c.a₄ c.a₆ (lab j).1 (hyp j)) with hφ
   rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
   · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
-  obtain ⟨j₀⟩ : Nonempty (Fin c.ρ) := ⟨⟨0, hρpos⟩⟩
-  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp j₀).discr (by simp [hΔ0])
+  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp ⟨0, hρpos⟩).discr (by simp [hΔ0])
   have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
     (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
@@ -146,8 +144,7 @@ theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certifica
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlabP, hlabC, hB, hinv, htors⟩ := hc
   rw [hW]
   rw [checkPoints_iff] at hpt
-  have hlabP' (j : Fin c.ρ) : c.labels[j].1.Prime :=
-    checkPrimes_true hlabP _ (List.getElem_mem _)
+  have hlabP' (j : Fin c.ρ) : c.labels[j].1.Prime := checkPrimes_true hlabP _ (List.getElem_mem _)
   have hlabC' (j : Fin c.ρ) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
     checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) :=
