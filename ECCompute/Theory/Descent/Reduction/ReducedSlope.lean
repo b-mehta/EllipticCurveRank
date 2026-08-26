@@ -117,15 +117,13 @@ public theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     simp only [Affine.addX, curve]; grind
   refine ⟨?_, ?_⟩
-  · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by
-      grind
+  · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     rwa [cast_pow,
       cast_add_of_ne_zero (den_add_ne_zero (den_add_ne_zero hd3 (by simp)) hd1) hd2,
       cast_add_of_ne_zero (den_add_ne_zero hd3 (by simp)) hd1,
       cast_add_of_ne_zero hd3 (by simp), cast_intCast] at hc
-  · have hℓmul : ℓ * (y₁ + y₂)
-        = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
+  · have hℓmul : ℓ * (y₁ + y₂) = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
       rw [hℓdef]; exact slope_mul_add_eq hne h₁ h₂
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hℓmul
     rwa [cast_mul_of_ne_zero hℓden (den_add_ne_zero hdy1 hdy2),
