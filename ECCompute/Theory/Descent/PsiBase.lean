@@ -9,7 +9,6 @@ public import ECCompute.Theory.Descent.Defs
 
 import ECCompute.Theory.Descent.Collinearity
 import Mathlib.Algebra.Field.ZMod
-import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
 # The Legendre character `ψ_p` and the simple-root fact (shared base)
@@ -40,30 +39,55 @@ transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p 
 
 section Psi
 
+/-- A nonzero element of `ZMod p` (`p` prime) has value coprime to `p`. -/
+private theorem val_coprime (hp : p.Prime) {w : ZMod p} (hw : w ≠ 0) :
+    Nat.Coprime w.val p := by
+  have : NeZero p := ⟨hp.pos.ne'⟩
+  rw [Nat.coprime_comm, hp.coprime_iff_not_dvd]
+  exact fun hdvd ↦ (ZMod.val_ne_zero w).2 hw (Nat.eq_zero_of_dvd_of_lt hdvd (ZMod.val_lt w))
+
+/-- `jacobiSym (·.val) p` is multiplicative: it only sees the residue mod `p`. -/
+private theorem jacobiSym_val_mul [NeZero p] (a b : ZMod p) :
+    jacobiSym ((a * b).val : ℤ) p = jacobiSym (a.val : ℤ) p * jacobiSym (b.val : ℤ) p := by
+  rw [← jacobiSym.mul_left]
+  refine jacobiSym.mod_left' ((ZMod.intCast_eq_intCast_iff' _ _ _).mp ?_)
+  simp only [Int.cast_natCast, Int.cast_mul, ZMod.natCast_zmod_val]
+
 /-- `ψ_p` vanishes on squares. -/
-public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 := if_pos ha
+public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 := by
+  rcases eq_or_ne p 0 with rfl | h0
+  · simp [psi, jacobiSym.zero_right]
+  · have : NeZero p := ⟨h0⟩
+    obtain ⟨r, rfl⟩ := ha
+    unfold psi
+    rw [jacobiSym_val_mul, if_neg (by have := mul_self_nonneg (jacobiSym (r.val : ℤ) p); lia)]
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
 public theorem psi_mul_sq (hp : p.Prime) {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
-  have : Fact p.Prime := ⟨hp⟩
-  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
+  have : NeZero p := ⟨hp.pos.ne'⟩
+  have hcop : (w.val : ℤ).gcd p = 1 := by
+    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp hw
+  have hw1 : jacobiSym (w.val : ℤ) p ^ 2 = 1 := jacobiSym.sq_one hcop
+  rw [sq, mul_assoc]
   unfold psi
-  rw [hiff]
+  rw [jacobiSym_val_mul, jacobiSym_val_mul,
+    show jacobiSym (w.val : ℤ) p * (jacobiSym (w.val : ℤ) p * jacobiSym (a.val : ℤ) p)
+      = jacobiSym (w.val : ℤ) p ^ 2 * jacobiSym (a.val : ℤ) p from by ring, hw1, one_mul]
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 public theorem psi_mul (hp : p.Prime) {a b : ZMod p} (ha : a ≠ 0) (hb : b ≠ 0) :
     psi p (a * b) = psi p a + psi p b := by
-  have : Fact p.Prime := ⟨hp⟩
-  -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
-  have key : IsSquare (a * b) ↔ (IsSquare a ↔ IsSquare b) := by
-    have hab : a * b ≠ 0 := mul_ne_zero ha hb
-    rw [← quadraticChar_one_iff_isSquare hab, ← quadraticChar_one_iff_isSquare ha,
-      ← quadraticChar_one_iff_isSquare hb, map_mul]
-    grind [quadraticChar_dichotomy]
-  grind [psi]
+  have : NeZero p := ⟨hp.pos.ne'⟩
+  have hca : (a.val : ℤ).gcd p = 1 := by
+    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp ha
+  have hcb : (b.val : ℤ).gcd p = 1 := by
+    rw [Int.gcd_eq_natAbs, Int.natAbs_natCast, Int.natAbs_natCast]; exact val_coprime hp hb
+  unfold psi
+  rw [jacobiSym_val_mul]
+  rcases jacobiSym.eq_one_or_neg_one hca with h | h <;>
+    rcases jacobiSym.eq_one_or_neg_one hcb with h' | h' <;> rw [h, h'] <;> decide
 
 end Psi
 

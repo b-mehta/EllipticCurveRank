@@ -104,8 +104,13 @@ abstract Legendre character `psi`. -/
 theorem mask_eq_psi (hp : p.Prime) (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     (if qrLookupBool (qrMask p) a.val then 0 else 1) = psi p a := by
   have : NeZero p := ⟨hp.ne_zero⟩
+  have : Fact p.Prime := ⟨hp⟩
   have ha0 : a.val ≠ 0 := by rwa [ne_eq, ZMod.val_eq_zero]
-  simp [qrLookupBool_spec hp2 hp (ZMod.val_lt a), ha0, psi]
+  have hkey : jacobiSym (ZMod.cast a : ℤ) p = -1 ↔ ¬ IsSquare a := by
+    have h := ZMod.nonsquare_iff_jacobiSym_eq_neg_one (a := (ZMod.cast a : ℤ)) (p := p)
+    rwa [ZMod.intCast_zmod_cast] at h
+  by_cases hsq : IsSquare a <;>
+    simp [psi, qrLookupBool_spec hp2 hp (ZMod.val_lt a), ha0, hsq, hkey]
 
 /-! ### Fully `Nat` mirror
 

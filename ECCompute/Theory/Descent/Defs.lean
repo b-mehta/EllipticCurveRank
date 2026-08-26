@@ -7,6 +7,7 @@ module
 
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 public import Mathlib.Data.ZMod.Basic
+public import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 /-!
 # The descent character: basic definitions
@@ -46,10 +47,9 @@ end WeierstrassCurve
 
 namespace ECCompute
 
-open Classical in
 /-- The Legendre symbol pushed into `(ZMod 2, +)`: `0` on squares (including `0`), `1` on
 non-squares. -/
-@[expose] noncomputable def psi (p : ℕ) (a : ZMod p) : ZMod 2 := if IsSquare a then 0 else 1
+@[expose] def psi (p : ℕ) (a : ZMod p) : ZMod 2 := if jacobiSym (a.val : ℤ) p = -1 then 1 else 0
 
 /-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
 @[expose] def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
