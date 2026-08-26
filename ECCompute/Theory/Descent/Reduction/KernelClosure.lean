@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.RedP
+public import ECCompute.Theory.Descent.Reduction.Map
 import ECCompute.ForMathlib.PadicValInt
 
 /-!
@@ -25,7 +25,7 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-! ### Integer data attached to a kernel point -/
 
@@ -34,30 +34,29 @@ theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) : (q.num : ℚ) =
   rw [(div_eq_iff (mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
 /-- The numerator of a rational with square denominator `w²` is coprime to any `p ∣ w`. -/
-theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
+theorem not_dvd_num (hp : p.Prime) {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hpw : (p : ℤ) ∣ w) :
     ¬ (p : ℤ) ∣ q.num := by
   intro hdvd
   have hcop : IsCoprime q.num (w ^ 2) := by
     rw [← hd, Int.isCoprime_iff_nat_coprime]; simpa using q.reduced
   exact absurd (Int.isUnit_iff.mp
     (hcop.isUnit_of_dvd' hdvd (hpw.trans (dvd_pow_self w two_ne_zero))))
-    (by have := (Fact.out : p.Prime).two_le; lia)
+    (by have := hp.two_le; lia)
 
 variable {x y : ℚ}
 
 /-- Coordinate data for a kernel point. If `(x, y)` satisfies the curve equation and reduces to
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
-theorem kernel_point_data
+theorem kernel_point_data (hp : p.Prime)
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
     ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
-  have hp : p.Prime := Fact.out
   obtain ⟨w, hxd, hyd⟩ := den_isSquare h
   have hpw : (p : ℤ) ∣ (w : ℤ) :=
     mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
   have hwne : w ≠ 0 := by grind [Rat.den_ne_zero]
-  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num (by grind) hpw, by positivity⟩
+  exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num hp (by grind) hpw, by positivity⟩
 
 /-- For a point `(A/E², B/E³)` on `y² = x³ + a₂x² + a₄x + a₆`, the integer relation
 `B² = A³ + a₂A²E² + a₄AE⁴ + a₆E⁶`. -/
@@ -74,7 +73,6 @@ theorem int_curve_relation {A B E : ℤ}
 section
 variable {x₁ y₁ x₂ y₂ : ℚ} {A B C D E G : ℤ}
 
-omit [Fact p.Prime] in
 /-- The scalar `W = -A²C² + a₄ACE²G² + a₆E²G²(AG² + CE²)` is a `p`-unit when `p ∣ E` and
 `A`, `C` are `p`-units. -/
 theorem not_dvd_W_cert (hpZ : Prime (p : ℤ))
@@ -124,10 +122,11 @@ theorem addX_single_fraction {ℓ x₃ : ℚ}
 /-! ### The valuation argument -/
 
 /-- With `v_p(N) < v_p(K)`, the integer `N² - M·K²` is nonzero and has `v_p = 2·v_p(N)`. -/
-theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValInt p K)
-    (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
+theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
+    (hcrux : padicValInt p N < padicValInt p K) (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
     padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
       ∧ (N ^ 2 - M * K ^ 2 : ℤ) ≠ 0 := by
+  have : Fact p.Prime := ⟨hp⟩
   have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
     rw [pow_two, padicValInt.mul hK0 hK0]; grind
   have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
@@ -144,7 +143,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono (p := p) Fact.out (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
+      have hle := padicValInt_mono (p := p) hp (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he ↦ by
@@ -159,13 +158,14 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
-theorem den_zero_of_cert {x₃ : ℚ} {K N M : ℤ}
+theorem den_zero_of_cert (hp : p.Prime) {x₃ : ℚ} {K N M : ℤ}
     (hMain : x₃ * ((A * C * K ^ 2 : ℤ) : ℚ) = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ))
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
     (hcrux : padicValInt p N < padicValInt p K)
     (hA0 : A ≠ 0) (hC0 : C ≠ 0) (hK0 : K ≠ 0) (hN0 : N ≠ 0) :
     (x₃.den : ZMod p) = 0 := by
-  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) hcrux hN0 hK0
+  have : Fact p.Prime := ⟨hp⟩
+  obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert hp (M := M) hcrux hN0 hK0
   have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
@@ -191,6 +191,7 @@ theorem crux_of_int_relations (hpZ : Prime (p : ℤ))
     (hCR2 : D ^ 2 = C ^ 3 + a₂ * C ^ 2 * G ^ 2 + a₄ * C * G ^ 4 + a₆ * G ^ 6) :
     padicValInt p (A * D * E - B * C * G) < padicValInt p (A * G ^ 2 - C * E ^ 2)
       ∧ A * D * E - B * C * G ≠ 0 ∧ A * G ^ 2 - C * E ^ 2 ≠ 0 := by
+  have : Fact p.Prime := ⟨Nat.prime_iff_prime_int.mpr hpZ⟩
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
   set N : ℤ := A * D * E - B * C * G with hNdef
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
@@ -219,21 +220,21 @@ end
 /-- If two affine points both reduce to the origin mod `p` (`p ∣ x₁.den`, `p ∣ x₂.den`) but are
 distinct over `ℚ`, the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of their sum satisfies
 `p ∣ x₃.den`, so the sum reduces to the origin as well. -/
-public theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
+public theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
     (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
     (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
-  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
+  have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp only [Affine.addX, curve]; grind
   have hcv1 := equation_curve h₁
   have hcv2 := equation_curve h₂
-  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data h₁ hd1
-  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data h₂ hd2
+  obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
+  obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data hp h₂ hd2
   set A : ℤ := x₁.num
   set B : ℤ := y₁.num
   set C : ℤ := x₂.num
@@ -251,7 +252,7 @@ public theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
   -- the crux inequality `v_p(N) < v_p(K)`, with nonzeroness, from the integer curve relations
   obtain ⟨hcrux, hN0, hK0⟩ := crux_of_int_relations hpZ hne hA hC
     (mod_cast hEne) (mod_cast hGne) hpE hpG hpA hpC hCR1 hCR2
-  exact den_zero_of_cert (M := a₆ * E ^ 2 * G ^ 2) hMain hpA hpC hcrux
+  exact den_zero_of_cert hp (M := a₆ * E ^ 2 * G ^ 2) hMain hpA hpC hcrux
     (fun h ↦ hpA (h ▸ dvd_zero _)) (fun h ↦ hpC (h ▸ dvd_zero _)) hK0 hN0
 
 end ECCompute

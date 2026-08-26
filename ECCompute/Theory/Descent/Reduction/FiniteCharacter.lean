@@ -44,16 +44,16 @@ public noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ θ) else psi p (X - θ)
 
-@[simp]
-theorem εpFinite_zero {θ : ZMod p} : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rfl
+variable {θ : ZMod p}
 
-public theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
+@[simp]
+theorem εpFinite_zero : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rfl
+
+public theorem εpFinite_some {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
       = if X = θ then psi p (fderiv a₂ a₄ θ) else psi p (X - θ) :=
   rfl
-
-variable {θ : ZMod p}
 
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
 theorem reduced_equation {X Y : ZMod p}
