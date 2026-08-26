@@ -58,16 +58,16 @@ variable {θ : ZMod p}
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
 theorem reduced_equation {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
-    Y ^ 2 = X ^ 3 + a₂ * X ^ 2 + a₄ * X + a₆ := by
+    Y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ X := by
   have := (Affine.equation_iff (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
-  simpa [map_curveℤ_zmod] using this
+  simpa [map_curveℤ_zmod, fval] using this
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
-theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by
-  simpa [fval] using h.root
+theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) : fval (R := ZMod p) a₂ a₄ a₆ θ = 0 :=
+  h.root
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
@@ -131,9 +131,9 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
-  have hpt1 : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆ := by
+  have hpt1 : (ℓ * x₁ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₁ := by
     rw [hm1, reduced_equation h₁]
-  have hpt2 : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆ := by
+  have hpt2 : (ℓ * x₂ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₂ := by
     rw [hm2, reduced_equation h₂]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots _ _ _ ℓ m x₁ x₂ X₃ hne hx3 hpt1 hpt2
@@ -186,9 +186,9 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
     simp [map_curveℤ_zmod, field]
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
-  have hpt : (ℓ * x + m) ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by rw [hm, reduced_equation hP]
+  have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root _ _ _ ℓ m x X₃ hpt (by grind) hx3
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root _ _ _ ℓ m x X₃ hpt (by grind [fderiv]) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
