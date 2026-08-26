@@ -7,7 +7,7 @@ module
 
 public import ECCompute.MainTheorem
 import ECCompute.Soundness.Torsion
-import Mathlib.Lean.Expr.Rat
+meta import Mathlib.Lean.Expr.Rat
 
 /-!
 # The `certify_curve` tactic
@@ -42,7 +42,7 @@ namespace ECCompute.CertifyEval
 
 /-- The Jacobi symbol `(a | n)` for odd `n`, by quadratic reciprocity. For prime `n` this is
 the Legendre symbol. Returns `0`, `1`, or `-1`. -/
-meta partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
+partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
   let mut a := ((a % (n : Int)) + n).toNat % n
   let mut n := n
   let mut acc : Int := 1
@@ -58,7 +58,7 @@ meta partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
 `xnum / xden`, mirroring `ECCompute.lambdaK` (`true` = nontrivial). `a₂ a₄` are the
 short-model coefficients; the cubic's constant term `a₆` does not enter the character. -/
-meta def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
+def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
   if (xden : Int) % (p : Int) == 0 then false
   else
     let α := (xnum - θ * (xden : Int)) % (p : Int)
@@ -67,24 +67,24 @@ meta def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : B
     jacobi a p != 1
 
 /-- Pack booleans `p 0, …, p (n-1)` into a `Nat` bitmask: bit `j` set iff `p j`. -/
-meta def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
+def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
   (List.range n).foldl (fun acc j ↦ if p j then acc ||| (1 <<< j) else acc) 0
 
 /-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `ls[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
-meta def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
+def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
   xs.map fun x ↦
     bitmaskOf ls.length (fun j ↦ let l := ls[j]!; lambdaEval a₂ a₄ l.1 l.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
-meta def qrMaskNat (p : Nat) : Nat :=
+def qrMaskNat (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k ↦ acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
 `none` if the matrix is singular. -/
-meta def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
+def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
   let mut inv : Array Nat := (Array.range n).map (fun i ↦ (1 <<< i : Nat))
   for col in [0:n] do
@@ -133,10 +133,10 @@ meta def getLitE {α} (kind : String) (parse : Expr → Option α)
 meta def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? e
 
 /-- ASCII-trim `s`, returning a `String`. -/
-meta def strTrim (s : String) : String := s.trimAscii.toString
+def strTrim (s : String) : String := s.trimAscii.toString
 
 /-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`. -/
-meta def parseCoord (s : String) : Int × Nat :=
+def parseCoord (s : String) : Int × Nat :=
   match (strTrim s).splitOn "/" with
   | [a, b] =>
     let num := (strTrim a).toInt!
@@ -146,11 +146,11 @@ meta def parseCoord (s : String) : Int × Nat :=
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
-meta def fields (line : String) : List String :=
+def fields (line : String) : List String :=
   ((strTrim line).splitOn " ").filter (· ≠ "")
 
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
-meta def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
+def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   match fields line with
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
@@ -161,7 +161,7 @@ meta def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
-meta def parseLabel (line : String) : Option (Nat × Int) :=
+def parseLabel (line : String) : Option (Nat × Int) :=
   match fields line with
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
