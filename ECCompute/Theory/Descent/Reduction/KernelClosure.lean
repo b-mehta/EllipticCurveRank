@@ -141,7 +141,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono (p := p) (a := K ^ 2) (b := M * K ^ 2)
+      have hle := padicValInt_mono (p := p) Fact.out (a := K ^ 2) (b := M * K ^ 2)
         ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
