@@ -141,7 +141,7 @@ theorem padicValRat_num_cert {N K M : ℤ} (hcrux : padicValInt p N < padicValIn
       simpa using this
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono (p := p) (a := K ^ 2) (b := M * K ^ 2)
+      have hle := padicValInt_mono (p := p) Fact.out (a := K ^ 2) (b := M * K ^ 2)
         ⟨M, by ring⟩ h0
       rw [hK2] at hle
       lia
@@ -181,6 +181,7 @@ theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
   exact (ZMod.natCast_eq_zero_iff _ p).mpr
     ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
 
+omit [Fact p.Prime] in
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
 theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime (p : ℤ))
@@ -204,7 +205,8 @@ theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime
   have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
   have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
   have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
-  exact ⟨padicValInt_lt_of_mul_eq hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
+  exact ⟨padicValInt_lt_of_mul_eq (Nat.prime_iff_prime_int.mpr hpZ) hI2 hpS hpW hN0
+      (right_ne_zero_of_mul hprodne) hK0 hW0,
     hN0, hK0⟩
 
 /-! ### Closure of the kernel -/
