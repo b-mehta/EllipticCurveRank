@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.IntModel
+public import ECCompute.Theory.Model
 public import ECCompute.ForMathlib.RatDenom
 
 /-!
