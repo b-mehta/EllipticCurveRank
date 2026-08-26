@@ -180,26 +180,24 @@ theorem variableChange_slope {x₁ x₂ y₁ y₂ : ℚ} (h₁ : W.toAffine.Equa
     have hd1 : y₁ - W.toAffine.negY x₁ y₁ ≠ 0 := sub_ne_zero.mpr hy
     have hd2 : C.mapY x₁ y₁ - (C • W).toAffine.negY (C.mapX x₁) (C.mapY x₁ y₁) ≠ 0 :=
       sub_ne_zero.mpr hy'
-    rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy,
-      show C.mapSlope
-            ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
-              / (y₁ - W.toAffine.negY x₁ y₁))
-          = ((C.u : ℚ)⁻¹
-              * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
-                - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁)
-        from by rw [mapSlope]; field_simp,
-      div_eq_div_iff hd2 hd1]
+    have hs : C.mapSlope
+          ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
+            / (y₁ - W.toAffine.negY x₁ y₁))
+        = ((C.u : ℚ)⁻¹
+            * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
+              - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁) := by
+      rw [mapSlope]; field_simp
+    rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hs, div_eq_div_iff hd2 hd1]
     simp only [negY, mapX, mapY, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, Units.val_inv_eq_inv_val]
     ring
   · have hx' : C.mapX x₁ ≠ C.mapX x₂ := fun hc ↦ hx (mapX_injective hc)
     have hd : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hx
     have hd' : C.mapX x₁ - C.mapX x₂ ≠ 0 := sub_ne_zero.mpr hx'
-    rw [slope_of_X_ne hx', slope_of_X_ne hx,
-      show C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
-          = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂)
-        from by rw [mapSlope]; field_simp,
-      div_eq_div_iff hd' hd]
+    have hs : C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
+        = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂) := by
+      rw [mapSlope]; field_simp
+    rw [slope_of_X_ne hx', slope_of_X_ne hx, hs, div_eq_div_iff hd' hd]
     simp only [mapX, mapY]
     ring
 
@@ -234,10 +232,10 @@ public def pointAddEquiv (C : VariableChange ℚ) :
       simp only [Equiv.coe_fn_mk]
       by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
       · obtain ⟨hx, hy⟩ := hxy
-        rw [Point.add_of_Y_eq hx hy,
-          Point.add_of_Y_eq (show C.mapX x₁ = C.mapX x₂ by rw [hx])
-            (show C.mapY x₁ y₁ = (C • W).toAffine.negY (C.mapX x₂) (C.mapY x₂ y₂) by
-              rw [variableChange_negY, ← hy, hx])]
+        have hX : C.mapX x₁ = C.mapX x₂ := by rw [hx]
+        have hY : C.mapY x₁ y₁ = (C • W).toAffine.negY (C.mapX x₂) (C.mapY x₂ y₂) := by
+          rw [variableChange_negY, ← hy, hx]
+        rw [Point.add_of_Y_eq hx hy, Point.add_of_Y_eq hX hY]
         rfl
       · have hxy' : ¬(C.mapX x₁ = C.mapX x₂ ∧
             C.mapY x₁ y₁ = (C • W).toAffine.negY (C.mapX x₂) (C.mapY x₂ y₂)) := by
