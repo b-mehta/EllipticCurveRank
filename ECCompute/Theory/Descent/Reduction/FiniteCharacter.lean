@@ -42,7 +42,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 public noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point → ZMod 2
   | .zero => 0
-  | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ θ) else psi p (X - θ)
+  | .some X _ _ => if X = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (X - θ)
 
 @[simp]
 theorem εpFinite_zero {θ : ZMod p} : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rfl
@@ -50,7 +50,7 @@ theorem εpFinite_zero {θ : ZMod p} : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rf
 public theorem εpFinite_some {θ : ZMod p} {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     εpFinite a₂ a₄ a₆ p θ (.some X Y h)
-      = if X = θ then psi p (fderiv a₂ a₄ θ) else psi p (X - θ) :=
+      = if X = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (X - θ) :=
   rfl
 
 variable {θ : ZMod p}
@@ -84,17 +84,17 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - a₆) :
-    (if X₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (X₃ - θ))
-      = (if x₁ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₁ - θ))
-        + (if x₂ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₂ - θ)) := by
+    (if X₃ = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (X₃ - θ))
+      = (if x₁ = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (x₁ - θ))
+        + (if x₂ = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (x₂ - θ)) := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
-  have hfd_ne : fderiv a₂ a₄ θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv a₂ a₄ θ = (x₂ - θ) * (X₃ - θ) :=
+  have hfd_ne : fderiv (R := ZMod p) a₂ a₄ θ ≠ 0 := fderiv_ne_zero h
+  have hfd1 : x₁ = θ → fderiv (R := ZMod p) a₂ a₄ θ = (x₂ - θ) * (X₃ - θ) :=
     fderiv_eq_prod _ _ _ ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot
-  have hfd2 : x₂ = θ → fderiv a₂ a₄ θ = (x₁ - θ) * (X₃ - θ) :=
+  have hfd2 : x₂ = θ → fderiv (R := ZMod p) a₂ a₄ θ = (x₁ - θ) * (X₃ - θ) :=
     fderiv_eq_prod _ _ _ ℓ m x₂ x₁ X₃ θ (by grind) (by grind) (by grind) hθroot
-  have hfd3 : X₃ = θ → fderiv a₂ a₄ θ = (x₁ - θ) * (x₂ - θ) :=
+  have hfd3 : X₃ = θ → fderiv (R := ZMod p) a₂ a₄ θ = (x₁ - θ) * (x₂ - θ) :=
     fderiv_eq_prod _ _ _ ℓ m X₃ x₁ x₂ θ (by grind) (by grind) (by grind) hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
   · have hX2ne : x₂ ≠ x₁ := fun hc ↦ hne hc.symm
@@ -146,7 +146,7 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ :
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x * x + x * X₃ + x * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x * x * X₃ = m ^ 2 - a₆) :
-    (if X₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (X₃ - θ)) = 0 := by
+    (if X₃ = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (X₃ - θ)) = 0 := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
@@ -154,7 +154,7 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ :
       hσ₁ hσ₂ hσ₃ hθroot
   obtain rfl | c3 := eq_or_ne X₃ θ
   · rw [if_pos rfl]
-    have hfd : fderiv a₂ a₄ X₃ = (x - X₃) * (x - X₃) :=
+    have hfd : fderiv (R := ZMod p) a₂ a₄ X₃ = (x - X₃) * (x - X₃) :=
       fderiv_eq_prod _ _ _ ℓ m X₃ x x X₃ (by grind) (by grind) (by grind) hθroot rfl
     rw [hfd]
     exact psi_of_isSquare ⟨x - X₃, by ring⟩

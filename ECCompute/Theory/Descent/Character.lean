@@ -54,7 +54,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
     if (x.den : ZMod p) = 0 then 0
     else
       let α : ZMod p := x.num - θ * x.den
-      if α = 0 then psi p (fderiv a₂ a₄ θ) else psi p α
+      if α = 0 then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p α
 
 @[simp, grind =]
 theorem lambda_zero {θ : ZMod p} :
@@ -74,7 +74,7 @@ structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Prop where
   /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
   discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
-  root : fval a₂ a₄ a₆ θ = 0
+  root : fval (R := ZMod p) a₂ a₄ a₆ θ = 0
 
 attribute [grind →] DescentHyp.discr DescentHyp.root
 
