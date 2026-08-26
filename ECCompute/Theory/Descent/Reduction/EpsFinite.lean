@@ -90,16 +90,12 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod _ _ _ ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot hc
-  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod _ _ _ ℓ m x₂ x₁ X₃ θ
-      (by grind) (by grind) (by grind)
-      hθroot hc
-  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc ↦
-    fderiv_eq_prod _ _ _ ℓ m X₃ x₁ x₂ θ
-      (by grind) (by grind) (by grind)
-      hθroot hc
+  have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) :=
+    fderiv_eq_prod _ _ _ ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot
+  have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) :=
+    fderiv_eq_prod _ _ _ ℓ m x₂ x₁ X₃ θ (by grind) (by grind) (by grind) hθroot
+  have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) :=
+    fderiv_eq_prod _ _ _ ℓ m X₃ x₁ x₂ θ (by grind) (by grind) (by grind) hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
   · have hX2ne : x₂ ≠ x₁ := fun hc ↦ hne hc.symm
     have hX3ne : X₃ ≠ x₁ := fun hc ↦ hfd_ne (by grind)
@@ -159,8 +155,7 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ :
   obtain rfl | c3 := eq_or_ne X₃ θ
   · rw [if_pos rfl]
     have hfd : fderiv a₂ a₄ p X₃ = (x - X₃) * (x - X₃) :=
-      fderiv_eq_prod _ _ _ ℓ m X₃ x x X₃
-        (by grind) (by grind) (by grind) hθroot rfl
+      fderiv_eq_prod _ _ _ ℓ m X₃ x x X₃ (by grind) (by grind) (by grind) hθroot rfl
     rw [hfd]
     exact psi_of_isSquare ⟨x - X₃, by ring⟩
   · rw [if_neg c3]
