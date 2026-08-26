@@ -101,7 +101,7 @@ end Field
 /-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
 at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-public theorem prod_sub_theta_eq_lineSq_zmod (a₂ a₄ a₆ : ℤ) (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
+public theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
