@@ -73,8 +73,8 @@ theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
 theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
-    {h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁}
-    {h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂} (hx : x₁ = x₂) :
+    (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hx : x₁ = x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
@@ -92,13 +92,13 @@ theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {�
   have hθroot := h.root'
   have hfd_ne : fderiv a₂ a₄ p θ ≠ 0 := fderiv_ne_zero h
   have hfd1 : x₁ = θ → fderiv a₂ a₄ p θ = (x₂ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot hc
+    fderiv_eq_prod _ _ _ ℓ m x₁ x₂ X₃ θ hσ₁ hσ₂ hσ₃ hθroot hc
   have hfd2 : x₂ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (X₃ - θ) := fun hc ↦
-    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₂ x₁ X₃ θ
+    fderiv_eq_prod _ _ _ ℓ m x₂ x₁ X₃ θ
       (by grind) (by grind) (by grind)
       hθroot hc
   have hfd3 : X₃ = θ → fderiv a₂ a₄ p θ = (x₁ - θ) * (x₂ - θ) := fun hc ↦
-    fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x₁ x₂ θ
+    fderiv_eq_prod _ _ _ ℓ m X₃ x₁ x₂ θ
       (by grind) (by grind) (by grind)
       hθroot hc
   obtain rfl | c1 := eq_or_ne x₁ θ
@@ -136,15 +136,13 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
-  have hpt1 : (ℓ * x₁ + m) ^ 2
-      = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆ := by
-    rw [hm1]; exact reduced_equation h₁
-  have hpt2 : (ℓ * x₂ + m) ^ 2
-      = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆ := by
-    rw [hm2]; exact reduced_equation h₂
+  have hpt1 : (ℓ * x₁ + m) ^ 2 = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆ := by
+    rw [hm1, reduced_equation h₁]
+  have hpt2 : (ℓ * x₂ + m) ^ 2 = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆ := by
+    rw [hm2, reduced_equation h₂]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots _ _ _ ℓ m
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
@@ -158,14 +156,13 @@ theorem εp_double_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) 
     (if X₃ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X₃ - θ)) = 0 := by
   have hθroot := h.root'
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
-    prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x x X₃ θ
+    prod_sub_theta_eq_lineSq _ _ _ ℓ m x x X₃ θ
       hσ₁ hσ₂ hσ₃ hθroot
   obtain rfl | c3 := eq_or_ne X₃ θ
   · rw [if_pos rfl]
     have hfd : fderiv a₂ a₄ p X₃ = (x - X₃) * (x - X₃) :=
-      fderiv_eq_prod (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m X₃ x x X₃
-        (by grind) (by grind) (by grind)
-        hθroot rfl
+      fderiv_eq_prod _ _ _ ℓ m X₃ x x X₃
+        (by grind) (by grind) (by grind) hθroot rfl
     rw [hfd]
     exact psi_of_isSquare ⟨x - X₃, by ring⟩
   · rw [if_neg c3]
@@ -183,31 +180,23 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have hp2 : p ≠ 2 := h.ne_two
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by rwa [ZMod.ringChar_zmod_n])
-  have hneg := reduced_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) p x y
   have hyne : y ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x y := by grind
-  have hcurve : y ^ 2
-      = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ :=
-    reduced_equation hP
   have hθroot := h.root'
-  have hXθ : x ≠ θ := by grind
+  have hXθ : x ≠ θ := by grind [reduced_equation hP]
   rw [Affine.Point.add_self_of_Y_ne hyne]
   simp only [εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * a₂ * x + a₄ := by
     have hsub : y - -y = 2 * y := by grind
-    rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
-    simp [map_curveℤ_zmod]
-    grind
+    rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, reduced_negY, hsub]
+    simp [map_curveℤ_zmod, field]
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
-  have hpt : (ℓ * x + m) ^ 2
-      = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by rwa [hm]
-  have htan : 3 * x ^ 2 + 2 * a₂ * x + a₄ = 2 * ℓ * (ℓ * x + m) := by grind
+  have hpt : (ℓ * x + m) ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by rw [hm, reduced_equation hP]
   have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by
     rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
-  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
-    ℓ m x X₃ hpt htan hx3
+  obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root _ _ _ ℓ m x X₃ hpt (by grind) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
@@ -221,8 +210,8 @@ theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
   · rw [← Affine.Point.zero_def, add_zero, εpFinite_zero, add_zero]
   by_cases hxy : x₁ = x₂ ∧ y₁ = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₂ y₂
   · -- `Q = -P`: the sum is `O`, and both summands share the `x`-coordinate, so `εpP + εpQ = 0`.
-    rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero,
-      εp_x_indep (h₁ := h₁) (h₂ := h₂) hxy.1, CharTwo.add_self_eq_zero]
+    rw [Affine.Point.add_of_Y_eq hxy.1 hxy.2, εpFinite_zero, εp_x_indep h₁ h₂ hxy.1,
+      CharTwo.add_self_eq_zero]
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
       have hyne' : y₁ ≠ -y₂ := by grind
