@@ -62,8 +62,7 @@ Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : 
 
 /-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
 as an `AddMonoidHom E(ℚ) → ZMod 2`. See `lambda_map_add`. -/
-noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ)
+noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp (redHom hΔ)
@@ -94,8 +93,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 @[expose, simps]
-public noncomputable def lambdaHom {θ : ZMod p}
-    (h : DescentHyp a₂ a₄ a₆ p θ) :
+public noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero
