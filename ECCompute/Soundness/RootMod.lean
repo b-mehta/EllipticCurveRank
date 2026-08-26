@@ -47,10 +47,10 @@ public theorem intResNat_cast {p : ℕ} {z : ℤ} (hp : p ≠ 0) :
   simp [polyModL]
 
 /-- A `polyModL` value is a residue mod `ℓ`. -/
-public theorem polyModL_lt (hℓ : 0 < ℓ) : polyModL cs ℓ r < ℓ := by
+public theorem polyModL_lt (hℓ : ℓ ≠ 0) : polyModL cs ℓ r < ℓ := by
   cases cs with
-  | nil => exact hℓ
-  | cons _ _ => exact Nat.mod_lt _ hℓ
+  | nil => exact hℓ.bot_lt
+  | cons _ _ => exact Nat.mod_lt _ hℓ.bot_lt
 
 /-- `polyModL` casts to `polyEval` in `ZMod ℓ`. -/
 public theorem polyModL_cast (hl : ℓ ≠ 0) : (polyModL cs ℓ r : ZMod ℓ) = polyEval cs r := by
@@ -83,7 +83,7 @@ public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     grind
   intro hu
-  have hℓ0 : (0 : ℤ) < ℓ := mod_cast (by lia : 0 < ℓ)
+  have hℓ0 : (0 : ℤ) < ℓ := by positivity
   set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
