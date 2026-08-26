@@ -69,12 +69,6 @@ open VariableChange
 
 variable {W : WeierstrassCurve ℚ} {C : VariableChange ℚ}
 
-/-- Two affine points with equal coordinates are equal (nonsingularity proofs are irrelevant). -/
-theorem Affine.point_some_congr
-    {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) (hy : y₁ = y₂) :
-    (Point.some x₁ y₁ h₁ : W.toAffine.Point) = Point.some x₂ y₂ h₂ := by subst hx hy; rfl
-
 /-- A point `(x, y)` lies on `W` iff its image lies on `C • W`. -/
 theorem equation_variableChange_iff :
     W.toAffine.Equation x y ↔ (C • W).toAffine.Equation (C.mapX x) (C.mapY x y) := by
@@ -118,7 +112,6 @@ theorem variableChange_slope (h₁ : W.toAffine.Equation x₁ y₁)
     (h₂ : W.toAffine.Equation x₂ y₂) (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
     (C • W).toAffine.slope (C.mapX x₁) (C.mapX x₂) (C.mapY x₁ y₁) (C.mapY x₂ y₂)
       = C.mapSlope (W.toAffine.slope x₁ x₂ y₁ y₂) := by
-  have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   obtain rfl | hx := eq_or_ne x₁ x₂
   · have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun h ↦ hxy ⟨rfl, h⟩
     obtain rfl : y₁ = y₂ := Y_eq_of_Y_ne h₁ h₂ rfl hy
@@ -128,7 +121,7 @@ theorem variableChange_slope (h₁ : W.toAffine.Equation x₁ y₁)
         = ((C.u : ℚ)⁻¹
             * ((3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁)
               - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁) := by
-      rw [mapSlope]; field_simp
+      rw [mapSlope]; field_simp [u_ne_zero]
     rw [slope_of_Y_ne rfl hy', slope_of_Y_ne rfl hy, hs, div_eq_div_iff (by grind) (by grind)]
     simp only [negY, mapX, mapY, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, Units.val_inv_eq_inv_val]
@@ -138,7 +131,7 @@ theorem variableChange_slope (h₁ : W.toAffine.Equation x₁ y₁)
     have hd' : C.mapX x₁ - C.mapX x₂ ≠ 0 := sub_ne_zero.mpr hx'
     have hs : C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
         = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂) := by
-      rw [mapSlope]; field_simp
+      rw [mapSlope]; field_simp [u_ne_zero]
     rw [slope_of_X_ne hx', slope_of_X_ne hx, hs, div_eq_div_iff hd' hd]
     simp only [mapX, mapY]
     ring
@@ -149,8 +142,7 @@ namespace VariableChange
 
 /-- An admissible change of variables `C` induces a group isomorphism between the Mordell-Weil
 groups of `W` and `C • W`, sending `(x, y)` to `(u⁻²(x - r), u⁻³(y - s(x - r) - t))`. -/
-public def pointAddEquiv (C : VariableChange ℚ) :
-    W.toAffine.Point ≃+ (C • W).toAffine.Point :=
+public def pointAddEquiv (C : VariableChange ℚ) : W.toAffine.Point ≃+ (C • W).toAffine.Point :=
   AddEquiv.mk'
     { toFun := fun
         | .zero => .zero
