@@ -221,7 +221,7 @@ private def readEntries {α} (what : String) (parse : String → Option α) (pat
     | none => throwError "certify_curve: malformed {what} line: {l}"
 
 /-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
-`rho` entries. -/
+`ρ` entries. -/
 private def readData (path lpath : String) (rho : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
   let pts ← readEntries "points" parseLine path
@@ -285,7 +285,7 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
   let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
     #[wModel, wCurve, rb, rb, rb, rb, rb]
-  let rhoE := mkApp (mkConst ``Certificate.rho) cExpr
+  let rhoE := mkApp (mkConst ``Certificate.ρ) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
     mkAppN (mkConst ``List.length_beq_eq [Level.zero])
@@ -316,8 +316,8 @@ private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
 and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by
-`ext_of_beq` on five `reflBoolTrue` `BEq` checks, with no side goals. The certificate's `rho` is
-`ρ_goal + t`, so `rank ≥ rho - t` is defeq to the goal `rank ≥ ρ_goal`. -/
+`ext_of_beq` on five `reflBoolTrue` `BEq` checks, with no side goals. The certificate's `ρ` is
+`ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
 private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
   let (rhoGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal

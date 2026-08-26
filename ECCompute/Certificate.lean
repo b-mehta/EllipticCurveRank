@@ -24,9 +24,9 @@ general integral model.
 
 ## Implementation notes
 
-The four lists `points`, `labels`, `B`, and `M` all have length `rho`; the `Certificate.Valid`
+The four lists `points`, `labels`, `B`, and `M` all have length `ρ`; the `Certificate.Valid`
 checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
-by rows, `M` by columns), so `F2Invert.checkInv rho B M` applies verbatim.
+by rows, `M` by columns), so `F2Invert.checkInv ρ B M` applies verbatim.
 -/
 
 namespace ECCompute
@@ -41,7 +41,7 @@ public structure Certificate where
   /-- The constant coefficient of the short model. -/
   a₆ : ℤ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
-  rho : ℕ
+  ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
   points : List (ℚ × ℚ)
   /-- The `ρ` descent-column labels `(p, θ)`: a prime `p` and a root `θ` mod `p`. -/
@@ -63,20 +63,20 @@ public structure Certificate where
   deriving Repr, DecidableEq
 
 /-- The checks a certificate must pass on its own data: the five lists have length
-`rho`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is
+`ρ`, the point, prime, label, and character-matrix checks pass, the claimed `𝔽₂` inverse is
 correct, and the `2`-torsion order is at most `2 ^ t`. `hasRankGE_of_certificate` turns this,
 together with a curve match, into a rank lower bound. -/
 public structure Certificate.Valid (c : Certificate) : Prop where
-  /-- The point list has `rho` entries. -/
-  lenP : c.points.length = c.rho
-  /-- The label list has `rho` entries. -/
-  lenL : c.labels.length = c.rho
-  /-- The row bitmask list `B` has `rho` entries. -/
-  lenB : c.B.length = c.rho
-  /-- The column bitmask list `M` has `rho` entries. -/
-  lenM : c.M.length = c.rho
-  /-- The quadratic-residue mask list has `rho` entries. -/
-  lenQ : c.qrMasks.length = c.rho
+  /-- The point list has `ρ` entries. -/
+  lenP : c.points.length = c.ρ
+  /-- The label list has `ρ` entries. -/
+  lenL : c.labels.length = c.ρ
+  /-- The row bitmask list `B` has `ρ` entries. -/
+  lenB : c.B.length = c.ρ
+  /-- The column bitmask list `M` has `ρ` entries. -/
+  lenM : c.M.length = c.ρ
+  /-- The quadratic-residue mask list has `ρ` entries. -/
+  lenQ : c.qrMasks.length = c.ρ
   /-- Each listed point lies on the short model. -/
   pts : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points
   /-- Each label carries a prime. -/
@@ -86,7 +86,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
-  inv : F2Invert.checkInv c.rho c.B c.M
+  inv : F2Invert.checkInv c.ρ c.B c.M
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/
   tors : (curve c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t
 
