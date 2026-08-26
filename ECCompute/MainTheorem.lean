@@ -152,6 +152,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) :=
     rank_ge_of_certificate (fun i ↦ hpt _ (List.getElem_mem _)) hlsP' hlsC'
       (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
-  exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
+  exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆)
+    (((IntegralScaling.scaling_smul_shortModel a₁ a₂ a₃ a₄ a₆).trans hmodel).symm ▸ key)
 
 end ECCompute

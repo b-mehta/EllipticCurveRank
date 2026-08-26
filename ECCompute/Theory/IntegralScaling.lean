@@ -62,7 +62,7 @@ integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
   curve (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 /-- Scaling the rational short model by `v = 2` produces the integral short model. -/
-theorem scaling_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+public theorem scaling_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)
       = intShortModel a₁ a₂ a₃ a₄ a₆ := by
   ext <;>
@@ -72,13 +72,12 @@ theorem scaling_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     push_cast <;> ring
 
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
-`v = 2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
-short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
+`v = 2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to its integral short
+model `scaling 2 • shortModel ⟨a₁, a₂, a₃, a₄, a₆⟩` (equal to `intShortModel a₁ a₂ a₃ a₄ a₆` by
+`scaling_smul_shortModel`), on which the descent character is stated. -/
 public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Point ≃+
-      (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
-  (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans
-    (scaling_smul_shortModel a₁ a₂ a₃ a₄ a₆ ▸
-      VariableChange.pointAddEquiv (scaling 2 two_ne_zero))
+      (scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)).toAffine.Point :=
+  (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans (VariableChange.pointAddEquiv (scaling 2 two_ne_zero))
 
 end ECCompute.IntegralScaling
