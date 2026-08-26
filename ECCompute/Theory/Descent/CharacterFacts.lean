@@ -16,7 +16,7 @@ import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 The `ψ_p`-arithmetic and the simple-root fact `fderiv_ne_zero`, used on both sides of the descent
 factorization `λ = εpFinite ∘ redP`: by `ECCompute.Descent` (the rational character `λ`) and by
-`ECCompute.Descent.Reduction.EpsFinite` (the finite-field character `εpFinite`).
+`ECCompute.Descent.Reduction.FiniteCharacter` (the finite-field character `εpFinite`).
 
 ## Main declarations
 
