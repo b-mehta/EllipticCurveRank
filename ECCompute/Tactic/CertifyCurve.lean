@@ -6,7 +6,7 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.MainTheorem
-import ECCompute.Soundness.Torsion
+public import ECCompute.Soundness.Torsion
 public meta import ECCompute.Tactic.CertifyEval
 
 /-!

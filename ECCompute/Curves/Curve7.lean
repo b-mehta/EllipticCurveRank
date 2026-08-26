@@ -3,8 +3,10 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Tactic.CertifyCurve
-import ECCompute.Soundness.JInvariant
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
 
 /-!
 # Curve 7 has rank at least 20
@@ -25,20 +27,20 @@ namespace ECCompute
 open WeierstrassCurve
 
 /-- ICARM leaderboard curve 7, Nagao's rank-20 curve over `ℚ`. -/
-def curve7 : WeierstrassCurve ℚ :=
+@[expose] public def curve7 : WeierstrassCurve ℚ :=
   ⟨1, 0, 0, -431092980766333677958362095891166, 5156283555366643659035652799871176909391533088196⟩
 
 /-- ICARM leaderboard curve 7 has Mordell-Weil rank at least `20`. -/
-theorem curve7_hasRankGE_20 : HasRankGE curve7 20 := by
+public theorem curve7_hasRankGE_20 : HasRankGE curve7 20 := by
   unfold curve7
   certify_curve torsion 23 "data/curve7.txt" "data/curve7-labels.txt"
 
 /-- Curve 7 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
-instance : curve7.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+public instance : curve7.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
 set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 7. -/
-theorem curve7_j : curve7.j = -8860058038489051327873505830623232453040740421940383732399828276783671172005754085165404926579435178209 / 6358347962741427332351207823555533236599280133229903044072065747055673142684922784840133195530240000 :=
+public theorem curve7_j : curve7.j = -8860058038489051327873505830623232453040740421940383732399828276783671172005754085165404926579435178209 / 6358347962741427332351207823555533236599280133229903044072065747055673142684922784840133195530240000 :=
   j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
