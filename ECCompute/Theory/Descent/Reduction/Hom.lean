@@ -146,7 +146,7 @@ private theorem y_eq_negY_of_X_eq {x₁ y₁ x₂ y₂ : ℚ}
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
     y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
-  have := WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
+  have := Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
   grind [Affine.Point.some.injEq]
 
 /-- Additivity of `redP` in the tangent-mod-`p` `2`-torsion sub-case: the shared reduced point
@@ -163,8 +163,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
       = redP a₂ a₄ a₆ p (.some x₁ y₁ h₁) + redP a₂ a₄ a₆ p (.some x₁ y₁ h₁) := by
   rw [redP_of_den_ne hΔ h₁ hd1, Affine.Point.add_of_Y_eq rfl hYneg,
     Affine.Point.add_of_X_ne hne]
-  apply redP_of_den_zero
-    (WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left))
+  apply redP_of_den_zero (Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left))
   by_contra hd3_s
   obtain ⟨-, htan⟩ :=
     reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
@@ -178,7 +177,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine hΔ h₁ hden1 hden1'
       (mt (Rat.den_cast_eq_zero_iff two_ne_zero hden1).mpr hd1)
-  rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns
+  rw [Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
   exact hns.2.elim (fun hfd_ne ↦ (Ne.symm hfd_ne) hfd) (fun hyne2 ↦ hyne2 hYeq)
 
@@ -196,10 +195,10 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
     redP a₂ a₄ a₆ p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP a₂ a₄ a₆ p (.some x₁ y₁ h₁) + redP a₂ a₄ a₆ p (.some x₁ y₁ h₁) := by
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
-    WeierstrassCurve.Affine.slope_of_X_ne hne
+    Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := by
-    simp only [WeierstrassCurve.Affine.addX, curve]; grind
+    simp only [Affine.addX, curve]; grind
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
@@ -214,7 +213,7 @@ private theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : 
   have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
   have hℓd := reduced_slope_eq hYneg h2Yne hXbar hYbar htan
   have hy3cast := addY_cast_eq (x₂ := x₂) hℓden hd1 hdy1 hd3
-  have hns3 := WeierstrassCurve.Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
+  have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
     Affine.Point.some.injEq, reduced_addX_eq, reduced_addY_eq]
 
