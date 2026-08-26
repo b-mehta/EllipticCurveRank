@@ -6,12 +6,12 @@ Authors: Bhavik Mehta
 module
 
 public import ECCompute.Theory.Descent.Defs
+public import Mathlib.Algebra.Field.ZMod
 
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.ForMathlib.RatDenom
 import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Data.Rat.Lemmas
-import Mathlib.Algebra.Field.ZMod
 
 /-!
 # Elementary reduction arithmetic
@@ -38,6 +38,7 @@ For `P = (x, y)` on `E` with `p ∤ x.den`, write `X := (x : ZMod p)` (the ratio
 `w` with `x.den = w²`. Then `α = x.num - θ·x.den = w²·(X - θ)`. -/
 
 /-- The reduced `x`-coordinate `(x : ZMod p)` of an affine point, as a plain field element. -/
+@[expose]
 public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x : ZMod p)
 
 variable {p : ℕ}
