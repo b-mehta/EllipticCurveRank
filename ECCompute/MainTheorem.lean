@@ -67,7 +67,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
     {pt : Fin c.rho → ℚ × ℚ}
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
-        = if lambdaComputeBoolNatMask c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
+        = if lambdaK c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
             ((lab j).2 % (lab j).1).toNat
             (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
     (hBlen : c.B.length = c.rho) (hMlen : c.M.length = c.rho)
@@ -80,7 +80,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
   have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.rho).row := by
     ext i j
     rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
-      ← lambdaComputeBoolNatMask_eq (hyp j) (hns i)
+      ← lambdaK_eq (hyp j) (hns i)
         (intResNat_cast (hyp j).prime.ne_zero)
         (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
     simp [hB]
@@ -108,7 +108,7 @@ theorem rank_ge_of_certificate (c : Certificate)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j =
-      if lambdaComputeBoolNatMask c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
+      if lambdaK c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
           ((lab j).2 % (lab j).1).toNat
           (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
     (hBlen : c.B.length = c.rho)
