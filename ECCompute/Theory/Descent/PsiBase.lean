@@ -47,9 +47,17 @@ public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
 public theorem psi_mul_sq (hp : p.Prime) {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
-  have : Fact p.Prime := ⟨hp⟩
-  have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
+  have : NeZero p := ⟨hp.pos.ne'⟩
+  obtain ⟨u, rfl⟩ : IsUnit w := by
+    have h : IsUnit (w.val : ZMod p) := by
+      rw [ZMod.isUnit_iff_coprime, Nat.coprime_comm, hp.coprime_iff_not_dvd,
+        ← ZMod.natCast_eq_zero_iff, ZMod.natCast_zmod_val]
+      exact hw
+    rwa [ZMod.natCast_zmod_val] at h
+  have hiff : IsSquare ((u : ZMod p) ^ 2 * a) ↔ IsSquare a :=
+    ⟨fun ⟨s, hs⟩ ↦ ⟨↑u⁻¹ * s, by
+        linear_combination (↑u⁻¹ : ZMod p) ^ 2 * hs - a * (1 + ↑u⁻¹ * ↑u) * u.inv_mul⟩,
+      fun ⟨r, hr⟩ ↦ ⟨↑u * r, by rw [hr]; ring⟩⟩
   unfold psi
   rw [hiff]
 
