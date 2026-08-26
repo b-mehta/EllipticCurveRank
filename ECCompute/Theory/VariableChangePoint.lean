@@ -103,7 +103,7 @@ private theorem point_some_congr {D : WeierstrassCurve ℚ} {x₁ x₂ y₁ y₂
 end Affine
 
 /-- A point `(x, y)` lies on `W` iff its image lies on `C • W`. -/
-theorem variableChange_equation {x y : ℚ} :
+theorem equation_variableChange_iff {x y : ℚ} :
     W.toAffine.Equation x y ↔ (C • W).toAffine.Equation (C.mapX x) (C.mapY x y) := by
   have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
   rw [equation_iff, equation_iff, mapX, mapY, variableChange_a₁, variableChange_a₂,
@@ -118,10 +118,10 @@ theorem variableChange_equation {x y : ℚ} :
     linear_combination h
 
 /-- Nonsingularity transfers forward along the change of variables. -/
-theorem variableChange_nonsingular {x y : ℚ} :
+theorem nonsingular_variableChange_iff {x y : ℚ} :
     W.toAffine.Nonsingular x y ↔ (C • W).toAffine.Nonsingular (C.mapX x) (C.mapY x y) := by
   have hu : (C.u : ℚ) ≠ 0 := u_ne_zero
-  rw [nonsingular_iff', nonsingular_iff', ← variableChange_equation]
+  rw [nonsingular_iff', nonsingular_iff', ← equation_variableChange_iff]
   refine and_congr_right fun _ ↦ ?_
   rw [mapX, mapY, variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄]
   simp only [Units.val_inv_eq_inv_val]
@@ -214,11 +214,11 @@ public def variableChangePointEquiv (C : VariableChange ℚ) :
   AddEquiv.mk'
     { toFun := fun P => match P with
         | .zero => .zero
-        | .some x y h => .some (C.mapX x) (C.mapY x y) (variableChange_nonsingular.mp h)
+        | .some x y h => .some (C.mapX x) (C.mapY x y) (nonsingular_variableChange_iff.mp h)
       invFun := fun P => match P with
         | .zero => .zero
         | .some X Y h => .some (C.invX X) (C.invY X Y)
-            (variableChange_nonsingular.mpr (by rw [mapX_invX, mapY_invY]; exact h))
+            (nonsingular_variableChange_iff.mpr (by rw [mapX_invX, mapY_invY]; exact h))
       left_inv := fun P => by
         cases P with
         | zero => rfl
