@@ -44,7 +44,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
       = if xbar p x = θ then psi p (fderiv a₂ a₄ p θ) else psi p (xbar p x - θ) := by
   obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular h
   have hw : (w : ZMod p) ≠ 0 := by intro h0; apply hd; rw [hxden]; grind
-  have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
+  have halpha : x.num - θ * x.den = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; grind
   have hp : p.Prime := Fact.out
   simp only [lambda]
@@ -87,7 +87,7 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
     lambda a₂ a₄ a₆ p θ (P + Q) = lambda a₂ a₄ a₆ p θ P + lambda a₂ a₄ a₆ p θ Q := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
-    have hval : (curve a₂ a₄ a₆).Δ = ((curveℤ a₂ a₄ a₆).Δ : ℚ) := by
+    have hval : (curve a₂ a₄ a₆).Δ = (curveℤ a₂ a₄ a₆).Δ := by
       rw [← map_curveℤ_ℚ, map_Δ, eq_intCast]
     rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ]
     grind
