@@ -115,22 +115,22 @@ read into `ZMod 2`, agrees with the abstract character `lambda`. -/
 section
 variable {tval xp xm xden : ℕ}
 
-/-- `alphaResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
-theorem alphaResNat_cast (hp : p ≠ 0) :
-    (alphaResNat p tval xp xm xden : ZMod p) = xp - (xm + tval * xden) := by
-  simp only [alphaResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
+/-- `αResNat` casts back to `x.num - θ·x.den` in `ZMod p`. -/
+theorem αResNat_cast (hp : p ≠ 0) :
+    (αResNat p tval xp xm xden : ZMod p) = xp - (xm + tval * xden) := by
+  simp only [αResNat, Nat.mod_eq_mod, Nat.add_eq, Nat.sub_eq, Nat.mul_eq, ZMod.natCast_mod,
     Nat.cast_add, Nat.cast_sub (Nat.mod_lt _ hp.bot_lt).le, ZMod.natCast_self, Nat.cast_mul]
   ring
 
-/-- `alphaResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
-theorem alphaResNat_eq_val (hp : p ≠ 0) {x : ℚ}
+/-- `αResNat` is the `ZMod p`-value of `x.num - θ·x.den`. -/
+theorem αResNat_eq_val (hp : p ≠ 0) {x : ℚ}
     (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
-    alphaResNat p tval xp xm xden = (x.num - θ * x.den).val := by
-  have hcast : (alphaResNat p tval xp xm xden : ZMod p) = x.num - θ * x.den := by
-    rw [alphaResNat_cast hp, ← htval, ← hxden]
+    αResNat p tval xp xm xden = (x.num - θ * x.den).val := by
+  have hcast : (αResNat p tval xp xm xden : ZMod p) = x.num - θ * x.den := by
+    rw [αResNat_cast hp, ← htval, ← hxden]
     have : (x.num : ZMod p) = xp - xm := by rw [hxnum]; push_cast; ring
     grind
-  have hlt : alphaResNat p tval xp xm xden < p := Nat.mod_lt _ hp.bot_lt
+  have hlt : αResNat p tval xp xm xden < p := Nat.mod_lt _ hp.bot_lt
   rw [← hcast, ZMod.val_cast_of_lt hlt]
 
 /-- `fderivResNat` casts back to `f'(θ) = 3θ² + 2a₂θ + a₄` in `ZMod p`. -/
@@ -160,11 +160,11 @@ public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
       = lambda a₂ a₄ a₆ p θ (.some x y h) := by
   have hp : p ≠ 0 := hyp.prime.ne_zero
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
-  have halpha := alphaResNat_eq_val hp htval hxnum hxden
+  have hα := αResNat_eq_val hp htval hxnum hxden
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
   rw [lambdaK, lambda]
-  grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResNat_eq_val, alphaResNat_eq_val,
+  grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResNat_eq_val, αResNat_eq_val,
     fderiv_ne_zero]
 
 end
