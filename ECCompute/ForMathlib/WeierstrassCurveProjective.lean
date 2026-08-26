@@ -47,8 +47,8 @@ theorem equiv_of_proportional (hU : W.Nonsingular U) (hV : W.Nonsingular V)
       grind [mul_eq_zero]
     exact equiv_of_X_eq_of_Y_eq hUz hVz (by grind) (by grind)
 
-/-- Two nonsingular projective representatives over a field are equivalent as soon as they have the
-same underlying affine point (the converse of `toAffine_of_equiv`). -/
+/-- Two nonsingular projective representatives over a field with the same underlying affine point
+are equivalent. See also `toAffine_of_equiv`. -/
 theorem equiv_of_toAffine_eq (hU : W.Nonsingular U) (hV : W.Nonsingular V)
     (h : Point.toAffine W U = Point.toAffine W V) : U ≈ V := by
   classical
