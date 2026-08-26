@@ -253,7 +253,7 @@ theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
 public noncomputable def εpHom [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Point →+ ZMod 2 where
   toFun := εpFinite a₂ a₄ a₆ p θ
-  map_zero' := rfl
+  map_zero' := by exact εpFinite_zero
   map_add' := by exact εpFinite_map_add h
 
 end ECCompute
