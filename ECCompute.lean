@@ -33,7 +33,7 @@ public import ECCompute.Soundness.RootMod
 public import ECCompute.Soundness.Torsion
 public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Tactic.CertifyEval
-public import ECCompute.Theory.CompleteSquare
+public import ECCompute.Theory.ShortModel.CompleteSquare
 public import ECCompute.Theory.Curve
 public import ECCompute.Theory.Descent.Cast
 public import ECCompute.Theory.Descent.Character

@@ -7,7 +7,7 @@ module
 
 public import ECCompute.Theory.Descent.Character
 
-import ECCompute.Theory.CompleteSquare
+import ECCompute.Theory.ShortModel.CompleteSquare
 
 /-!
 # The general-to-integer-short-model change of variables
