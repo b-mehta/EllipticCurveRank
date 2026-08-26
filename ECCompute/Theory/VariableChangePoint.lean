@@ -151,8 +151,9 @@ theorem slope_variableChange {x₁ x₂ y₁ y₂ : ℚ} (h₁ : W.toAffine.Equa
       show vcSlope C
             ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
               / (y₁ - W.toAffine.negY x₁ y₁))
-          = ((C.u : ℚ)⁻¹ * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
-              - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁)
+          = ((C.u : ℚ)⁻¹
+              * ((3 * x₁ ^ 2 + 2 * W.toAffine.a₂ * x₁ + W.toAffine.a₄ - W.toAffine.a₁ * y₁)
+                - C.s * (y₁ - W.toAffine.negY x₁ y₁))) / (y₁ - W.toAffine.negY x₁ y₁)
         from by rw [vcSlope]; field_simp,
       div_eq_div_iff hd2 hd1]
     simp only [negY, vcX, vcY, variableChange_a₁, variableChange_a₂, variableChange_a₃,
