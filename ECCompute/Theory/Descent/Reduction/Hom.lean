@@ -21,7 +21,6 @@ proves that the reduction map `redP` on affine points is additive, and bundles i
 
 ## Main declarations
 
-* `ECCompute.redP_map_add`: additivity of `redP`.
 * `ECCompute.redHom`: `redP` bundled as an `AddMonoidHom`.
 -/
 
