@@ -38,7 +38,6 @@ def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
-section
 variable {a₂ a₄ a₆ : ℤ}
 
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
@@ -79,10 +78,8 @@ theorem fval_iff {θ : ℤ} {p : ℕ} (hp : 1 < p) :
 theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
   grind [discrIntK, discrInt]
 
-end
-
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
-public theorem descentHyp_of_checkLabel {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
+public theorem descentHyp_of_checkLabel {p : ℕ} {θ : ℤ}
     (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
@@ -103,7 +100,7 @@ public theorem descentHyp_of_checkLabel {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : �
     grind
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
-public theorem checkLabels_true {a₂ a₄ a₆ : ℤ} {labels : List (ℕ × ℤ)}
+public theorem checkLabels_true {labels : List (ℕ × ℤ)}
     (h : checkLabels a₂ a₄ a₆ labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
   rwa [checkLabels, allList_iff] at h
