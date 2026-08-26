@@ -30,7 +30,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 /-! ### Integer data attached to a kernel point -/
 
 /-- `(q.num : ℚ) = q * wᵏ` when `q.den = wᵏ`, clearing the denominator of a rational. -/
-theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) : (q.num : ℚ) = q * (w : ℚ) ^ k := by
+theorem cast_num_eq {q : ℚ} {w k : ℕ} (hd : q.den = w ^ k) : (q.num : ℚ) = q * w ^ k := by
   rw [(div_eq_iff (mod_cast q.den_ne_zero)).mp (Rat.num_div_den q), hd]; grind
 
 /-- The numerator of a rational with square denominator `w²` is coprime to any `p ∣ w`. -/
@@ -50,7 +50,7 @@ the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.n
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
 theorem kernel_point_data (hp : p.Prime)
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
-    ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
+    ∃ w : ℤ, (x.num : ℚ) = x * w ^ 2 ∧ (y.num : ℚ) = y * w ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
   obtain ⟨w, hxd, hyd⟩ := den_isSquare h
   have hpw : (p : ℤ) ∣ (w : ℤ) :=
