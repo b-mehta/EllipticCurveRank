@@ -99,7 +99,7 @@ A line `y = ℓx + m` meeting `E` in three points with `x`-coordinates `x₁, x�
 
 section CommRing
 
-variable {R : Type*} [CommRing R] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R)
+variable {R : Type*} [CommRing R] {a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R}
 
 /-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the three Vieta relations, the cubic
 `x³ + a₂x² + a₄x + a₆ - (ℓx + m)²` factors as `(x - x₁)(x - x₂)(x - x₃)` at every `x`. -/
@@ -134,7 +134,7 @@ end CommRing
 
 section Field
 
-variable {F : Type*} [Field F] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F)
+variable {F : Type*} [Field F] {a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F}
 
 /-- The Vieta relations for the line `y = ℓx + m` meeting `E` at `x₁, x₂, x₃`, recovered from
 the two points `(x₁, ℓx₁ + m)` and `(x₂, ℓx₂ + m)` lying on the curve (with `x₁ ≠ x₂`) and the
@@ -150,7 +150,7 @@ public theorem vieta_of_roots (hne : x₁ ≠ x₂)
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
 mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
-public theorem fderiv_eq_prod
+public theorem fderiv_eq_prod (ℓ m : F)
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
@@ -162,14 +162,13 @@ end Field
 /-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
 at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
+theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x₁ x₂ x₃ θ : ZMod p}
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃ θ
-    hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
+  prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
@@ -222,7 +221,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq_zmod p ℓ m X₁ X₂ X₃ θ hσ₁ hσ₂ hσ₃ hroot
+  have hprod := prod_sub_theta_eq_lineSq_zmod hσ₁ hσ₂ hσ₃ hroot
   have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
   have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
   have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃
