@@ -38,13 +38,11 @@ public theorem intResNat_cast {p : ℕ} {z : ℤ} (hp : p ≠ 0) :
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 
-@[simp, grind =] lemma polyEval_cons {c u : ℤ} :
-    polyEval (c :: cs) u = c + u * polyEval cs u := by
+@[simp, grind =] lemma polyEval_cons {c u : ℤ} : polyEval (c :: cs) u = c + u * polyEval cs u := by
   simp [polyEval]
 
 @[simp, grind =] lemma polyModL_cons {c : ℤ} :
-    polyModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * polyModL cs ℓ r) % ℓ := by
-  simp [polyModL]
+    polyModL (c :: cs) ℓ r = ((c % ℓ).toNat + r * polyModL cs ℓ r) % ℓ := by simp [polyModL]
 
 /-- A `polyModL` value is a residue mod `ℓ`. -/
 public theorem polyModL_lt (hℓ : ℓ ≠ 0) : polyModL cs ℓ r < ℓ := by

@@ -33,14 +33,12 @@ namespace ECCompute
 
 /-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/
-@[grind =] theorem passes_iff {x : ℕ} {L : List ℕ} :
-    passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
+@[grind =] theorem passes_iff {x : ℕ} {L : List ℕ} : passes x L ↔ ∀ i ∈ L, x % i ≠ 0 ∨ x ≤ i := by
   induction L <;> grind
 
 /-- The primes below `23` are exactly `[2, 3, 5, 7, 11, 13, 17, 19]`. -/
 theorem primes_below_23 {p : ℕ} (hlt : p < 23) (hp : p.Prime) :
-    p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := by
-  decide +revert +kernel
+    p ∈ [2, 3, 5, 7, 11, 13, 17, 19] := by decide +revert +kernel
 
 /-- If `2 ≤ n < 529 = 23²` and `n` survives trial division by the primes below `23`, then `n` is
 prime. -/
@@ -63,8 +61,7 @@ theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
   grind [checkPrime, prime_of_passes]
 
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
-public theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) :
-    ∀ l ∈ ls, l.1.Prime := by
+public theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) : ∀ l ∈ ls, l.1.Prime := by
   grind [checkPrimes, checkPrime_true]
 
 end ECCompute

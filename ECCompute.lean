@@ -9,7 +9,7 @@ import ECCompute.Theory.Descent.Defs
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity
-import ECCompute.Theory.Descent.PsiBase
+import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare

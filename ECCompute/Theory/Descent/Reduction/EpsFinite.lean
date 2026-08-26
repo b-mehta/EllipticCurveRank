@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.PsiBase
+public import ECCompute.Theory.Descent.CharacterFacts
 public import ECCompute.Theory.Descent.Reduction.IntModel
 public import Mathlib.Algebra.Field.ZMod
 import ECCompute.Theory.Descent.Collinearity

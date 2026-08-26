@@ -51,14 +51,12 @@ theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) {j : ℕ} (h
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
-    checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat
-      pt[i].1.den B[i] ls := by
+    checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den B[i] ls := by
   induction B generalizing pt i with grind [cases List]
 
 /-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
 theorem checkMaskList_true (h : checkMaskList ls) {j : ℕ} (hj : j < ls.length) :
-    qrMask ls[j].1 = ls[j].2.2 := by
-  grind [checkMaskList, List.getElem_mem]
+    qrMask ls[j].1 = ls[j].2.2 := by grind [checkMaskList, List.getElem_mem]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
 read into `ZMod 2`. -/
@@ -75,8 +73,7 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
   -- The row and column lemmas below index by `ℕ`, so read the label and point through `Fin.val`.
   simp only [Fin.getElem_fin] at hL hP
   set ns := toLs ls q with hnsdef
-  have hns : ns.length = ρ := by
-    rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
+  have hns : ns.length = ρ := by rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : ns[j.val] = (L.1, (L.2 % L.1).toNat, q[j]) := by
     simp only [hnsdef, toLs, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
