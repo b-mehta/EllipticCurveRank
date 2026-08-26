@@ -66,12 +66,9 @@ instance [Module.Finite ℤ H] : Finite (ModN H 2) := by
   exact Module.finite_of_fg_torsion (ModN H 2)
     (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN⟩)
 
-instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) :=
-  Module.Finite.of_finite
+instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) := Module.Finite.of_finite
 
-instance [Module.Finite ℤ H] :
-    Finite (Submodule.torsionBy ℤ H 2) :=
-  Module.finite_of_fg_torsion _
+instance [Module.Finite ℤ H] : Finite (Submodule.torsionBy ℤ H 2) := Module.finite_of_fg_torsion _
     (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
 
 /-! ### The cardinality identity for finite groups -/
@@ -97,8 +94,7 @@ lemma natCard_modN_two_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
 variable {K : Type*} [AddCommGroup K]
 
 /-- `Nat.card (H ⧸ 2H)` is invariant under linear equivalences. -/
-lemma natCard_modN_two_congr (e : H ≃ₗ[ℤ] K) :
-    Nat.card (ModN H 2) = Nat.card (ModN K 2) :=
+lemma natCard_modN_two_congr (e : H ≃ₗ[ℤ] K) : Nat.card (ModN H 2) = Nat.card (ModN K 2) :=
   Nat.card_congr
     (Submodule.Quotient.equiv _ _ e e.map_range_lsmul).toEquiv
 
@@ -198,8 +194,7 @@ variable {ρ : ℕ}
 `φ : H →+ (Fin ρ → ZMod 2)`, then `H ⧸ 2H` has dimension at least `ρ`. (The hom automatically
 factors through `H ⧸ 2H`, since the target has characteristic 2.) -/
 theorem ρ_le_finrank_modN_two [Module.Finite ℤ H] (g : Fin ρ → H)
-    (φ : H →+ (Fin ρ → ZMod 2))
-    (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i))) :
+    (φ : H →+ (Fin ρ → ZMod 2)) (hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i))) :
     ρ ≤ finrank (ZMod 2) (ModN H 2) := by
   have hφ : ∀ h, (2 : ℕ) • φ h = 0 := fun h ↦ by
     rw [← Nat.cast_smul_eq_nsmul (ZMod 2), ZMod.natCast_self, zero_smul]
