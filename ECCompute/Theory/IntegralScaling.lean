@@ -61,7 +61,7 @@ section Scaling
 variable {W W' : WeierstrassCurve ℚ} {v : ℚ} (s : IsScaling W W' v)
 include s
 
-variable {x y : ℚ}
+variable {x y X Y x₁ x₂ y₁ ℓ : ℚ}
 
 /-- The defining equation transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem equation_scale :
@@ -81,8 +81,6 @@ theorem nonsingular_scale :
       = v ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by grind [s.a₁, s.a₃]
   rw [eX, eY, mul_ne_zero_iff_left (pow_ne_zero 4 s.ne), mul_ne_zero_iff_left (pow_ne_zero 3 s.ne)]
 
-variable {X Y : ℚ}
-
 /-- Nonsingularity transfers along the inverse scaling `(X, Y) ↦ (X/v², Y/v³)`. -/
 theorem nonsingular_scale' :
     W'.toAffine.Nonsingular X Y ↔ W.toAffine.Nonsingular (X / v ^ 2) (Y / v ^ 3) := by
@@ -94,20 +92,18 @@ theorem negY_scale :
     W'.toAffine.negY (v ^ 2 * x) (v ^ 3 * y) = v ^ 3 * W.toAffine.negY x y := by
   grind [negY, IsScaling.a₁, IsScaling.a₃]
 
-variable {x₁ x₂ ℓ : ℚ}
-
 /-- The `X`-coordinate of the sum scales by `v²` (the slope scales by `v`). -/
 theorem addX_scale :
     W'.toAffine.addX (v ^ 2 * x₁) (v ^ 2 * x₂) (v * ℓ) = v ^ 2 * W.toAffine.addX x₁ x₂ ℓ := by
   grind [addX, IsScaling.a₁, IsScaling.a₂]
 
 /-- The intermediate `Y`-coordinate scales by `v³`. -/
-theorem negAddY_scale {y₁ : ℚ} :
+theorem negAddY_scale :
     W'.toAffine.negAddY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.negAddY x₁ x₂ y₁ ℓ := by grind [negAddY, addX_scale]
 
 /-- The `Y`-coordinate of the sum scales by `v³`. -/
-theorem addY_scale {y₁ : ℚ} :
+theorem addY_scale :
     W'.toAffine.addY (v ^ 2 * x₁) (v ^ 2 * x₂) (v ^ 3 * y₁) (v * ℓ)
       = v ^ 3 * W.toAffine.addY x₁ x₂ y₁ ℓ := by grind [addY, addX_scale, negAddY_scale, negY_scale]
 
