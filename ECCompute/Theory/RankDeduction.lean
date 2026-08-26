@@ -44,9 +44,6 @@ namespace RankDeduction
 
 variable {H : Type*} [AddCommGroup H]
 
-/-- Notation-free abbreviation for the 2-torsion subgroup as a `ℤ`-submodule. -/
-local notation3 M "⟦2⟧" => Submodule.torsionBy ℤ M 2
-
 /-! ### The 2-torsion as kernel of doubling -/
 
 /-- The 2-torsion `H[2]` is the kernel of the doubling map `x ↦ 2 • x`. -/
