@@ -43,3 +43,4 @@ public import ECCompute.Theory.Descent.ReductionMap
 public import ECCompute.Theory.IntegralScaling
 public import ECCompute.Theory.Model
 public import ECCompute.Theory.RankDeduction
+public import ECCompute.Theory.VariableChangePoint
