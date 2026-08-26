@@ -130,8 +130,7 @@ private theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     repr a₂ a₄ a₆ p (P + Q) ≈ (Int.castRingHom (ZMod p) ∘ V) := by
   have hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ V) := by
     rw [← hadd]
-    exact nonsingular_add (repr_nonsingular hΔ _)
-      (repr_nonsingular hΔ _)
+    exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
   have hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ V) := by
     rw [hgadd]; exact nonsingular_add hnsA hnsB
   have hTℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ V)
@@ -385,12 +384,10 @@ private theorem redP_map_add_tangent_case (hΔ : ((curveℤ a₂ a₄ a₆).Δ :
       (Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ
         (trep x₁ y₁ w₁)) := by
     rw [← hadd]
-    exact nonsingular_add (repr_nonsingular hΔ _)
-      (repr_nonsingular hΔ _)
+    exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
   refine equiv_of_toAffine_eq (repr_nonsingular hΔ _) hnspV ?_
   rw [← redP_eq_toAffine, ← hadd,
-    Point.toAffine_add (repr_nonsingular hΔ _)
-      (repr_nonsingular hΔ _),
+    Point.toAffine_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _),
     ← redP_eq_toAffine, ← redP_eq_toAffine]
   exact redP_add_tangent hΔ h₁ h₂ hred hPQ
 
@@ -409,8 +406,7 @@ private theorem redP_map_add_some (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
     nonsingular_of_toAffine_some (toAffine_g_trep h₂ hden2 hden2')
   rw [redP_eq_toAffine, redP_eq_toAffine (.some x₁ y₁ h₁),
     redP_eq_toAffine (.some x₂ y₂ h₂),
-    ← Point.toAffine_add (repr_nonsingular hΔ _)
-      (repr_nonsingular hΔ _)]
+    ← Point.toAffine_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)]
   refine Point.toAffine_of_equiv ?_
   by_cases heq : (repr a₂ a₄ a₆ p (.some x₁ y₁ h₁)) ≈ (repr a₂ a₄ a₆ p (.some x₂ y₂ h₂))
   · -- `repr P ≈ repr Q` mod `p`: the reduced sum is a doubling of `repr P`.
