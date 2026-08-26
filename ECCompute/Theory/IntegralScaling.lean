@@ -136,10 +136,10 @@ def scaleFwd : W.toAffine.Point → W'.toAffine.Point
   | .zero => .zero
   | .some x y h => .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s).mp h)
 
-/-- The inverse coordinate map `(X, Y) ↦ (X/v², Y/v³)`. -/
+/-- The inverse coordinate map `(x, y) ↦ (x/v², y/v³)`. -/
 def scaleBwd : W'.toAffine.Point → W.toAffine.Point
   | .zero => .zero
-  | .some X Y h => .some (X / v ^ 2) (Y / v ^ 3) ((nonsingular_scale' s).mp h)
+  | .some x y h => .some (x / v ^ 2) (y / v ^ 3) ((nonsingular_scale' s).mp h)
 
 @[simp] theorem scaleFwd_some (h : W.toAffine.Nonsingular x y) :
     scaleFwd s (.some x y h) = .some (v ^ 2 * x) (v ^ 3 * y) ((nonsingular_scale s).mp h) :=
