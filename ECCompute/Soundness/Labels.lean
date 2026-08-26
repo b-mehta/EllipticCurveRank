@@ -32,6 +32,8 @@ into a `DescentHyp`.
 
 namespace ECCompute
 
+open WeierstrassCurve
+
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the case `a₁ = a₃ = 0`), matching
 `WeierstrassCurve.Δ`. -/
 def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
@@ -43,8 +45,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
 theorem curve_Δ_eq :
     (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
-  simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-    WeierstrassCurve.b₆, WeierstrassCurve.b₈, curve, discrInt]
+  simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]
   grind
 
 /-- The numerator of the (integral) discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
