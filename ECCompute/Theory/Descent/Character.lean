@@ -85,7 +85,7 @@ public structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Pro
   /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
   discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
-  root : fval (R := ZMod p) a₂ a₄ a₆ θ = 0
+  root : fval (a₂ : ZMod p) a₄ a₆ θ = 0
 
 attribute [grind →] DescentHyp.discr DescentHyp.root
 
@@ -166,9 +166,9 @@ theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x�
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
-    (hroot : fval (R := ZMod p) a₂ a₄ a₆ θ = 0) :
+    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃ θ
+  prod_sub_theta_eq_lineSq a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ
     hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
@@ -186,15 +186,6 @@ variable {a b : ZMod p}
 /-- `ψ_p` vanishes on squares. -/
 public theorem psi_of_isSquare (ha : IsSquare a) : psi p a = 0 := if_pos ha
 
-/-- Multiplying by a nonzero square does not change `ψ_p`. -/
-public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
-    psi p (b ^ 2 * a) = psi p a := by
-  have : Fact p.Prime := ⟨hp⟩
-  have hiff : IsSquare (b ^ 2 * a) ↔ IsSquare a :=
-    ⟨fun ⟨s, hs⟩ ↦ ⟨s / b, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨b * r, by rw [hr]; ring⟩⟩
-  unfold psi
-  rw [hiff]
-
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/
 public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
@@ -208,6 +199,13 @@ public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
     grind [quadraticChar_dichotomy]
   grind [psi]
 
+/-- Multiplying by a nonzero square does not change `ψ_p`. -/
+public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
+    psi p (b ^ 2 * a) = psi p a := by
+  rcases eq_or_ne a 0 with rfl | ha
+  · rw [mul_zero]
+  · rw [psi_mul hp (pow_ne_zero 2 hb) ha, psi_of_isSquare ⟨b, by ring⟩, zero_add]
+
 end Psi
 
 variable {θ : ZMod p}
@@ -219,7 +217,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
-    (hroot : fval (R := ZMod p) a₂ a₄ a₆ θ = 0)
+    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0)
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
