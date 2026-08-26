@@ -85,7 +85,7 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     (hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ T))
     (hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ T))
     (hTℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = R) :
-    (repr p R) ≈ (Int.castRingHom (ZMod p) ∘ T) := by
+    repr p R ≈ Int.castRingHom (ZMod p) ∘ T := by
   cases R with
   | zero =>
     have hTz : (Int.castRingHom ℚ ∘ T) 2 = 0 := by
@@ -124,7 +124,7 @@ theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {V 
     (haffB : Point.toAffine (curve a₂ a₄ a₆).toProjective B = Q)
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
       (repr p P) (repr p Q) = Int.castRingHom (ZMod p) ∘ V) :
-    repr p (P + Q) ≈ (Int.castRingHom (ZMod p) ∘ V) := by
+    repr p (P + Q) ≈ Int.castRingHom (ZMod p) ∘ V := by
   have hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ V) := by
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
@@ -310,11 +310,11 @@ theorem redP_map_add_secant (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0
     (hden2 : x₂.den = w₂ ^ 2) (hden2' : y₂.den = w₂ ^ 3)
     (hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁))
     (hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂))
-    (heq : ¬ (repr p (.some x₁ y₁ h₁)) ≈ (repr p (.some x₂ y₂ h₂))) :
+    (heq : ¬ repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂)) :
     repr p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       ≈ Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
           (trep x₂ y₂ w₂) := by
-  have hℚne : ¬ (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁) ≈ (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂) := by
+  have hℚne : ¬ Int.castRingHom ℚ ∘ trep x₁ y₁ w₁ ≈ Int.castRingHom ℚ ∘ trep x₂ y₂ w₂ := by
     intro hℚeq
     apply heq
     have hpt : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) = .some x₂ y₂ h₂ := by
@@ -345,7 +345,7 @@ reduced to the affine additivity supplied by `redP_add_tangent`. -/
 theorem redP_map_add_tangent_case (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     {x₁ y₁ x₂ y₂ : ℚ} {w₁ : ℕ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
-    (heq : (repr p (.some x₁ y₁ h₁)) ≈ (repr p (.some x₂ y₂ h₂)))
+    (heq : repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂))
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
@@ -381,7 +381,7 @@ theorem redP_map_add_some (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) 
     redP_eq_toAffine (.some x₂ y₂ h₂),
     ← Point.toAffine_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)]
   refine Point.toAffine_of_equiv ?_
-  by_cases heq : (repr p (.some x₁ y₁ h₁)) ≈ (repr p (.some x₂ y₂ h₂))
+  by_cases heq : repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂)
   · -- `repr P ≈ repr Q` mod `p`: the reduced sum is a doubling of `repr P`.
     have hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
           (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
