@@ -186,7 +186,7 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
-  let q := ls.toList.map fun l ↦ CertifyEval.qrMaskNat l.1
+  let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
   return mkAppN (mkConst ``Certificate.mk)
     #[sA2E, sA4E, sA6E, toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]

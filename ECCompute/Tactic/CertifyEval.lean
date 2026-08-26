@@ -19,12 +19,12 @@ namespace ECCompute.CertifyEval
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
-public def qrMaskNat (p : Nat) : Nat :=
+public def qrMaskEval (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k ↦ acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
 `xnum / xden`, mirroring `ECCompute.lambdaK` (`true` = nontrivial). `a₂ a₄` are the short-model
-coefficients and `qrMask` is `qrMaskNat p`. The character is nontrivial exactly when the relevant
+coefficients and `qrMask` is `qrMaskEval p`. The character is nontrivial exactly when the relevant
 value is a non-residue (or zero) mod `p`, i.e. its bit in `qrMask` is clear. -/
 public def lambdaEval (a₂ a₄ : Int) (p : Nat) (qrMask : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
   if (xden : Int) % (p : Int) == 0 then false
@@ -43,7 +43,7 @@ public def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
 character of label `ls[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. The
 quadratic-residue bitmask of each label's prime is computed once. -/
 public def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
-  let qs := ls.map fun l ↦ qrMaskNat l.1
+  let qs := ls.map fun l ↦ qrMaskEval l.1
   xs.map fun x ↦
     bitmaskOf ls.length (fun j ↦ let l := ls[j]!; lambdaEval a₂ a₄ l.1 qs[j]! l.2 x.1 x.2)
 
