@@ -7,7 +7,7 @@ module
 
 public import ECCompute.Theory.Descent.Character
 import ECCompute.Theory.Descent.PointArith
-import ECCompute.Theory.Descent.Reduction.Map
+import ECCompute.Theory.Descent.ReductionMap
 import ECCompute.Theory.Descent.Reduction.RedHom
 import ECCompute.Theory.Descent.Reduction.FiniteCharacter
 

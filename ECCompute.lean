@@ -39,10 +39,9 @@ public import ECCompute.Theory.Descent.LambdaHom
 public import ECCompute.Theory.Descent.PointArith
 public import ECCompute.Theory.Descent.Reduction.FiniteCharacter
 public import ECCompute.Theory.Descent.Reduction.KernelClosure
-public import ECCompute.Theory.Descent.Reduction.Map
 public import ECCompute.Theory.Descent.Reduction.RedHom
-public import ECCompute.Theory.Descent.Reduction.Representative
 public import ECCompute.Theory.Descent.Reduction.SlopeDenominators
+public import ECCompute.Theory.Descent.ReductionMap
 public import ECCompute.Theory.IntegralScaling
 public import ECCompute.Theory.Model
 public import ECCompute.Theory.RankDeduction

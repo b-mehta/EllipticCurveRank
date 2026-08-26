@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Reduction.Map
+public import ECCompute.Theory.Descent.ReductionMap
 import ECCompute.ForMathlib.PadicValInt
 
 /-!
