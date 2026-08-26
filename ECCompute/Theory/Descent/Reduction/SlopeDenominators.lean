@@ -179,6 +179,7 @@ public theorem reduced_slope_eq {ℓ : ZMod p} {x₁ x₂ y₁ y₂ : ZMod p}
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `L² - a₂ - X - X`. -/
+@[grind =]
 public theorem reduced_addX_eq {X L : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addX X X L = L ^ 2 - a₂ - X - X := by
   simp only [Affine.addX, map_curveℤ_zmod]; grind
