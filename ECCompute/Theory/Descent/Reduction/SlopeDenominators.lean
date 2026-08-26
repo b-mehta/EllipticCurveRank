@@ -185,6 +185,7 @@ public theorem reduced_addX_eq {X L : ZMod p} :
   simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - X̄₁) + Ȳ₁)`. -/
+@[grind =]
 public theorem reduced_addY_eq {X Y L : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY X X Y L
       = -(L * ((curveZMod a₂ a₄ a₆ p).toAffine.addX X X L - X) + Y) := by

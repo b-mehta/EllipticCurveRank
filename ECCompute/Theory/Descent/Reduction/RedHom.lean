@@ -209,7 +209,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
   have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
   grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne,
-    Affine.Point.some.injEq, reduced_addY_eq]
+    Affine.Point.some.injEq]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
 reduces to the origin. Uses `den_addX_both_kernel`. -/
