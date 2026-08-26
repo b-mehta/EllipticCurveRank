@@ -3,7 +3,11 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.MainTheorem
+module
+
+public import ECCompute.MainTheorem
+import ECCompute.Soundness.Torsion
+import Mathlib.Lean.Expr.Rat
 
 /-!
 # The `certify_curve` tactic
@@ -38,7 +42,7 @@ namespace ECCompute.CertifyEval
 
 /-- The Jacobi symbol `(a | n)` for odd `n`, by quadratic reciprocity. For prime `n` this is
 the Legendre symbol. Returns `0`, `1`, or `-1`. -/
-partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
+meta partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
   let mut a := ((a % (n : Int)) + n).toNat % n
   let mut n := n
   let mut acc : Int := 1
@@ -54,7 +58,7 @@ partial def jacobi (a : Int) (n : Nat) : Int := Id.run do
 /-- Evaluator-side value of the descent character `λ_{p,θ}` on a point whose `x`-coordinate is
 `xnum / xden`, mirroring `ECCompute.lambdaK` (`true` = nontrivial). `a₂ a₄` are the
 short-model coefficients; the cubic's constant term `a₆` does not enter the character. -/
-def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
+meta def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :=
   if (xden : Int) % (p : Int) == 0 then false
   else
     let α := (xnum - θ * (xden : Int)) % (p : Int)
@@ -63,24 +67,24 @@ def lambdaEval (a₂ a₄ : Int) (p : Nat) (θ xnum : Int) (xden : Nat) : Bool :
     jacobi a p != 1
 
 /-- Pack booleans `p 0, …, p (n-1)` into a `Nat` bitmask: bit `j` set iff `p j`. -/
-def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
+meta def bitmaskOf (n : Nat) (p : Nat → Bool) : Nat :=
   (List.range n).foldl (fun acc j ↦ if p j then acc ||| (1 <<< j) else acc) 0
 
 /-- The descent-character matrix `B` as `Nat` row bitmasks: row `i` has bit `j` set iff the
 character of label `ls[j]` on the point with `x`-coordinate `xs[i] = (num, den)` is nontrivial. -/
-def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
+meta def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) : List Nat :=
   xs.map fun x ↦
     bitmaskOf ls.length (fun j ↦ let l := ls[j]!; lambdaEval a₂ a₄ l.1 l.2 x.1 x.2)
 
 /-- The quadratic-residue bitmask mod an odd prime `p`: bit `a` set iff `a` is a nonzero square mod
 `p`, computed as the OR of `1 <<< (j² % p)` for `j = 1 .. (p-1)/2`. Matches `ECCompute.qrMask`. -/
-def qrMaskNat (p : Nat) : Nat :=
+meta def qrMaskNat (p : Nat) : Nat :=
   (List.range ((p - 1) / 2)).foldl (fun acc k ↦ acc ||| (1 <<< ((k + 1) * (k + 1) % p))) 0
 
 /-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
 column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
 `none` if the matrix is singular. -/
-def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
+meta def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
   let mut inv : Array Nat := (Array.range n).map (fun i ↦ (1 <<< i : Nat))
   for col in [0:n] do
@@ -110,14 +114,14 @@ namespace ECCompute
 
 /-- Two Weierstrass curves over `ℚ` are equal when their five coefficient `BEq` checks all hold.
 The tactic uses this to prove the model equality from five `reflBoolTrue` witnesses. -/
-theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
+public theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
     (h₁ : W.a₁ == W'.a₁) (h₂ : W.a₂ == W'.a₂) (h₃ : W.a₃ == W'.a₃)
     (h₄ : W.a₄ == W'.a₄) (h₆ : W.a₆ == W'.a₆) : W = W' :=
   WeierstrassCurve.ext (eq_of_beq h₁) (eq_of_beq h₂) (eq_of_beq h₃) (eq_of_beq h₄) (eq_of_beq h₆)
 
 /-- Extract a literal from `e`: try `parse` on the raw term, then on its `whnf`, then `fallback`.
 `kind` names the expected type in the error. -/
-private def getLitE {α} (kind : String) (parse : Expr → Option α)
+meta def getLitE {α} (kind : String) (parse : Expr → Option α)
     (fallback : Expr → MetaM (Option α)) (e : Expr) : MetaM α := do
   if let some n := parse (← whnfR e) then return n
   let e ← whnf e
@@ -126,13 +130,13 @@ private def getLitE {α} (kind : String) (parse : Expr → Option α)
   throwError "certify_curve: expected a `{kind}` literal, got{indentExpr e}"
 
 /-- Extract the `Nat` value of a numeral `Expr`. -/
-private def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? e
+meta def getNatE (e : Expr) : MetaM Nat := getLitE "Nat" (·.nat?) getNatValue? e
 
 /-- ASCII-trim `s`, returning a `String`. -/
-private def strTrim (s : String) : String := s.trimAscii.toString
+meta def strTrim (s : String) : String := s.trimAscii.toString
 
 /-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`. -/
-private def parseCoord (s : String) : Int × Nat :=
+meta def parseCoord (s : String) : Int × Nat :=
   match (strTrim s).splitOn "/" with
   | [a, b] =>
     let num := (strTrim a).toInt!
@@ -142,22 +146,22 @@ private def parseCoord (s : String) : Int × Nat :=
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
-private def fields (line : String) : List String :=
+meta def fields (line : String) : List String :=
   ((strTrim line).splitOn " ").filter (· ≠ "")
 
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
-private def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
+meta def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   match fields line with
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
 /-- `ℚ` Expr for `num / den` (reduced) via `mkRat`, whose reduction the kernel performs by
 computation, leaving the emitted term a bare numerator/denominator pair. -/
-private def coordExpr (num : Int) (den : Nat) : Expr :=
+meta def coordExpr (num : Int) (den : Nat) : Expr :=
   mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
-private def parseLabel (line : String) : Option (Nat × Int) :=
+meta def parseLabel (line : String) : Option (Nat × Int) :=
   match fields line with
   | [p, t] => some ((strTrim p).toNat!, (strTrim t).toInt!)
   | _ => none
@@ -168,7 +172,7 @@ syntax num : intLit
 syntax "(" "-" num ")" : intLit
 
 /-- Read the `Int` value of an `intLit`. -/
-private def getIntLit : TSyntax `intLit → MetaM Int
+meta def getIntLit : TSyntax `intLit → MetaM Int
   | `(intLit| $n:num) => return (n.getNat : Int)
   | `(intLit| (-$n:num)) => return -(n.getNat : Int)
   | _ => throwError "certify_curve: expected an integer literal"
@@ -186,7 +190,7 @@ syntax "certify_curve" " oneTorsion " intLit num str str : tactic
 
 /-- Extract the integer value of an integer-valued `ℚ` literal `Expr`: an `OfNat` numeral, its
 negation, or an `Int.cast` of an `ℤ` literal. Errors if the coefficient is not an integer. -/
-private def getRatIntE (e : Expr) : MetaM Int := do
+meta def getRatIntE (e : Expr) : MetaM Int := do
   let checkInt (q : Rat) : MetaM Int := do
     if q.den == 1 then return q.num
     throwError "certify_curve: curve coefficient is not an integer{indentExpr e}"
@@ -200,7 +204,7 @@ private def getRatIntE (e : Expr) : MetaM Int := do
 /-- Read `HasRankGE W ρ` off `goal`, where `W` reduces to a `WeierstrassCurve.mk` literal with
 integer-valued rational coefficients. Returns the rank `ρ`, the original curve `Expr` `W`, and the
 five integer coefficient values. -/
-private def readGoal (goal : MVarId) :
+meta def readGoal (goal : MVarId) :
     MetaM (Nat × Expr × Int × Int × Int × Int × Int) := do
   let (``HasRankGE, #[curveE, ρE]) := (← goal.getType).getAppFnArgs
     | throwError "certify_curve: goal must be `HasRankGE _ _`"
@@ -212,7 +216,7 @@ private def readGoal (goal : MVarId) :
 
 /-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
 line kind in the error message. -/
-private def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
+meta def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
     MetaM (Array α) := do
   ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l ↦ do
     if (strTrim l).isEmpty then return none
@@ -222,7 +226,7 @@ private def readEntries {α} (what : String) (parse : String → Option α) (pat
 
 /-- Read and parse the points file (`x y` per line) and labels file (`p θ`), checking each has
 `ρ` entries. -/
-private def readData (path lpath : String) (ρ : Nat) :
+meta def readData (path lpath : String) (ρ : Nat) :
     MetaM (Array (Int × Nat × Int × Nat) × Array (Nat × Int)) := do
   let pts ← readEntries "points" parseLine path
   let ls ← readEntries "labels" parseLabel lpath
@@ -233,7 +237,7 @@ private def readData (path lpath : String) (ρ : Nat) :
   return (pts, ls)
 
 /-- The descent-character matrix over the short model and its 𝔽₂ inverse (a pure computation). -/
-private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (ρ : Nat) :
+meta def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × Int)) (ρ : Nat) :
     MetaM (List Nat × List Nat) := do
   let B := CertifyEval.computeB sA2 sA4 xs ls
   let some M := CertifyEval.invF2 B.toArray ρ
@@ -241,18 +245,18 @@ private def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat �
   return (B, M)
 
 /-- The pair type `ℚ × ℚ` as an `Expr`. -/
-private def ratPairTy : Expr :=
+meta def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
 
 /-- The short-model coefficient Exprs `(a₂, a₄, a₆)` built from the integer coefficient Exprs
 `a₁…a₆` via `IntegralScaling.intShortA₂/₄/₆`. -/
-private def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr :=
+meta def shortCoeffExprs (a1E a2E a3E a4E a6E : Expr) : Expr × Expr × Expr :=
   (mkApp2 (mkConst ``IntegralScaling.intShortA₂) a1E a2E,
     mkApp3 (mkConst ``IntegralScaling.intShortA₄) a1E a3E a4E,
     mkApp2 (mkConst ``IntegralScaling.intShortA₆) a3E a6E)
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). -/
-private def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
+meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
     (B M : List Nat) (t tp : Nat) (a1E a2E a3E a4E a6E : Expr) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
@@ -267,7 +271,7 @@ private def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls :
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
-private theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
+public theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
     (h : l.length.beq n) : l.length = n := Nat.eq_of_beq_eq_true h
 
 /-- Build the `hasRankGE_of_certificate` proof term directly. The `Certificate.Valid` checks are
@@ -277,7 +281,7 @@ checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]|
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
 `t = 2`. The model equality is discharged by `WeierstrassCurve.ext_of_beq` on the five coefficient
 `BEq`s. `torsRoot` supplies the `t = 1` root `R`. -/
-private def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
+meta def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW : Expr) :
     MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
@@ -318,7 +322,7 @@ the two data files (`ρ_goal + t` entries each), computes the descent matrix and
 and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by
 `ext_of_beq` on five `reflBoolTrue` `BEq` checks, with no side goals. The certificate's `ρ` is
 `ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
-private def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
+meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
   let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
   let a1E := toExpr v1
