@@ -45,8 +45,9 @@ public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
   if_pos ha
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
-public theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :
+public theorem psi_mul_sq (hp : p.Prime) {a w : ZMod p} (hw : w ≠ 0) :
     psi p (w ^ 2 * a) = psi p a := by
+  have : Fact p.Prime := ⟨hp⟩
   have hiff : IsSquare (w ^ 2 * a) ↔ IsSquare a :=
     ⟨fun ⟨s, hs⟩ ↦ ⟨s / w, by grind⟩, fun ⟨r, hr⟩ ↦ ⟨w * r, by rw [hr]; ring⟩⟩
   unfold psi
