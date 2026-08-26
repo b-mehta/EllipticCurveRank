@@ -138,8 +138,8 @@ public noncomputable def redP (P : (curve a₂ a₄ a₆).toAffine.Point) :
 public theorem redP_eq_toAffine (P : (curve a₂ a₄ a₆).toAffine.Point) :
     redP a₂ a₄ a₆ p P
       = Point.toAffine
-          ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective (repr a₂ a₄ a₆ p P) :=
-  rfl
+          ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toProjective (repr a₂ a₄ a₆ p P) := by
+  simp only [redP]
 
 @[simp]
 public theorem redP_zero : redP a₂ a₄ a₆ p 0 = 0 := by
