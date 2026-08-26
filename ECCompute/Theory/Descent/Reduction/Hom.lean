@@ -180,8 +180,7 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h₁
   have hns : ((curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))).toAffine.Nonsingular
       (x₁ : ZMod p) (y₁ : ZMod p) :=
-    red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁ hden1 hden1'
-      (mt (Rat.den_cast_eq_zero_iff two_ne_zero hden1).mpr (Rat.mem_padicInteger_iff.mp hd1))
+    red_nonsingular_affine a₂ a₄ a₆ p hΔ h₁ hden1 hden1' hd1
   rw [WeierstrassCurve.Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
   exact hns.2.elim (fun hfd_ne ↦ (Ne.symm hfd_ne) hfd) (fun hyne2 ↦ hyne2 hYeq)

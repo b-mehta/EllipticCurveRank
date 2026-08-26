@@ -55,10 +55,9 @@ For a `p`-integral `x` the `y`-coordinate is `p`-integral too, from `x.den = w²
 public theorem ydenom_pIntegral {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : Rat.IsPIntegral p x) :
     Rat.IsPIntegral p y := by
-  rw [Rat.mem_padicInteger_iff] at hdx ⊢
   obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
-  have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
-  rw [hyw]
+  have hw : (w : ZMod p) ≠ 0 := Rat.pow_base_ne_of_pIntegral hdx hxw two_ne_zero
+  rw [Rat.mem_padicInteger_iff, hyw]
   grind
 
 end ECCompute

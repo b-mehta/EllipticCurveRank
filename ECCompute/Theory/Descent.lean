@@ -44,10 +44,8 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : Rat.IsPIntegral p x) :
     lambda a₂ a₄ a₆ p θ (.some x y h)
       = if xbar p x = θ then psi p (fderiv a₂ a₄ p θ) else psi p (xbar p x - θ) := by
-  have hd' := Rat.mem_padicInteger_iff.mp hd
   obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
-  have hw : (w : ZMod p) ≠ 0 := by
-    intro h0; apply hd'; rw [hxden]; grind
+  have hw : (w : ZMod p) ≠ 0 := Rat.pow_base_ne_of_pIntegral hd hxden two_ne_zero
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; grind
   simp only [lambda, if_pos hd]

@@ -50,6 +50,11 @@ public theorem mem_padicInteger_iff [Fact p.Prime] {x : ℚ} :
   rw [IsPIntegral, Valuation.mem_integer_iff, Rat.padicValuation_le_one_iff, Ne,
     ZMod.natCast_eq_zero_iff]
 
+/-- From `p`-integrality and `x.den = w ^ k` (`k ≠ 0`), the base `w` is nonzero mod `p`. -/
+public theorem pow_base_ne_of_pIntegral [Fact p.Prime] {x : ℚ} {w k : ℕ} (hd : IsPIntegral p x)
+    (hden : x.den = w ^ k) (hk : k ≠ 0) : (w : ZMod p) ≠ 0 :=
+  mt (den_cast_eq_zero_iff hk hden).mpr (mem_padicInteger_iff.mp hd)
+
 /-- Every integer is `p`-integral. -/
 public theorem intCast_pIntegral [Fact p.Prime] (n : ℤ) : IsPIntegral p (n : ℚ) :=
   intCast_mem _ n
