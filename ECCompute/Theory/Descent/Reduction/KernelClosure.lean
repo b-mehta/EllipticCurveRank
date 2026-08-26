@@ -46,13 +46,14 @@ private theorem not_dvd_num {q : ℚ} {w : ℤ} (hd : (q.den : ℤ) = w ^ 2) (hp
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
 private theorem kernel_point_data {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
+    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : ¬ Rat.IsPIntegral p x) :
     ∃ w : ℤ, (x.num : ℚ) = x * (w : ℚ) ^ 2 ∧ (y.num : ℚ) = y * (w : ℚ) ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
   have hp : p.Prime := Fact.out
+  have hd0 : (x.den : ZMod p) = 0 := by by_contra hne; exact hd (Rat.mem_padicInteger_iff.mpr hne)
   obtain ⟨w, hxd, hyd⟩ := den_isSquare a₂ a₄ a₆ h
   have hpw : (p : ℤ) ∣ (w : ℤ) :=
-    mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd)
+    mod_cast hp.dvd_of_dvd_pow (hxd ▸ (ZMod.natCast_eq_zero_iff _ p).mp hd0)
   have hwne : w ≠ 0 := by grind [Rat.den_ne_zero]
   exact ⟨w, cast_num_eq hxd, cast_num_eq hyd, hpw, not_dvd_num p (by grind) hpw, by positivity⟩
 
@@ -160,7 +161,7 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
     (hpA : ¬ (p : ℤ) ∣ A) (hpC : ¬ (p : ℤ) ∣ C)
     (hcrux : padicValInt p N < padicValInt p K)
     (hA0 : A ≠ 0) (hC0 : C ≠ 0) (hK0 : K ≠ 0) (hN0 : N ≠ 0) :
-    (x₃.den : ZMod p) = 0 := by
+    ¬ Rat.IsPIntegral p x₃ := by
   obtain ⟨hNumvalQ, hNum0⟩ := padicValRat_num_cert (M := M) p hcrux hN0 hK0
   have hDenval : padicValInt p (A * C * K ^ 2) = 2 * padicValInt p K := by
     rw [padicValInt.mul (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0), padicValInt.mul hA0 hC0,
@@ -176,8 +177,8 @@ private theorem den_zero_of_cert {x₃ : ℚ} {A C K N M : ℤ}
       hDenval]
     grind
   have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
-  exact (ZMod.natCast_eq_zero_iff _ p).mpr
-    ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
+  exact fun hmem ↦ Rat.mem_padicInteger_iff.mp hmem ((ZMod.natCast_eq_zero_iff _ p).mpr
+    ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0))
 
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
@@ -213,9 +214,9 @@ distinct over `ℚ`, the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of t
 theorem den_addX_both_kernel {x₁ y₁ x₂ y₂ : ℚ}
     (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
-    (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
-    (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
+    (hne : x₁ ≠ x₂) (hd1 : ¬ Rat.IsPIntegral p x₁) (hd2 : ¬ Rat.IsPIntegral p x₂) :
+    ¬ Rat.IsPIntegral p ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
+        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)) := by
   have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def

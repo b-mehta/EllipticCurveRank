@@ -230,13 +230,11 @@ private theorem redP_add_kernel {x₁ y₁ x₂ y₂ : ℚ}
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hd1 : ¬ Rat.IsPIntegral p x₁) (hd2 : ¬ Rat.IsPIntegral p x₂) :
     redP a₂ a₄ a₆ p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂) = 0 := by
-  have hz1 : (x₁.den : ZMod p) = 0 := by by_contra h; exact hd1 (Rat.mem_padicInteger_iff.mpr h)
-  have hz2 : (x₂.den : ZMod p) = 0 := by by_contra h; exact hd2 (Rat.mem_padicInteger_iff.mpr h)
   obtain rfl | hx12 := eq_or_ne x₁ x₂
   · rw [Affine.Point.add_of_Y_eq rfl (y_eq_negY_of_X_eq a₂ a₄ a₆ h₁ h₂ rfl hPQ), redP_zero]
   · rw [Affine.Point.add_of_X_ne hx12]
-    refine redP_of_den_zero a₂ a₄ a₆ p _ (fun hmem ↦ Rat.mem_padicInteger_iff.mp hmem ?_)
-    exact den_addX_both_kernel a₂ a₄ a₆ p h₁.1 h₂.1 hx12 hz1 hz2
+    exact redP_of_den_zero a₂ a₄ a₆ p _
+      (den_addX_both_kernel a₂ a₄ a₆ p h₁.1 h₂.1 hx12 hd1 hd2)
 
 /-- Additivity when the reduced points coincide and `Q = -P` over `ℚ` (`x₁ = x₂`): then `P + Q = 0`
 and the common reduced point is `2`-torsion, so `redP (P + Q) = 0 = P̄ + P̄`. -/
