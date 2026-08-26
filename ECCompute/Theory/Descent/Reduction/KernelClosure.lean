@@ -195,8 +195,7 @@ theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime
   set N : ℤ := A * D * E - B * C * G with hNdef
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
     + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
-  have hI2 : N * (A * D * E + B * C * G) = K * W := by
-    grind
+  have hI2 : N * (A * D * E + B * C * G) = K * W := by grind
   have hpS : (p : ℤ) ∣ (A * D * E + B * C * G) :=
     dvd_add (hpE.mul_left (A * D)) (hpG.mul_left (B * C))
   have hpW : ¬ (p : ℤ) ∣ W := hWdef ▸ not_dvd_W_cert hpZ hpA hpC hpE
@@ -204,8 +203,14 @@ theorem crux_of_int_relations {A B C D E G : ℤ} {x₁ x₂ : ℚ} (hpZ : Prime
   have hK0 : K ≠ 0 := hKdef ▸ K_ne_zero hne hA hC hEne hGne
   have hprodne : N * (A * D * E + B * C * G) ≠ 0 := hI2 ▸ mul_ne_zero hK0 hW0
   have hN0 : N ≠ 0 := left_ne_zero_of_mul hprodne
-  exact ⟨padicValInt_lt_of_mul_eq hI2 hpS hpW hN0 (right_ne_zero_of_mul hprodne) hK0 hW0,
-    hN0, hK0⟩
+  refine ⟨?_, hN0, hK0⟩
+  replace hI2 := congr(padicValInt p $hI2)
+  rw [padicValInt.mul hN0 (by lia), padicValInt.mul hK0 hW0,
+    padicValInt.eq_zero_of_not_dvd hpW] at hI2
+  have : 1 ≤ padicValInt p (A * D * E + B * C * G) := by
+    apply one_le_padicValNat_of_dvd (by grind)
+    rwa [← Int.ofNat_dvd_left]
+  grind
 
 /-! ### Closure of the kernel -/
 
