@@ -58,8 +58,7 @@ public theorem ydenom_eq_zero_iff {a₂ a₄ a₆ : ℤ} (hp : p.Prime) {x y : �
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare h
-  rw [ZMod.natCast_eq_zero_iff, ZMod.natCast_eq_zero_iff, hxw, hyw]
-  exact ⟨fun hd ↦ (hp.dvd_of_dvd_pow hd).trans (dvd_pow_self w (by norm_num)),
-    fun hd ↦ (hp.dvd_of_dvd_pow hd).trans (dvd_pow_self w (by norm_num))⟩
+  simp only [ZMod.natCast_eq_zero_iff]
+  grind [hp.prime.dvd_pow_iff_dvd]
 
 end ECCompute
