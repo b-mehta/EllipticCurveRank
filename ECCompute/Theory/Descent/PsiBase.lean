@@ -41,8 +41,7 @@ transported along `{±1} ≅ ZMod 2`, hence additive: `ψ_p(ab) = ψ_p a + ψ_p 
 section Psi
 
 /-- `ψ_p` vanishes on squares. -/
-public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 :=
-  if_pos ha
+public theorem psi_of_isSquare {a : ZMod p} (ha : IsSquare a) : psi p a = 0 := if_pos ha
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
 public theorem psi_mul_sq [Fact p.Prime] {a w : ZMod p} (hw : w ≠ 0) :

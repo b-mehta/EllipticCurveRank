@@ -43,14 +43,12 @@ def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
 /-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_eq :
-    (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
+theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = (discrInt a₂ a₄ a₆ : ℚ) := by
   simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]
   grind
 
 /-- The numerator of the (integral) discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_num :
-    (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
+theorem curve_Δ_num : (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
@@ -71,17 +69,14 @@ theorem fval_iff (hp : 1 < p) :
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
     rw [Int.emod_eq, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
     exact Int.emod_emod_of_dvd θ dvd_rfl
-  have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by
-    grind [polyEval]
+  have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by grind [polyEval]
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
 /-- `discrIntK a₂ a₄ a₆` equals the integer discriminant `discrInt a₂ a₄ a₆`. -/
-theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by
-  grind [discrIntK, discrInt]
+theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by grind [discrIntK, discrInt]
 
 /-- If the kernel check passes and `p` is prime, the label `(p, ↑θ)` satisfies `DescentHyp`. -/
-public theorem descentHyp_of_checkLabel
-    (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
+public theorem descentHyp_of_checkLabel (h : checkLabel a₂ a₄ a₆ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not] at h
@@ -95,15 +90,12 @@ public theorem descentHyp_of_checkLabel
       ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq, ← Int.mod_def'] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`
-    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fval_iff hp.one_lt).mp hf
+    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := (fval_iff hp.one_lt).mp hf
     rw [fval]
     grind
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
-public theorem checkLabels_true {labels : List (ℕ × ℤ)}
-    (h : checkLabels a₂ a₄ a₆ labels) :
-    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
-  rwa [checkLabels, allList_iff] at h
+public theorem checkLabels_true {labels : List (ℕ × ℤ)} (h : checkLabels a₂ a₄ a₆ labels) :
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by rwa [checkLabels, allList_iff] at h
 
 end ECCompute
