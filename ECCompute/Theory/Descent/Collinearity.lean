@@ -34,7 +34,7 @@ namespace ECCompute
 
 section CommRing
 
-variable {R : Type*} [CommRing R] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R)
+variable {R : Type*} [CommRing R] {a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R}
 
 /-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the three Vieta relations, the cubic
 `x³ + a₂x² + a₄x + a₆ - (ℓx + m)²` factors as `(x - x₁)(x - x₂)(x - x₃)` at every `x`. -/
@@ -69,7 +69,7 @@ end CommRing
 
 section Field
 
-variable {F : Type*} [Field F] (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F)
+variable {F : Type*} [Field F] {a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : F}
 
 /-- The Vieta relations for the line `y = ℓx + m` meeting `E` at `x₁, x₂, x₃`, recovered from
 the two points `(x₁, ℓx₁ + m)` and `(x₂, ℓx₂ + m)` lying on the curve (with `x₁ ≠ x₂`) and the
@@ -97,13 +97,12 @@ end Field
 /-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
 at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-public theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} (p : ℕ) (ℓ m x₁ x₂ x₃ θ : ZMod p)
+public theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x₁ x₂ x₃ θ : ZMod p}
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval a₂ a₄ a₆ p θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m x₁ x₂ x₃ θ
-    hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
+  prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
 
 end ECCompute
