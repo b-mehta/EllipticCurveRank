@@ -55,16 +55,19 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
     exact Module.Finite.equiv (M := H) emap
   · rwa [← emap.finrank_eq]
 
+variable {a₂ a₄ a₆ : ℤ}
+
 /-- A descent hypothesis for `curve a₂ a₄ a₆` witnesses that its discriminant is nonzero. -/
-private theorem discr_ne_zero_of_descentHyp {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
+private theorem discr_ne_zero_of_descentHyp {p : ℕ} {θ : ZMod p}
     (h : DescentHyp a₂ a₄ a₆ p θ) : (curve a₂ a₄ a₆).Δ ≠ 0 :=
   fun hΔ ↦ h.discr (by simp [hΔ])
 
+variable {c : Certificate} {pt : Fin c.rho → ℚ × ℚ} {lab : Fin c.rho → ℕ × ℤ}
+
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
-private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho → ℕ × ℤ}
+private theorem linearIndependent_descent
     (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (lab j).1 ((lab j).2 : ZMod (lab j).1))
-    {pt : Fin c.rho → ℚ × ℚ}
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
     (hB : ∀ i j, F2Invert.toMat c.B c.rho i j
         = if lambdaK c.a₂ c.a₄ (lab j).1 (qrMask (lab j).1)
@@ -89,8 +92,7 @@ private theorem linearIndependent_descent {c : Certificate} {lab : Fin c.rho →
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
-private theorem card_torsionBy_le {a₂ a₄ a₆ : ℤ}
-    (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
+private theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
     Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap (x : Submodule.torsionBy ℤ H 2) :
       (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
@@ -102,8 +104,7 @@ private theorem card_torsionBy_le {a₂ a₄ a₆ : ℤ}
 /-- Soundness on the short integral model `curve c.a₂ c.a₄ c.a₆` (`a₁ = a₃ = 0`): when the
 certificate's points, labels, character matrix `B`, its `𝔽₂`-inverse, and its torsion witness all
 pass their checks, the rank is at least `c.rho - c.t`. -/
-theorem rank_ge_of_certificate (c : Certificate)
-    {pt : Fin c.rho → ℚ × ℚ} {lab : Fin c.rho → ℕ × ℤ}
+theorem rank_ge_of_certificate
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
     (hlabP : ∀ j, ((lab j).1).Prime)
     (hlabC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (lab j).1 (lab j).2)
@@ -156,7 +157,7 @@ theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certifica
   have hlabC' (j : Fin c.rho) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
     checkLabels_true hlabC _ (List.getElem_mem _)
   have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.rho - c.t) :=
-    rank_ge_of_certificate c (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
+    rank_ge_of_certificate (fun i ↦ hpt _ (List.getElem_mem _)) hlabP' hlabC'
       (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆) (hmodel.symm ▸ key)
 
