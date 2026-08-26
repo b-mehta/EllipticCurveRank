@@ -32,8 +32,8 @@ to the integral short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invarian
 * `IntegralScaling.IsScaling`: `W'.aᵢ = vⁱ · W.aᵢ` for a nonzero `v`, the shape of an
   `(x, y) ↦ (v²x, v³y)` rescaling.
 * `IntegralScaling.scaleEquiv`: such a scaling is a group isomorphism `W.Point ≃+ W'.Point`.
-* `IntegralScaling.intShortModel`, `IntegralScaling.genModel`: the integral short model and the
-  general integral Weierstrass curve over `ℚ`.
+* `IntegralScaling.intShortModel`: the integral short model of a general integral Weierstrass
+  curve over `ℚ`.
 * `IntegralScaling.generalToShortEquiv`: the composite `⟨1/2, 0, -a₁/2, -a₃/2⟩` change of
   variables, a group isomorphism from the general model to its integral short model.
 -/
@@ -65,8 +65,7 @@ include s
 theorem equation_scale {x y : ℚ} :
     W.toAffine.Equation x y ↔ W'.toAffine.Equation (v ^ 2 * x) (v ^ 3 * y) := by
   rw [Affine.equation_iff, Affine.equation_iff, s.a₁, s.a₂, s.a₃, s.a₄, s.a₆]
-  exact ⟨fun h ↦ by grind,
-    fun h ↦ mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
+  exact ⟨fun h ↦ by grind, fun h ↦ mul_left_cancel₀ (pow_ne_zero 6 s.ne) (by grind)⟩
 
 /-- Nonsingularity transfers along the scaling `(x, y) ↦ (v²x, v³y)`. -/
 theorem nonsingular_scale {x y : ℚ} :
@@ -204,40 +203,21 @@ end Scaling
 /-- The integral short model `curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
 integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 @[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  curve (intShortA₂ a₁ a₂) (intShortA₄ a₁ a₃ a₄) (intShortA₆ a₃ a₆)
-
-/-- The general integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` over `ℚ`. -/
-@[expose] public def genModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  ⟨a₁, a₂, a₃, a₄, a₆⟩
-
-lemma intShortModel_a₂ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
-    (intShortModel a₁ a₂ a₃ a₄ a₆).a₂ = 2 ^ 2 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₂ := by
-  simp only [intShortModel, curve, intShortA₂, shortModel_a₂, genModel]
-  grind
-
-lemma intShortModel_a₄ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
-    (intShortModel a₁ a₂ a₃ a₄ a₆).a₄ = 2 ^ 4 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₄ := by
-  simp only [intShortModel, curve, intShortA₄, shortModel_a₄, genModel]
-  grind
-
-lemma intShortModel_a₆ {a₁ a₂ a₃ a₄ a₆ : ℤ} :
-    (intShortModel a₁ a₂ a₃ a₄ a₆).a₆ = 2 ^ 6 * (shortModel (genModel a₁ a₂ a₃ a₄ a₆)).a₆ := by
-  simp only [intShortModel, curve, intShortA₆, shortModel_a₆, genModel]
-  grind
+  curve (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
 `u = 1/2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to the integral
 short model `intShortModel a₁ a₂ a₃ a₄ a₆`, on which the descent character is stated. -/
 public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    (genModel a₁ a₂ a₃ a₄ a₆).toAffine.Point ≃+ (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
-  (pointAddEquiv (genModel a₁ a₂ a₃ a₄ a₆)).trans <|
-    scaleEquiv (W := shortModel (genModel a₁ a₂ a₃ a₄ a₆))
-      (W' := intShortModel a₁ a₂ a₃ a₄ a₆) (v := 2)
+    (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Point ≃+
+      (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
+  (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans <|
+    scaleEquiv
       ⟨two_ne_zero,
-        by simp only [intShortModel, curve, shortModel_a₁, mul_zero],
-        intShortModel_a₂,
-        by simp only [intShortModel, curve, shortModel_a₃, mul_zero],
-        intShortModel_a₄,
-        intShortModel_a₆⟩
+        by grind [intShortModel, curve, shortModel_a₁],
+        by grind [intShortModel, curve, shortModel_a₂],
+        by grind [intShortModel, curve, shortModel_a₃],
+        by grind [intShortModel, curve, shortModel_a₄],
+        by grind [intShortModel, curve, shortModel_a₆]⟩
 
 end ECCompute.IntegralScaling
