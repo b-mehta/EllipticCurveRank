@@ -7,7 +7,7 @@ module
 
 public import ECCompute.Certificate
 public import ECCompute.Theory.RankDeduction
-public import ECCompute.Theory.IntegralScaling
+public import ECCompute.Theory.ShortModel
 import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.Primes
