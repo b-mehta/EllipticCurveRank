@@ -55,7 +55,7 @@ variable {θ : ZMod p}
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
 private theorem reduced_equation {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
-    Y ^ 2 = X ^ 3 + (a₂ : ZMod p) * X ^ 2 + (a₄ : ZMod p) * X + (a₆ : ZMod p) := by
+    Y ^ 2 = X ^ 3 + a₂ * X ^ 2 + a₄ * X + a₆ := by
   have := (Affine.equation_iff (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
   simpa [map_curveℤ_zmod] using this
 
@@ -65,7 +65,7 @@ private theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2
 
 /-- The root hypothesis `f(θ) = 0` in expanded form. -/
 private theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) :
-    θ ^ 3 + (a₂ : ZMod p) * θ ^ 2 + (a₄ : ZMod p) * θ + (a₆ : ZMod p) = 0 := by
+    θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by
   simpa [fval] using h.root
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
@@ -80,9 +80,9 @@ line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the
 `x₂`. -/
 private theorem εp_sum_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
     (hne : x₁ ≠ x₂)
-    (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
-    (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - (a₆ : ZMod p)) :
+    (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - a₆) :
     (if X₃ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X₃ - θ))
       = (if x₁ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₁ - θ))
         + (if x₂ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (x₂ - θ)) := by
@@ -134,12 +134,12 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
   have hpt1 : (ℓ * x₁ + m) ^ 2
-      = x₁ ^ 3 + (a₂ : ZMod p) * x₁ ^ 2 + (a₄ : ZMod p) * x₁ + (a₆ : ZMod p) := by
+      = x₁ ^ 3 + a₂ * x₁ ^ 2 + a₄ * x₁ + a₆ := by
     rw [hm1]; exact reduced_equation h₁
   have hpt2 : (ℓ * x₂ + m) ^ 2
-      = x₂ ^ 3 + (a₂ : ZMod p) * x₂ ^ 2 + (a₄ : ZMod p) * x₂ + (a₆ : ZMod p) := by
+      = x₂ ^ 3 + a₂ * x₂ ^ 2 + a₄ * x₂ + a₆ := by
     rw [hm2]; exact reduced_equation h₂
-  have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - x₁ - x₂ := by
+  have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
     rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p) ℓ m
     x₁ x₂ X₃ hne hx3 hpt1 hpt2
@@ -149,9 +149,9 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
 descent-character value at `X₃` is `0`. -/
 private theorem εp_double_of_vieta [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
     (hXθ : x ≠ θ)
-    (hσ₁ : x + x + X₃ = ℓ ^ 2 - (a₂ : ZMod p))
-    (hσ₂ : x * x + x * X₃ + x * X₃ = (a₄ : ZMod p) - 2 * ℓ * m)
-    (hσ₃ : x * x * X₃ = m ^ 2 - (a₆ : ZMod p)) :
+    (hσ₁ : x + x + X₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x * x + x * X₃ + x * X₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x * x * X₃ = m ^ 2 - a₆) :
     (if X₃ = θ then psi p (fderiv a₂ a₄ p θ) else psi p (X₃ - θ)) = 0 := by
   have hθroot := h.root'
   have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
@@ -183,7 +183,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   have hneg := reduced_negY (a₂ := a₂) (a₄ := a₄) (a₆ := a₆) p x y
   have hyne : y ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x y := by grind
   have hcurve : y ^ 2
-      = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) :=
+      = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ :=
     reduced_equation hP
   have hθroot := h.root'
   have hXθ : x ≠ θ := by grind
@@ -191,7 +191,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   simp only [εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
-  have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) := by
+  have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * a₂ * x + a₄ := by
     have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, hneg, hsub]
     simp [map_curveℤ_zmod]
@@ -199,9 +199,9 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2
-      = x ^ 3 + (a₂ : ZMod p) * x ^ 2 + (a₄ : ZMod p) * x + (a₆ : ZMod p) := by rwa [hm]
-  have htan : 3 * x ^ 2 + 2 * (a₂ : ZMod p) * x + (a₄ : ZMod p) = 2 * ℓ * (ℓ * x + m) := by grind
-  have hx3 : X₃ = ℓ ^ 2 - (a₂ : ZMod p) - 2 * x := by
+      = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by rwa [hm]
+  have htan : 3 * x ^ 2 + 2 * a₂ * x + a₄ = 2 * ℓ * (ℓ * x + m) := by grind
+  have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by
     rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root (a₂ : ZMod p) (a₄ : ZMod p) (a₆ : ZMod p)
     ℓ m x X₃ hpt htan hx3
