@@ -126,13 +126,10 @@ theorem variableChange_slope (h₁ : W.toAffine.Equation x₁ y₁)
     simp only [negY, mapX, mapY, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, Units.val_inv_eq_inv_val]
     ring
-  · have hx' : C.mapX x₁ ≠ C.mapX x₂ := fun hc ↦ hx (mapX_injective hc)
-    have hd : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hx
-    have hd' : C.mapX x₁ - C.mapX x₂ ≠ 0 := sub_ne_zero.mpr hx'
-    have hs : C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
+  · have hs : C.mapSlope ((y₁ - y₂) / (x₁ - x₂))
         = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂) := by
       rw [mapSlope]; field_simp [u_ne_zero]
-    rw [slope_of_X_ne hx', slope_of_X_ne hx, hs, div_eq_div_iff hd' hd]
+    rw [slope_of_X_ne (by grind), slope_of_X_ne hx, hs, div_eq_div_iff (by grind) (by grind)]
     simp only [mapX, mapY]
     ring
 
@@ -150,7 +147,7 @@ public def pointAddEquiv (C : VariableChange ℚ) : W.toAffine.Point ≃+ (C •
       invFun := fun
         | .zero => .zero
         | .some X Y h => .some (C.invX X) (C.invY X Y)
-            (nonsingular_variableChange_iff.mpr (by rw [mapX_invX, mapY_invY]; exact h))
+            (nonsingular_variableChange_iff.mpr (by rwa [mapX_invX, mapY_invY]))
       left_inv := by grind
       right_inv := by grind }
     (by
@@ -158,12 +155,7 @@ public def pointAddEquiv (C : VariableChange ℚ) : W.toAffine.Point ≃+ (C •
       rcases P with _ | ⟨x₁, y₁, hp₁⟩ <;> rcases Q with _ | ⟨x₂, y₂, hp₂⟩
       any_goals rfl
       simp only [Equiv.coe_fn_mk]
-      by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
-      · obtain ⟨rfl, rfl⟩ := hxy
-        rw [Point.add_of_Y_eq rfl rfl, Point.add_of_Y_eq rfl]
-        · rfl
-        rw [variableChange_negY]
-      · grind [Point.add_some, variableChange_slope hp₁.1 hp₂.1])
+      grind [Point.add_some, variableChange_slope hp₁.1 hp₂.1, Point.zero_def, Point.add_of_Y_eq])
 
 end VariableChange
 
