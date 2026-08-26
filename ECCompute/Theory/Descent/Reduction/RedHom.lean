@@ -223,7 +223,7 @@ theorem redP_add_kernel
   obtain rfl | hx12 := eq_or_ne x₁ x₂
   · rw [Affine.Point.add_of_Y_eq rfl (y_eq_negY_of_X_eq h₁ h₂ rfl hPQ), redP_zero]
   · rw [Affine.Point.add_of_X_ne hx12]
-    exact redP_of_den_zero _ (den_addX_both_kernel h₁.1 h₂.1 hx12 hd1 hd2)
+    exact redP_of_den_zero _ (den_addX_both_kernel Fact.out h₁.1 h₂.1 hx12 hd1 hd2)
 
 /-- Additivity when the reduced points coincide and `Q = -P` over `ℚ` (`x₁ = x₂`): then `P + Q = 0`
 and the common reduced point is `2`-torsion, so `redP (P + Q) = 0 = P̄ + P̄`. -/
