@@ -173,10 +173,8 @@ private theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).�
   rw [hY0, mul_zero] at htan
   have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
     grind
-  obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare_of_nonsingular h₁
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
-    red_nonsingular_affine hΔ h₁ hden1 hden1'
-      (mt (Rat.den_cast_eq_zero_iff two_ne_zero hden1).mpr hd1)
+    red_nonsingular_affine hΔ h₁ hd1
   rw [Affine.nonsingular_iff, map_curveℤ_zmod] at hns
   simp only [zero_mul, sub_zero] at hns
   exact hns.2.elim (fun hfd_ne ↦ (Ne.symm hfd_ne) hfd) (fun hyne2 ↦ hyne2 hYeq)
