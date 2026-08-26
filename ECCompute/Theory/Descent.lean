@@ -3,10 +3,12 @@ Copyright (c) 2026 Bhavik Mehta. All rights reserved.
 Released under the GNU General Public License version 3.0 as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
-import ECCompute.Theory.Descent.Defs
+module
+
+public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.ReducedArith
-import ECCompute.Theory.Descent.PsiBase
 import ECCompute.Theory.Descent.Reduction.RedP
 import ECCompute.Theory.Descent.Reduction.Hom
 import ECCompute.Theory.Descent.Reduction.EpsFinite
@@ -22,9 +24,6 @@ additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 
 ## Main declarations
 
-* `ECCompute.psi_mul`: `ψ_p` is multiplicative-to-additive on nonzero elements.
-* `ECCompute.lambda_some_of_den_ne`: reduction of `λ` on an affine point to `ψ_p(X - θ)`.
-* `ECCompute.lambda_map_add`: `λ` is additive.
 * `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
 -/
 
@@ -94,11 +93,12 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
   simp only [lambda_eq_εp_red h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
-@[simps]
-noncomputable def lambdaHom (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+@[expose, simps]
+public noncomputable def lambdaHom (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p}
+    (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero
-  map_add' := lambda_map_add h
+  map_add' := by exact lambda_map_add h
 
 end ECCompute
