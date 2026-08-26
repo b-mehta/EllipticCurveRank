@@ -193,7 +193,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
     Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
-  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - (a₂ : ℚ) - x₁ - x₂ := curve_addX
+  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
   have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
