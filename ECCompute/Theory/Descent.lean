@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.ReducedArith
@@ -17,7 +17,7 @@ import ECCompute.Theory.Descent.Reduction.EpsFinite
 # The descent character: additivity
 
 This file assembles the additivity of the descent character `λ_{p,θ}` defined in
-`ECCompute.Descent.Defs`. Additivity is obtained by factoring `λ` through the reduction map
+`ECCompute.Descent.Character`. Additivity is obtained by factoring `λ` through the reduction map
 `redP : E(ℚ) → E(𝔽ₚ)` and the finite-field descent character `εpFinite`, both of which are
 additive homomorphisms (see `ECCompute.Descent.Reduction.Hom` and
 `ECCompute.Descent.Reduction.EpsFinite`).

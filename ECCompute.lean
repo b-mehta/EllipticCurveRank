@@ -5,7 +5,7 @@ import ECCompute.Certificate
 
 -- Pure mathematics
 import ECCompute.Theory.Descent
-import ECCompute.Theory.Descent.Defs
+import ECCompute.Theory.Descent.Character
 import ECCompute.Theory.Descent.ReducedArith
 import ECCompute.Theory.Descent.DenominatorSquare
 import ECCompute.Theory.Descent.Collinearity

@@ -7,7 +7,7 @@ module
 
 public import ECCompute.ForMathlib.TwoTorsion
 public import ECCompute.Soundness.RootMod
-public import ECCompute.Theory.Descent.Defs
+public import ECCompute.Theory.Descent.Character
 
 import Mathlib.RingTheory.Polynomial.RationalRoot
 
