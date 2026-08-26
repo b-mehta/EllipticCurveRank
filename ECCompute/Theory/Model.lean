@@ -5,33 +5,61 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.Descent.Character
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 import ECCompute.ForMathlib.WeierstrassCurveAffine
 import Mathlib.Data.ZMod.Basic
 
 /-!
-# The integral model of the descent curve
+# The Weierstrass model of the descent curve
 
-The descent character works with the curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ` whose
-coefficients are integers. This file records the corresponding curve over `ℤ`,
-`curveℤ a₂ a₄ a₆`, its reduction `curveZMod a₂ a₄ a₆ p` modulo `p`, and the structural facts
-used to build the reduction map.
+The descent argument runs on the curve `y² = x³ + a₂x² + a₄x + a₆` with integer coefficients. This
+file records it over `ℚ` (`curve a₂ a₄ a₆`), over `ℤ` (`curveℤ a₂ a₄ a₆`), and its reduction
+`curveZMod a₂ a₄ a₆ p` modulo `p`, along with `WeierstrassCurve.twoTorsionPoints`, the set of
+affine points `P` with `P + P = 0`.
 
 ## Main declarations
 
-* `ECCompute.curveℤ`: the integral Weierstrass curve.
-* `ECCompute.curveZMod`: the reduction of `curveℤ` modulo `p`.
-* `ECCompute.baseChange_curveℤ_ℚ`: `(curveℤ …).baseChange ℚ = curve …`.
-* `ECCompute.map_curveℤ_zmod`: `(curveℤ …).map (Int.castRingHom (ZMod p))` has coefficients
-  the images of `a₂, a₄, a₆` in `ZMod p`.
+* `ECCompute.curve`: the rational Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
+* `ECCompute.curveℤ`: its integral model; `ECCompute.curveZMod`: the reduction modulo `p`.
+* `WeierstrassCurve.twoTorsionPoints`: the affine `2`-torsion points.
 -/
 
 open WeierstrassCurve
 
+namespace WeierstrassCurve
+
+/-- The affine `2`-torsion points of `W`: the points `P` with `P + P = 0`. -/
+@[expose] public def twoTorsionPoints (W : WeierstrassCurve ℚ) : Set W.toAffine.Point :=
+  {P | P + P = 0}
+
+@[simp]
+public lemma mem_twoTorsionPoints {W : WeierstrassCurve ℚ} {P : W.toAffine.Point} :
+    P ∈ W.twoTorsionPoints ↔ P + P = 0 := Iff.rfl
+
+end WeierstrassCurve
+
 namespace ECCompute
 
+/-- The Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℚ`, i.e. `a₁ = a₃ = 0`. -/
+@[expose] public def curve (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ where
+  a₁ := 0
+  a₂ := a₂
+  a₃ := 0
+  a₄ := a₄
+  a₆ := a₆
+
 variable {a₂ a₄ a₆ : ℤ}
+
+/-- The affine equation of `curve a₂ a₄ a₆` in cleared form. -/
+@[grind →]
+public theorem equation_curve {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve]
+
+/-- On the short model `curve a₂ a₄ a₆`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
+public theorem curve_addX {x₁ x₂ ℓ : ℚ} :
+    (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
+  simp only [Affine.addX, curve]; grind
 
 /-- The integral Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℤ`, i.e. `a₁ = a₃ = 0`. -/
 public def curveℤ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℤ where
