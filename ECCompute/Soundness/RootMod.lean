@@ -83,7 +83,7 @@ public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simp_rw [ne_eq, ← polyModL_beq hℓ, Bool.not_eq_true]
     grind
   intro hu
-  have hℓ0 : (0 : ℤ) < ℓ := by positivity
+  have hℓ0 : (0 : ℤ) < ℓ := mod_cast (by lia : 0 < ℓ)
   set r := u % ℓ with hr
   have hrℓ : r < ℓ := Int.emod_lt_of_pos u hℓ0
   refine h r.toNat (by grind) ?_
