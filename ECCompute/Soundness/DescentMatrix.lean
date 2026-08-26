@@ -77,8 +77,7 @@ public theorem checkB_true {ρ : ℕ} {lab : List (ℕ × ℤ)} {q : List ℕ}
   set ls := toLabN lab q with hlsdef
   have hls : ls.length = ρ := by
     rw [hlsdef, toLabN, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : ls[j.val]'(by rw [hls]; exact j.isLt)
-      = (L.1, (L.2 % L.1).toNat, q[j]) := by
+  have hgetN : ls[j.val] = (L.1, (L.2 % L.1).toNat, q[j]) := by
     simp only [hlsdef, toLabN, List.getElem_zipWith, Fin.getElem_fin, ← Int.mod_def', ← hL]
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
