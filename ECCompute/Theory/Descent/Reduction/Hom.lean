@@ -287,8 +287,6 @@ private theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
           (Int.castRingHom (ZMod p))).toAffine.negY (x₁ : ZMod p) (y₁ : ZMod p)
       · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2
           (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1]) hXbar hYbar hYneg
-        -- TODO: add a `grind →` lemma for Nonsingular => Equation, then drop the h_.1 above
-        -- TODO: add ydenom_eq_zero_iff to grind, probably as _=_
       · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2
           (by grind [ydenom_eq_zero_iff, h₁.1]) (by grind [ydenom_eq_zero_iff, h₂.1]) hXbar hYbar hYneg
 
