@@ -55,7 +55,7 @@ When `p ∤ x.den` the `y`-denominator survives reduction, since `x.den = w²` a
 public theorem ydenom_ne_zero {a₂ a₄ a₆ : ℤ} [Fact p.Prime] {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hdx : (x.den : ZMod p) ≠ 0) :
     (y.den : ZMod p) ≠ 0 := by
-  obtain ⟨w, hxw, hyw⟩ := den_isSquare a₂ a₄ a₆ h
+  obtain ⟨w, hxw, hyw⟩ := den_isSquare h
   have hw : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hxw).mpr hdx
   rw [hyw]
   grind

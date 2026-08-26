@@ -31,10 +31,10 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ)
+variable {a₂ a₄ a₆ : ℤ}
 
 /-- The integral Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℤ`, i.e. `a₁ = a₃ = 0`. -/
-public def curveℤ : WeierstrassCurve ℤ where
+public def curveℤ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℤ where
   a₁ := 0
   a₂ := a₂
   a₃ := 0
@@ -42,7 +42,7 @@ public def curveℤ : WeierstrassCurve ℤ where
   a₆ := a₆
 
 /-- The reduction of the integral model `curveℤ` modulo `p`: its base change along `ℤ → ZMod p`. -/
-public abbrev curveZMod (p : ℕ) : WeierstrassCurve (ZMod p) :=
+public abbrev curveZMod (a₂ a₄ a₆ : ℤ) (p : ℕ) : WeierstrassCurve (ZMod p) :=
   (curveℤ a₂ a₄ a₆).map (Int.castRingHom (ZMod p))
 
 /-- The base change of the integral model to `ℚ` is the original rational curve. -/
