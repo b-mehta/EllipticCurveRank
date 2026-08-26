@@ -39,18 +39,12 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
 variable {x y : ℚ} {w : ℕ}
 
 theorem trep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
-    (Int.castRingHom (ZMod p) ∘ trep x y w) 0 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2
-      = (x : ZMod p) := by
-  simp only [Function.comp_apply, trep_zero, trep_two, eq_intCast, Rat.cast_def, hden]
-  push_cast
-  grind
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 0 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = x := by
+  simp [field, Rat.cast_def, hden]
 
-theorem trep_coord_one (hden' : y.den = w ^ 3) (hwne : (w : ZMod p) ≠ 0) :
-    (Int.castRingHom (ZMod p) ∘ trep x y w) 1 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2
-      = (y : ZMod p) := by
-  simp only [Function.comp_apply, trep_one, trep_two, eq_intCast, Rat.cast_def, hden']
-  push_cast
-  rw [div_eq_div_iff (pow_ne_zero 3 hwne) (pow_ne_zero 3 hwne)]
+theorem trep_coord_one (hden' : y.den = w ^ 3) :
+    (Int.castRingHom (ZMod p) ∘ trep x y w) 1 / (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = y := by
+  simp [field, Rat.cast_def, hden']
 
 /-- The reduced discriminant is nonzero (good reduction transported to `ZMod p`). -/
 theorem map_Δ_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
@@ -63,8 +57,7 @@ theorem red_nonsingular (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ trep x y w) := by
-  have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation
-      (Int.castRingHom (ZMod p) ∘ trep x y w) :=
+  have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation (Int.castRingHom (ZMod p) ∘ trep x y w) :=
     (trep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
@@ -162,10 +155,10 @@ public theorem red_nonsingular_affine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMo
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x : ZMod p) (y : ZMod p) := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
-  have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
+  have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular hΔ h hden hden'
   rwa [nonsingular_of_Z_ne_zero (by simp [hwne]), trep_coord_zero hden hwne,
-    trep_coord_one hden' (by simp [hwne])] at hns
+    trep_coord_one hden'] at hns
 
 /-- When `p ∤ x.den` the point reduces to the affine point with the reduced coordinates
 `(x : ZMod p, y : ZMod p)`. -/
@@ -174,9 +167,9 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
     redP a₂ a₄ a₆ p (.some x y h)
       = .some (x : ZMod p) (y : ZMod p) (red_nonsingular_affine hΔ h hd) := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare_of_nonsingular h
-  have hwne : (w : ZMod p) ≠ 0 := mt (Rat.den_cast_eq_zero_iff two_ne_zero hden).mpr hd
+  have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular hΔ h hden hden'
   rw [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne])]
-  simp only [trep_coord_zero hden hwne, trep_coord_one hden' hwne]
+  simp only [trep_coord_zero hden hwne, trep_coord_one hden']
 
 end ECCompute

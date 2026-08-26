@@ -24,7 +24,6 @@ is closed under the field operations through that subring.
 
 * `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_div_ne_zero`:
   closure of `(·.den : ZMod p) ≠ 0` under the field operations.
-* `Rat.den_cast_eq_zero_iff`: reduces a power-base denominator `q.den = w ^ k` mod `p` to its base.
 -/
 
 section
@@ -32,11 +31,6 @@ section
 namespace Rat
 
 variable {p : ℕ}
-
-/-- With `q.den = w ^ k` (`k ≠ 0`), the denominator vanishes mod `p` iff `w` does. -/
-public theorem den_cast_eq_zero_iff [Fact p.Prime] {q : ℚ} {w k : ℕ} (hk : k ≠ 0)
-    (hden : q.den = w ^ k) : (q.den : ZMod p) = 0 ↔ (w : ZMod p) = 0 := by
-  rw [hden, Nat.cast_pow, pow_eq_zero_iff hk]
 
 /-- A rational lies in the `p`-adic valuation ring iff its denominator is nonzero mod `p`. -/
 public theorem mem_padicInteger_iff [Fact p.Prime] {x : ℚ} :
