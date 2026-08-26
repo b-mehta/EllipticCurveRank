@@ -29,7 +29,7 @@ short model `curve b₂ (8·b₄) (16·b₆)`, with `b`-invariants `b₂ = a₁�
 
 ## Main results
 
-* `IntegralScaling.scalingVC`: the pure scaling `⟨1/v, 0, 0, 0⟩`, whose action is `(x, y) ↦
+* `IntegralScaling.scaling`: the pure scaling `⟨1/v, 0, 0, 0⟩`, whose action is `(x, y) ↦
   (v²x, v³y)`.
 * `IntegralScaling.intShortModel`: the integral short model of a general integral Weierstrass
   curve over `ℚ`.
@@ -43,7 +43,7 @@ open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 
 /-- The pure scaling change of variables `⟨1/v, 0, 0, 0⟩` (`v ≠ 0`), whose action `C • W` scales the
 coefficients by `W.aᵢ ↦ vⁱ · W.aᵢ` and points by `(x, y) ↦ (v²x, v³y)`. -/
-def scalingVC (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
+def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
 
 /-! ## The integral short model and the change of variables -/
 
@@ -62,11 +62,11 @@ integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
   curve (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 /-- Scaling the rational short model by `v = 2` produces the integral short model. -/
-theorem scalingVC_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    scalingVC 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)
+theorem scaling_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+    scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)
       = intShortModel a₁ a₂ a₃ a₄ a₆ := by
   ext <;>
-    simp only [scalingVC, variableChange_a₁, variableChange_a₂, variableChange_a₃,
+    simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, variableChange_a₆, shortModel_a₁, shortModel_a₂, shortModel_a₃,
       shortModel_a₄, shortModel_a₆, intShortModel, curve, inv_inv, Units.val_mk0] <;>
     push_cast <;> ring
@@ -78,6 +78,7 @@ public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
     (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Point ≃+
       (intShortModel a₁ a₂ a₃ a₄ a₆).toAffine.Point :=
   (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans
-    (scalingVC_smul_shortModel a₁ a₂ a₃ a₄ a₆ ▸ variableChangePointEquiv (scalingVC 2 two_ne_zero))
+    (scaling_smul_shortModel a₁ a₂ a₃ a₄ a₆ ▸
+      VariableChange.variableChangePointEquiv (scaling 2 two_ne_zero))
 
 end ECCompute.IntegralScaling

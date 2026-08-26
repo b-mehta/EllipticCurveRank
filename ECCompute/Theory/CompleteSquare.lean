@@ -71,7 +71,7 @@ Mordell-Weil groups of the general model `W` and the short model `shortModel W`,
 bound on the short model transfers back. -/
 public def pointAddEquiv (W : WeierstrassCurve ℚ) :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
-  variableChangePointEquiv (completeSquare W)
+  VariableChange.variableChangePointEquiv (completeSquare W)
 
 end ECCompute.CompleteSquare
 
