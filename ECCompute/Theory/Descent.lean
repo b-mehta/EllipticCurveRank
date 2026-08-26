@@ -32,11 +32,9 @@ open WeierstrassCurve
 
 namespace ECCompute
 
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
+variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-! ### Reducing `λ` on an affine point to `ψ_p` of the reduced coordinate -/
-
-variable {a₂ a₄ a₆ p}
 
 /-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate:
 `ψ_p(f'(θ))` when `xbar p x = θ`, and `ψ_p(xbar p x - θ)` otherwise. -/
@@ -44,7 +42,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {θ : ZMod p} {x y : ℚ}
     (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     lambda a₂ a₄ a₆ p θ (.some x y h)
       = if xbar p x = θ then psi p (fderiv a₂ a₄ p θ) else psi p (xbar p x - θ) := by
-  obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular a₂ a₄ a₆ h
+  obtain ⟨w, hxden, _⟩ := den_isSquare_of_nonsingular h
   have hw : (w : ZMod p) ≠ 0 := by
     intro h0; apply hd; rw [hxden]; grind
   have halpha : (x.num : ZMod p) - θ * (x.den : ZMod p) = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
@@ -58,12 +56,6 @@ theorem lambda_some_of_den_zero {θ : ZMod p} {x y : ℚ}
     lambda a₂ a₄ a₆ p θ (.some x y h) = 0 := by
   simp only [lambda, if_pos hd]
 
-end ECCompute
-
-namespace ECCompute
-
-variable (a₂ a₄ a₆ : ℤ) (p : ℕ)
-
 /-! ### Additivity via the reduction factorization
 
 Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : E(ℚ) → E(𝔽ₚ)`
@@ -72,7 +64,8 @@ Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : 
 
 /-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
 as an `AddMonoidHom E(ℚ) → ZMod 2`. See `lambda_map_add`. -/
-noncomputable def redCharHom [Fact p.Prime] {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
+noncomputable def redCharHom (a₂ a₄ a₆ : ℤ) (p : ℕ) [Fact p.Prime] {θ : ZMod p}
+    (h : DescentHyp a₂ a₄ a₆ p θ)
     (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp (redHom a₂ a₄ a₆ p hΔ)
@@ -99,14 +92,14 @@ theorem lambda_map_add {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ)
       rw [← map_curveℤ_ℚ, map_Δ, eq_intCast]
     rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ]
     grind
-  simp only [lambda_eq_εp_red a₂ a₄ a₆ p h hΔ, map_add]
+  simp only [lambda_eq_εp_red h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 @[simps]
-noncomputable def lambdaHom {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
+noncomputable def lambdaHom (a₂ a₄ a₆ : ℤ) (p : ℕ) {θ : ZMod p} (h : DescentHyp a₂ a₄ a₆ p θ) :
     (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda a₂ a₄ a₆ p θ
   map_zero' := lambda_zero
-  map_add' := lambda_map_add a₂ a₄ a₆ p h
+  map_add' := lambda_map_add h
 
 end ECCompute

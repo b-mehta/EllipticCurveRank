@@ -40,7 +40,7 @@ public def trep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, w ^
 /-- The image of `curveℤ` under `ℤ → ℚ`, in projective form, is the rational curve. -/
 theorem map_curveℤ_toProjective :
     (curveℤ a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curve a₂ a₄ a₆).toProjective :=
-  map_curveℤ_ℚ a₂ a₄ a₆
+  map_curveℤ_ℚ
 
 variable {x y : ℚ} {w : ℕ}
 
