@@ -47,32 +47,34 @@ def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ :=
 public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ :=
   completeSquare W • W
 
+variable {W : WeierstrassCurve ℚ}
+
 @[simp]
-public theorem shortModel_a₁ {W : WeierstrassCurve ℚ} : (shortModel W).a₁ = 0 := by
+public theorem shortModel_a₁ : (shortModel W).a₁ = 0 := by
   grind [shortModel, completeSquare, variableChange_a₁]
 
 @[simp]
-public theorem shortModel_a₂ {W : WeierstrassCurve ℚ} :
+public theorem shortModel_a₂ :
     (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
   grind [shortModel, completeSquare, variableChange_a₂, inv_one, Units.val_one, one_pow]
 
 @[simp]
-public theorem shortModel_a₃ {W : WeierstrassCurve ℚ} : (shortModel W).a₃ = 0 := by
+public theorem shortModel_a₃ : (shortModel W).a₃ = 0 := by
   grind [shortModel, completeSquare, variableChange_a₃]
 
 @[simp]
-public theorem shortModel_a₄ {W : WeierstrassCurve ℚ} :
+public theorem shortModel_a₄ :
     (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
   grind [shortModel, completeSquare, variableChange_a₄, inv_one, Units.val_one, one_pow]
 
 @[simp]
-public theorem shortModel_a₆ {W : WeierstrassCurve ℚ} :
+public theorem shortModel_a₆ :
     (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
   grind [shortModel, completeSquare, variableChange_a₆, inv_one, Units.val_one, one_pow]
 
 /-- A point `(x, y)` lies on the general model `W` iff `(x, y + (a₁x + a₃)/2)` lies on the short
 model. -/
-theorem equation_completeSquare {W : WeierstrassCurve ℚ} {x y : ℚ} : W.toAffine.Equation x y ↔
+theorem equation_completeSquare {x y : ℚ} : W.toAffine.Equation x y ↔
       (shortModel W).toAffine.Equation x (y + (W.a₁ * x + W.a₃) / 2) := by
   rw [Affine.equation_iff, Affine.equation_iff]
   grind [shortModel_a₁, shortModel_a₂, shortModel_a₃, shortModel_a₄, shortModel_a₆]
@@ -80,8 +82,6 @@ theorem equation_completeSquare {W : WeierstrassCurve ℚ} {x y : ℚ} : W.toAff
 section GroupIso
 
 open WeierstrassCurve.Affine
-
-variable {W : WeierstrassCurve ℚ}
 
 /-- Elementary disjunction fact underlying the transfer of the nonsingular condition: the two
 partial-derivative non-vanishing conditions on the general and short models are related by the
