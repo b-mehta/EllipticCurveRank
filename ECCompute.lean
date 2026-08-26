@@ -13,6 +13,7 @@ import ECCompute.Theory.Descent.CharacterFacts
 import ECCompute.Theory.RankDeduction
 import ECCompute.Theory.IntegralScaling
 import ECCompute.Theory.CompleteSquare
+import ECCompute.Theory.VariableChangePoint
 
 -- Soundness of the checkers
 import ECCompute.Soundness.Fold
