@@ -12,13 +12,14 @@ import Mathlib.Algebra.Field.ZMod
 /-!
 # The reduction map on affine points
 
-For an integral curve `y² = x³ + a₂x² + a₄x + a₆` of good reduction at a prime `p`, this file
-defines the reduction map `redP` on affine points, sending `P = (x, y)` to the affine point
-underlying `ℤ → ZMod p` applied to its integer representative `trep x y w`.
+For an integral curve `y² = x³ + a₂x² + a₄x + a₆` and a prime `p`, this file defines the
+`ZMod p`-projective representative `repr` of an affine point, applying `ℤ → ZMod p` to its
+integer representative `trep x y w`, and the reduction map `redP`, the affine point of `repr`.
 
 ## Main declarations
 
-* `ECCompute.redP`: the reduction map.
+* `ECCompute.repr`: the `ZMod p`-projective representative of an affine point.
+* `ECCompute.redP`: the reduction map, `toAffine` of `repr`.
 * `ECCompute.redP_zero`: `redP 0 = 0`.
 * `ECCompute.redP_of_den_zero`: `redP (x, y) = 0` when `p ∣ x.den`.
 * `ECCompute.redP_of_den_ne`: `redP (x, y) = (x̄, ȳ)` when `p ∤ x.den`.
