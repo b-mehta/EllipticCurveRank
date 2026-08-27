@@ -314,10 +314,10 @@ theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
   have : padicValRat p (N ^ 2 : ℤ) < padicValRat p (-(M * K ^ 2 : ℤ)) := by
     simp [padicValRat.mul, hM, hK0]; grind
   have hne : N ^ 2 ≠ M * K ^ 2 := by contrapose! this; simp [this]
-  refine ⟨?_, by grind⟩
-  rw [Int.cast_sub, sub_eq_add_neg,
-    padicValRat.add_eq_of_lt (by qify at hne; grind) (by simp [*]) (by simp [*]) this]
-  simp
+  have hne' : (↑(N ^ 2 : ℤ) + -↑(M * K ^ 2) : ℚ) ≠ 0 := by qify at hne; grind
+  refine ⟨?_, by grind only⟩
+  rw [Int.cast_sub, sub_eq_add_neg, padicValRat.add_eq_of_lt hne' _ _ this]
+  all_goals simp [*]
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
