@@ -62,6 +62,20 @@ public theorem curve_addX {x₁ x₂ ℓ : ℚ} :
     (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
   simp only [Affine.addX, curve]; grind
 
+/-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
+`WeierstrassCurve.Δ`. -/
+public def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
+  -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
+    9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
+
+/-- The discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
+public theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
+  simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]; grind
+
+/-- The numerator of the discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
+public theorem curve_Δ_num : (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
+  rw [curve_Δ_eq, Rat.num_intCast]
+
 /-- The integral Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆` over `ℤ`, i.e. `a₁ = a₃ = 0`. -/
 public def curveℤ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℤ where
   a₁ := 0
