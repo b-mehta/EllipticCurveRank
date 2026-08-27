@@ -18,7 +18,6 @@ public import ECCompute.ForMathlib.PadicValInt
 public import ECCompute.ForMathlib.RatDenom
 public import ECCompute.ForMathlib.TwoTorsion
 public import ECCompute.ForMathlib.WeierstrassCurveAffine
-public import ECCompute.ForMathlib.WeierstrassCurveProjective
 public import ECCompute.Kernel
 public import ECCompute.MainTheorem
 public import ECCompute.Soundness.DescentMatrix

@@ -11,7 +11,6 @@ public import ECCompute.Theory.Descent.ReductionMap
 import ECCompute.ForMathlib.PadicValInt
 import ECCompute.Theory.Descent.PointArith
 import ECCompute.ForMathlib.WeierstrassCurveAffine
-import ECCompute.ForMathlib.WeierstrassCurveProjective
 
 /-!
 # Additivity of the reduction map
