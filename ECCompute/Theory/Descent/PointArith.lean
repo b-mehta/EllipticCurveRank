@@ -42,8 +42,7 @@ theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
   have hsq : IsSquare d := Rat.isSquare_natCast_iff.mp ⟨c, by grind⟩
   obtain ⟨w, hw⟩ := hsq.exists_sq
   refine ⟨w, hw, ?_⟩
-  have hg : g ^ 2 = (w ^ 3) ^ 2 := by grind
-  simpa using congrArg Nat.sqrt hg
+  simpa using congrArg Nat.sqrt (by grind : g ^ 2 = (w ^ 3) ^ 2)
 
 /-- For a solution `(x, y)` of the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is a
 natural number `w` with `x.den = w²` and `y.den = w³`. -/
@@ -58,19 +57,18 @@ public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equ
     (div_eq_iff (mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
   have key : y.num ^ 2 * (x.den : ℤ) ^ 3
       = (x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
-          + a₆ * (x.den : ℤ) ^ 3) * (y.den : ℤ) ^ 2 := by
-    have hQ : (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
+          + a₆ * (x.den : ℤ) ^ 3) * (y.den : ℤ) ^ 2 :=
+    mod_cast (by grind :
+      (y.num : ℚ) ^ 2 * (x.den : ℚ) ^ 3
         = ((x.num : ℚ) ^ 3 + a₂ * (x.num : ℚ) ^ 2 * x.den + a₄ * (x.num : ℚ) * (x.den : ℚ) ^ 2
-            + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2 := by grind
-    exact mod_cast hQ
+            + a₆ * (x.den : ℚ) ^ 3) * (y.den : ℚ) ^ 2)
   set N : ℤ := x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
       + a₆ * (x.den : ℤ) ^ 3
   have hcx : IsCoprime x.num (x.den : ℤ) := Rat.isCoprime_num_den x
   have hcy : IsCoprime y.num (y.den : ℤ) := Rat.isCoprime_num_den y
   have hcN : IsCoprime N (x.den : ℤ) := by
-    have hNfac : N = x.num ^ 3 + (x.den : ℤ) *
-        (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2) := by grind
-    rw [hNfac]
+    rw [(by grind : N = x.num ^ 3 + (x.den : ℤ) *
+        (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * (x.den : ℤ) ^ 2))]
     exact hcx.pow_left.add_mul_left_left _
   have hdvd1 : (x.den : ℤ) ^ 3 ∣ (y.den : ℤ) ^ 2 :=
     hcN.symm.pow_left.dvd_of_dvd_mul_left ⟨y.num ^ 2, by grind⟩
