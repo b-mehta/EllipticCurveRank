@@ -583,13 +583,12 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
     Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
-  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
   have hy2 : (y₁ : ZMod p) + y₂ ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
   have hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
-    addX_den_ne Fact.out hℓden hd1 hd2 haddX
+    addX_den_ne Fact.out hℓden hd1 hd2 curve_addX
   have hd3_s : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
@@ -627,9 +626,8 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   rw [Affine.Point.add_of_Y_eq hx12 hy, redP_zero, redP_of_den_ne hΔ h₁ hd1]
   have hyneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
       (x₁ : ZMod p) (y₁ : ZMod p) := by
-    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
-      Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl
-    have hcast : (y₁ : ZMod p) = -y₂ := by rw [hy, hny, Rat.cast_neg]
+    have hcast : (y₁ : ZMod p) = -y₂ := by
+      rw [hy, Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl, Rat.cast_neg]
     grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
