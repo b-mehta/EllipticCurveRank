@@ -50,10 +50,8 @@ theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMo
     ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄).den : ZMod p) ≠ 0
       ∧ ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ : ℚ) : ZMod p)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
-  have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
-    rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd1
-  have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
-    rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hd2
+  have hx1sq : ((x₁ ^ 2 : ℚ).den : ZMod p) ≠ 0 := den_pow_ne_zero Fact.out hd1 2
+  have hx2sq : ((x₂ ^ 2 : ℚ).den : ZMod p) ≠ 0 := den_pow_ne_zero Fact.out hd2 2
   have hprod : ((x₁ * x₂ : ℚ).den : ZMod p) ≠ 0 := den_mul_ne_zero Fact.out hd1 hd2
   have esum : ((x₁ + x₂ : ℚ).den : ZMod p) ≠ 0 := den_add_ne_zero Fact.out hd1 hd2
   have e1 := den_add_ne_zero Fact.out hx1sq hprod
@@ -159,7 +157,7 @@ theorem addX_den_ne (hp : p.Prime) {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠
   have : Fact p.Prime := ⟨hp⟩
   rw [haddX]
   exact den_sub_ne_zero hp (den_sub_ne_zero hp (den_sub_ne_zero hp
-    (by rw [den_pow, Nat.cast_pow]; exact pow_ne_zero 2 hℓden) (by simp)) hd1) hd2
+    (den_pow_ne_zero hp hℓden 2) (by simp)) hd1) hd2
 
 section
 variable [Fact p.Prime]
