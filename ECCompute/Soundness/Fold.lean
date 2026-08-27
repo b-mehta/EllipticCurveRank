@@ -34,7 +34,9 @@ variable {n : Nat} {p : Nat → Bool}
 @[grind =] public theorem allBelow_iff : allBelow n p ↔ ∀ m < n, p m := by
   induction n with
   | zero => simp
-  | succ k ih => rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]; grind
+  | succ k ih =>
+    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
+    grind
 
 end
 
