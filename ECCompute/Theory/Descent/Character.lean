@@ -65,7 +65,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
     if (x.den : ZMod p) = 0 then 0
     else
       let α : ZMod p := x.num - θ * x.den
-      if α = 0 then psi p (fderiv a₂ a₄ θ) else psi p α
+      if α = 0 then psi p (fderiv (a₂ : ZMod p) a₄ θ) else psi p α
 
 @[simp, grind =]
 public theorem lambda_zero {θ : ZMod p} : lambda θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := rfl
@@ -84,7 +84,7 @@ public structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Pro
   /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
   discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
-  root : fval a₂ a₄ a₆ θ = 0
+  root : fval (a₂ : ZMod p) a₄ a₆ θ = 0
 
 attribute [grind →] DescentHyp.discr DescentHyp.root
 
@@ -165,7 +165,7 @@ theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x�
     (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
-    (hroot : fval a₂ a₄ a₆ θ = 0) :
+    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
   prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hroot
 
@@ -215,7 +215,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
     (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
-    (hroot : fval a₂ a₄ a₆ θ = 0)
+    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0)
     (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
     psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
@@ -229,7 +229,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
-public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv a₂ a₄ θ ≠ 0 := by
+public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   grind [fderiv, fval, discrInt, curve_Δ_num]
 
 end ECCompute
