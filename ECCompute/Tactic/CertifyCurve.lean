@@ -40,12 +40,6 @@ public theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
     (h₄ : W.a₄ == W'.a₄) (h₆ : W.a₆ == W'.a₆) : W = W' :=
   WeierstrassCurve.ext (eq_of_beq h₁) (eq_of_beq h₂) (eq_of_beq h₃) (eq_of_beq h₄) (eq_of_beq h₆)
 
-/-- Extract the `Nat` value of a numeral `Expr`. -/
-meta def getNatE (e : Expr) : MetaM Nat := do
-  let some n ← getNatValue? e
-    | throwError "certify_curve: expected a `Nat` literal, got{indentExpr e}"
-  return n
-
 /-- ASCII-trim `s`, returning a `String`. -/
 meta def strTrim (s : String) : String := s.trimAscii.toString
 
@@ -125,7 +119,9 @@ meta def readGoal (goal : MVarId) :
   let (``WeierstrassCurve.mk, #[_, q1E, q2E, q3E, q4E, q6E]) := (← whnf curveE).getAppFnArgs
     | throwError "certify_curve: the curve must reduce to a `WeierstrassCurve` literal; \
         `unfold` your curve definition and its coefficient abbreviations first"
-  return (← getNatE ρE, curveE,
+  let some ρ ← getNatValue? ρE
+    | throwError "certify_curve: expected a `Nat` rank literal, got{indentExpr ρE}"
+  return (ρ, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
 /-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
