@@ -463,12 +463,7 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
   obtain ⟨hS0, hS1⟩ := key S hS
   obtain ⟨hT0, hT1⟩ := key T hT
   funext i
-  fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul]
-  · have : ((T 2 * S 0 : ℤ) : ℚ) = ((S 2 * T 0 : ℤ) : ℚ) := by grind
-    exact mod_cast this
-  · have : ((T 2 * S 1 : ℤ) : ℚ) = ((S 2 * T 1 : ℤ) : ℚ) := by grind
-    exact mod_cast this
-  · exact mul_comm _ _
+  fin_cases i <;> simp only [Pi.smul_apply, smul_eq_mul] <;> qify <;> grind
 
 /-- Reduction is well-defined on classes: any integer projective representative `T` whose
 rational affine point is `R` reduces mod `p` to a representative equivalent to `repr R`. -/
@@ -497,8 +492,8 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 •
           (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
         = (Int.castRingHom (ZMod p) ∘ trep X Y w₃) 2 • (Int.castRingHom (ZMod p) ∘ T) := by
-      have h := congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
-      simpa only [comp_smul, Function.comp_apply] using h
+      simpa only [comp_smul, Function.comp_apply] using
+        congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
     have hns_repr := repr_nonsingular hΔ (.some X Y hR)
     rw [hrepr] at hns_repr ⊢
     exact equiv_of_proportional hns_repr hnsp hprop
