@@ -173,7 +173,8 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by
+    rw [hx3def]; simp only [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root hpt (by grind [fderiv]) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 
