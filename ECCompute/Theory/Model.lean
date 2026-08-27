@@ -100,8 +100,7 @@ variable {p : ℕ}
 /-- The reduction of the integral model modulo `p`: mapping the coefficients through the ring
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
 public theorem map_curveℤ_zmod :
-    curveZMod a₂ a₄ a₆ p =
-      { a₁ := 0, a₂ := a₂, a₃ := 0, a₄ := a₄, a₆ := a₆ } := by ext <;> simp [curveℤ]
+    curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := by ext <;> simp [curveℤ]
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
