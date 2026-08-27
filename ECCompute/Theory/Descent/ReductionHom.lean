@@ -168,7 +168,7 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
-  simp only [map_curveℤ_zmod, Affine.negY, zero_mul]
+  simp only [map_curveℤ_zmod]
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
