@@ -61,12 +61,8 @@ theorem prime_of_passes {n : ℕ} (h2 : 2 ≤ n) (h529 : n < 529)
   · exact hmod (Nat.dvd_iff_mod_eq_zero.mp (Nat.minFac_dvd n))
   · lia
 
-/-- If `checkPrime p` passes, `p` is prime. -/
-theorem checkPrime_true {p : ℕ} (h : checkPrime p) : p.Prime := by
-  grind [checkPrime, prime_of_passes]
-
 /-- If `checkPrimes` passes, every label's prime component really is prime. -/
 public theorem checkPrimes_true {ls : List (ℕ × ℤ)} (h : checkPrimes ls) : ∀ l ∈ ls, l.1.Prime := by
-  grind [checkPrimes, checkPrime_true]
+  grind [checkPrimes, checkPrime, prime_of_passes]
 
 end ECCompute
