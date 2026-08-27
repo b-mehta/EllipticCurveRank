@@ -56,8 +56,7 @@ lemma torsionBy_eq_ker : Submodule.torsionBy ℤ H n = LinearMap.ker (LinearMap.
 theorem ModN.isAddTorsion [NeZero n] : IsAddTorsion (ModN H n) := by
   intro x
   rw [isOfFinAddOrder_iff_nsmul_eq_zero]
-  refine ⟨n, NeZero.pos _, ?_⟩
-  simp [← Nat.cast_smul_eq_nsmul (ZMod n)]
+  refine ⟨n, NeZero.pos _, by simp [← Nat.cast_smul_eq_nsmul (ZMod n)]⟩
 
 instance [NeZero n] [Module.Finite ℤ H] : Finite (ModN H n) :=
   Module.finite_of_fg_torsion (ModN H n) (isAddTorsion_iff_isTorsion_int.1 ModN.isAddTorsion)
@@ -67,8 +66,7 @@ instance [NeZero n] [Module.Finite ℤ H] : Module.Finite (ZMod n) (ModN H n) :=
 
 instance [NeZero n] [Module.Finite ℤ H] : Finite (Submodule.torsionBy ℤ H n) :=
   Module.finite_of_fg_torsion _
-    (Submodule.torsionBy_isTorsion_nonZeroDivisor _
-      (by simp [mem_nonZeroDivisors_iff_ne_zero, NeZero.ne]))
+    (Submodule.torsionBy_isTorsion_nonZeroDivisor _ (by simp [NeZero.ne]))
 
 /-! ### The cardinality identity for finite groups -/
 
