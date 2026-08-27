@@ -330,8 +330,8 @@ theorem den_zero_of_cert (hp : p.Prime) {x₃ : ℚ} {K N M : ℤ}
       padicValInt.eq_zero_of_not_dvd hpA, padicValInt.eq_zero_of_not_dvd hpC,
       pow_two, padicValInt.mul hK0 hK0]
     grind
-  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 := by
-    exact mod_cast (mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0))
+  have hDen3Q : ((A * C * K ^ 2 : ℤ) : ℚ) ≠ 0 :=
+    mod_cast mul_ne_zero (mul_ne_zero hA0 hC0) (pow_ne_zero 2 hK0)
   have hx3div : x₃ = ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) / ((A * C * K ^ 2 : ℤ) : ℚ) := by
     rw [eq_div_iff hDen3Q]; exact hMain
   have hx3neg : padicValRat p x₃ < 0 := by
@@ -560,13 +560,10 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
   have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans reduced_negY
   have hY0 : (y₁ : ZMod p) + y₂ = 0 := by grind
   rw [hY0, mul_zero] at htan
-  have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
-    grind
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine hΔ h₁ hd1
   rw [Affine.nonsingular_iff, map_curveℤ_zmod] at hns
-  simp only [zero_mul, sub_zero] at hns
-  exact hns.2.elim (fun hfd_ne ↦ (Ne.symm hfd_ne) hfd) (fun hyne2 ↦ hyne2 hYeq)
+  grind
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
 `redP (P + Q)` is the tangent doubling of the common reduced point `P̄`. Both reduced `x`- and
@@ -792,15 +789,10 @@ theorem redP_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     redP p (P + Q) = redP p P + redP p Q := by
   cases P with
-  | zero =>
-      change redP p (0 + Q) = redP p 0 + redP p Q
-      rw [zero_add, redP_zero, zero_add]
+  | zero => rw [← Affine.Point.zero_def, zero_add, redP_zero, zero_add]
   | some x₁ y₁ h₁ =>
   cases Q with
-  | zero =>
-      change redP p (Affine.Point.some x₁ y₁ h₁ + 0)
-        = redP p (.some x₁ y₁ h₁) + redP p 0
-      rw [add_zero, redP_zero, add_zero]
+  | zero => rw [← Affine.Point.zero_def, add_zero, redP_zero, add_zero]
   | some x₂ y₂ h₂ => exact redP_map_add_some hΔ h₁ h₂
 
 /-- The reduction map bundled as an additive homomorphism
