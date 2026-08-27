@@ -45,10 +45,8 @@ theorem fval_iff (hp : 1 < p) :
     (polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0
       ↔ ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 := by
   have hp0 : p ≠ 0 := by lia
-  have hpz : (p : ℤ) ≠ 0 := mod_cast hp0
   have hmod : (((θ.emod p).toNat : ℤ) : ZMod p) = (θ : ZMod p) := by
-    rw [Int.emod_eq, Int.toNat_of_nonneg (Int.emod_nonneg θ hpz), ZMod.intCast_eq_intCast_iff']
-    exact Int.emod_emod_of_dvd θ dvd_rfl
+    rw [Int.cast_natCast]; exact intResNat_cast hp0
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by grind [polyEval]
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
