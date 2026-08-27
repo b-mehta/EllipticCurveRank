@@ -68,8 +68,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
       if α = 0 then psi p (fderiv (a₂ : ZMod p) a₄ θ) else psi p α
 
 @[simp, grind =]
-public theorem lambda_zero {θ : ZMod p} :
-    lambda θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := rfl
+public theorem lambda_zero {θ : ZMod p} : lambda θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := rfl
 
 /-! ### The hypotheses of the descent lemma
 
@@ -199,8 +198,7 @@ public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
   grind [psi]
 
 /-- Multiplying by a nonzero square does not change `ψ_p`. -/
-public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) :
-    psi p (b ^ 2 * a) = psi p a := by
+public theorem psi_mul_sq (hp : p.Prime) (hb : b ≠ 0) : psi p (b ^ 2 * a) = psi p a := by
   have : Fact p.Prime := ⟨hp⟩
   rcases eq_or_ne a 0 with rfl | ha
   · rw [mul_zero]
@@ -231,8 +229,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
-public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
-    fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
+public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   intro hfd
   apply h.discr
   rw [curve_Δ_num]
