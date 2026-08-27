@@ -58,15 +58,19 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
 variable {a₂ a₄ a₆ : ℤ}
 variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {ls : Fin c.ρ → ℕ × ℤ}
 
+/-- The certificate's character matrix `B` reduces entrywise to the descent-character value
+`λ(Pᵢ)` at each certified point and label, computed by `lambdaK`. -/
+abbrev isCharMatrix (c : Certificate) (pt : Fin c.ρ → ℚ × ℚ) (ls : Fin c.ρ → ℕ × ℤ) : Prop :=
+  ∀ i j, F2Invert.toMat c.B c.ρ i j
+    = if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
+        (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0
+
 /-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
 `B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
 theorem linearIndependent_descent
     (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2)
     (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
-    (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j
-        = if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1)
-            ((ls j).2 % (ls j).1).toNat
-            (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
+    (hB : isCharMatrix c pt ls)
     (hBlen : c.B.length = c.ρ) (hMlen : c.M.length = c.ρ)
     (hinv : F2Invert.checkInv c.ρ c.B c.M)
     {φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.ρ → ZMod 2)}
@@ -80,7 +84,7 @@ theorem linearIndependent_descent
       ← lambdaK_eq (hyp j) (hns i)
         (intResNat_cast (hyp j).prime.ne_zero)
         (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
-    simp [hB]
+    exact (hB i j).symm
   rw [hrow]
   exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hBlen hMlen hinv)
 
@@ -102,10 +106,7 @@ theorem rank_ge_of_certificate
     (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
     (hlsP : ∀ j, ((ls j).1).Prime)
     (hlsC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2)
-    (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j =
-      if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1)
-          ((ls j).2 % (ls j).1).toNat
-          (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
+    (hB : isCharMatrix c pt ls)
     (hBlen : c.B.length = c.ρ)
     (hMlen : c.M.length = c.ρ)
     (hinv : F2Invert.checkInv c.ρ c.B c.M)
