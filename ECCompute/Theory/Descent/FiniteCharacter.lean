@@ -78,8 +78,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 /-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
 line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p}
-    (hne : x₁ ≠ x₂)
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p} (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - a₆) :
@@ -132,8 +131,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
 
 /-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
 descent-character value at `X₃` is `0`. -/
-theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p}
-    (hXθ : x ≠ θ)
+theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p} (hXθ : x ≠ θ)
     (hσ₁ : x + x + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x * x + x * X₃ + x * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x * x * X₃ = m ^ 2 - a₆) :
