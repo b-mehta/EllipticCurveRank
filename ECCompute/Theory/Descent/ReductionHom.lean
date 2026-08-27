@@ -28,15 +28,17 @@ assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 * `ECCompute.redHom`: `redP` as an `AddMonoidHom E(ℚ) → E(𝔽ₚ)`.
 -/
 
-namespace ECCompute
-
--- Denominators of the group law survive reduction.
-section
 open WeierstrassCurve
 
-open Rat
+namespace ECCompute
 
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
+
+/-! ## Denominators of the group law survive reduction -/
+
+section
+open Rat
+
 variable {x₁ y₁ x₂ y₂ : ℚ}
 
 section
@@ -209,11 +211,9 @@ theorem addY_cast_eq {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
 end
 end
 
--- The kernel of reduction is closed under the group law.
-section
-open WeierstrassCurve
+/-! ## The kernel of reduction is closed under the group law -/
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
+section
 
 /-! ### Integer data attached to a kernel point -/
 
@@ -444,11 +444,12 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
     (fun h ↦ hpA (h ▸ dvd_zero _)) (fun h ↦ hpC (h ▸ dvd_zero _)) hK0 hN0
 end
 
--- Additivity of the reduction map: `redP_map_add` and `redHom`.
-section
-open WeierstrassCurve Projective
+/-! ## Additivity of the reduction map -/
 
-variable {a₂ a₄ a₆ : ℤ} {p : ℕ} [Fact p.Prime]
+section
+open Projective
+
+variable [Fact p.Prime]
 
 /-- Over `ℚ`, the affine point underlying the integer representative `trep x y w` is `(x, y)`. -/
 theorem toAffine_g_trep {x y : ℚ} {w : ℕ}
