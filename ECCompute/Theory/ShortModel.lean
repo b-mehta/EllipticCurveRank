@@ -104,7 +104,7 @@ integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
   curve (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 /-- Scaling the rational short model by `v = 2` produces the integral short model. -/
-public theorem scaling_smul_shortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) :
+public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
     scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)
       = intShortModel a₁ a₂ a₃ a₄ a₆ := by
   ext <;>
