@@ -64,8 +64,7 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
     (hqlen : q.length = ρ)
     (h : checkB a₂ a₄ ls q B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
-      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1)
-          (ls[j].2 % ls[j].1).toNat
+      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
   set L := ls[j] with hL
   set P := pt[i] with hP
