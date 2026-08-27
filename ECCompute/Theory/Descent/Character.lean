@@ -9,7 +9,6 @@ public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 public import Mathlib.Data.ZMod.Basic
 public import ECCompute.Theory.Model
 
-import Mathlib.Tactic.LinearCombination
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
