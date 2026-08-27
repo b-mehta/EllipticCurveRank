@@ -183,7 +183,7 @@ public theorem certTorsionBound_one (hp : Nat.blt 1 ℓ)
 `2`-torsion is the identity together with the (at most three) nonzero points `(x, 0)` for `x` a
 root of the `2`-division cubic. -/
 public theorem certTorsionBound_two : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 := by
-  show (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 4
+  change (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 4
   grw [(card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).2, Cubic.card_roots_le]
 
 end ECCompute
