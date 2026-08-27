@@ -64,7 +64,7 @@ public theorem curve_addX {x₁ x₂ ℓ : ℚ} :
 
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
 `WeierstrassCurve.Δ`. -/
-public def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
+@[expose] public def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
