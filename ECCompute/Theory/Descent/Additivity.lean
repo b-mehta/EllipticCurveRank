@@ -44,8 +44,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {x y : ℚ}
   have halpha : x.num - θ * x.den = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
     rw [num_eq_xbar_mul_den hd, hxden]; grind
   have hp : p.Prime := Fact.out
-  simp only [lambda]
-  grind [psi_mul_sq hp]
+  grind [lambda, psi_mul_sq hp]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {x y : ℚ}
@@ -85,8 +84,7 @@ theorem lambda_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
   have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
     have hval : (curve a₂ a₄ a₆).Δ = (curveℤ a₂ a₄ a₆).Δ := by
       rw [← map_curveℤ_ℚ, map_Δ, eq_intCast]
-    rw [← Rat.num_intCast (curveℤ a₂ a₄ a₆).Δ]
-    grind
+    grind [Rat.num_intCast]
   simp only [lambda_eq_εp_red h hΔ, map_add]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
