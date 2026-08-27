@@ -20,7 +20,7 @@ proves them correct.
 
 ## Main declarations
 
-* `ECCompute.qrLookupBool_spec`: the mask bit test decides whether `a` is a nonzero square mod `p`.
+* `ECCompute.qrLookupBool_iff`: the mask bit test decides whether `a` is a nonzero square mod `p`.
 * `ECCompute.lambdaK_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,
   agrees with the abstract character `lambda`.
 -/
@@ -32,7 +32,7 @@ variable {p a : ℕ} {a₂ a₄ a₆ : ℤ}
 /-! ### Quadratic-residue bitmask: kernel evaluation of the Legendre character
 
 `qrMask` is the reference builder the certificate's supplied mask is checked against;
-`qrLookupBool_spec` shows the bit test decides whether `a` is a nonzero square mod `p`.
+`qrLookupBool_iff` shows the bit test decides whether `a` is a nonzero square mod `p`.
 -/
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `m.testBit a`. -/
@@ -93,7 +93,7 @@ theorem qrMask_testBit (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
 
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
 prime). -/
-theorem qrLookupBool_spec (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
+theorem qrLookupBool_iff (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
     qrLookupBool (qrMask p) a ↔ (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
   grind [qrLookupBool, qrMask_testBit]
 
@@ -105,7 +105,7 @@ theorem mask_eq_psi (hp : p.Prime) (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     (if qrLookupBool (qrMask p) a.val then 0 else 1) = psi p a := by
   have : NeZero p := ⟨hp.ne_zero⟩
   have ha0 : a.val ≠ 0 := by rwa [ne_eq, ZMod.val_eq_zero]
-  simp [qrLookupBool_spec hp2 hp (ZMod.val_lt a), ha0, psi]
+  simp [qrLookupBool_iff hp2 hp (ZMod.val_lt a), ha0, psi]
 
 /-! ### Fully `Nat` mirror
 
