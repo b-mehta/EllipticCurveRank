@@ -109,11 +109,6 @@ public instance : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
 
 /-! ## The universal bound `t = 2` -/
 
-/-- The rational `2`-torsion of the short model has at most four elements: the identity together
-with the (at most three) nonzero points `(x, 0)` for `x` a root of the `2`-division cubic. -/
-theorem card_twoTorsion_le_four : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 4 := by
-  grw [(card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).2, Cubic.card_roots_le]
-
 variable {ℓ : ℕ} {R : ℤ}
 
 /-! ## The `t = 0` bound -/
@@ -184,8 +179,10 @@ public theorem certTorsionBound_one (hp : Nat.blt 1 ℓ)
     (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 1 :=
   card_twoTorsion_le_two_of_root_cofactor (by simpa [Int.beq'_eq] using hR) (by simpa using hp) hq
 
-/-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`. -/
-public theorem certTorsionBound_two : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 :=
-  card_twoTorsion_le_four
+/-- The `t = 2` certificate torsion bound: the universal `|E(ℚ)[2]| ≤ 4 = 2^2`, since the rational
+`2`-torsion is the identity together with the (at most three) nonzero points `(x, 0)` for `x` a
+root of the `2`-division cubic. -/
+public theorem certTorsionBound_two : (curve a₂ a₄ a₆).twoTorsionPoints.ncard ≤ 2 ^ 2 := by
+  grw [(card_twoTorsion_le_of_xcoords twoTorsion_xcoord_mem_roots).2, Cubic.card_roots_le]
 
 end ECCompute
