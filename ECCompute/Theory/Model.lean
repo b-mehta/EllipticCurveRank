@@ -96,15 +96,17 @@ theorem baseChange_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).baseChange ℚ = cur
 public theorem map_curveℤ_ℚ : (curveℤ a₂ a₄ a₆).map (Int.castRingHom ℚ) = curve a₂ a₄ a₆ := by
   rw [← baseChange_curveℤ_ℚ, baseChange, algebraMap_int_eq]
 
+variable {p : ℕ}
+
 /-- The reduction of the integral model modulo `p`: mapping the coefficients through the ring
 homomorphism `ℤ → ZMod p` gives the curve with `a₂, a₄, a₆` cast into `ZMod p`. -/
-public theorem map_curveℤ_zmod {p : ℕ} :
+public theorem map_curveℤ_zmod :
     curveZMod a₂ a₄ a₆ p =
       { a₁ := 0, a₂ := a₂, a₃ := 0, a₄ := a₄, a₆ := a₆ } := by ext <;> simp [curveℤ]
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
-public theorem reduced_negY (p : ℕ) (x y : ZMod p) :
+public theorem reduced_negY {x y : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod])
 
