@@ -98,7 +98,7 @@ theorem variableChange_addX {ℓ : ℚ} :
     (C • W).toAffine.addX (C.mapX x₁) (C.mapX x₂) (C.mapSlope ℓ)
       = C.mapX (W.toAffine.addX x₁ x₂ ℓ) := by
   simp only [addX, mapX, mapSlope, variableChange_a₁, variableChange_a₂, Units.val_inv_eq_inv_val]
-  grind [Units.val_inv_eq_inv_val]
+  grind
 
 @[grind =]
 theorem variableChange_addY {ℓ : ℚ} :
