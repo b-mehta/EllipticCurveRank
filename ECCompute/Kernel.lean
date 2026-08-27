@@ -20,26 +20,25 @@ aggregate descent-matrix check, and the point-on-curve check.
 
 namespace ECCompute
 
-/-- Kernel-reducible bounded `∀`: `true` iff `p m = true` for every `m < n`. -/
+/-- `true` iff `p m = true` for every `m < n`. -/
 noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool := n.rec true fun m r ↦ (p m).and' r
 
-/-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
+/-- `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type} (p : α → Bool) : List α → Bool :=
   List.rec true fun a _ r ↦ (p a).and' r
 
 /-! ## Primes -/
 
-/-- Trial division as a `Bool`-valued fold: `passes x L = true` iff no `i ∈ L` with `i < x`
-divides `x`. -/
+/-- `true` iff no `i ∈ L` with `i < x` divides `x`. -/
 noncomputable def passes (x : Nat) : List Nat → Bool :=
   List.rec true (fun i _ r ↦ ((Nat.ble 1 (x.mod i)).or' (x.ble i)).and' r)
 
-/-- Kernel `Bool`: `p` is a prime below `529 = 23²`, certified by trial division by the primes below
+/-- `true` iff `p` is a prime below `529 = 23²`, certified by trial division by the primes below
 `23` (`ECCompute.passes`). -/
 noncomputable def checkPrime (p : Nat) : Bool :=
   (Nat.ble 2 p).and' ((p.ble 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
 
-/-- Kernel `Bool`: every label's prime component passes `checkPrime`. -/
+/-- `true` iff every label's prime component passes `checkPrime`. -/
 noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkPrime l.1) labels
 
@@ -55,7 +54,7 @@ fold reaches it. -/
 noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
-/-- Kernel-reducible test: `true` iff the monic integer polynomial with lower coefficients `cs`
+/-- `true` iff the monic integer polynomial with lower coefficients `cs`
 (implicit leading coefficient `1`) has no root modulo `ℓ`, trying every residue `0, …, ℓ - 1`. -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
   allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not'
@@ -71,7 +70,7 @@ def discrIntK (a₂ a₄ a₆ : Int) : Int :=
       (Int.mul 8 ((b4.mul b4).mul b4))).sub (Int.mul 27 (b6.mul b6))).add
     (((Int.mul 9 b2).mul b4).mul b6)
 
-/-- Kernel-reducible check that the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
+/-- `true` iff the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
 `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, where `f(θ) = θ³ + a₂θ² + a₄θ + a₆` is read as the monic cubic
 `polyModL [a₆, a₄, a₂, 1]` evaluated at the residue of `θ`. -/
 noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
@@ -79,7 +78,7 @@ noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool 
     (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
       ((polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0))
 
-/-- Kernel `Bool`: every label passes `checkLabel`. -/
+/-- `true` iff every label passes `checkLabel`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
   allList (fun l ↦ checkLabel a₂ a₄ a₆ l.1 l.2) labels
 
@@ -94,24 +93,24 @@ noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
 /-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
-/-- Kernel-reducible character lookup: `true` iff bit `a` of the quadratic-residue mask `qmask` is
+/-- `true` iff bit `a` of the quadratic-residue mask `qmask` is
 set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
-noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
+noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
 /-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, for the kernel. -/
-noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
+noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
 /-- The value of the descent character `λ_{p,θ}` at a point. -/
 noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
-    (((alphaResNat p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResNat a₂ a₄ p tval)).not'))
+    (((alphaResK p tval xp xm xden).beq 0).rec
+      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).not')
+      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
     false
 
 /-! ## 𝔽₂ matrix inverse -/
@@ -145,7 +144,7 @@ noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
 noncomputable def maskBelow (n : Nat) (M : List Nat) : Bool :=
   allList (fun x ↦ x.blt (Nat.shiftLeft 1 n)) M
 
-/-- Kernel-reducible certificate checker: `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
+/-- `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
 rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
 masks fit in `n ≤ 32` bits, which `popParityK` relies on for soundness. -/
 noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
@@ -192,7 +191,7 @@ noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List 
 
 /-! ## Point on curve -/
 
-/-- Kernel-reducible point-on-curve check. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
+/-- `true` iff `(x, y)` lies on the curve. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
 Weierstrass equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` is equivalent, after clearing the
 denominator `xd³·yd²`, to an identity between integers, which `checkPoint` tests. -/
 noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : Int) (x y : Rat) : Bool :=
