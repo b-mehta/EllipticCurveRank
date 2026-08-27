@@ -106,18 +106,19 @@ public structure Vieta (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ : R) : Prop where
   σ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m
   σ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆
 
+attribute [grind →] Vieta.σ₁ Vieta.σ₂ Vieta.σ₃
+
 /-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the Vieta relations, the cubic
 `x³ + a₂x² + a₄x + a₆ - (ℓx + m)²` factors as `(x - x₁)(x - x₂)(x - x₃)` at every `x`. -/
 theorem cubic_sub_lineSq_eq_prod (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃) {x : R} :
     fval a₂ a₄ a₆ x - (ℓ * x + m) ^ 2 = (x - x₁) * (x - x₂) * (x - x₃) := by
-  grind [fval, hv.σ₁, hv.σ₂, hv.σ₃]
+  grind [fval]
 
 /-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
 public theorem prod_sub_theta_eq_lineSq (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃)
     (hθ : fval a₂ a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
-  have hσ₁ := hv.σ₁; have hσ₂ := hv.σ₂; have hσ₃ := hv.σ₃
   grind [fval, cubic_sub_lineSq_eq_prod hv]
 
 /-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
@@ -153,7 +154,6 @@ mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
 public theorem fderiv_eq_prod (ℓ m : F) (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃)
     (hθ : fval a₂ a₄ a₆ θ = 0) (h1 : x₁ = θ) :
     fderiv a₂ a₄ θ = (x₂ - θ) * (x₃ - θ) := by
-  have hσ₁ := hv.σ₁; have hσ₂ := hv.σ₂; have hσ₃ := hv.σ₃
   grind [fval, fderiv, cubic_sub_lineSq_eq_prod hv]
 
 end Field

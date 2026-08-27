@@ -85,9 +85,6 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod
         + (if x₂ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₂ - θ)) := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
-  have hσ₁ := hv.σ₁
-  have hσ₂ := hv.σ₂
-  have hσ₃ := hv.σ₃
   have hfd_ne : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := fderiv_ne_zero h
   have hfd1 : x₁ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₂ - θ) * (x₃ - θ) :=
     fderiv_eq_prod ℓ m hv hθroot
@@ -136,9 +133,6 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x x₃ :
     (if x₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₃ - θ)) = 0 := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
-  have hσ₁ := hv.σ₁
-  have hσ₂ := hv.σ₂
-  have hσ₃ := hv.σ₃
   have hprod : (x - θ) * (x - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
     prod_sub_theta_eq_lineSq hv hθroot
   obtain rfl | c3 := eq_or_ne x₃ θ
