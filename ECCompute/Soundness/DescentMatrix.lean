@@ -75,7 +75,7 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
     have hjns : j < ns.length := by rw [hns]; exact j.isLt
-    have : qrMask ns[j].1 = ns[j].2.2 := by grind [checkMaskList, List.getElem_mem]
+    have : qrMask ns[(j : ℕ)].1 = ns[(j : ℕ)].2.2 := by grind [checkMaskList, List.getElem_mem]
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
   have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
