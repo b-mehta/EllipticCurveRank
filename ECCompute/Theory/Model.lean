@@ -18,7 +18,7 @@ file records it over `ℚ` (`curve a₂ a₄ a₆`), over `ℤ` (`curveℤ a₂ 
 `curveZMod a₂ a₄ a₆ p` modulo `p`, along with `WeierstrassCurve.twoTorsionPoints`, the set of
 affine points `P` with `P + P = 0`.
 
-## Main declarations
+## Main results
 
 * `ECCompute.curve`: the rational Weierstrass curve `y² = x³ + a₂x² + a₄x + a₆`.
 * `ECCompute.curveℤ`: its integral model; `ECCompute.curveZMod`: the reduction modulo `p`.

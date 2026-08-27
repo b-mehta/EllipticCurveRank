@@ -23,7 +23,7 @@ where `ψ_p` is the Legendre symbol pushed into `(ZMod 2, +)`. This file proves 
 `εpFinite θ` is additive, packaged as `εpHom : E(𝔽ₚ) →+ ZMod 2`; vanishing on `2·E(𝔽ₚ)`
 is then automatic.
 
-## Main declarations
+## Main results
 
 * `ECCompute.εpFinite`: the finite-field descent character `E(𝔽ₚ) → ZMod 2`.
 * `ECCompute.εpHom`: `εpFinite` packaged as an `AddMonoidHom`.

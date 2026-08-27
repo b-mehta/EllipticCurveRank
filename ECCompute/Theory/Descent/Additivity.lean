@@ -20,7 +20,7 @@ This file assembles the additivity of the descent character `λ_{p,θ}` defined 
 additive homomorphisms (see `ECCompute.Descent.ReductionHom` and
 `ECCompute.Descent.FiniteCharacter`).
 
-## Main declarations
+## Main results
 
 * `ECCompute.lambdaHom`: `λ` packaged as an `AddMonoidHom`.
 -/

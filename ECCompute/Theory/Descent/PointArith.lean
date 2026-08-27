@@ -22,7 +22,7 @@ For the integral curve `E : y² = x³ + a₂x² + a₄x + a₆` over `ℚ` and a
 denominator is a perfect square (`den_isSquare`, giving `w` with `x.den = w²` and `y.den = w³`, so
 a point is `(u/w², v/w³)` in lowest terms), and the coordinates cast to `ZMod p`.
 
-## Main declarations
+## Main results
 
 * `ECCompute.den_isSquare`: from the affine equation, `∃ w, x.den = w² ∧ y.den = w³`.
 * `ECCompute.xbar`: the reduced `x`-coordinate `(x : ZMod p)` as a plain field element.

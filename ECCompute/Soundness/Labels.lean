@@ -24,7 +24,7 @@ The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`)
 `descentHyp_of_checkLabel` turns a passing `checkLabel` (with a separately supplied primality proof)
 into a `DescentHyp`.
 
-## Main declarations
+## Main results
 
 * `ECCompute.descentHyp_of_checkLabel`: the passage from a passing `checkLabel` to `DescentHyp`.
 * `ECCompute.checkLabels_true`: a passing `checkLabels` gives `checkLabel` for every label.

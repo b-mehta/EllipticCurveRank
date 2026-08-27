@@ -18,7 +18,7 @@ The kernel `Bool`/`Nat` builders that evaluate the descent character `λ_{p,θ}`
 (`qrMask`, `qrLookupBool`, `lambdaK`, …) live in `ECCompute.Kernel`; this file
 proves them correct.
 
-## Main declarations
+## Main results
 
 * `ECCompute.qrLookupBool_iff`: the mask bit test decides whether `a` is a nonzero square mod `p`.
 * `ECCompute.lambdaK_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,

@@ -21,7 +21,7 @@ homomorphism. The proof runs in three stages: the group-law denominators survive
 under the group law (`den_addX_both_kernel`); and the full case analysis on the affine group law
 assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 
-## Main declarations
+## Main results
 
 * `ECCompute.redP_map_add`: `redP` preserves the group law.
 * `ECCompute.redHom`: `redP` as an `AddMonoidHom E(ℚ) → E(𝔽ₚ)`.

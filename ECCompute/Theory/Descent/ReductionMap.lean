@@ -21,7 +21,7 @@ file builds the integer projective representative `trep x y w = ![x.num·w, y.nu
 `x.den = w²`, `y.den = w³`), applies `ℤ → ZMod p` to it to get the `ZMod p`-projective
 representative `repr`, and takes its affine point to define the reduction map `redP`.
 
-## Main declarations
+## Main results
 
 * `ECCompute.trep`: the integer representative `![x.num · w, y.num, w³]`.
 * `ECCompute.repr`: the `ZMod p`-projective representative of an affine point.
