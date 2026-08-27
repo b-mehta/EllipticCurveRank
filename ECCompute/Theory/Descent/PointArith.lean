@@ -49,13 +49,9 @@ theorem exists_sq_cube_of_cube_eq_sq {d g : ℕ} (hdg : d ^ 3 = g ^ 2) :
 natural number `w` with `x.den = w²` and `y.den = w³`. -/
 public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
-  have heq : y ^ 2 = x ^ 3 + (a₂ : ℚ) * x ^ 2 + (a₄ : ℚ) * x + (a₆ : ℚ) := by
-    have := (Affine.equation_iff (W := (curve a₂ a₄ a₆).toAffine) x y).mp h
-    simpa [curve] using this
-  have hx : (x.num : ℚ) = x * (x.den : ℚ) :=
-    (div_eq_iff (mod_cast x.den_ne_zero)).mp (Rat.num_div_den x)
-  have hy : (y.num : ℚ) = y * (y.den : ℚ) :=
-    (div_eq_iff (mod_cast y.den_ne_zero)).mp (Rat.num_div_den y)
+  have heq := equation_curve h
+  have hx : (x.num : ℚ) = x * (x.den : ℚ) := (Rat.mul_den_eq_num x).symm
+  have hy : (y.num : ℚ) = y * (y.den : ℚ) := (Rat.mul_den_eq_num y).symm
   have key : y.num ^ 2 * (x.den : ℤ) ^ 3
       = (x.num ^ 3 + a₂ * x.num ^ 2 * x.den + a₄ * x.num * (x.den : ℤ) ^ 2
           + a₆ * (x.den : ℤ) ^ 3) * (y.den : ℤ) ^ 2 := by
