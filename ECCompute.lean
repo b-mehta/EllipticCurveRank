@@ -14,7 +14,6 @@ public import ECCompute.Curves.Curve8
 public import ECCompute.Curves.Curve9
 public import ECCompute.ForLean
 public import ECCompute.ForMathlib.ModuleTorsionQuotient
-public import ECCompute.ForMathlib.PadicValInt
 public import ECCompute.ForMathlib.RatDenom
 public import ECCompute.ForMathlib.TwoTorsion
 public import ECCompute.ForMathlib.WeierstrassCurve
