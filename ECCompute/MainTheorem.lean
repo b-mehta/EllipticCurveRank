@@ -115,8 +115,7 @@ theorem rank_ge_of_certificate
   set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
   have hyp (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
     descentHyp_of_checkLabel (hlsC j) (hlsP j)
-  set φ : E →+ (Fin c.ρ → ZMod 2) :=
-    AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)) with hφ
+  set φ : E →+ (Fin c.ρ → ZMod 2) := AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)) with hφ
   rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
   · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
   have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp ⟨0, hρpos⟩).discr (by simp [hΔ0])
@@ -128,8 +127,7 @@ theorem rank_ge_of_certificate
     linearIndependent_descent hyp hns hB hBlen hMlen hinv hφ hg
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t :=
-    (card_torsionBy_le H).trans htors
+  have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t := (card_torsionBy_le H).trans htors
   have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
     (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
     (φ.comp H.subtype.toAddMonoidHom) hindep htorH
@@ -153,6 +151,6 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     rank_ge_of_certificate (fun i ↦ hpt _ (List.getElem_mem _)) hlsP' hlsC'
       (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
   exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆)
-    (((IntegralScaling.scaling_smul_shortModel a₁ a₂ a₃ a₄ a₆).trans hmodel).symm ▸ key)
+    ((IntegralScaling.scaling_smul_shortModel.trans hmodel).symm ▸ key)
 
 end ECCompute

@@ -46,8 +46,7 @@ theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls
     b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
   induction ls generalizing b j with
   | nil => grind
-  | cons l ls ih =>
-    cases j <;> grind [Nat.testBit_succ]
+  | cons l ls ih => cases j <;> grind [Nat.testBit_succ]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
