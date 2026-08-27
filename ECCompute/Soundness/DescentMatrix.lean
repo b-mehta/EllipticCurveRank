@@ -53,10 +53,6 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip :
     checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den B[i] ls := by
   induction B generalizing pt i with grind [cases List]
 
-/-- If `checkMaskList` passes, every supplied mask equals `qrMask` of its label's prime. -/
-theorem checkMaskList_true (h : checkMaskList ls) (hj : j < ls.length) :
-    qrMask ls[j].1 = ls[j].2.2 := by grind [checkMaskList, List.getElem_mem]
-
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
 read into `ZMod 2`. -/
 public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
@@ -78,7 +74,8 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
-    have := checkMaskList_true hmask (by rw [hns]; exact j.isLt)
+    have hjns : (j : ℕ) < ns.length := by rw [hns]; exact j.isLt
+    have : qrMask ns[(j : ℕ)].1 = ns[(j : ℕ)].2.2 := by grind [checkMaskList, List.getElem_mem]
     rwa [hgetN] at this
   -- read off the mask-based cell value at `(i, j)`
   have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
