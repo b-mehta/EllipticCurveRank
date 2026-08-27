@@ -65,7 +65,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
     if (x.den : ZMod p) = 0 then 0
     else
       let α : ZMod p := x.num - θ * x.den
-      if α = 0 then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p α
+      if α = 0 then psi p (fderiv (a₂ : ZMod p) a₄ θ) else psi p α
 
 @[simp, grind =]
 public theorem lambda_zero {θ : ZMod p} : lambda θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := rfl
@@ -167,7 +167,7 @@ theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x�
     (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
     (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ (by simpa only [fval] using hroot)
+  prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hroot
 
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
@@ -230,11 +230,10 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
-  have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
   intro hfd
   apply h.discr
   rw [curve_Δ_num]
   simp only [discrInt]
-  grind [fderiv]
+  grind [fderiv, fval]
 
 end ECCompute
