@@ -53,8 +53,7 @@ theorem popParity_eq_xorBits {fuel a : ℕ} : popParity fuel a = xorBits a (List
     simp only [xorBits, List.foldr_cons, List.foldr_map, Nat.testBit_zero, Nat.testBit_succ]
 
 /-- Dropping trailing indices whose bit is `false` does not change the XOR. -/
-theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = false)
-    (hnm : n ≤ m) :
+theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = false) (hnm : n ≤ m) :
     xorBits v (List.range m) = xorBits v (List.range n) := by
   induction m with grind [List.range_succ, xorBits]
 
