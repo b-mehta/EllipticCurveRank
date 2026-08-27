@@ -27,7 +27,7 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- ICARM leaderboard curve 9, a Martin-McMillen curve over `ℚ`. -/
+/-- ICARM leaderboard curve 9, a Martin-McMillen rank-23 curve over `ℚ`. -/
 @[expose] public def curve9 : WeierstrassCurve ℚ :=
   ⟨1, 0, 1, -19252966408674012828065964616418441723,
     32685500727716376257923347071452044295907443056345614006⟩
