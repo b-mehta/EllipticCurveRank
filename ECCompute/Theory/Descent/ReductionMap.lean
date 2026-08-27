@@ -53,8 +53,7 @@ variable {x y : ℚ} {w : ℕ}
 /-- Over `ℚ`, the integer representative equals `w³ • [x : y : 1]`. -/
 public theorem trep_map_ℚ (hxden : x.den = w ^ 2) (hyden : y.den = w ^ 3) :
     Int.castRingHom ℚ ∘ trep x y w = (w ^ 3 : ℚ) • ![x, y, 1] := by
-  simp [trep, comp_fin3, ← Rat.mul_den_eq_num, hxden, hyden]
-  grind
+  grind [trep, comp_fin3, ← Rat.mul_den_eq_num, hxden, hyden]
 
 /-- The integer representative lies on the integral projective curve. -/
 theorem trep_equation (h : (curve a₂ a₄ a₆).toAffine.Equation x y)
@@ -113,13 +112,10 @@ theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
       simp only [Function.comp_apply, trep_one, eq_intCast]
       rw [Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
       intro hpy
-      have hpw : p ∣ w := (ZMod.natCast_eq_zero_iff w p).mp hwz
       have hpw3 : (p : ℤ) ∣ (w : ℤ) ^ 3 :=
-        (Int.natCast_dvd_natCast.mpr hpw).trans (dvd_pow_self _ three_ne_zero)
-      have hunit : IsUnit (p : ℤ) :=
-        y.isCoprime_num_den.isUnit_of_dvd' hpy (by rwa [hden', Nat.cast_pow])
-      have h2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
-      grind [Int.isUnit_iff]
+        (Int.natCast_dvd_natCast.mpr ((ZMod.natCast_eq_zero_iff w p).mp hwz)).trans
+          (dvd_pow_self _ three_ne_zero)
+      grind [Int.isUnit_iff, y.isCoprime_num_den.isUnit_of_dvd', hden', Nat.cast_pow, hp.two_le]
     rw [hX0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
