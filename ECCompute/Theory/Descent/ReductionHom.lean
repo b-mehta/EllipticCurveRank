@@ -492,8 +492,8 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 •
           (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
         = (Int.castRingHom (ZMod p) ∘ trep X Y w₃) 2 • (Int.castRingHom (ZMod p) ∘ T) := by
-      have h := congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
-      simpa only [comp_smul, Function.comp_apply] using h
+      simpa only [comp_smul, Function.comp_apply] using
+        congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
     have hns_repr := repr_nonsingular hΔ (.some X Y hR)
     rw [hrepr] at hns_repr ⊢
     exact equiv_of_proportional hns_repr hnsp hprop
