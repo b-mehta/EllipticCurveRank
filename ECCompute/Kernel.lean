@@ -99,19 +99,19 @@ set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero 
 noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
-noncomputable def alphaResNat (p tval xp xm xden : Nat) : Nat :=
+noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
 
 /-- Residue in `[0, p)` of `f'(θ) = 3θ² + 2a₂θ + a₄`, for the kernel. -/
-noncomputable def fderivResNat (a₂ a₄ : Int) (p tval : Nat) : Nat :=
+noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
 /-- The value of the descent character `λ_{p,θ}` at a point. -/
 noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
-    (((alphaResNat p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResNat p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResNat a₂ a₄ p tval)).not'))
+    (((alphaResK p tval xp xm xden).beq 0).rec
+      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).not')
+      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
     false
 
 /-! ## 𝔽₂ matrix inverse -/
