@@ -17,12 +17,10 @@ import Mathlib.Data.List.Basic
 peel one step.
 -/
 
-section
-
 namespace ECCompute
 
 section
-variable {n : Nat} {p : Nat → Bool}
+variable {n : ℕ} {p : ℕ → Bool}
 
 /-- `allBelow 0 p` is vacuously `true`. -/
 @[simp] theorem allBelow_zero : allBelow 0 p = true := rfl
@@ -58,5 +56,3 @@ variable {α : Type} {p : α → Bool} {l : List α}
 end
 
 end ECCompute
-
-end
