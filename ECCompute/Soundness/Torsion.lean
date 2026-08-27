@@ -97,11 +97,8 @@ theorem card_twoTorsion_le_of_xcoords {Sx : Finset ℚ}
     · simp only [hιdef, hS, Finset.mem_coe, Finset.some_mem_insertNone]
       exact hx x y h hP
   refine ⟨Set.Finite.of_finite_image (S.finite_toSet.subset himg) hinj, ?_⟩
-  calc T.ncard
-      = (ι '' T).ncard := hinj.ncard_image.symm
-    _ ≤ (S : Set (Option ℚ)).ncard := Set.ncard_le_ncard himg S.finite_toSet
-    _ = S.card := Set.ncard_coe_finset S
-    _ = Sx.card + 1 := Finset.card_insertNone Sx
+  rw [← hinj.ncard_image]
+  grw [Set.ncard_le_ncard himg S.finite_toSet, Set.ncard_coe_finset S, Finset.card_insertNone Sx]
 
 /-- The `2`-torsion set of the short model `curve a₂ a₄ a₆` is finite. -/
 public instance : Finite (curve a₂ a₄ a₆).twoTorsionPoints :=
