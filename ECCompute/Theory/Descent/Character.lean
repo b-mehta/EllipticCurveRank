@@ -159,17 +159,6 @@ public theorem fderiv_eq_prod (ℓ m : F)
 
 end Field
 
-/-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
-at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
-`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x₁ x₂ x₃ θ : ZMod p}
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
-    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
-    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hroot
-
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
 On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-residue character
@@ -220,7 +209,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
     (hx₁ : x₁ ≠ θ) (hx₂ : x₂ ≠ θ) (hx₃ : x₃ ≠ θ) :
     psi p (x₁ - θ) + psi p (x₂ - θ) + psi p (x₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq_zmod hσ₁ hσ₂ hσ₃ hroot
+  have hprod := prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hroot
   have h1 : x₁ - θ ≠ 0 := sub_ne_zero.mpr hx₁
   have h2 : x₂ - θ ≠ 0 := sub_ne_zero.mpr hx₂
   have h3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr hx₃
