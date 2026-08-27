@@ -22,8 +22,8 @@ is closed under the field operations through that subring.
 
 ## Main results
 
-* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`,
-  `Rat.den_div_ne_zero`: closure of `(·.den : ZMod p) ≠ 0` under the field operations.
+* `Rat.den_add_ne_zero`, `Rat.den_sub_ne_zero`, `Rat.den_mul_ne_zero`, `Rat.den_pow_ne_zero`:
+  closure of `(·.den : ZMod p) ≠ 0` under the field operations.
 -/
 
 section
@@ -63,16 +63,6 @@ public theorem den_pow_ne_zero (hp : p.Prime) (hx : (x.den : ZMod p) ≠ 0) (n :
   have : Fact p.Prime := ⟨hp⟩
   mem_padicInteger_iff.mp (pow_mem (mem_padicInteger_iff.mpr hx) n)
 
-/-- `(·.den : ZMod p) ≠ 0` is closed under division by an element with `p`-unit numerator, since
-then the inverse also has good denominator. -/
-public theorem den_div_ne_zero (hp : p.Prime) {a b : ℚ} (hb : (b.den : ZMod p) ≠ 0)
-    (ha0 : (a.num : ZMod p) ≠ 0) : ((b / a).den : ZMod p) ≠ 0 := by
-  have ha' : a ≠ 0 := by rintro rfl; simp at ha0
-  have hinv : (a⁻¹.den : ZMod p) ≠ 0 := by
-    rwa [Rat.den_inv_of_ne_zero ha', ne_eq, ZMod.natCast_eq_zero_iff, ← Int.natCast_dvd_natCast,
-      Int.dvd_natAbs, ← ZMod.intCast_zmod_eq_zero_iff_dvd]
-  rw [div_eq_mul_inv]
-  exact den_mul_ne_zero hp hb hinv
 
 end Rat
 
