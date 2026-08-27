@@ -104,7 +104,7 @@ public theorem map_curveℤ_zmod {p : ℕ} :
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
-public theorem reduced_negY (p : ℕ) (x y : ZMod p) :
+public theorem reduced_negY {p : ℕ} {x y : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod])
 
