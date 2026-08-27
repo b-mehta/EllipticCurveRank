@@ -58,8 +58,7 @@ public theorem εpFinite_some {X Y : ZMod p}
 theorem reduced_equation {X Y : ZMod p}
     (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular X Y) :
     Y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ X := by
-  have := (Affine.equation_iff (W := (curveZMod a₂ a₄ a₆ p).toAffine) X Y).mp h.1
-  simpa [map_curveℤ_zmod, fval] using this
+  simpa [map_curveℤ_zmod, fval] using (Affine.equation_iff X Y).mp h.1
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
@@ -198,9 +197,7 @@ theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
       have hyeq : y₁ = y₂ := by grind
       have hy1ne0 : y₁ ≠ 0 := by grind
       subst hyeq
-      have hpt : (Affine.Point.some x₁ y₁ h₂ :
-          (curveZMod a₂ a₄ a₆ p).toAffine.Point) = Affine.Point.some x₁ y₁ h₁ := rfl
-      rw [hpt, CharTwo.add_self_eq_zero]
+      rw [εp_x_indep h₂ h₁ rfl, CharTwo.add_self_eq_zero]
       exact εpFinite_double h h₁ hy1ne0
     · -- Secant: `x₁ ≠ x₂`.
       exact εpFinite_map_add_of_X_ne h h₁ h₂ hne
