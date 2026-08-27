@@ -120,10 +120,9 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
-  have hpt1 : (ℓ * x₁ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₁ := by rw [hm1, reduced_equation h₁]
-  have hpt2 : (ℓ * x₂ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₂ := by rw [hm2, reduced_equation h₂]
   have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]
-  exact εp_sum_of_vieta h hne (vieta_of_roots hne hx3 hpt1 hpt2)
+  exact εp_sum_of_vieta h hne (vieta_of_roots hne hx3
+    (by rw [hm1, reduced_equation h₁]) (by rw [hm2, reduced_equation h₂]))
 
 /-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the
 descent-character value at `x₃` is `0`. -/
@@ -132,8 +131,6 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x x₃ :
     (if x₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₃ - θ)) = 0 := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
-  have hprod : (x - θ) * (x - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-    prod_sub_theta_eq_lineSq hv hθroot
   obtain rfl | c3 := eq_or_ne x₃ θ
   · rw [if_pos rfl,
       fderiv_eq_prod ℓ m (x₂ := x) (x₃ := x) ⟨by grind, by grind, by grind⟩ hθroot rfl]
@@ -142,7 +139,7 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x x₃ :
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
     have hs3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr c3
     have hpm : psi p ((x - θ) * (x - θ) * (x₃ - θ)) = 0 := by
-      rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
+      rw [prod_sub_theta_eq_lineSq hv hθroot]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
     rwa [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
       CharTwo.add_self_eq_zero, zero_add] at hpm
 
@@ -166,10 +163,10 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
     simp [map_curveℤ_zmod, field]
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
-  have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
   have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by
     rw [hx3def]; simp only [Affine.addX, map_curveℤ_zmod]; ring
-  exact εp_double_of_vieta h hXθ (vieta_of_double_root hpt (by grind [fderiv]) hx3)
+  exact εp_double_of_vieta h hXθ
+    (vieta_of_double_root (by rw [hm, reduced_equation hP]) (by grind [fderiv]) hx3)
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
 `(E(𝔽ₚ), +) → (ZMod 2, +)`. -/
@@ -187,8 +184,7 @@ theorem εpFinite_map_add [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
   · obtain rfl | hne := eq_or_ne x₁ x₂
     · -- Doubling: `x₁ = x₂` forces `y₁ = y₂` (not the `-P` case), so `P = Q`; `εp(2P) = 0`.
       have hyne' : y₁ ≠ -y₂ := by grind
-      have hy2eq : y₁ ^ 2 = y₂ ^ 2 := by rw [reduced_equation h₁, reduced_equation h₂]
-      have hyeq : y₁ = y₂ := by grind
+      have hyeq : y₁ = y₂ := by grind [reduced_equation h₁, reduced_equation h₂]
       have hy1ne0 : y₁ ≠ 0 := by grind
       subst hyeq
       rw [εp_x_indep h₂ h₁ rfl, CharTwo.add_self_eq_zero]
