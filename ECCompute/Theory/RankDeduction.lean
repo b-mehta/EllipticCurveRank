@@ -172,7 +172,9 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
     classical
     have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i ↦ Fintype.ofFinite _
     exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
-  have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by rwa [iso.finrank_eq]
+  have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
+    rw [iso.finrank_eq]
+    exact finrank_prod_finite
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
