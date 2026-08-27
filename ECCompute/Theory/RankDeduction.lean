@@ -166,16 +166,13 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
   have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i ↦
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
   have : Finite D := Finite.of_equiv _ DFinsupp.equivFunOnFintype.symm
-  have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
-    rw [iso.finrank_eq]
-    exact finrank_prod_finite
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
           Nat.card (Submodule.torsionBy ℤ ((Fin n →₀ ℤ) × D) 2) :=
         natCard_modN_two_of_free_prod_finite
     _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
-        rw [hfrH, natCard_torsionBy_two_congr iso]
+        rw [iso.finrank_eq.trans finrank_prod_finite, natCard_torsionBy_two_congr iso]
 
 /-! ### The deduction -/
 
