@@ -108,7 +108,6 @@ theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
     have hz0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 2 = 0 := by simp [hwz]
     rw [nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
-    have hX0 : (Int.castRingHom (ZMod p) ∘ trep x y w) 0 = 0 := X_eq_zero_of_Z_eq_zero hEq hz0
     have hYne : (Int.castRingHom (ZMod p) ∘ trep x y w) 1 ≠ 0 := by
       simp only [Function.comp_apply, trep_one, eq_intCast]
       rw [Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
@@ -117,7 +116,7 @@ theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
         rwa [Int.natCast_dvd_natCast, hden', hp.prime.dvd_pow_iff_dvd three_ne_zero,
           ← ZMod.natCast_eq_zero_iff]
       grind [Int.isUnit_iff, y.isCoprime_num_den.isUnit_of_dvd' hpy hpw3, hp.two_le]
-    rw [hX0]
+    rw [X_eq_zero_of_Z_eq_zero hEq hz0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
     rw [nonsingular_of_Z_ne_zero (by simp [hwz])]
