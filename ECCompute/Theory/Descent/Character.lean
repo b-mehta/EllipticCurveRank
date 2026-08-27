@@ -101,22 +101,27 @@ section CommRing
 
 variable {R : Type*} [CommRing R] {a₂ a₄ a₆ ℓ m x₁ x₂ x₃ θ : R}
 
-/-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the three Vieta relations, the cubic
+/-- The Vieta relations of the line `y = ℓx + m` meeting the cubic `f = x³ + a₂x² + a₄x + a₆`
+at `x₁, x₂, x₃`. -/
+public structure Vieta (a₂ a₄ a₆ ℓ m x₁ x₂ x₃ : R) : Prop where
+  σ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂
+  σ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m
+  σ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆
+
+attribute [grind →] Vieta.σ₁ Vieta.σ₂ Vieta.σ₃
+
+/-- If `x₁, x₂, x₃` and the line `y = ℓx + m` satisfy the Vieta relations, the cubic
 `x³ + a₂x² + a₄x + a₆ - (ℓx + m)²` factors as `(x - x₁)(x - x₂)(x - x₃)` at every `x`. -/
-theorem cubic_sub_lineSq_eq_prod
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) {x : R} :
-    fval a₂ a₄ a₆ x - (ℓ * x + m) ^ 2 = (x - x₁) * (x - x₂) * (x - x₃) := by grind [fval]
+theorem cubic_sub_lineSq_eq_prod (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃) {x : R} :
+    fval a₂ a₄ a₆ x - (ℓ * x + m) ^ 2 = (x - x₁) * (x - x₂) * (x - x₃) := by
+  grind [fval]
 
 /-- Evaluating the collinearity identity at a root `θ` of `f(x) = x³ + a₂x² + a₄x + a₆` gives
 `(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`. -/
-public theorem prod_sub_theta_eq_lineSq
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
+public theorem prod_sub_theta_eq_lineSq (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃)
     (hθ : fval a₂ a₄ a₆ θ = 0) :
-    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by grind [fval, cubic_sub_lineSq_eq_prod]
+    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 := by
+  grind [fval, cubic_sub_lineSq_eq_prod hv]
 
 /-- If the line `y = ℓx + m` is tangent to `E` at `(x₁, ℓx₁ + m)` (point on curve `hpt`,
 slope condition `f'(x₁) = 2ℓ(ℓx₁ + m)` as `htan`), then `x₁` is a double root and the Vieta
@@ -126,9 +131,8 @@ public theorem vieta_of_double_root
     (hpt : (ℓ * x₁ + m) ^ 2 = fval a₂ a₄ a₆ x₁)
     (htan : fderiv a₂ a₄ x₁ = 2 * ℓ * (ℓ * x₁ + m))
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - 2 * x₁) :
-    x₁ + x₁ + x₃ = ℓ ^ 2 - a₂ ∧
-      x₁ * x₁ + x₁ * x₃ + x₁ * x₃ = a₄ - 2 * ℓ * m ∧
-        x₁ * x₁ * x₃ = m ^ 2 - a₆ := by grind [fval, fderiv]
+    Vieta a₂ a₄ a₆ ℓ m x₁ x₁ x₃ := by
+  refine ⟨?_, ?_, ?_⟩ <;> grind [fval, fderiv]
 
 end CommRing
 
@@ -143,19 +147,16 @@ public theorem vieta_of_roots (hne : x₁ ≠ x₂)
     (hx₃ : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂)
     (h₁ : (ℓ * x₁ + m) ^ 2 = fval a₂ a₄ a₆ x₁)
     (h₂ : (ℓ * x₂ + m) ^ 2 = fval a₂ a₄ a₆ x₂) :
-    x₁ + x₂ + x₃ = ℓ ^ 2 - a₂ ∧
-      x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m ∧ x₁ * x₂ * x₃ = m ^ 2 - a₆ := by
-  grind (ringSteps := 200000) [fval]
+    Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃ := by
+  refine ⟨?_, ?_, ?_⟩ <;> grind (ringSteps := 200000) [fval]
 
 /-- If `θ` is a root of `f` and one collinear `x`-coordinate equals `θ` (here `x₁ = θ`), then
 `f'(θ) = (x₂ - θ)(x₃ - θ)`. Analogue of `prod_sub_theta_eq_lineSq` for the tangent (`2`-torsion
 mod `p`) branch, where the factor `X_i - θ` is replaced by `f'(θ)`. -/
-public theorem fderiv_eq_prod (ℓ m : F)
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
+public theorem fderiv_eq_prod (ℓ m : F) (hv : Vieta a₂ a₄ a₆ ℓ m x₁ x₂ x₃)
     (hθ : fval a₂ a₄ a₆ θ = 0) (h1 : x₁ = θ) :
-    fderiv a₂ a₄ θ = (x₂ - θ) * (x₃ - θ) := by grind [fval, fderiv, cubic_sub_lineSq_eq_prod]
+    fderiv a₂ a₄ θ = (x₂ - θ) * (x₃ - θ) := by
+  grind [fval, fderiv, cubic_sub_lineSq_eq_prod hv]
 
 end Field
 
@@ -202,14 +203,12 @@ variable {θ : ZMod p}
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
 `ψ_p (x₁ - θ) + ψ_p (x₂ - θ) + ψ_p (x₃ - θ) = 0`. -/
 public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
-    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
+    (hv : Vieta (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃)
     (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0)
     (hx₁ : x₁ ≠ θ) (hx₂ : x₂ ≠ θ) (hx₃ : x₃ ≠ θ) :
     psi p (x₁ - θ) + psi p (x₂ - θ) + psi p (x₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hroot
+  have hprod := prod_sub_theta_eq_lineSq hv hroot
   have h1 : x₁ - θ ≠ 0 := sub_ne_zero.mpr hx₁
   have h2 : x₂ - θ ≠ 0 := sub_ne_zero.mpr hx₂
   have h3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr hx₃
