@@ -352,7 +352,7 @@ theorem crux_of_int_relations (hpZ : Prime (p : ℤ))
       ∧ A * D * E - B * C * G ≠ 0 ∧ A * G ^ 2 - C * E ^ 2 ≠ 0 := by
   have : Fact p.Prime := ⟨Nat.prime_iff_prime_int.mpr hpZ⟩
   set K : ℤ := A * G ^ 2 - C * E ^ 2 with hKdef
-  set N : ℤ := A * D * E - B * C * G with hNdef
+  set N : ℤ := A * D * E - B * C * G
   set W : ℤ := -A ^ 2 * C ^ 2 + a₄ * A * C * E ^ 2 * G ^ 2
     + a₆ * E ^ 2 * G ^ 2 * (A * G ^ 2 + C * E ^ 2) with hWdef
   have hI2 : N * (A * D * E + B * C * G) = K * W := by grind
@@ -386,7 +386,7 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
     (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
         ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
   have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_addX]
@@ -579,7 +579,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
   have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
     Affine.slope_of_X_ne hne
-  set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
+  set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂)
   have hy2 : (y₁ : ZMod p) + y₂ ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
