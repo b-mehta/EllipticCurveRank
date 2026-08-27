@@ -338,8 +338,9 @@ theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
       exact lt_irrefl _ hlt
-    exact ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv],
-      fun he ↦ hqrne (by rw [← hsplit]; exact mod_cast he)⟩
+    refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], fun he ↦ hqrne ?_⟩
+    rw [← hsplit]
+    exact mod_cast he
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
