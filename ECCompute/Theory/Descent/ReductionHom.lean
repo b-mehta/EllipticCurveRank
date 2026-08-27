@@ -574,7 +574,7 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
-    (hXbar : (x₁ : ZMod p) = x₂) (hYbar : (y₁ : ZMod p) = y₂)
+    (hYbar : (y₁ : ZMod p) = y₂)
     (hYneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
@@ -696,7 +696,7 @@ theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       have hdy2 : (y₂.den : ZMod p) ≠ 0 := by grind [ydenom_eq_zero_iff, h₂.1]
       by_cases hYneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
           (x₁ : ZMod p) (y₁ : ZMod p)
-      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
+      · exact redP_add_tangent_two_torsion hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hYbar hYneg
       · exact redP_add_tangent_generic hΔ h₁ h₂ hx12 hd1 hd2 hdy1 hdy2 hXbar hYbar hYneg
 
 /-! ### The homomorphism -/
