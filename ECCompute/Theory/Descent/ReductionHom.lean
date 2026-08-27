@@ -584,7 +584,7 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
     reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den Fact.out hd1 hd2 hd3_s) hd3_s
   have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans reduced_negY
-  have hY0 : (y₁ : ZMod p) + (y₂ : ZMod p) = 0 := by grind
+  have hY0 : (y₁ : ZMod p) + y₂ = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hfd : 3 * (x₁ : ZMod p) ^ 2 + 2 * (a₂ : ZMod p) * (x₁ : ZMod p) + (a₄ : ZMod p) = 0 := by
     grind
@@ -610,7 +610,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
     Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂) with hℓdef
   have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
-  have hy2 : (y₁ : ZMod p) + (y₂ : ZMod p) ≠ 0 := by grind
+  have hy2 : (y₁ : ZMod p) + y₂ ≠ 0 := by grind
   have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
@@ -620,7 +620,7 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
       ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
-  have h2Yne : (y₁ : ZMod p) + (y₁ : ZMod p) ≠ 0 := by grind
+  have h2Yne : (y₁ : ZMod p) + y₁ ≠ 0 := by grind
   rw [← hXbar, ← hYbar] at htan
   have hℓd := reduced_slope_eq hYneg h2Yne htan
   have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
@@ -646,7 +646,7 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
-    (hd1 : (x₁.den : ZMod p) ≠ 0) (hx12 : x₁ = x₂) (hYbar : (y₁ : ZMod p) = (y₂ : ZMod p)) :
+    (hd1 : (x₁.den : ZMod p) ≠ 0) (hx12 : x₁ = x₂) (hYbar : (y₁ : ZMod p) = y₂) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
   have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := y_eq_negY_of_X_eq h₁ h₂ hx12 hPQ
@@ -655,7 +655,7 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       (x₁ : ZMod p) (y₁ : ZMod p) := by
     have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
       Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl
-    have hcast : (y₁ : ZMod p) = -(y₂ : ZMod p) := by rw [hy, hny, Rat.cast_neg]
+    have hcast : (y₁ : ZMod p) = -y₂ := by rw [hy, hny, Rat.cast_neg]
     grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
