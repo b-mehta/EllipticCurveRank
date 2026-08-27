@@ -5,22 +5,34 @@ Authors: Bhavik Mehta
 -/
 module
 
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 
 /-!
-# Recognising equivalent projective representatives
+# Weierstrass curve helpers for mathlib
 
-Two criteria for `U ≈ V` between nonsingular projective representatives on a Weierstrass curve
-over a field: proportionality with the cross scalars given by each other's `Z`-coordinate, and
-equality of the underlying affine points.
+Negation on affine points when `a₁ = a₃ = 0`, and two criteria for equivalence of nonsingular
+projective representatives over a field.
 
 ## Main results
 
+* `WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero`: `negY x y = -y` when `a₁ = a₃ = 0`.
 * `WeierstrassCurve.Projective.equiv_of_proportional`: `V 2 • U = U 2 • V` implies `U ≈ V`.
 * `WeierstrassCurve.Projective.equiv_of_toAffine_eq`: equal affine points imply `U ≈ V`.
 -/
 
 public section
+
+namespace WeierstrassCurve.Affine
+
+variable {R : Type*} [CommRing R]
+
+/-- On a Weierstrass curve with `a₁ = a₃ = 0`, negation is `negY x y = -y`. -/
+@[grind =]
+theorem negY_of_a₁_a₃_eq_zero (W : WeierstrassCurve R) (ha1 : W.a₁ = 0) (ha3 : W.a₃ = 0)
+    {x y : R} : W.toAffine.negY x y = -y := by simp [negY, ha1, ha3]
+
+end WeierstrassCurve.Affine
 
 namespace WeierstrassCurve.Projective
 

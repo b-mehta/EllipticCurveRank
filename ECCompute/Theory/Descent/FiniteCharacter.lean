@@ -8,7 +8,7 @@ module
 public import ECCompute.Theory.Descent.Character
 public import ECCompute.Theory.Model
 public import Mathlib.Algebra.Field.ZMod
-import ECCompute.ForMathlib.WeierstrassCurveAffine
+import ECCompute.ForMathlib.WeierstrassCurve
 
 /-!
 # The finite-field descent character `εpFinite` and its additivity
