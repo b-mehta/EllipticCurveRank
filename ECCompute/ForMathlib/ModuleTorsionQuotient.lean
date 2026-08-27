@@ -44,8 +44,7 @@ public lemma natCard_eq_two_pow_finrank {V : Type*} [AddCommGroup V] [Module (ZM
 /-- A finite `ℤ`-module has free rank zero. -/
 lemma finrank_int_zero_of_finite {D : Type*} [AddCommGroup D] [Finite D] : finrank ℤ D = 0 := by
   have : Module.Finite ℤ D := Module.Finite.of_finite
-  rw [finrank_eq_zero_iff_isTorsion, ← isAddTorsion_iff_isTorsion_int]
-  exact isAddTorsion_of_finite
+  rwa [finrank_eq_zero_iff_isTorsion, ← isAddTorsion_iff_isTorsion_int]
 
 /-- The free rank of `F × D` equals that of `F` when `D` is finite. -/
 public lemma finrank_prod_finite {F : Type*} [AddCommGroup F] [Module.Finite ℤ F]
