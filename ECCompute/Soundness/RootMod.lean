@@ -7,8 +7,8 @@ module
 
 public import ECCompute.Soundness.Fold
 public import Mathlib.Data.ZMod.Basic
+public import Mathlib.RingTheory.Polynomial.RationalRoot
 
-import Mathlib.RingTheory.Polynomial.RationalRoot
 import ECCompute.ForLean
 
 /-!
@@ -92,6 +92,20 @@ public theorem no_int_root_of_monicHasNoRootMod (hℓ : 1 < ℓ)
 No-rational-root lemmas for the cofactor quadratic `q = X² + b X + c`, certified by a prime `ℓ`
 modulo which `q` has no root. -/
 
+/-- The monic quadratic `X² + b X + c` evaluated at `r` by `polyEval` and cast to `ℚ`, equals
+`r² + b r + c`. -/
+lemma polyEval_monicQuadratic_cast {b c r : ℤ} :
+    (polyEval [c, b, 1] r : ℚ) = r ^ 2 + b * r + c := by
+  simp only [polyEval]
+  grind
+
+open Polynomial in
+/-- A rational root of a monic integer polynomial is an integer. -/
+public theorem exists_int_of_aeval_eq_zero {p : ℤ[X]} (hmonic : p.Monic) {x : ℚ}
+    (hroot : p.aeval x = 0) : ∃ z : ℤ, (z : ℚ) = x := by
+  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
+  exact ⟨z, by simpa only [algebraMap_int_eq, eq_intCast] using hz.symm⟩
+
 open Polynomial in
 /-- If the monic integer quadratic `x² + b x + c` has no root mod `ℓ` (with `1 < ℓ`), it has no
 rational root. -/
@@ -102,12 +116,10 @@ public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
   have hmonic : p.Monic := by simp only [p]; monicity!
   have haeval : p.aeval x = x ^ 2 + b * x + c := by simp [hp]
   have hroot : p.aeval x = 0 := by grind
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
-  simp only [algebraMap_int_eq, eq_intCast] at hz
+  obtain ⟨z, hz⟩ := exists_int_of_aeval_eq_zero hmonic hroot
   refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
   have hQ : (polyEval [c, b, 1] z : ℚ) = 0 := by
-    simp only [polyEval]
-    grind
+    rw [polyEval_monicQuadratic_cast]; grind
   exact mod_cast hQ
 
 end ECCompute
