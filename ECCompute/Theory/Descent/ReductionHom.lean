@@ -338,11 +338,8 @@ theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
       exact lt_irrefl _ hlt
-    refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
-    intro he
-    apply hqrne
-    rw [← hsplit]
-    exact mod_cast he
+    exact ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv],
+      fun he ↦ hqrne (by rw [← hsplit]; exact mod_cast he)⟩
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
@@ -823,15 +820,10 @@ theorem redP_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
     redP p (P + Q) = redP p P + redP p Q := by
   cases P with
-  | zero =>
-      change redP p (0 + Q) = redP p 0 + redP p Q
-      rw [zero_add, redP_zero, zero_add]
+  | zero => rw [← Affine.Point.zero_def, zero_add, redP_zero, zero_add]
   | some x₁ y₁ h₁ =>
   cases Q with
-  | zero =>
-      change redP p (Affine.Point.some x₁ y₁ h₁ + 0)
-        = redP p (.some x₁ y₁ h₁) + redP p 0
-      rw [add_zero, redP_zero, add_zero]
+  | zero => rw [← Affine.Point.zero_def, add_zero, redP_zero, add_zero]
   | some x₂ y₂ h₂ => exact redP_map_add_some hΔ h₁ h₂
 
 /-- The reduction map bundled as an additive homomorphism
