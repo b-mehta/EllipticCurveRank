@@ -52,19 +52,20 @@ lemma torsionBy_two_eq_ker :
 
 /-! ### Finiteness of `H ⧸ 2H` -/
 
-/-- Doubling annihilates `ModN H 2`. -/
-lemma two_zsmul_modN {x : ModN H 2} : (2 : ℤ) • x = 0 := by
-  have h2 : ((2 : ℤ) : ZMod 2) = 0 := by decide
-  rw [← Int.cast_smul_eq_zsmul (ZMod 2), h2, zero_smul]
+theorem ModN.isAddTorsion {n} [NeZero n] : IsAddTorsion (ModN H n) := by
+  intro x
+  rw [isOfFinAddOrder_iff_nsmul_eq_zero]
+  refine ⟨n, NeZero.pos _, ?_⟩
+  simp [← Nat.cast_smul_eq_nsmul (ZMod n)]
 
-instance [Module.Finite ℤ H] : Finite (ModN H 2) :=
-  Module.finite_of_fg_torsion (ModN H 2)
-    (fun _ ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN⟩)
+instance {n} [NeZero n] [Module.Finite ℤ H] : Finite (ModN H n) :=
+  Module.finite_of_fg_torsion (ModN H n) (isAddTorsion_iff_isTorsion_int.1 ModN.isAddTorsion)
 
-instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) := Module.Finite.of_finite
+instance {n} [NeZero n] [Module.Finite ℤ H] : Module.Finite (ZMod n) (ModN H n) :=
+  Module.Finite.of_finite
 
 instance [Module.Finite ℤ H] : Finite (Submodule.torsionBy ℤ H 2) := Module.finite_of_fg_torsion _
-    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, Submodule.smul_torsionBy 2 x⟩)
+  (Submodule.torsionBy_isTorsion_nonZeroDivisor 2 (by simp))
 
 /-! ### The cardinality identity for finite groups -/
 
