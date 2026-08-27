@@ -43,7 +43,7 @@ public noncomputable def εpFinite (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p
   | .zero => 0
   | .some X _ _ => if X = θ then psi p (fderiv a₂ a₄ θ) else psi p (X - θ)
 
-variable {θ : ZMod p}
+variable {θ : ZMod p} {x₁ y₁ x₂ y₂ : ZMod p}
 
 @[simp]
 theorem εpFinite_zero : εpFinite a₂ a₄ a₆ p θ 0 = 0 := rfl
@@ -69,7 +69,7 @@ theorem DescentHyp.root' (h : DescentHyp a₂ a₄ a₆ p θ) : fval (R := ZMod 
   h.root
 
 /-- `εpFinite` on an affine point depends only on its `x`-coordinate. -/
-theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
+theorem εp_x_indep
     (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hx : x₁ = x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
@@ -78,7 +78,7 @@ theorem εp_x_indep {x₁ y₁ x₂ y₂ : ZMod p}
 /-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
 line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X₃ : ZMod p} (hne : x₁ ≠ x₂)
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m X₃ : ZMod p} (hne : x₁ ≠ x₂)
     (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
     (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
     (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - a₆) :
@@ -108,7 +108,7 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₁ x₂ X
 
 /-- Additivity of `εpFinite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
 distinct `x`-coordinates over `𝔽ₚ`. -/
-theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x₁ y₁ x₂ y₂ : ZMod p}
+theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
     (h₁ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₁ y₁)
     (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
