@@ -111,7 +111,6 @@ theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
       ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
   set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  have haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := curve_addX
   refine ⟨?_, ?_⟩
   · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
