@@ -105,7 +105,9 @@ public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
   obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic hroot
   simp only [algebraMap_int_eq, eq_intCast] at hz
   refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
-  have hQ : (polyEval [c, b, 1] z : ℚ) = 0 := by grind [polyEval]
+  have hQ : (polyEval [c, b, 1] z : ℚ) = 0 := by
+    simp only [polyEval]
+    grind
   exact mod_cast hQ
 
 end ECCompute
