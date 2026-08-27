@@ -71,7 +71,8 @@ public theorem den_div_ne_zero (hp : p.Prime) {a b : ℚ} (hb : (b.den : ZMod p)
   have hinv : (a⁻¹.den : ZMod p) ≠ 0 := by
     rwa [Rat.den_inv_of_ne_zero ha', ne_eq, ZMod.natCast_eq_zero_iff, ← Int.natCast_dvd_natCast,
       Int.dvd_natAbs, ← ZMod.intCast_zmod_eq_zero_iff_dvd]
-  rw [div_eq_mul_inv]; exact den_mul_ne_zero hp hb hinv
+  rw [div_eq_mul_inv]
+  exact den_mul_ne_zero hp hb hinv
 
 end Rat
 
