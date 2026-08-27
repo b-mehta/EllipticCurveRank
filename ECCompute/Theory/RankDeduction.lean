@@ -146,9 +146,7 @@ end Prod
 /-- A torsion-free module has trivial 2-torsion. -/
 lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
     [NoZeroSMulDivisors ℤ F] : Nat.card (Submodule.torsionBy ℤ F 2) = 1 := by
-  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ :=
-    (isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)
-  rw [hbot]
+  rw [(isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)]
   exact Nat.card_unique
 
 /-- The identity for a free-times-finite decomposition. -/
