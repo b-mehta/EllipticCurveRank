@@ -22,8 +22,8 @@ binary product, and the free rank of a product with a finite factor.
 ## Main results
 
 * `Module.natCard_eq_two_pow_finrank`: a finite `𝔽₂`-vector space has `2 ^ dimension` elements.
-* `LinearEquiv.map_range_lsmul`, `LinearEquiv.map_torsionBy`: transport of the range of doubling
-  and of the `2`-torsion along a `ℤ`-linear equivalence.
+* `LinearEquiv.map_range_lsmul`, `LinearEquiv.map_torsionBy`: transport of the range of `a • ·`
+  and of the `a`-torsion along a `ℤ`-linear equivalence.
 * `Submodule.prodQuotEquiv`: `(M × N) ⧸ (P.prod Q) ≃ₗ (M ⧸ P) × (N ⧸ Q)`.
 * `Submodule.prodSubtypeEquiv`: `↥(S.prod T) ≃ ↥S × ↥T`.
 * `Module.finrank_prod_finite`: `finrank ℤ (F × D) = finrank ℤ F` for a finite `D`.
@@ -65,21 +65,21 @@ namespace LinearEquiv
 
 variable {H K : Type*} [AddCommGroup H] [AddCommGroup K]
 
-/-- A linear equivalence carries the range of doubling to the range of doubling. -/
-public lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) :
-    (LinearMap.range (LinearMap.lsmul ℤ H 2)).map (e : H →ₗ[ℤ] K) =
-      LinearMap.range (LinearMap.lsmul ℤ K 2) := by
+/-- A linear equivalence carries the range of `a • ·` to the range of `a • ·`. -/
+public lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) (a : ℤ) :
+    (LinearMap.range (LinearMap.lsmul ℤ H a)).map (e : H →ₗ[ℤ] K) =
+      LinearMap.range (LinearMap.lsmul ℤ K a) := by
   ext z
   simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply, LinearEquiv.coe_coe]
   constructor
   · rintro ⟨_, ⟨y, rfl⟩, rfl⟩
     exact ⟨e y, by rw [map_smul]⟩
   · rintro ⟨w, rfl⟩
-    exact ⟨(2 : ℤ) • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
+    exact ⟨a • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
 
-/-- A linear equivalence carries 2-torsion to 2-torsion. -/
-public lemma map_torsionBy (e : H ≃ₗ[ℤ] K) :
-    (Submodule.torsionBy ℤ H 2).map (e : H →ₗ[ℤ] K) = Submodule.torsionBy ℤ K 2 := by
+/-- A linear equivalence carries `a`-torsion to `a`-torsion. -/
+public lemma map_torsionBy (e : H ≃ₗ[ℤ] K) (a : ℤ) :
+    (Submodule.torsionBy ℤ H a).map (e : H →ₗ[ℤ] K) = Submodule.torsionBy ℤ K a := by
   ext z
   simp only [Submodule.mem_map, Submodule.mem_torsionBy_iff, LinearEquiv.coe_coe]
   constructor
