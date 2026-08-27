@@ -54,9 +54,7 @@ lemma torsionBy_two_eq_ker :
 
 /-- Doubling annihilates `ModN H 2`. -/
 lemma two_zsmul_modN {x : ModN H 2} : (2 : ℤ) • x = 0 := by
-  obtain ⟨y, rfl⟩ := Submodule.mkQ_surjective (LinearMap.range (LinearMap.lsmul ℤ H 2)) x
-  rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
-  exact ⟨y, by simp [LinearMap.lsmul_apply]⟩
+  rw [← Int.cast_smul_eq_zsmul (ZMod 2), show ((2 : ℤ) : ZMod 2) = 0 by decide, zero_smul]
 
 instance [Module.Finite ℤ H] : Finite (ModN H 2) :=
   Module.finite_of_fg_torsion (ModN H 2)
