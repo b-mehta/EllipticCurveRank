@@ -165,10 +165,7 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
   have : ∀ i, NeZero (p i ^ ee i) := fun i ↦ ⟨pow_ne_zero _ (hp i).ne_zero⟩
   have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i ↦
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
-  have : Finite D := by
-    classical
-    have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i ↦ Fintype.ofFinite _
-    exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
+  have : Finite D := Finite.of_equiv _ DFinsupp.equivFunOnFintype.symm
   have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
     rw [iso.finrank_eq]
     exact finrank_prod_finite
