@@ -60,9 +60,9 @@ theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = f
 /-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
 def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
-lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert
-@[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert
-@[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert
+lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert +kernel
+@[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
+@[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
 /-- `popParityK v` is the XOR over the low 32 bits of `v`. -/
 theorem popParityK_eq32 : popParityK v = popParity 32 v := by
