@@ -8,9 +8,9 @@ module
 public import ECCompute.Theory.Model
 public import ECCompute.ForMathlib.RatDenom
 public import ECCompute.Theory.Descent.ReductionMap
-import ECCompute.ForMathlib.PadicValInt
 import ECCompute.Theory.Descent.PointArith
 import ECCompute.ForMathlib.WeierstrassCurve
+import Mathlib.Tactic.Qify
 
 /-!
 # Additivity of the reduction map
@@ -59,13 +59,8 @@ theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMo
   have e2 := den_add_ne_zero Fact.out e1 hx2sq
   have e3 : ((a₂ * (x₁ + x₂)).den : ZMod p) ≠ 0 := den_mul_ne_zero Fact.out (by simp) esum
   have e4 := den_add_ne_zero Fact.out e2 e3
-  have hd : ((x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄).den : ZMod p) ≠ 0 :=
-    den_add_ne_zero Fact.out e4 (by simp)
-  refine ⟨hd, ?_⟩
-  rw [cast_add_of_ne_zero e4 (by simp), cast_add_of_ne_zero e2 e3,
-    cast_add_of_ne_zero e1 hx2sq, cast_add_of_ne_zero hx1sq hprod, cast_pow,
-    cast_mul_of_ne_zero hd1 hd2, cast_pow, cast_mul_of_ne_zero (by simp) esum,
-    cast_add_of_ne_zero hd1 hd2, cast_intCast, cast_intCast]
+  refine ⟨den_add_ne_zero Fact.out e4 (by simp), ?_⟩
+  simp [cast_add_of_ne_zero, cast_mul_of_ne_zero, *]
 
 /-- For the reduced secant slope, `slope·(y₁ + y₂) = x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄`. -/
 theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
@@ -312,37 +307,17 @@ theorem addX_single_fraction {ℓ x₃ : ℚ}
 /-- With `v_p(N) < v_p(K)`, the integer `N² - M·K²` is nonzero and has `v_p = 2·v_p(N)`. -/
 theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
     (hcrux : padicValInt p N < padicValInt p K) (hN0 : N ≠ 0) (hK0 : K ≠ 0) :
-    padicValRat p ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ)
-      ∧ (N ^ 2 - M * K ^ 2 : ℤ) ≠ 0 := by
+    padicValRat p (N ^ 2 - M * K ^ 2 : ℤ) = 2 * padicValInt p N ∧ N ^ 2 - M * K ^ 2 ≠ 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hK2 : padicValInt p (K ^ 2) = 2 * padicValInt p K := by
-    rw [pow_two, padicValInt.mul hK0 hK0]; grind
-  have hNval2 : padicValInt p (N ^ 2) = 2 * padicValInt p N := by
-    rw [pow_two, padicValInt.mul hN0 hN0]; grind
-  have hqv : padicValRat p ((N ^ 2 : ℤ) : ℚ) = (2 * padicValInt p N : ℤ) := by
-    rw [padicValRat.of_int, hNval2]; grind
-  rcases eq_or_ne (M * K ^ 2 : ℤ) 0 with h0 | h0
-  · rw [h0, sub_zero]; exact ⟨hqv, pow_ne_zero 2 hN0⟩
-  · have hsplit : ((N ^ 2 - M * K ^ 2 : ℤ) : ℚ)
-        = ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) := by grind
-    have hq0 : ((N ^ 2 : ℤ) : ℚ) ≠ 0 := mod_cast pow_ne_zero 2 hN0
-    have hr0 : (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := by
-      have : ((M * K ^ 2 : ℤ) : ℚ) ≠ 0 := mod_cast h0
-      simpa using this
-    have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
-      rw [hqv, padicValRat.neg, padicValRat.of_int]
-      have hle := padicValInt_mono (p := p) hp (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
-      rw [hK2] at hle
-      lia
-    have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he ↦ by
-      have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
-      rw [heq, padicValRat.neg] at hlt
-      exact lt_irrefl _ hlt
-    refine ⟨by rw [hsplit, padicValRat.add_eq_of_lt hqrne hq0 hr0 hlt, hqv], ?_⟩
-    intro he
-    apply hqrne
-    rw [← hsplit]
-    exact mod_cast he
+  obtain rfl | hM := eq_or_ne M 0
+  · simp [hN0]
+  have : padicValRat p (N ^ 2 : ℤ) < padicValRat p (-(M * K ^ 2 : ℤ)) := by
+    simp [padicValRat.mul, hM, hK0]; grind
+  have hne : N ^ 2 ≠ M * K ^ 2 := by contrapose! this; simp [this]
+  have hne' : (↑(N ^ 2 : ℤ) + -↑(M * K ^ 2) : ℚ) ≠ 0 := by qify at hne; grind
+  refine ⟨?_, by grind only⟩
+  rw [Int.cast_sub, sub_eq_add_neg, padicValRat.add_eq_of_lt hne' _ _ this]
+  all_goals simp [*]
 
 /-- For the single-fraction `x₃ = (N² - M·K²)/(A·C·K²)` with `p`-unit `A`, `C` and
 `v_p(N) < v_p(K)`, the `p`-adic valuation of `x₃` is negative, so `p ∣ x₃.den`. -/
