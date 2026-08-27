@@ -237,6 +237,7 @@ public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
   intro hfd
   apply h.discr
   rw [curve_Δ_num]
-  grind [fderiv, discrInt]
+  simp only [discrInt]
+  grind [fderiv]
 
 end ECCompute
