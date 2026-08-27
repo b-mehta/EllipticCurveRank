@@ -31,6 +31,8 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 * `ECCompute.psi`: the Legendre symbol into `ZMod 2`; `ECCompute.lambda`: the raw character.
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 * `ECCompute.prod_sub_theta_eq_lineSq`: the collinearity identity `(x₁-θ)(x₂-θ)(x₃-θ) = (ℓθ+m)²`.
+* `ECCompute.vieta_of_roots`, `ECCompute.vieta_of_double_root`, `ECCompute.fderiv_eq_prod`:
+  the Vieta relations of the secant line and the derivative-as-product identity at a root.
 * `ECCompute.psi_mul`: `ψ_p` turns products into sums on nonzero elements.
 * `ECCompute.psi_collinear`, `ECCompute.fderiv_ne_zero`: the collinear-sum and simple-root facts.
 -/
@@ -158,15 +160,6 @@ public theorem fderiv_eq_prod (ℓ m : F) (hv : Vieta a₂ a₄ a₆ ℓ m x₁ 
 
 end Field
 
-/-- The `θ`-corollary phrased with `fval` so the root hypothesis is exactly `DescentHyp.root`:
-at a root `θ` of `f` mod `p`, a collinear triple on `y = ℓx + m` satisfies
-`(x₁ - θ)(x₂ - θ)(x₃ - θ) = (ℓθ + m)²`, a square in `ZMod p`. -/
-theorem prod_sub_theta_eq_lineSq_zmod {a₂ a₄ a₆ : ℤ} {p : ℕ} {ℓ m x₁ x₂ x₃ θ : ZMod p}
-    (hv : Vieta (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃)
-    (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0) :
-    (x₁ - θ) * (x₂ - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
-  prod_sub_theta_eq_lineSq hv hroot
-
 /-! ### The Legendre character `ψ_p` is a homomorphism away from zero
 
 On the nonzero elements of `ZMod p` (`p` an odd prime), `ψ_p` is the quadratic-residue character
@@ -215,7 +208,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
     (hx₁ : x₁ ≠ θ) (hx₂ : x₂ ≠ θ) (hx₃ : x₃ ≠ θ) :
     psi p (x₁ - θ) + psi p (x₂ - θ) + psi p (x₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq_zmod hv hroot
+  have hprod := prod_sub_theta_eq_lineSq hv hroot
   have h1 : x₁ - θ ≠ 0 := sub_ne_zero.mpr hx₁
   have h2 : x₂ - θ ≠ 0 := sub_ne_zero.mpr hx₂
   have h3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr hx₃
