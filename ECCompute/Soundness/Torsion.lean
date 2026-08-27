@@ -126,8 +126,7 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
   set p : ℤ[X] := X ^ 3 + C a₂ * X ^ 2 + C a₄ * X + C a₆ with hp
   have hmonic : p.Monic := by simp only [hp]; monicity!
   have haeval : p.aeval x = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by simp [hp]
-  obtain ⟨z, hz, -⟩ := exists_integer_of_is_root_of_monic hmonic (haeval.trans hxr)
-  simp only [algebraMap_int_eq, eq_intCast] at hz
+  obtain ⟨z, hz⟩ := exists_int_of_aeval_eq_zero hmonic (haeval.trans hxr)
   -- `4z = 4x` is an integer root of the scaled cubic, contradicting the no-root-mod witness
   refine (no_int_root_of_monicHasNoRootMod hℓ h (4 * z) ?_).elim
   have hQ : (polyEval [64 * a₆, 16 * a₄, 4 * a₂, 1] (4 * z) : ℚ) = 0 := by
