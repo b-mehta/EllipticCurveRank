@@ -7,7 +7,7 @@ module
 
 public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
-import ECCompute.ForMathlib.WeierstrassCurveAffine
+import ECCompute.ForMathlib.WeierstrassCurve
 import Mathlib.Data.ZMod.Basic
 
 /-!
