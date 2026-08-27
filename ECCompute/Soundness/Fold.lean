@@ -45,8 +45,7 @@ variable {α : Type} {p : α → Bool} {l : List α}
 @[simp] theorem allList_nil : allList p [] = true := rfl
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
-@[simp, grind =] theorem allList_cons {a : α} :
-    allList p (a :: l) = (p a).and' (allList p l) := rfl
+@[simp, grind =] theorem allList_cons {a : α} : allList p (a :: l) = (p a).and' (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
 @[grind =] public theorem allList_iff : allList p l ↔ ∀ a ∈ l, p a := by
