@@ -75,24 +75,24 @@ theorem εp_x_indep
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- For a collinear triple `x₁, x₂, X₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
-line `y = ℓx + m`, the descent-character value at `X₃` equals the sum of the values at `x₁` and
+/-- For a collinear triple `x₁, x₂, x₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
+line `y = ℓx + m`, the descent-character value at `x₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m X₃ : ZMod p} (hne : x₁ ≠ x₂)
-    (hσ₁ : x₁ + x₂ + X₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x₁ * x₂ + x₁ * X₃ + x₂ * X₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x₁ * x₂ * X₃ = m ^ 2 - a₆) :
-    (if X₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (X₃ - θ))
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod p} (hne : x₁ ≠ x₂)
+    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆) :
+    (if x₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₃ - θ))
       = (if x₁ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₁ - θ))
         + (if x₂ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₂ - θ)) := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
   have hfd_ne : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := fderiv_ne_zero h
-  have hfd1 : x₁ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₂ - θ) * (X₃ - θ) :=
+  have hfd1 : x₁ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₂ - θ) * (x₃ - θ) :=
     fderiv_eq_prod ℓ m hσ₁ hσ₂ hσ₃ hθroot
-  have hfd2 : x₂ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (X₃ - θ) :=
+  have hfd2 : x₂ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₃ - θ) :=
     fderiv_eq_prod ℓ m (by grind) (by grind) (by grind) hθroot
-  have hfd3 : X₃ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₂ - θ) :=
+  have hfd3 : x₃ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₂ - θ) :=
     fderiv_eq_prod ℓ m (by grind) (by grind) (by grind) hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
   · rw [if_neg (by grind), if_pos rfl, if_neg hne.symm, hfd1 rfl,
@@ -101,7 +101,7 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m X₃ : ZMod
   obtain rfl | c2 := eq_or_ne x₂ θ
   · rw [if_neg (by grind), if_neg c1, if_pos rfl, hfd2 rfl, psi_mul h.prime (by grind) (by grind)]
     grind
-  obtain rfl | c3 := eq_or_ne X₃ θ
+  obtain rfl | c3 := eq_or_ne x₃ θ
   · rw [if_pos rfl, if_neg c1, if_neg c2, hfd3 rfl, psi_mul h.prime (by grind) (by grind)]
   · rw [if_neg c3, if_neg c1, if_neg c2]
     grind [psi_collinear h.prime hσ₁ hσ₂ hσ₃ h.root c1 c2 c3]
@@ -116,7 +116,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   rw [Affine.Point.add_of_X_ne hne]
   simp only [εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
-  set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hX3def
+  set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hx3def
   have hdiff : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hne
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, Affine.slope_of_X_ne hne, div_mul_cancel₀ _ hdiff]
@@ -125,29 +125,29 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   have hm2 : ℓ * x₂ + m = y₂ := by grind
   have hpt1 : (ℓ * x₁ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₁ := by rw [hm1, reduced_equation h₁]
   have hpt2 : (ℓ * x₂ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₂ := by rw [hm2, reduced_equation h₂]
-  have hx3 : X₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_roots hne hx3 hpt1 hpt2
   exact εp_sum_of_vieta h hne hσ₁ hσ₂ hσ₃
 
-/-- For the double-root triple `x, x, X₃` with the given Vieta relations at a root `θ ≠ x`, the
-descent-character value at `X₃` is `0`. -/
-theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x X₃ : ZMod p} (hXθ : x ≠ θ)
-    (hσ₁ : x + x + X₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : x * x + x * X₃ + x * X₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : x * x * X₃ = m ^ 2 - a₆) :
-    (if X₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (X₃ - θ)) = 0 := by
+/-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the
+descent-character value at `x₃` is `0`. -/
+theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x x₃ : ZMod p} (hXθ : x ≠ θ)
+    (hσ₁ : x + x + x₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x * x + x * x₃ + x * x₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x * x * x₃ = m ^ 2 - a₆) :
+    (if x₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₃ - θ)) = 0 := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hθroot := h.root'
-  have hprod : (x - θ) * (x - θ) * (X₃ - θ) = (ℓ * θ + m) ^ 2 :=
+  have hprod : (x - θ) * (x - θ) * (x₃ - θ) = (ℓ * θ + m) ^ 2 :=
     prod_sub_theta_eq_lineSq hσ₁ hσ₂ hσ₃ hθroot
-  obtain rfl | c3 := eq_or_ne X₃ θ
+  obtain rfl | c3 := eq_or_ne x₃ θ
   · rw [if_pos rfl,
       fderiv_eq_prod ℓ m (x₂ := x) (x₃ := x) (by grind) (by grind) (by grind) hθroot rfl]
-    exact psi_of_isSquare ⟨x - X₃, by ring⟩
+    exact psi_of_isSquare ⟨x - x₃, by ring⟩
   · rw [if_neg c3]
     have hs : x - θ ≠ 0 := sub_ne_zero.mpr hXθ
-    have hs3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr c3
-    have hpm : psi p ((x - θ) * (x - θ) * (X₃ - θ)) = 0 := by
+    have hs3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr c3
+    have hpm : psi p ((x - θ) * (x - θ) * (x₃ - θ)) = 0 := by
       rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
     rwa [psi_mul h.prime (mul_ne_zero hs hs) hs3, psi_mul h.prime hs hs,
       CharTwo.add_self_eq_zero, zero_add] at hpm
@@ -165,7 +165,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   rw [Affine.Point.add_self_of_Y_ne hyne]
   simp only [εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
-  set X₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hX3def
+  set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = 3 * x ^ 2 + 2 * a₂ * x + a₄ := by
     have hsub : y - -y = 2 * y := by grind
     rw [hℓdef, Affine.slope_of_Y_ne rfl hyne, reduced_negY, hsub]
@@ -173,7 +173,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
-  have hx3 : X₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hX3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]; ring
   obtain ⟨hσ₁, hσ₂, hσ₃⟩ := vieta_of_double_root hpt (by grind [fderiv]) hx3
   exact εp_double_of_vieta h hXθ hσ₁ hσ₂ hσ₃
 

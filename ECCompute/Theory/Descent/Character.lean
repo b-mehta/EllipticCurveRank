@@ -207,22 +207,22 @@ end Psi
 
 variable {θ : ZMod p}
 
-/-- If `X₁, X₂, X₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
+/-- If `x₁, x₂, x₃` are the reduced `x`-coordinates of three collinear points on `E` (via the
 Vieta relations of `y = ℓx + m`), all distinct from the root `θ`, then
-`ψ_p (X₁ - θ) + ψ_p (X₂ - θ) + ψ_p (X₃ - θ) = 0`. -/
-public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
-    (hσ₁ : X₁ + X₂ + X₃ = ℓ ^ 2 - a₂)
-    (hσ₂ : X₁ * X₂ + X₁ * X₃ + X₂ * X₃ = a₄ - 2 * ℓ * m)
-    (hσ₃ : X₁ * X₂ * X₃ = m ^ 2 - a₆)
+`ψ_p (x₁ - θ) + ψ_p (x₂ - θ) + ψ_p (x₃ - θ) = 0`. -/
+public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
+    (hσ₁ : x₁ + x₂ + x₃ = ℓ ^ 2 - a₂)
+    (hσ₂ : x₁ * x₂ + x₁ * x₃ + x₂ * x₃ = a₄ - 2 * ℓ * m)
+    (hσ₃ : x₁ * x₂ * x₃ = m ^ 2 - a₆)
     (hroot : fval (a₂ : ZMod p) a₄ a₆ θ = 0)
-    (hX₁ : X₁ ≠ θ) (hX₂ : X₂ ≠ θ) (hX₃ : X₃ ≠ θ) :
-    psi p (X₁ - θ) + psi p (X₂ - θ) + psi p (X₃ - θ) = 0 := by
+    (hx₁ : x₁ ≠ θ) (hx₂ : x₂ ≠ θ) (hx₃ : x₃ ≠ θ) :
+    psi p (x₁ - θ) + psi p (x₂ - θ) + psi p (x₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
   have hprod := prod_sub_theta_eq_lineSq_zmod hσ₁ hσ₂ hσ₃ hroot
-  have h1 : X₁ - θ ≠ 0 := sub_ne_zero.mpr hX₁
-  have h2 : X₂ - θ ≠ 0 := sub_ne_zero.mpr hX₂
-  have h3 : X₃ - θ ≠ 0 := sub_ne_zero.mpr hX₃
-  have hpm : psi p ((X₁ - θ) * (X₂ - θ) * (X₃ - θ)) = 0 := by
+  have h1 : x₁ - θ ≠ 0 := sub_ne_zero.mpr hx₁
+  have h2 : x₂ - θ ≠ 0 := sub_ne_zero.mpr hx₂
+  have h3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr hx₃
+  have hpm : psi p ((x₁ - θ) * (x₂ - θ) * (x₃ - θ)) = 0 := by
     rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
   rwa [psi_mul hp (mul_ne_zero h1 h2) h3, psi_mul hp h1 h2] at hpm
 
