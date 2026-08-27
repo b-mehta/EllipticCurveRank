@@ -98,7 +98,7 @@ theorem variableChange_addX {ℓ : ℚ} :
     (C • W).toAffine.addX (C.mapX x₁) (C.mapX x₂) (C.mapSlope ℓ)
       = C.mapX (W.toAffine.addX x₁ x₂ ℓ) := by
   simp only [addX, mapX, mapSlope, variableChange_a₁, variableChange_a₂, Units.val_inv_eq_inv_val]
-  grind [Units.val_inv_eq_inv_val]
+  grind
 
 @[grind =]
 theorem variableChange_addY {ℓ : ℚ} :
@@ -130,8 +130,7 @@ theorem variableChange_slope (h₁ : W.toAffine.Equation x₁ y₁)
         = ((C.u : ℚ)⁻¹ * (y₁ - y₂ - C.s * (x₁ - x₂))) / (x₁ - x₂) := by
       rw [mapSlope]; field_simp [u_ne_zero]
     rw [slope_of_X_ne (by grind), slope_of_X_ne hx, hs, div_eq_div_iff (by grind) (by grind)]
-    simp only [mapX, mapY]
-    ring
+    grind [mapX, mapY]
 
 /-! ### The group isomorphism -/
 
