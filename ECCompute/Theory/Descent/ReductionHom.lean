@@ -178,7 +178,6 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
   simp only [map_curveℤ_zmod, Affine.negY, zero_mul, sub_zero, sub_neg_eq_add]
-  rw [div_mul_cancel₀ _ h2Yne]
   grind
 
 /-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
@@ -332,8 +331,7 @@ theorem padicValRat_num_cert (hp : p.Prime) {N K M : ℤ}
     have hlt : padicValRat p ((N ^ 2 : ℤ) : ℚ) < padicValRat p (-((M * K ^ 2 : ℤ) : ℚ)) := by
       rw [hqv, padicValRat.neg, padicValRat.of_int]
       have hle := padicValInt_mono (p := p) hp (a := K ^ 2) (b := M * K ^ 2) ⟨M, by ring⟩ h0
-      rw [hK2] at hle
-      lia
+      grind
     have hqrne : ((N ^ 2 : ℤ) : ℚ) + (-((M * K ^ 2 : ℤ) : ℚ)) ≠ 0 := fun he ↦ by
       have heq : ((N ^ 2 : ℤ) : ℚ) = ((M * K ^ 2 : ℤ) : ℚ) := by grind
       rw [heq, padicValRat.neg] at hlt
