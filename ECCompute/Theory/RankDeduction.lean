@@ -58,10 +58,9 @@ lemma two_zsmul_modN {x : ModN H 2} : (2 : ℤ) • x = 0 := by
   rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
   exact ⟨y, by simp [LinearMap.lsmul_apply]⟩
 
-instance [Module.Finite ℤ H] : Finite (ModN H 2) := by
-  have : Module.Finite ℤ (ModN H 2) := Module.Finite.quotient ℤ _
-  exact Module.finite_of_fg_torsion (ModN H 2)
-    (fun x ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN⟩)
+instance [Module.Finite ℤ H] : Finite (ModN H 2) :=
+  Module.finite_of_fg_torsion (ModN H 2)
+    (fun _ ↦ ⟨⟨2, mem_nonZeroDivisors_of_ne_zero two_ne_zero⟩, two_zsmul_modN⟩)
 
 instance [Module.Finite ℤ H] : Module.Finite (ZMod 2) (ModN H 2) := Module.Finite.of_finite
 
@@ -146,9 +145,7 @@ end Prod
 /-- A torsion-free module has trivial 2-torsion. -/
 lemma natCard_torsionBy_two_eq_one_of_noZeroSMul (F : Type*) [AddCommGroup F]
     [NoZeroSMulDivisors ℤ F] : Nat.card (Submodule.torsionBy ℤ F 2) = 1 := by
-  have hbot : Submodule.torsionBy ℤ F 2 = ⊥ :=
-    (isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)
-  rw [hbot]
+  rw [(isSMulRegular_iff_torsionBy_eq_bot F 2).1 (smul_right_injective F two_ne_zero)]
   exact Nat.card_unique
 
 /-- The identity for a free-times-finite decomposition. -/
@@ -168,20 +165,14 @@ theorem natCard_modN_two [Module.Finite ℤ H] :
   have : ∀ i, NeZero (p i ^ ee i) := fun i ↦ ⟨pow_ne_zero _ (hp i).ne_zero⟩
   have : ∀ i, Finite (ℤ ⧸ (ℤ ∙ (p i ^ ee i))) := fun i ↦
     inferInstanceAs (Finite (ℤ ⧸ Ideal.span {p i ^ ee i}))
-  have : Finite D := by
-    classical
-    have : ∀ i, Fintype (ℤ ⧸ (ℤ ∙ p i ^ ee i)) := fun i ↦ Fintype.ofFinite _
-    exact Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
-  have hfrH : finrank ℤ H = finrank ℤ (Fin n →₀ ℤ) := by
-    rw [iso.finrank_eq]
-    exact finrank_prod_finite
+  have : Finite D := Finite.of_equiv _ DFinsupp.equivFunOnFintype.symm
   calc Nat.card (ModN H 2)
       = Nat.card (ModN ((Fin n →₀ ℤ) × D) 2) := natCard_modN_two_congr iso
     _ = 2 ^ finrank ℤ (Fin n →₀ ℤ) *
           Nat.card (Submodule.torsionBy ℤ ((Fin n →₀ ℤ) × D) 2) :=
         natCard_modN_two_of_free_prod_finite
     _ = 2 ^ finrank ℤ H * Nat.card (Submodule.torsionBy ℤ H 2) := by
-        rw [hfrH, natCard_torsionBy_two_congr iso]
+        rw [iso.finrank_eq.trans finrank_prod_finite, natCard_torsionBy_two_congr iso]
 
 /-! ### The deduction -/
 
