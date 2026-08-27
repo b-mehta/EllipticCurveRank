@@ -51,8 +51,7 @@ meta def parseCoord (s : String) : Int × Nat :=
   | _ => ((strTrim s).toInt!, 1)
 
 /-- Split a whitespace-trimmed line on spaces into its nonempty fields. -/
-meta def fields (line : String) : List String :=
-  ((strTrim line).splitOn " ").filter (· ≠ "")
+meta def fields (line : String) : List String := ((strTrim line).splitOn " ").filter (· ≠ "")
 
 /-- Parse one line `"x y"` of a points file into `(x.num, x.den, y.num, y.den)`. -/
 meta def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=

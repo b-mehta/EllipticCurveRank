@@ -21,8 +21,7 @@ aggregate descent-matrix check, and the point-on-curve check.
 namespace ECCompute
 
 /-- Kernel-reducible bounded `∀`: `true` iff `p m = true` for every `m < n`. -/
-noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool :=
-  n.rec true fun m r ↦ (p m).and' r
+noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool := n.rec true fun m r ↦ (p m).and' r
 
 /-- Kernel-reducible `∀` over a list: `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type} (p : α → Bool) : List α → Bool :=

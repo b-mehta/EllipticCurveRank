@@ -69,7 +69,6 @@ public def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
         if r2 != col && a[r2]!.testBit col then
           a := a.set! r2 (a[r2]! ^^^ a[col]!)
           inv := inv.set! r2 (inv[r2]! ^^^ inv[col]!)
-  return some <| (List.range n).map fun k ↦
-    bitmaskOf n (fun j ↦ inv[j]!.testBit k)
+  return some <| (List.range n).map fun k ↦ bitmaskOf n (fun j ↦ inv[j]!.testBit k)
 
 end ECCompute.CertifyEval
