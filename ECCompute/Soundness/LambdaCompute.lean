@@ -164,8 +164,7 @@ public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
   rw [lambdaK, lambda]
-  grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResNat_eq_val, alphaResNat_eq_val,
-    fderiv_ne_zero]
+  grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResNat_eq_val, fderiv_ne_zero]
 
 end
 
