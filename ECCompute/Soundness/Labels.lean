@@ -34,22 +34,7 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-/-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the case `a₁ = a₃ = 0`), matching
-`WeierstrassCurve.Δ`. -/
-def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
-  -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
-    9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
-
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
-
-/-- The rational discriminant of `curve a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
-  simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]
-  grind
-
-/-- The numerator of the (integral) discriminant of `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
-theorem curve_Δ_num : (curve a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
-  rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- Reducing the coefficients mod `p` before `discrInt` gives the same value in `ZMod p`. -/
 theorem discrInt_emod : (discrInt (a₂ % p) (a₄ % p) (a₆ % p) : ZMod p) = discrInt a₂ a₄ a₆ := by

@@ -234,15 +234,10 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m X₁ X₂ X₃ : ZMod p}
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) :
     fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   have hroot : θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ = 0 := by simpa [fval] using h.root
-  have hΔ : (curve a₂ a₄ a₆).Δ.num
-      = 16 * (-4 * a₂ ^ 3 * a₆ + a₂ ^ 2 * a₄ ^ 2 - 4 * a₄ ^ 3 - 27 * a₆ ^ 2
-        + 18 * a₂ * a₄ * a₆) := by
-    simp [curve, Δ, b₂, b₄, b₆, b₈]
-    norm_cast
-    grind
   intro hfd
   apply h.discr
-  rw [hΔ]
+  rw [curve_Δ_num]
+  simp only [discrInt]
   grind [fderiv]
 
 end ECCompute
