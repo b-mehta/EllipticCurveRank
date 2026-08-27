@@ -630,9 +630,8 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   rw [Affine.Point.add_of_Y_eq hx12 hy, redP_zero, redP_of_den_ne hΔ h₁ hd1]
   have hyneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
       (x₁ : ZMod p) (y₁ : ZMod p) := by
-    have hny : (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ = -y₂ :=
-      Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl
-    have hcast : (y₁ : ZMod p) = -y₂ := by rw [hy, hny, Rat.cast_neg]
+    have hcast : (y₁ : ZMod p) = -y₂ := by
+      rw [hy, Affine.negY_of_a₁_a₃_eq_zero _ rfl rfl, Rat.cast_neg]
     grind
   rw [Affine.Point.add_of_Y_eq rfl hyneg]
 
