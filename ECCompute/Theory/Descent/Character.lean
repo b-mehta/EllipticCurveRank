@@ -31,6 +31,8 @@ For a point `P = (x, y) = (u/w², v/w³)` on `E`, set `α := u - θ·w² = x.num
 * `ECCompute.psi`: the Legendre symbol into `ZMod 2`; `ECCompute.lambda`: the raw character.
 * `ECCompute.DescentHyp`: the arithmetic hypotheses `p ∤ 6Δ`, `f(θ) ≡ 0`.
 * `ECCompute.prod_sub_theta_eq_lineSq`: the collinearity identity `(x₁-θ)(x₂-θ)(x₃-θ) = (ℓθ+m)²`.
+* `ECCompute.vieta_of_roots`, `ECCompute.vieta_of_double_root`, `ECCompute.fderiv_eq_prod`: the Vieta
+  relations of the secant line and the derivative-as-product identity at a root.
 * `ECCompute.psi_mul`: `ψ_p` turns products into sums on nonzero elements.
 * `ECCompute.psi_collinear`, `ECCompute.fderiv_ne_zero`: the collinear-sum and simple-root facts.
 -/
