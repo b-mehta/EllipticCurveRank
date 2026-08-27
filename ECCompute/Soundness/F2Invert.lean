@@ -45,8 +45,7 @@ def xorBits (v : ℕ) (l : List ℕ) : Bool := l.foldr (fun j r ↦ (v.testBit j
 theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by grind
 
 /-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
-theorem popParity_eq_xorBits {fuel a : ℕ} :
-    popParity fuel a = xorBits a (List.range fuel) := by
+theorem popParity_eq_xorBits {fuel a : ℕ} : popParity fuel a = xorBits a (List.range fuel) := by
   induction fuel generalizing a with
   | zero => rfl
   | succ f ih =>
