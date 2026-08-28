@@ -285,6 +285,18 @@ def gate(decl):
     return decl
 
 
+def j_theorem(cid, jinv):
+    """The `j`-invariant theorem. Short statements stay on one line; longer ones move the
+    proof to its own line, and only a statement whose numeral overflows keeps the longLine
+    suppression."""
+    doc = f"/-- The `j`-invariant of curve {cid}. -/\n"
+    head = f"public theorem curve{cid}_j : curve{cid}.j = {jinv} :="
+    proof = "j_eq_iff.mpr (by decide +kernel)"
+    if len(f"{head} {proof}") <= 100:
+        return doc + f"{head} {proof}"
+    return gate(doc + f"{head}\n  {proof}")
+
+
 def lean_int(n):
     """A Lean integer literal that parses at `term:max`: negatives need parentheses."""
     return f"({n})" if n < 0 else str(n)
@@ -446,9 +458,7 @@ def main():
     ellblock = gate(
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
         f"public instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
-    jblock = gate(
-        f"/-- The `j`-invariant of curve {cid}. -/\n"
-        f"public theorem curve{cid}_j : curve{cid}.j = {jinv} := j_eq_iff.mpr (by decide +kernel)")
+    jblock = j_theorem(cid, jinv)
     template = (Path(__file__).parent / "curve_template.lean").read_text()
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
                            coeffs=coeff_block(ainvs[3], ainvs[4]),
