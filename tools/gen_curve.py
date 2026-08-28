@@ -32,7 +32,7 @@ import urllib.request
 from fractions import Fraction
 from math import isqrt
 from pathlib import Path
-from sympy import Poly, Symbol, ZZ, jacobi_symbol, primerange
+from sympy import Poly, QQ, Rational, Symbol, ZZ, jacobi_symbol, primerange
 
 _X = Symbol("X")
 
@@ -84,6 +84,107 @@ def col_bits(curve, p, theta):
         if curve.lam(p, theta, xn, xd):
             v |= (1 << i)
     return v
+
+
+def padd(P, Q, A2, A4):
+    """Group law on the short model Y^2 = X^3 + A2 X^2 + A4 X + A6; points are Fraction
+    pairs, the identity is None."""
+    if P is None:
+        return Q
+    if Q is None:
+        return P
+    x1, y1 = P
+    x2, y2 = Q
+    if x1 == x2 and y1 + y2 == 0:
+        return None
+    lam = (3 * x1 * x1 + 2 * A2 * x1 + A4) / (2 * y1) if P == Q else (y2 - y1) / (x2 - x1)
+    x3 = lam * lam - A2 - x1 - x2
+    return (x3, lam * (x1 - x3) - y1)
+
+
+def f2_kernel(curve, prime_cap):
+    """Basis of the F2-relations among the witness points that every descent column up to
+    `prime_cap` misses, together with the image dimension (image rank = number of pivots)."""
+    n = len(curve.short)
+    basis = []                          # (pivot_bit, mask) in reduced row-echelon form
+    for p in primerange(5, prime_cap):
+        if curve.disc % p == 0:
+            continue
+        for th in curve.roots_mod(p):
+            r = col_bits(curve, p, th)
+            for pb, m in basis:
+                if (r >> pb) & 1:
+                    r ^= m
+            if r:
+                pb = r.bit_length() - 1
+                basis = [(q, (mm ^ r) if (mm >> pb) & 1 else mm) for q, mm in basis]
+                basis.append((pb, r))
+    pivots = {pb for pb, _ in basis}
+    kernel = []
+    for fb in (i for i in range(n) if i not in pivots):
+        v = 1 << fb
+        for pb, m in basis:
+            if bin((m & ~(1 << pb)) & v).count("1") & 1:
+                v |= 1 << pb
+        kernel.append(v)
+    return len(basis), kernel
+
+
+def rational_sqrt(q):
+    """Exact rational square root of a nonnegative Fraction, or None if it is not a square."""
+    if q < 0:
+        return None
+    sn, sd = isqrt(q.numerator), isqrt(q.denominator)
+    if sn * sn == q.numerator and sd * sd == q.denominator:
+        return Fraction(sn, sd)
+    return None
+
+
+def halve(Q, A2, A4, A6):
+    """A rational point R with 2R = Q, or None if Q is not in 2E(Q). The X-coordinates of
+    such R are the rational roots of the halving quartic."""
+    if Q is None:
+        return None
+    xQ = Rational(Q[0].numerator, Q[0].denominator)
+    A2r, A4r, A6r = (Rational(v) for v in (A2, A4, A6))
+    fX = _X**3 + A2r * _X**2 + A4r * _X + A6r
+    g = (3 * _X**2 + 2 * A2r * _X + A4r)**2 - 4 * fX * (2 * _X + A2r + xQ)
+    for root in Poly(g, _X, domain=QQ).ground_roots():
+        xR = Fraction(int(root.p), int(root.q))
+        yR = rational_sqrt(xR**3 + A2 * xR**2 + A4 * xR + A6)
+        if yR is None:
+            continue
+        for R in ((xR, yR), (xR, -yR)):
+            if padd(R, R, A2, A4) == Q:
+                return R
+    return None
+
+
+def saturate(curve, prime_cap=15000, max_cap=200000, max_rounds=60):
+    """2-saturate the witness points in place: while some F2-combination of the points is in
+    2E(Q) (so no descent character separates it), replace one summand by the half. Starts at
+    a small prime cap and escalates only when a relation is not yet resolved, so the common
+    case stays fast. Returns True once the descent images reach full F2 rank."""
+    A2, A4, A6 = curve.A2, curve.A4, curve.A6
+    cap = prime_cap
+    for _ in range(max_rounds):
+        _, kernel = f2_kernel(curve, cap)
+        if not kernel:
+            return True
+        mask = min(kernel, key=lambda m: bin(m).count("1"))
+        idxs = [i for i in range(len(curve.short)) if (mask >> i) & 1]
+        Q = None
+        for i in idxs:
+            xn, xd, yn, yd = curve.short[i]
+            Q = padd(Q, (Fraction(xn, xd), Fraction(yn, yd)), A2, A4)
+        R = halve(Q, A2, A4, A6)
+        if R is None:                       # relation not in 2E at this cap: scan further
+            if cap >= max_cap:
+                return False
+            cap = min(cap * 3, max_cap)
+            continue
+        curve.short[idxs[0]] = (R[0].numerator, R[0].denominator, R[1].numerator, R[1].denominator)
+    return False
 
 
 def select_labels(curve, prime_cap=100000):
@@ -272,6 +373,10 @@ def main():
         tors_pts = []
     for r in tors_pts:
         curve.short.append((r, 1, 0, 1))
+
+    # Leaderboard generators can span an index-2^k subgroup; saturate so the descent sees
+    # the full rank rather than rank - k.
+    saturate(curve)
 
     labels = select_labels(curve)
     rho = len(curve.short)
