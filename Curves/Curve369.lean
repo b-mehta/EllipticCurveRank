@@ -39,8 +39,8 @@ public theorem curve369_hasRankGE_8 : HasRankGE curve369 8 := by
 /-- Curve 369 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve369.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 369. -/
-public theorem curve369_j : curve369.j = -5685108812391047578576 / 264708770551352883 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve369_j : curve369.j = -5685108812391047578576 / 264708770551352883 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

@@ -39,8 +39,8 @@ public theorem curve153_hasRankGE_9 : HasRankGE curve153 9 := by
 /-- Curve 153 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve153.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 153. -/
-public theorem curve153_j : curve153.j = 211137647347999957843881 / 4929094923734171152 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve153_j : curve153.j = 211137647347999957843881 / 4929094923734171152 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

@@ -42,6 +42,7 @@ public instance : curve34.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +ker
 
 set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 34. -/
-public theorem curve34_j : curve34.j = 10596573132490679629146791681939777040929724885906880577921744896 / 3621424321888632432629450530248713201918732250053936693011157 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve34_j : curve34.j = 10596573132490679629146791681939777040929724885906880577921744896 / 3621424321888632432629450530248713201918732250053936693011157 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
