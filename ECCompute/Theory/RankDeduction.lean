@@ -84,7 +84,7 @@ lemma natCard_modN_of_finite (D : Type*) [AddCommGroup D] [Finite D] :
   rw [torsionBy_eq_ker]
   have hpos : Nat.card (LinearMap.range f) ≠ 0 := Nat.card_ne_zero.2 ⟨⟨0, by simp⟩, inferInstance⟩
   refine Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero hpos) ?_
-  rw [mul_comm, ← h2, h1, hquot, mul_comm]
+  grind
 
 /-! ### Transport along `ℤ`-linear equivalences -/
 
