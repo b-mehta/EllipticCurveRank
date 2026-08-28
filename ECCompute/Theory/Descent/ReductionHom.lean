@@ -415,14 +415,14 @@ open Projective
 
 variable [Fact p.Prime]
 
-/-- Over `ℚ`, the affine point underlying the integer representative `trep x y w` is `(x, y)`. -/
-theorem toAffine_g_trep {x y : ℚ} {w : ℕ}
+/-- Over `ℚ`, the affine point underlying the integer representative `intRep x y w` is `(x, y)`. -/
+theorem toAffine_g_intRep {x y : ℚ} {w : ℕ}
     (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
-    Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ trep x y w)
+    Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ intRep x y w)
       = .some x y h := by
   have hw : w ≠ 0 := by grind [Rat.den_ne_zero]
-  rw [trep_map_ℚ hden hden',
+  rw [intRep_map_ℚ hden hden',
     Point.toAffine_smul _ (isUnit_iff_ne_zero.2 (by positivity)),
     Point.toAffine_some ((nonsingular_some x y).mpr h)]
 
@@ -476,10 +476,10 @@ theorem repr_equiv_of_toAffine (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0
     exact Setoid.symm (equiv_zero_of_Z_eq_zero hnsp hfTz)
   | some X Y hR =>
     obtain ⟨w₃, hd3, hd3'⟩ := den_isSquare hR.1
-    have hid : T 2 • trep X Y w₃ = trep X Y w₃ 2 • T :=
-      int_smul_eq_of_toAffine_eq (toAffine_g_trep hR hd3 hd3') hTℚ
-    have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 • (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
-        = (Int.castRingHom (ZMod p) ∘ trep X Y w₃) 2 • (Int.castRingHom (ZMod p) ∘ T) := by
+    have hid : T 2 • intRep X Y w₃ = intRep X Y w₃ 2 • T :=
+      int_smul_eq_of_toAffine_eq (toAffine_g_intRep hR hd3 hd3') hTℚ
+    have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 • (Int.castRingHom (ZMod p) ∘ intRep X Y w₃)
+        = (Int.castRingHom (ZMod p) ∘ intRep X Y w₃) 2 • (Int.castRingHom (ZMod p) ∘ T) := by
       simpa only [comp_smul, Function.comp_apply] using
         congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
     have hns_repr := repr_nonsingular hΔ (.some X Y hR)
@@ -653,20 +653,20 @@ mod `p` and the points are equal over `ℚ`: the reduced sum is an honest doubli
 theorem redP_map_add_double (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     {w₁ : ℕ} (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (hden1 : x₁.den = w₁ ^ 2) (hden1' : y₁.den = w₁ ^ 3)
-    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁))
+    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₁ y₁ h₁))
-      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁)) :
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
     repr p (.some x₁ y₁ h₁ + .some x₁ y₁ h₁)
-      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁) := by
-  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁)
-      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
-          (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁) := by
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
+  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)
+      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+          (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) := by
     rw [add_self, ← map_curve_Q]
     exact (map_dblXYZ (Int.castRingHom ℚ) _).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns1 hgadd
-    (toAffine_g_trep h₁ hden1 hden1')
-    (toAffine_g_trep h₁ hden1 hden1') hadd
+    (toAffine_g_intRep h₁ hden1 hden1')
+    (toAffine_g_intRep h₁ hden1 hden1') hadd
 
 /-- Additivity of `redP` on `some + some` in the secant case (`¬ repr P ≈ repr Q` mod `p`): the
 reduced sum is a secant, and the two representatives are also inequivalent over `ℚ`. -/
@@ -675,37 +675,37 @@ theorem redP_map_add_secant (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (hden1 : x₁.den = w₁ ^ 2) (hden1' : y₁.den = w₁ ^ 3)
     (hden2 : x₂.den = w₂ ^ 2) (hden2' : y₂.den = w₂ ^ 3)
-    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁))
-    (hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂))
+    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
+    (hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂))
     (heq : ¬ repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂)) :
     repr p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
-          (trep x₂ y₂ w₂) := by
-  have hℚne : ¬ Int.castRingHom ℚ ∘ trep x₁ y₁ w₁ ≈ Int.castRingHom ℚ ∘ trep x₂ y₂ w₂ := by
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+          (intRep x₂ y₂ w₂) := by
+  have hℚne : ¬ Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁ ≈ Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂ := by
     intro hℚeq
     apply heq
     have hpt : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point)
         = .some x₂ y₂ h₂ := by
-      rw [← toAffine_g_trep h₁ hden1 hden1', ← toAffine_g_trep h₂ hden2 hden2']
+      rw [← toAffine_g_intRep h₁ hden1 hden1', ← toAffine_g_intRep h₂ hden2 hden2']
       exact Point.toAffine_of_equiv hℚeq
     exact hpt ▸ Setoid.refl (repr p (.some x₁ y₁ h₁))
   have hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
-          (trep x₂ y₂ w₂) := by
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+          (intRep x₂ y₂ w₂) := by
     rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1', repr_some h₂ hden2 hden2']
     exact map_addXYZ (Int.castRingHom (ZMod p)) _ _
-  have hgaddXYZ : (curveQ a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
-        (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂)
-      = Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
-          (trep x₂ y₂ w₂) := by rw [← map_curve_Q]; exact map_addXYZ (Int.castRingHom ℚ) _ _
-  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
-        (trep x₂ y₂ w₂)
-      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
-          (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂) := by
+  have hgaddXYZ : (curveQ a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+        (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂)
+      = Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+          (intRep x₂ y₂ w₂) := by rw [← map_curve_Q]; exact map_addXYZ (Int.castRingHom ℚ) _ _
+  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+        (intRep x₂ y₂ w₂)
+      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+          (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂) := by
     rw [← hgaddXYZ]; exact (add_of_not_equiv hℚne).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns2 hgadd
-    (toAffine_g_trep h₁ hden1 hden1') (toAffine_g_trep h₂ hden2 hden2') hadd
+    (toAffine_g_intRep h₁ hden1 hden1') (toAffine_g_intRep h₂ hden2 hden2') hadd
 
 /-- Additivity of `redP` on `some + some` in the tangent-mod-`p` case: the reduced
 representatives are proportional but the points differ over `ℚ`. The projective-class goal is
@@ -717,13 +717,13 @@ theorem redP_map_add_tangent_case (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) �
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁)) :
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
     repr p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁) := by
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
   have hred : redP p (.some x₁ y₁ h₁) = redP p (.some x₂ y₂ h₂) := by
     rw [redP_eq_toAffine, redP_eq_toAffine]; exact Point.toAffine_of_equiv heq
   have hnspV : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
-      (Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁)) := by
+      (Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) := by
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
   refine equiv_of_toAffine_eq (repr_nonsingular hΔ _) hnspV ?_
@@ -741,10 +741,10 @@ theorem redP_map_add_some (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₂ y₂ h₂) := by
   obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare h₁.1
   obtain ⟨w₂, hden2, hden2'⟩ := den_isSquare h₂.1
-  have hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁) :=
-    nonsingular_of_toAffine_some (toAffine_g_trep h₁ hden1 hden1')
-  have hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂) :=
-    nonsingular_of_toAffine_some (toAffine_g_trep h₂ hden2 hden2')
+  have hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) :=
+    nonsingular_of_toAffine_some (toAffine_g_intRep h₁ hden1 hden1')
+  have hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂) :=
+    nonsingular_of_toAffine_some (toAffine_g_intRep h₂ hden2 hden2')
   rw [redP_eq_toAffine, redP_eq_toAffine (.some x₁ y₁ h₁),
     redP_eq_toAffine (.some x₂ y₂ h₂),
     ← Point.toAffine_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)]
@@ -753,7 +753,7 @@ theorem redP_map_add_some (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   · -- `repr P ≈ repr Q` mod `p`: the reduced sum is a doubling of `repr P`.
     have hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
           (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-        = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁) := by
+        = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
       rw [add_of_equiv heq, repr_some h₁ hden1 hden1']
       exact map_dblXYZ (Int.castRingHom (ZMod p)) _
     rw [hadd]

@@ -1,17 +1,6 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import ECCompute.Certificate
-public import ECCompute.Curves.Curve10
-public import ECCompute.Curves.Curve11
-public import ECCompute.Curves.Curve12
-public import ECCompute.Curves.Curve13
-public import ECCompute.Curves.Curve14
-public import ECCompute.Curves.Curve273
-public import ECCompute.Curves.Curve302
-public import ECCompute.Curves.Curve7
-public import ECCompute.Curves.Curve74
-public import ECCompute.Curves.Curve8
-public import ECCompute.Curves.Curve9
 public import ECCompute.ForLean
 public import ECCompute.ForMathlib.ModuleTorsionQuotient
 public import ECCompute.ForMathlib.RatDenom

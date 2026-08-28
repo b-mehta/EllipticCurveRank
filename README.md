@@ -45,25 +45,37 @@ trusted.
 
 ## Layout
 
-* `Theory/` - the descent character and the rank-bound argument.
-* `Check/` - the `Bool`-valued checkers the kernel reduces (matrix inverse over `𝔽₂`, primality,
-  2-torsion, points on the curve).
-* `Certify/`, `Certify.lean`, `MainTheorem.lean` - the certificate type, the assembled rank bound
-  `hasRankGE_of_certificate`, and the `certify_curve` tactic.
+* `ECCompute/Theory/` - the descent character and the rank-bound argument.
+* `ECCompute/Soundness/` - the `Bool`-valued checkers the kernel reduces (matrix inverse over `𝔽₂`,
+  primality, 2-torsion, points on the curve).
+* `ECCompute/Kernel.lean` - the raw kernel-reducible `Bool` folds the checkers run on.
+* `ECCompute/Certificate.lean`, `ECCompute/MainTheorem.lean`, `ECCompute/Tactic/` - the certificate
+  type, the assembled rank bound `hasRankGE_of_certificate`, and the `certify_curve` tactic.
+* `ForMathlib/` - lemmas destined upstream (2-torsion, `padicValInt`, rational denominators).
+* `data/` - the points and labels each certificate reads.
+
+The certified curves live in a separate `Curves` library, so building the core theory does not
+recompile them:
+
 * `Curves/` - certified curves, named by their id on the
   [ICARM Elliptic Curve Rank Leaderboard](https://elliptic-rank.icarm.cloud/): high-rank curves
   spanning rank `20` to `31` (Nagao, Fermigier, Martin-McMillen, Elkies, Elkies-Klagsbrun, and
   curve `302` at rank `31`).
-* `ForMathlib/` - lemmas destined upstream (2-torsion, `padicValInt`, rational denominators).
-* `data/` - the points and labels each certificate reads.
 
 ## Building
 
-The project uses a pinned mathlib. After cloning, fetch the cache once, then build:
+The project uses a pinned mathlib. After cloning, fetch the cache once, then build the core theory:
 
 ```
 lake exe cache get
 lake build
+```
+
+`lake build` compiles the theory and the `certify_curve` tactic. The certified curves are their own
+library; build them with
+
+```
+lake build Curves
 ```
 
 ## Acknowledgements

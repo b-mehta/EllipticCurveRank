@@ -22,3 +22,7 @@ jobs:
         with:
           mk_all-check: true
           mk_all-args: "--lib ECCompute"
+      - name: Check Curves.lean is up to date
+        run: lake exe mk_all --lib Curves --check
+      - name: Build the Curves library
+        run: lake build Curves
