@@ -120,7 +120,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set m : ZMod p := y₁ - ℓ * x₁ with hmb
   have hm1 : ℓ * x₁ + m = y₁ := by grind
   have hm2 : ℓ * x₂ + m = y₂ := by grind
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, reduced_addX]
   exact εp_sum_of_vieta h hne (vieta_of_roots hne hx3
     (by rw [hm1, reduced_equation h₁]) (by rw [hm2, reduced_equation h₂]))
 
@@ -163,8 +163,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
     simp [map_curveℤ_zmod, field]
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by
-    rw [hx3def]; simp only [Affine.addX, map_curveℤ_zmod]; ring
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hx3def, reduced_addX]; ring
   exact εp_double_of_vieta h hXθ
     (vieta_of_double_root (by rw [hm, reduced_equation hP]) (by grind [fderiv]) hx3)
 

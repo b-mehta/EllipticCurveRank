@@ -17,7 +17,7 @@ import Mathlib.Tactic.Qify
 
 The reduction map `redP : E(ℚ) → E(𝔽ₚ)` (from `Descent.ReductionMap`) is an additive
 homomorphism. The proof runs in three stages: the group-law denominators survive reduction
-(`reduced_slope_eq`, `reduced_addX_eq`, `reduced_addY_eq`); the kernel of reduction is closed
+(`reduced_slope_eq`, `reduced_addY_eq`); the kernel of reduction is closed
 under the group law (`den_addX_both_kernel`); and the full case analysis on the affine group law
 assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 
@@ -168,15 +168,8 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
-  simp only [map_curveℤ_zmod, Affine.negY, zero_mul, sub_zero, sub_neg_eq_add]
-  rw [div_mul_cancel₀ _ h2Yne]
+  simp only [map_curveℤ_zmod]
   grind
-
-/-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
-@[grind =]
-theorem reduced_addX_eq {x ℓ : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ = ℓ ^ 2 - a₂ - x - x := by
-  simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
 @[grind =]
@@ -532,8 +525,7 @@ theorem y_eq_negY_of_X_eq
     (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
     (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
     y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
-  have := Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12
-  grind [Affine.Point.some.injEq]
+  grind [Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12, Affine.Point.some.injEq]
 
 /-- Additivity of `redP` in the tangent-mod-`p` `2`-torsion sub-case: the shared reduced point
 satisfies `Ȳ₁ = -Ȳ₁`, and both `redP (P + Q)` and `P̄ + P̄` are the origin. -/
@@ -587,10 +579,9 @@ theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) 
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + y₁ ≠ 0 := by grind
   rw [← hXbar, ← hYbar] at htan
-  have hℓd := reduced_slope_eq hYneg h2Yne htan
-  have hy3cast := addY_cast_eq hℓden hd1 hdy1 hd3
-  have hns3 := Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left)
-  grind [Affine.Point.add_of_X_ne, redP_of_den_ne, Affine.Point.add_of_Y_ne]
+  grind [reduced_slope_eq hYneg h2Yne htan, addY_cast_eq hℓden hd1 hdy1 hd3,
+    Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left), Affine.Point.add_of_X_ne,
+    redP_of_den_ne, Affine.Point.add_of_Y_ne]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
 reduces to the origin. Uses `den_addX_both_kernel`. -/

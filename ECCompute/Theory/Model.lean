@@ -108,4 +108,10 @@ public theorem reduced_negY {x y : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curveℤ_zmod]) (by simp [map_curveℤ_zmod])
 
+/-- On the reduced curve, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
+@[grind =]
+public theorem reduced_addX {x₁ x₂ ℓ : ZMod p} :
+    (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
+  simp only [Affine.addX, map_curveℤ_zmod]; grind
+
 end ECCompute
