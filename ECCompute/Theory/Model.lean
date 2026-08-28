@@ -86,12 +86,9 @@ public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a�
     simp only [Δ, b₂, b₄, b₆, b₈, curveQ_eq, discrInt]; grind
   rw [this, Rat.num_intCast]
 
-/-- The base change of the integral model to `ℚ` is `curveQ a₂ a₄ a₆`. -/
-theorem baseChange_curve_ℚ : (curve a₂ a₄ a₆)⁄ℚ = curveQ a₂ a₄ a₆ := rfl
-
 /-- The integral model maps to `curveQ a₂ a₄ a₆` under `ℤ → ℚ`. -/
 public theorem map_curve_ℚ : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
-  rw [← baseChange_curve_ℚ, baseChange, algebraMap_int_eq]
+  rw [curveQ, baseChange, algebraMap_int_eq]
 
 variable {p : ℕ}
 
