@@ -87,7 +87,7 @@ public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a�
   rw [this, Rat.num_intCast]
 
 /-- The integral model maps to `curveQ a₂ a₄ a₆` under `ℤ → ℚ`. -/
-public theorem map_curve_ℚ : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
+public theorem map_curve_Q : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
   rw [curveQ, baseChange, algebraMap_int_eq]
 
 variable {p : ℕ}

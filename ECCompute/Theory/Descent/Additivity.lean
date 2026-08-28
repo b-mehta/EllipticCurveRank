@@ -81,7 +81,7 @@ theorem lambda_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
     lambda θ (P + Q) = lambda θ P + lambda θ Q := by
   have : Fact p.Prime := ⟨h.prime⟩
   have hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
-    grind [Rat.num_intCast, map_curve_ℚ, map_Δ, eq_intCast]
+    grind [Rat.num_intCast, map_curve_Q, map_Δ, eq_intCast]
   grind [lambda_eq_εp_red h hΔ]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/

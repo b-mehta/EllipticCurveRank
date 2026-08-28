@@ -662,7 +662,7 @@ theorem redP_map_add_double (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (trep x₁ y₁ w₁)
       = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
           (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁) := by
-    rw [add_self, ← map_curve_ℚ]
+    rw [add_self, ← map_curve_Q]
     exact (map_dblXYZ (Int.castRingHom ℚ) _).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns1 hgadd
     (toAffine_g_trep h₁ hden1 hden1')
@@ -698,7 +698,7 @@ theorem redP_map_add_secant (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   have hgaddXYZ : (curveQ a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
         (Int.castRingHom ℚ ∘ trep x₂ y₂ w₂)
       = Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
-          (trep x₂ y₂ w₂) := by rw [← map_curve_ℚ]; exact map_addXYZ (Int.castRingHom ℚ) _ _
+          (trep x₂ y₂ w₂) := by rw [← map_curve_Q]; exact map_addXYZ (Int.castRingHom ℚ) _ _
   have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (trep x₁ y₁ w₁)
         (trep x₂ y₂ w₂)
       = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ trep x₁ y₁ w₁)
