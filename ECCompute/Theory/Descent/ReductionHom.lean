@@ -382,9 +382,9 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   set x₃ := (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
-  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_addX]
-  have hcv1 := equation_curve h₁
-  have hcv2 := equation_curve h₂
+  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curveQ_addX]
+  have hcv1 := equation_curveQ h₁
+  have hcv2 := equation_curveQ h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
   obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data hp h₂ hd2
   set A : ℤ := x₁.num
@@ -565,7 +565,7 @@ theorem redP_add_tangent_generic (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
   have hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
-    addX_den_ne Fact.out hℓden hd1 hd2 curve_addX
+    addX_den_ne Fact.out hℓden hd1 hd2 curveQ_addX
   have hd3_s : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s

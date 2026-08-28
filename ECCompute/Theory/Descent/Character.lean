@@ -216,7 +216,7 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   intro hfd
   apply h.discr
-  simp only [curve_Δ_num, discrInt]
+  simp only [curveQ_Δ_num, discrInt]
   grind [fderiv, fval]
 
 end ECCompute

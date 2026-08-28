@@ -65,12 +65,12 @@ public theorem curveQ_eq : curveQ a₂ a₄ a₆ = ⟨0, a₂, 0, a₄, a₆⟩ 
 
 /-- The affine equation of `curveQ a₂ a₄ a₆` in cleared form. -/
 @[grind →]
-public theorem equation_curve {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
+public theorem equation_curveQ {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curveQ_eq]
 
 /-- On the short model `curveQ a₂ a₄ a₆`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
 @[grind =]
-public theorem curve_addX {x₁ x₂ ℓ : ℚ} :
+public theorem curveQ_addX {x₁ x₂ ℓ : ℚ} :
     (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
   grind [Affine.addX, curveQ_eq]
 
@@ -80,13 +80,13 @@ public theorem curve_addX {x₁ x₂ ℓ : ℚ} :
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
-/-- The discriminant of `curveQ a₂ a₄ a₆` is the integer `discrInt a₂ a₄ a₆`. -/
-public theorem curve_Δ_eq : (curveQ a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
-  simp only [Δ, b₂, b₄, b₆, b₈, curveQ_eq, discrInt]; grind
+/-- The discriminant of the integral model `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
+public theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
+  simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]; grind
 
 /-- The numerator of the discriminant of `curveQ a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
-public theorem curve_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
-  rw [curve_Δ_eq, Rat.num_intCast]
+public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
+  rw [curveQ, baseChange, map_Δ, curve_Δ_eq]; simp
 
 /-- The base change of the integral model to `ℚ` is `curveQ a₂ a₄ a₆`. -/
 theorem baseChange_curve_ℚ : (curve a₂ a₄ a₆)⁄ℚ = curveQ a₂ a₄ a₆ := rfl
