@@ -760,10 +760,8 @@ theorem redP_map_add_some (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
     by_cases hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) = .some x₂ y₂ h₂
     · rw [← hPQ] at hadd ⊢; exact redP_map_add_double hΔ h₁ hden1 hden1' hns1 hadd
     · exact redP_map_add_tangent_case hΔ h₁ h₂ heq hPQ hadd
-  · rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1',
-      repr_some h₂ hden2 hden2',
-      curveZMod, WeierstrassCurve.baseChange, algebraMap_int_eq,
-      map_addXYZ (Int.castRingHom (ZMod p))]
+  · rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1', repr_some h₂ hden2 hden2', curveZMod,
+      WeierstrassCurve.baseChange, algebraMap_int_eq, map_addXYZ (Int.castRingHom (ZMod p))]
     exact redP_map_add_secant hΔ h₁ h₂ hden1 hden1' hden2 hden2' hns1 hns2 heq
 
 /-- Additivity of the reduction map. -/
