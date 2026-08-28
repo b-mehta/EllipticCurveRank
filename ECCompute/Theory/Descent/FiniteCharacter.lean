@@ -104,8 +104,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
     (h₂ : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂) :
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) + εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
-  rw [Point.add_of_X_ne hne]
-  simp only [εpFinite_some]
+  simp only [Point.add_of_X_ne hne, εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
@@ -136,8 +135,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
     εpFinite a₂ a₄ a₆ p θ (.some x y hP + .some x y hP) = 0 := by
   have h2 : (2 : ZMod p) ≠ 0 := Ring.two_ne_zero (by simp [ZMod.ringChar_zmod_n, h.ne_two])
   have hyne : y ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x y := by grind
-  rw [Point.add_self_of_Y_ne hyne]
-  simp only [εpFinite_some]
+  simp only [Point.add_self_of_Y_ne hyne, εpFinite_some]
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = fderiv (a₂ : ZMod p) a₄ x := by
