@@ -80,11 +80,13 @@ section
 variable [Fact p.Prime]
 
 theorem intRep_coord_zero (hden : x.den = w ^ 2) (hwne : (w : ZMod p) ≠ 0) :
-    (Int.castRingHom (ZMod p) ∘ intRep x y w) 0 / (Int.castRingHom (ZMod p) ∘ intRep x y w) 2 = x := by
+    (Int.castRingHom (ZMod p) ∘ intRep x y w) 0
+        / (Int.castRingHom (ZMod p) ∘ intRep x y w) 2 = x := by
   simp [field, Rat.cast_def, hden]
 
 theorem intRep_coord_one (hden' : y.den = w ^ 3) :
-    (Int.castRingHom (ZMod p) ∘ intRep x y w) 1 / (Int.castRingHom (ZMod p) ∘ intRep x y w) 2 = y := by
+    (Int.castRingHom (ZMod p) ∘ intRep x y w) 1
+        / (Int.castRingHom (ZMod p) ∘ intRep x y w) 2 = y := by
   simp [field, Rat.cast_def, hden']
 
 end
@@ -101,7 +103,8 @@ theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ intRep x y w) := by
   have : Fact p.Prime := ⟨hp⟩
-  have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation (Int.castRingHom (ZMod p) ∘ intRep x y w) :=
+  have hEq : (curveZMod a₂ a₄ a₆ p).toProjective.Equation
+      (Int.castRingHom (ZMod p) ∘ intRep x y w) :=
     (intRep_equation h.1 hden hden').map (Int.castRingHom (ZMod p))
   by_cases hwz : (w : ZMod p) = 0
   · -- `z = 0`: the point reduces to the origin.
