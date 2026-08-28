@@ -60,7 +60,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
 
 /-- The descent character as a raw function. -/
 @[expose] public noncomputable def lambda (θ : ZMod p) :
-    (curve a₂ a₄ a₆).toAffine.Point → ZMod 2
+    (curveQ a₂ a₄ a₆).toAffine.Point → ZMod 2
   | .zero => 0
   | .some x _ _ =>
     if (x.den : ZMod p) = 0 then 0
@@ -69,7 +69,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ}
       if α = 0 then psi p (fderiv (a₂ : ZMod p) a₄ θ) else psi p α
 
 @[simp, grind =]
-public theorem lambda_zero {θ : ZMod p} : lambda θ (0 : (curve a₂ a₄ a₆).toAffine.Point) = 0 := rfl
+public theorem lambda_zero {θ : ZMod p} : lambda θ (0 : (curveQ a₂ a₄ a₆).toAffine.Point) = 0 := rfl
 
 /-! ### The hypotheses of the descent lemma
 
@@ -83,7 +83,7 @@ public structure DescentHyp (a₂ a₄ a₆ : ℤ) (p : ℕ) (θ : ZMod p) : Pro
   /-- `p ∤ 6` (equivalently `p ≠ 2` and `p ≠ 3`). -/
   ne_six : ¬ p ∣ 6
   /-- `p ∤ Δ`: the (integer) discriminant is invertible mod `p`. -/
-  discr : ((curve a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
+  discr : ((curveQ a₂ a₄ a₆).Δ.num : ZMod p) ≠ 0
   /-- `θ` is a root of `f` mod `p`, i.e. `f(θ) ≡ 0`. -/
   root : fval (a₂ : ZMod p) a₄ a₆ θ = 0
 

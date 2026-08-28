@@ -11,7 +11,7 @@ public import ECCompute.Theory.Model
 /-!
 # The general curve to the integral short model
 
-The certified rank bound lives on the integral short model `curve A₂ A₄ A₆`
+The certified rank bound lives on the integral short model `curveQ A₂ A₄ A₆`
 (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character is defined. A general integral
 Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` is carried to it in two steps, each a group isomorphism of
 Mordell-Weil groups (so a rank lower bound transfers back):
@@ -98,10 +98,10 @@ public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk
 /-- The `a₆` coefficient of the integral short model: `A₆ = 64a₆ + 16a₃² = 16·b₆`. -/
 @[expose] public def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
 
-/-- The integral short model `curve (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
+/-- The integral short model `curveQ (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
 integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 @[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  curve (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
+  curveQ (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 /-- Scaling the rational short model by `v = 2` produces the integral short model. -/
 public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
@@ -110,7 +110,7 @@ public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
   ext <;>
     simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, variableChange_a₆, shortModel_a₁, shortModel_a₂, shortModel_a₃,
-      shortModel_a₄, shortModel_a₆, intShortModel, curve, inv_inv, Units.val_mk0] <;>
+      shortModel_a₄, shortModel_a₆, intShortModel, curveQ_eq, inv_inv, Units.val_mk0] <;>
     push_cast <;> ring
 
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by

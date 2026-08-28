@@ -192,7 +192,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW
   let rb := Lean.reflBoolTrue
   let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
   let (sA2E, sA4E, sA6E) := shortCoeffExprs a1E a2E a3E a4E a6E
-  let wCurve := mkAppN (mkConst ``curve) #[sA2E, sA4E, sA6E]
+  let wCurve := mkAppN (mkConst ``curveQ) #[sA2E, sA4E, sA6E]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
     #[wModel, wCurve, rb, rb, rb, rb, rb]
   let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
@@ -206,7 +206,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (wE a1E a2E a3E a4E a6E cExpr hW
   let hlenB := hlenOf ``Certificate.B natTy
   let hlenM := hlenOf ``Certificate.M natTy
   let hlenQ := hlenOf ``Certificate.qrMasks natTy
-  -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curve c.a₂ …`.
+  -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curveQ c.a₂ …`.
   let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
   let a4C := mkApp (mkConst ``Certificate.a₄) cExpr
   let a6C := mkApp (mkConst ``Certificate.a₆) cExpr

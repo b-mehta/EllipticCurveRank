@@ -36,7 +36,7 @@ variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ZMod p}
 /-- Reduction of `λ` on an affine point with `p ∤ x.den` to `ψ_p` of the reduced coordinate:
 `ψ_p(f'(θ))` when `xbar p x = θ`, and `ψ_p(xbar p x - θ)` otherwise. -/
 theorem lambda_some_of_den_ne [Fact p.Prime] {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
+    (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) ≠ 0) :
     lambda θ (.some x y h)
       = if xbar p x = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (xbar p x - θ) := by
   obtain ⟨w, hxden, _⟩ := den_isSquare h.1
@@ -47,7 +47,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {x y : ℚ}
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
+    (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
     lambda θ (.some x y h) = 0 := by simp only [lambda, if_pos hd]
 
 /-! ### Additivity via the reduction factorization
@@ -59,13 +59,13 @@ Additivity of `λ_{p,θ}` factors it as `λ = εpFinite ∘ redP`, with `redP : 
 /-- The descent character `λ_{p,θ}` presented as the composition `εpFinite θ ∘ redP`, packaged
 as an `AddMonoidHom E(ℚ) → ZMod 2`. See `lambda_map_add`. -/
 noncomputable def redCharHom [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
-    (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
-    (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
+    (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
+    (curveQ a₂ a₄ a₆).toAffine.Point →+ ZMod 2 :=
   (εpHom h).comp (redHom hΔ)
 
 /-- On each point, `λ_{p,θ}` agrees with the reduction composition `εpFinite θ ∘ redP`. -/
 theorem lambda_eq_εp_red [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
-    (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curve a₂ a₄ a₆).toAffine.Point) :
+    (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0) (P : (curveQ a₂ a₄ a₆).toAffine.Point) :
     lambda θ P = redCharHom h hΔ P := by
   cases P with
   | zero => rw [← Affine.Point.zero_def, lambda_zero, map_zero]
@@ -77,17 +77,17 @@ theorem lambda_eq_εp_red [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ)
 
 /-- The descent character `λ_{p,θ}` is additive, i.e. a homomorphism `(E(ℚ), +) → (ZMod 2, +)`. -/
 theorem lambda_map_add (h : DescentHyp a₂ a₄ a₆ p θ)
-    (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
+    (P Q : (curveQ a₂ a₄ a₆).toAffine.Point) :
     lambda θ (P + Q) = lambda θ P + lambda θ Q := by
   have : Fact p.Prime := ⟨h.prime⟩
-  have hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
-    grind [Rat.num_intCast, map_curveℤ_ℚ, map_Δ, eq_intCast]
+  have hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0 := by
+    grind [Rat.num_intCast, map_curve_ℚ, map_Δ, eq_intCast]
   grind [lambda_eq_εp_red h hΔ]
 
 /-- The descent character `λ_{p,θ}` as an `AddMonoidHom E(ℚ) → ZMod 2`. -/
 @[expose, simps]
 public noncomputable def lambdaHom (h : DescentHyp a₂ a₄ a₆ p θ) :
-    (curve a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
+    (curveQ a₂ a₄ a₆).toAffine.Point →+ ZMod 2 where
   toFun := lambda θ
   map_zero' := lambda_zero
   map_add' := by exact lambda_map_add h
