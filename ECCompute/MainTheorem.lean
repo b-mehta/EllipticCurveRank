@@ -58,32 +58,6 @@ theorem hasRankGE_of_addEquiv {W₁ W₂ : WeierstrassCurve ℚ}
 variable {a₂ a₄ a₆ : ℤ}
 variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {ls : Fin c.ρ → ℕ × ℤ}
 
-/-- The descent character `φ` sends the certified points `g` to the rows of the character matrix
-`B`, so linear independence of those rows over `𝔽₂` transfers to the points. -/
-theorem linearIndependent_descent
-    (hyp : ∀ j, DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2)
-    (hns : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2)
-    (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j
-        = if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1)
-            ((ls j).2 % (ls j).1).toNat
-            (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
-    (hBlen : c.B.length = c.ρ) (hMlen : c.M.length = c.ρ)
-    (hinv : F2Invert.checkInv c.ρ c.B c.M)
-    {φ : (curve c.a₂ c.a₄ c.a₆).toAffine.Point →+ (Fin c.ρ → ZMod 2)}
-    (hφ : φ = AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)))
-    {g : Fin c.ρ → (curve c.a₂ c.a₄ c.a₆).toAffine.Point}
-    (hg : g = fun i ↦ .some (pt i).1 (pt i).2 (hns i)) :
-    LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
-  have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.ρ).row := by
-    ext i j
-    rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
-      ← lambdaK_eq (hyp j) (hns i)
-        (intResNat_cast (hyp j).prime.ne_zero)
-        (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
-    simp [hB]
-  rw [hrow]
-  exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hBlen hMlen hinv)
-
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
 theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
@@ -95,44 +69,6 @@ theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Poi
   refine Nat.card_le_card_of_injective (fun x ↦ ⟨x, hmap x⟩) fun a b hab ↦ ?_
   grind
 
-/-- Soundness on the short integral model `curve c.a₂ c.a₄ c.a₆` (`a₁ = a₃ = 0`): when the
-certificate's points, labels, character matrix `B`, its `𝔽₂`-inverse, and its torsion witness all
-pass their checks, the rank is at least `c.ρ - c.t`. -/
-theorem rank_ge_of_certificate
-    (hpt : ∀ i, (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2)
-    (hlsP : ∀ j, ((ls j).1).Prime)
-    (hlsC : ∀ j, checkLabel c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2)
-    (hB : ∀ i j, F2Invert.toMat c.B c.ρ i j =
-      if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1)
-          ((ls j).2 % (ls j).1).toNat
-          (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0)
-    (hBlen : c.B.length = c.ρ)
-    (hMlen : c.M.length = c.ρ)
-    (hinv : F2Invert.checkInv c.ρ c.B c.M)
-    (htors : (curve c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t) :
-    HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) := by
-  classical
-  set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
-  have hyp (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
-    descentHyp_of_checkLabel (hlsC j) (hlsP j)
-  set φ : E →+ (Fin c.ρ → ZMod 2) := AddMonoidHom.pi (fun j ↦ lambdaHom (hyp j)) with hφ
-  rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
-  · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
-  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hyp ⟨0, hρpos⟩).discr (by simp [hΔ0])
-  have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
-    (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
-  let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
-  -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
-  have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) :=
-    linearIndependent_descent hyp hns hB hBlen hMlen hinv hφ hg
-  set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
-  have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  have htorH : Nat.card (Submodule.torsionBy ℤ H 2) ≤ 2 ^ c.t := (card_torsionBy_le H).trans htors
-  have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
-    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
-    (φ.comp H.subtype.toAddMonoidHom) hindep htorH
-  exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
-
 /-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), a proof that the
 short model of these coefficients is the certificate's curve (`hmodel`), and a certificate
 satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.ρ - c.t`. -/
@@ -142,15 +78,49 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
-  rw [hW]
+  subst hW
+  suffices HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) from
+    hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆)
+      (IntegralScaling.scaling_smul_shortModel.trans hmodel ▸ this)
+  clear hmodel a₁ a₂ a₃ a₄ a₆
   rw [checkPoints_iff] at hpt
-  have hlsP' (j : Fin c.ρ) : c.labels[j].1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
-  have hlsC' (j : Fin c.ρ) : checkLabel c.a₂ c.a₄ c.a₆ c.labels[j].1 c.labels[j].2 :=
+  set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
+  set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
+  replace hlsP (j : Fin c.ρ) : (ls j).1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
+  replace hlsC (j : Fin c.ρ) : checkLabel c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
     checkLabels_true hlsC _ (List.getElem_mem _)
-  have key : HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) :=
-    rank_ge_of_certificate (fun i ↦ hpt _ (List.getElem_mem _)) hlsP' hlsC'
-      (checkB_true hlenB hlenP hlenL hlenQ hB) hlenB hlenM hinv htors
-  exact hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆)
-    ((IntegralScaling.scaling_smul_shortModel.trans hmodel).symm ▸ key)
+  replace hlsC (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
+    descentHyp_of_checkLabel (hlsC j) (hlsP j)
+  replace hpt (i : Fin c.ρ) : (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
+    hpt _ (List.getElem_mem _)
+  classical
+  have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
+      if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
+          (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0 :=
+    checkB_true hlenB hlenP hlenL hlenQ hB
+  set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
+  set φ : E →+ (Fin c.ρ → ZMod 2) := AddMonoidHom.pi (fun j ↦ lambdaHom (hlsC j)) with hφ
+  rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
+  · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
+  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hlsC ⟨0, hρpos⟩).discr (by simp [hΔ0])
+  have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
+    (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
+  let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
+  -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
+  have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
+    have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.ρ).row := by
+      ext i j
+      rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
+        ← lambdaK_eq (hlsC j) (hns i) (intResNat_cast (hlsC j).prime.ne_zero)
+          (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
+      simp [hBmat]
+    rw [hrow]
+    exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hlenB hlenM hinv)
+  set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
+  have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
+  have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
+    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
+    (φ.comp H.subtype.toAddMonoidHom) hindep ((card_torsionBy_le H).trans htors)
+  exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
 
 end ECCompute
