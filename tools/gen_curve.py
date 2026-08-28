@@ -5,7 +5,7 @@ Given a curve id (fetched from elliptic-rank.icarm.cloud) or a local JSON file,
 this emits everything `certify_curve` needs:
   - data/curve<id>.txt         witness points on the integral short model
   - data/curve<id>-labels.txt  descent labels (an F2-independent column set)
-  - ECCompute/Curves/Curve<id>.lean   the theorem, ready to import
+  - Curves/Curve<id>.lean      the theorem, ready to import
 
 It mirrors the Lean referee exactly (the `certify_curve` tactic and the integral
 short-model change of variables), so the kernel is the final judge: any wrong
@@ -356,12 +356,12 @@ def main():
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
                            coeffs=coeff_block(ainvs[3], ainvs[4]),
                            defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
-    with open(f"{repo}/ECCompute/Curves/Curve{cid}.lean", "w") as fh:
+    with open(f"{repo}/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
 
     print(f"\nwrote data/curve{cid}.txt, data/curve{cid}-labels.txt, "
-          f"ECCompute/Curves/Curve{cid}.lean")
-    print(f"add to ECCompute.lean:  import ECCompute.Curves.Curve{cid}")
+          f"Curves/Curve{cid}.lean")
+    print(f"add to Curves.lean:  import Curves.Curve{cid}")
 
 
 if __name__ == "__main__":
