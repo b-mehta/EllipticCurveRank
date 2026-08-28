@@ -509,10 +509,8 @@ theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {V 
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
   have hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ V) := by
-    rw [hgadd]; exact nonsingular_add hnsA hnsB
-  have hTℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ V)
-      = P + Q := by rw [hgadd, Point.toAffine_add hnsA hnsB, haffA, haffB]
-  exact repr_equiv_of_toAffine hΔ _ hnsp hnsq hTℚ
+    grind [nonsingular_add]
+  exact repr_equiv_of_toAffine hΔ _ hnsp hnsq (by grind [Point.toAffine_add])
 
 /-! ### Case analysis for the group law -/
 
