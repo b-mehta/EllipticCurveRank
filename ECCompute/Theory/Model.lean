@@ -92,8 +92,7 @@ public theorem map_curve_Q : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = 
 
 variable {p : ℕ}
 
-/-- The reduction of the integral model modulo `p`: the curve with `a₂, a₄, a₆` cast into
-`ZMod p`. -/
+/-- `curveZMod a₂ a₄ a₆ p` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ZMod p`. -/
 public theorem curveZMod_eq :
     curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := by ext <;> simp [curve, baseChange]
 
