@@ -112,7 +112,6 @@ public theorem reduced_negY {x y : ZMod p} :
 @[grind =]
 public theorem reduced_addX {x₁ x₂ ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-  simp only [Affine.addX, map_curveℤ_zmod]
-  grind
+  simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 end ECCompute
