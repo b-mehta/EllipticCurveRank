@@ -109,13 +109,11 @@ theorem red_nonsingular (hp : p.Prime) (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZM
     rw [nonsingular_of_Z_eq_zero hz0]
     refine ⟨hEq, Or.inr ?_⟩
     have hYne : (Int.castRingHom (ZMod p) ∘ trep x y w) 1 ≠ 0 := by
-      simp only [Function.comp_apply, trep_one, eq_intCast]
-      rw [Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
+      simp only [Function.comp_apply, trep_one, eq_intCast, Ne, ZMod.intCast_zmod_eq_zero_iff_dvd]
       intro hpy
-      have hpw3 : (p : ℤ) ∣ (y.den : ℤ) := by
+      grind [Int.isUnit_iff, y.isCoprime_num_den.isUnit_of_dvd' hpy (by
         rwa [Int.natCast_dvd_natCast, hden', hp.prime.dvd_pow_iff_dvd three_ne_zero,
-          ← ZMod.natCast_eq_zero_iff]
-      grind [Int.isUnit_iff, y.isCoprime_num_den.isUnit_of_dvd' hpy hpw3, hp.two_le]
+          ← ZMod.natCast_eq_zero_iff]), hp.two_le]
     rw [X_eq_zero_of_Z_eq_zero hEq hz0]
     simpa using pow_ne_zero 2 hYne
   · -- `z ≠ 0`: good reduction makes it nonsingular.
@@ -143,9 +141,8 @@ public theorem repr_zero : repr p (.zero : (curve a₂ a₄ a₆).toAffine.Point
 public theorem repr_some (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
     repr p (.some x y h) = Int.castRingHom (ZMod p) ∘ trep x y w := by
-  obtain rfl : w = (den_isSquare h.1).choose := by
-    have h1 := (den_isSquare h.1).choose_spec.1
-    exact Nat.pow_left_injective two_ne_zero (hden.symm.trans h1)
+  obtain rfl : w = (den_isSquare h.1).choose :=
+    Nat.pow_left_injective two_ne_zero (hden.symm.trans (den_isSquare h.1).choose_spec.1)
   rfl
 
 /-- `repr P` is a nonsingular representative on the reduced curve (needs good reduction `hΔ`). -/
