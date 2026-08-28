@@ -160,7 +160,7 @@ def halve(Q, A2, A4, A6):
     return None
 
 
-def saturate(curve, prime_cap=15000, max_cap=200000, max_rounds=60):
+def saturate(curve, prime_cap=1000, max_cap=200000, max_rounds=60):
     """2-saturate the witness points in place: while some F2-combination of the points is in
     2E(Q) (so no descent character separates it), replace one summand by the half. Starts at
     a small prime cap and escalates only when a relation is not yet resolved, so the common
