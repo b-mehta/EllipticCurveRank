@@ -182,8 +182,7 @@ public theorem psi_mul (hp : p.Prime) (ha : a ≠ 0) (hb : b ≠ 0) :
   have : Fact p.Prime := ⟨hp⟩
   -- `IsSquare (a*b) ↔ (IsSquare a ↔ IsSquare b)` on nonzero elements, via `quadraticChar`.
   have key : IsSquare (a * b) ↔ (IsSquare a ↔ IsSquare b) := by
-    have hab : a * b ≠ 0 := mul_ne_zero ha hb
-    rw [← quadraticChar_one_iff_isSquare hab, ← quadraticChar_one_iff_isSquare ha,
+    rw [← quadraticChar_one_iff_isSquare (by grind), ← quadraticChar_one_iff_isSquare ha,
       ← quadraticChar_one_iff_isSquare hb, map_mul]
     grind [quadraticChar_dichotomy]
   grind [psi]
