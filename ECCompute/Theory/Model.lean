@@ -53,11 +53,11 @@ variable {a₂ a₄ a₆ : ℤ}
 
 /-- The rational curve `y² = x³ + a₂x² + a₄x + a₆`, i.e. `curve` base changed to `ℚ`. -/
 public abbrev curveQ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  (curve a₂ a₄ a₆).baseChange ℚ
+  (curve a₂ a₄ a₆)⁄ℚ
 
 /-- The reduction of the integral model modulo `p`: the base change of `curve` to `ZMod p`. -/
 public abbrev curveZMod (a₂ a₄ a₆ : ℤ) (p : ℕ) : WeierstrassCurve (ZMod p) :=
-  (curve a₂ a₄ a₆).baseChange (ZMod p)
+  (curve a₂ a₄ a₆)⁄(ZMod p)
 
 /-- `curveQ a₂ a₄ a₆` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ℚ`. -/
 public theorem curveQ_eq : curveQ a₂ a₄ a₆ = ⟨0, a₂, 0, a₄, a₆⟩ := by
@@ -89,7 +89,7 @@ public theorem curve_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a�
   rw [curve_Δ_eq, Rat.num_intCast]
 
 /-- The base change of the integral model to `ℚ` is `curveQ a₂ a₄ a₆`. -/
-theorem baseChange_curve_ℚ : (curve a₂ a₄ a₆).baseChange ℚ = curveQ a₂ a₄ a₆ := rfl
+theorem baseChange_curve_ℚ : (curve a₂ a₄ a₆)⁄ℚ = curveQ a₂ a₄ a₆ := rfl
 
 /-- The integral model maps to `curveQ a₂ a₄ a₆` under `ℤ → ℚ`. -/
 public theorem map_curve_ℚ : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
