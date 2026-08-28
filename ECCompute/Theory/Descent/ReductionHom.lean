@@ -17,7 +17,7 @@ import Mathlib.Tactic.Qify
 
 The reduction map `redP : E(ℚ) → E(𝔽ₚ)` (from `Descent.ReductionMap`) is an additive
 homomorphism. The proof runs in three stages: the group-law denominators survive reduction
-(`reduced_slope_eq`, `reduced_addX_eq`, `reduced_addY_eq`); the kernel of reduction is closed
+(`reduced_slope_eq`, `reduced_addY_eq`); the kernel of reduction is closed
 under the group law (`den_addX_both_kernel`); and the full case analysis on the affine group law
 assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 
@@ -170,12 +170,6 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
   rw [Affine.slope_of_Y_ne rfl hYneg]
   simp only [map_curveℤ_zmod]
   grind
-
-/-- The reduced-curve `addX` at a doubled point unfolds to `ℓ² - a₂ - x - x`. -/
-@[grind =]
-theorem reduced_addX_eq {x ℓ : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ = ℓ ^ 2 - a₂ - x - x := by
-  simp only [Affine.addX, map_curveℤ_zmod]; grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
 @[grind =]

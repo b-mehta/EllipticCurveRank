@@ -122,7 +122,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   have hm2 : ℓ * x₂ + m = y₂ := by grind
   have hpt1 : (ℓ * x₁ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₁ := by rw [hm1, reduced_equation h₁]
   have hpt2 : (ℓ * x₂ + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x₂ := by rw [hm2, reduced_equation h₂]
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def]; simp [Affine.addX, map_curveℤ_zmod]
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, reduced_addX]
   exact εp_sum_of_vieta h hne (vieta_of_roots hne hx3 hpt1 hpt2)
 
 /-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the
@@ -167,8 +167,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set m : ZMod p := y - ℓ * x with hmb
   have hm : ℓ * x + m = y := by grind
   have hpt : (ℓ * x + m) ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by rw [hm, reduced_equation hP]
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by
-    rw [hx3def]; simp only [Affine.addX, map_curveℤ_zmod]; ring
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by rw [hx3def, reduced_addX]; ring
   exact εp_double_of_vieta h hXθ (vieta_of_double_root hpt (by grind [fderiv]) hx3)
 
 /-- Additivity of `εpFinite`: the finite-field descent character is a homomorphism
