@@ -56,7 +56,7 @@ public theorem εpFinite_some (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsing
 @[local grind →]
 theorem reduced_equation (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) :
     y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by
-  simpa [map_curve_zmod, fval] using (equation_iff x y).mp h.1
+  simpa [curveZMod_eq, fval] using (equation_iff x y).mp h.1
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
@@ -139,7 +139,7 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = fderiv (a₂ : ZMod p) a₄ x := by
-    rw [hℓdef, slope_of_Y_ne rfl hyne, map_curve_zmod]
+    rw [hℓdef, slope_of_Y_ne rfl hyne, curveZMod_eq]
     grind [fderiv]
   have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by grind
   exact εp_double_of_vieta (m := y - ℓ * x) h (by grind)

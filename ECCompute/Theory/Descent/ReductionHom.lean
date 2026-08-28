@@ -168,7 +168,7 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
-  simp only [map_curve_zmod]
+  simp only [curveZMod_eq]
   grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
@@ -176,7 +176,7 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
 theorem reduced_addY_eq {x y ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
       = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
-  simp only [Affine.addY, Affine.negY, Affine.negAddY, map_curve_zmod]; grind
+  simp only [Affine.addY, Affine.negY, Affine.negAddY, curveZMod_eq]; grind
 
 /-- When the slope, `x`-coordinates and `y`-coordinate have nonzero denominators mod `p`, the cast
 of the rational `addY` equals `-(ℓ·(addX - x₁) + y₁)` over `ZMod p`. -/
@@ -542,7 +542,7 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p)
   rw [hY0, mul_zero] at htan
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine hΔ h₁ hd1
-  rw [Affine.nonsingular_iff, map_curve_zmod] at hns
+  rw [Affine.nonsingular_iff, curveZMod_eq] at hns
   grind
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum

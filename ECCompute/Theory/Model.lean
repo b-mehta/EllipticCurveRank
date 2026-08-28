@@ -99,19 +99,19 @@ variable {p : ℕ}
 
 /-- The reduction of the integral model modulo `p`: the curve with `a₂, a₄, a₆` cast into
 `ZMod p`. -/
-public theorem map_curve_zmod :
+public theorem curveZMod_eq :
     curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := by ext <;> simp [curve, baseChange]
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
 public theorem reduced_negY {x y : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
-  Affine.negY_of_a₁_a₃_eq_zero _ (by simp [map_curve_zmod]) (by simp [map_curve_zmod])
+  Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curveZMod_eq]) (by simp [curveZMod_eq])
 
 /-- On the reduced curve, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
 @[grind =]
 public theorem reduced_addX {x₁ x₂ ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-  simp only [Affine.addX, map_curve_zmod]; grind
+  simp only [Affine.addX, curveZMod_eq]; grind
 
 end ECCompute
