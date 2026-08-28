@@ -32,7 +32,9 @@ import urllib.request
 from fractions import Fraction
 from math import isqrt
 from pathlib import Path
-from sympy import divisors, jacobi_symbol, primerange
+from sympy import Poly, Symbol, ZZ, jacobi_symbol, primerange
+
+_X = Symbol("X")
 
 
 # ---------- curve model ----------
@@ -118,22 +120,12 @@ def torsion_prime(curve, cap=1000):
 
 def find_integer_root(A2, A4, A6):
     """One integer root of the monic cubic X^3+A2 X^2+A4 X+A6, or None. Monic, so every
-    rational root is an integer dividing A6."""
-    def val(r):
-        return r * r * r + A2 * r * r + A4 * r + A6
+    rational root is an integer; polynomial factorization over ℤ finds it regardless of the
+    size of A6."""
     if A6 == 0:
         return 0
-    n = abs(A6)
-    if n < 10**13:
-        for d in divisors(n):
-            for r in (d, -d):
-                if val(r) == 0:
-                    return r
-        return None
-    for r in range(-10**6, 10**6 + 1):       # fallback for an unfactorable constant term
-        if val(r) == 0:
-            return r
-    return None
+    roots = Poly(_X ** 3 + A2 * _X ** 2 + A4 * _X + A6, _X, domain=ZZ).ground_roots()
+    return int(next(iter(roots))) if roots else None
 
 
 def two_torsion(A2, A4, A6):
