@@ -54,7 +54,7 @@ public theorem εpFinite_some (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsing
 
 /-- A point `(X, Y)` on the reduced curve satisfies the Weierstrass equation in expanded form. -/
 @[local grind →]
-theorem reduced_equation (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) :
+theorem equation_curveZMod (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) :
     y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by
   simpa [curveZMod_eq, fval] using (equation_iff x y).mp h.1
 

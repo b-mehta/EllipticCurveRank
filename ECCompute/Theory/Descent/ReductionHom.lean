@@ -17,7 +17,7 @@ import Mathlib.Tactic.Qify
 
 The reduction map `redP : E(ℚ) → E(𝔽ₚ)` (from `Descent.ReductionMap`) is an additive
 homomorphism. The proof runs in three stages: the group-law denominators survive reduction
-(`reduced_slope_eq`, `reduced_addY_eq`); the kernel of reduction is closed
+(`curveZMod_slope_eq`, `curveZMod_addY`); the kernel of reduction is closed
 under the group law (`den_addX_both_kernel`); and the full case analysis on the affine group law
 assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 
@@ -161,7 +161,7 @@ variable [Fact p.Prime]
 
 /-- In the genuine-tangent case the reduced secant slope equals the reduced tangent slope `ℓ`:
 `slope x₁ x₁ y₁ y₁ = ℓ`, from the reduced tangent identity `htan`. -/
-theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
+theorem curveZMod_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (hYneg : y₁ ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁)
     (h2Yne : y₁ + y₁ ≠ 0)
     (htan : ℓ * (y₁ + y₁) = x₁ ^ 2 + x₁ * x₁ + x₁ ^ 2 + a₂ * (x₁ + x₁) + a₄) :
@@ -173,7 +173,7 @@ theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
 @[grind =]
-theorem reduced_addY_eq {x y ℓ : ZMod p} :
+theorem curveZMod_addY {x y ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
       = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
   simp only [Affine.addY, Affine.negY, Affine.negAddY, curveZMod_eq]; grind
@@ -572,7 +572,7 @@ theorem redP_add_tangent_generic (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + y₁ ≠ 0 := by grind
   rw [← hXbar, ← hYbar] at htan
-  grind [reduced_slope_eq hYneg h2Yne htan, addY_cast_eq hℓden hd1 hdy1 hd3,
+  grind [curveZMod_slope_eq hYneg h2Yne htan, addY_cast_eq hℓden hd1 hdy1 hd3,
     Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left), Affine.Point.add_of_X_ne,
     redP_of_den_ne, Affine.Point.add_of_Y_ne]
 
