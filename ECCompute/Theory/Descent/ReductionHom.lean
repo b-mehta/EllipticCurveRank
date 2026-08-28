@@ -476,19 +476,14 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
     exact Setoid.symm (equiv_zero_of_Z_eq_zero hnsp hfTz)
   | some X Y hR =>
     obtain ⟨w₃, hd3, hd3'⟩ := den_isSquare hR.1
-    have hrepr : repr p (.some X Y hR) = Int.castRingHom (ZMod p) ∘ trep X Y w₃ :=
-      repr_some hR hd3 hd3'
-    have hStℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective
-        (Int.castRingHom ℚ ∘ trep X Y w₃) = .some X Y hR :=
-      toAffine_g_trep hR hd3 hd3'
-    have hid : T 2 • trep X Y w₃ = trep X Y w₃ 2 • T := int_smul_eq_of_toAffine_eq hStℚ hTℚ
-    have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 •
-          (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
+    have hid : T 2 • trep X Y w₃ = trep X Y w₃ 2 • T :=
+      int_smul_eq_of_toAffine_eq (toAffine_g_trep hR hd3 hd3') hTℚ
+    have hprop : (Int.castRingHom (ZMod p) ∘ T) 2 • (Int.castRingHom (ZMod p) ∘ trep X Y w₃)
         = (Int.castRingHom (ZMod p) ∘ trep X Y w₃) 2 • (Int.castRingHom (ZMod p) ∘ T) := by
       simpa only [comp_smul, Function.comp_apply] using
         congrArg (fun Q : Fin 3 → ℤ ↦ Int.castRingHom (ZMod p) ∘ Q) hid
     have hns_repr := repr_nonsingular hΔ (.some X Y hR)
-    rw [hrepr] at hns_repr ⊢
+    rw [repr_some hR hd3 hd3'] at hns_repr ⊢
     exact equiv_of_proportional hns_repr hnsp hprop
 
 /-- Common closing step for the doubling and secant cases of additivity: an integer
