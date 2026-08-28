@@ -59,9 +59,28 @@ public abbrev curveQ (a₂ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
 public abbrev curveZMod (a₂ a₄ a₆ : ℤ) (p : ℕ) : WeierstrassCurve (ZMod p) :=
   (curve a₂ a₄ a₆)⁄(ZMod p)
 
+section BaseChange
+variable {R : Type*} [CommRing R] [Algebra ℤ R]
+
+/-- The base change of `curve a₂ a₄ a₆` to `R` is the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩`. -/
+public theorem curve_baseChange_eq :
+    (curve a₂ a₄ a₆).baseChange R = ⟨0, a₂, 0, a₄, a₆⟩ := by
+  ext <;> simp [curve, WeierstrassCurve.baseChange]
+
+/-- On `(curve a₂ a₄ a₆).baseChange R`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
+public theorem curve_baseChange_addX (x₁ x₂ ℓ : R) :
+    ((curve a₂ a₄ a₆).baseChange R).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
+  simp only [Affine.addX, curve_baseChange_eq]; grind
+
+/-- On `(curve a₂ a₄ a₆).baseChange R` (where `a₁ = a₃ = 0`), the negation `negY` is `y ↦ -y`. -/
+public theorem curve_baseChange_negY (x y : R) :
+    ((curve a₂ a₄ a₆).baseChange R).toAffine.negY x y = -y :=
+  Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curve_baseChange_eq]) (by simp [curve_baseChange_eq])
+
+end BaseChange
+
 /-- `curveQ a₂ a₄ a₆` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ℚ`. -/
-public theorem curveQ_eq : curveQ a₂ a₄ a₆ = ⟨0, a₂, 0, a₄, a₆⟩ := by
-  ext <;> simp [curve, baseChange]
+public theorem curveQ_eq : curveQ a₂ a₄ a₆ = ⟨0, a₂, 0, a₄, a₆⟩ := curve_baseChange_eq
 
 /-- The affine equation of `curveQ a₂ a₄ a₆` in cleared form. -/
 @[grind →]
@@ -71,8 +90,8 @@ public theorem equation_curveQ {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine
 /-- On the short model `curveQ a₂ a₄ a₆`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
 @[grind =]
 public theorem curveQ_addX {x₁ x₂ ℓ : ℚ} :
-    (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-  grind [Affine.addX, curveQ_eq]
+    (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ :=
+  curve_baseChange_addX x₁ x₂ ℓ
 
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
 `WeierstrassCurve.Δ`. -/
@@ -94,18 +113,17 @@ variable {p : ℕ}
 
 /-- `curveZMod a₂ a₄ a₆ p` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ZMod p`. -/
 public theorem curveZMod_eq :
-    curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := by ext <;> simp [curve, baseChange]
+    curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := curve_baseChange_eq
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
 public theorem curveZMod_negY {x y : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
-  Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curveZMod_eq]) (by simp [curveZMod_eq])
+    (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y := curve_baseChange_negY x y
 
 /-- On the reduced curve, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
 @[grind =]
 public theorem curveZMod_addX {x₁ x₂ ℓ : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
-  simp only [Affine.addX, curveZMod_eq]; grind
+    (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ :=
+  curve_baseChange_addX x₁ x₂ ℓ
 
 end ECCompute
