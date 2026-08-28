@@ -208,21 +208,16 @@ public theorem psi_collinear (hp : p.Prime) {ℓ m x₁ x₂ x₃ : ZMod p}
     (hx₁ : x₁ ≠ θ) (hx₂ : x₂ ≠ θ) (hx₃ : x₃ ≠ θ) :
     psi p (x₁ - θ) + psi p (x₂ - θ) + psi p (x₃ - θ) = 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  have hprod := prod_sub_theta_eq_lineSq hv hroot
-  have h1 : x₁ - θ ≠ 0 := sub_ne_zero.mpr hx₁
-  have h2 : x₂ - θ ≠ 0 := sub_ne_zero.mpr hx₂
-  have h3 : x₃ - θ ≠ 0 := sub_ne_zero.mpr hx₃
   have hpm : psi p ((x₁ - θ) * (x₂ - θ) * (x₃ - θ)) = 0 := by
-    rw [hprod]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
-  rwa [psi_mul hp (mul_ne_zero h1 h2) h3, psi_mul hp h1 h2] at hpm
+    rw [prod_sub_theta_eq_lineSq hv hroot]; exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩
+  rwa [psi_mul hp (by grind) (by grind), psi_mul hp (by grind) (by grind)] at hpm
 
 /-- The root `θ` of `f` is simple, so `f'(θ) ≠ 0`. Uses the descent hypotheses `DescentHyp`
 (`p ∤ 6Δ`). -/
 public theorem fderiv_ne_zero (h : DescentHyp a₂ a₄ a₆ p θ) : fderiv (a₂ : ZMod p) a₄ θ ≠ 0 := by
   intro hfd
   apply h.discr
-  rw [curve_Δ_num]
-  simp only [discrInt]
+  simp only [curve_Δ_num, discrInt]
   grind [fderiv, fval]
 
 end ECCompute
