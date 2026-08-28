@@ -1,0 +1,53 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under the GNU General Public License version 3.0 as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
+
+/-!
+# Curve 374 has rank at least 1
+
+The elliptic curve recorded as
+[curve 374](https://elliptic-rank.icarm.cloud/curve/374) on the ICARM Elliptic Curve Rank
+Leaderboard is
+
+  `E : y² = x³ + a₄·x + a₆`,   with
+  `a₄ = -141743602184651825964181144458936364367941983022055159070846432094856624827`
+  `     0382149350981354753099072564302439019875044167775027129030942134811618862430`
+  `     1337572701894101327301875`   and
+  `a₆ = 4724786739488394198806038148631212145598066100735171969028214403161887494234`
+  `     6071645032711825103302418810081300662501472259167570967698071160387295414337`
+  `     79190900631367109100625`
+
+over `ℚ`. It has Mordell-Weil rank at least `1`. The witness points from the leaderboard,
+transported to the integral short model, are in `data/curve374.txt`; descent labels are in
+`data/curve374-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
+-/
+
+namespace ECCompute
+
+open WeierstrassCurve
+
+set_option linter.style.longLine false in
+/-- ICARM leaderboard curve 374 over `ℚ`. -/
+@[expose] public def curve374 : WeierstrassCurve ℚ :=
+  ⟨0, 0, 0, -14174360218465182596418114445893636436794198302205515907084643209485662482703821493509813547530990725643024390198750441677750271290309421348116188624301337572701894101327301875,
+    4724786739488394198806038148631212145598066100735171969028214403161887494234607164503271182510330241881008130066250147225916757096769807116038729541433779190900631367109100625⟩
+
+/-- ICARM leaderboard curve 374 has Mordell-Weil rank at least `1`. -/
+public theorem curve374_hasRankGE_1 : HasRankGE curve374 1 := by
+  unfold curve374
+  certify_curve torsion 139 "data/curve374.txt" "data/curve374-labels.txt"
+
+/-- Curve 374 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+public instance : curve374.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve 374. -/
+public theorem curve374_j : curve374.j = 10885908647781260234049111894446312783457944296093836216641005984884988786716534907015536804503800877293842731672640339208512208350957635595353232863463427255835054669819367840000 / 6299715652651192265074717531508282860797421467646895958704285870882516658979476219337694910013773655841344173421666862967889009462359742821384972721911705587867508489478800833 := j_eq_iff.mpr (by decide +kernel)
+
+end ECCompute

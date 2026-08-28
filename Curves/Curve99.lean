@@ -1,0 +1,46 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under the GNU General Public License version 3.0 as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
+
+/-!
+# Curve 99 has rank at least 10
+
+The elliptic curve recorded as
+[curve 99](https://elliptic-rank.icarm.cloud/curve/99) on the ICARM Elliptic Curve Rank
+Leaderboard is
+
+  `E : y² + xy = x³ - x² + a₄·x + a₆`,   with
+  `a₄ = -10194109`   and
+  `a₆ = 12647638369`
+
+over `ℚ`. It has Mordell-Weil rank at least `10`. The witness points from the leaderboard,
+transported to the integral short model, are in `data/curve99.txt`; descent labels are in
+`data/curve99-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
+-/
+
+namespace ECCompute
+
+open WeierstrassCurve
+
+/-- ICARM leaderboard curve 99 over `ℚ`. -/
+@[expose] public def curve99 : WeierstrassCurve ℚ := ⟨1, -1, 0, -10194109, 12647638369⟩
+
+/-- ICARM leaderboard curve 99 has Mordell-Weil rank at least `10`. -/
+public theorem curve99_hasRankGE_10 : HasRankGE curve99 10 := by
+  unfold curve99
+  certify_curve torsion 7 "data/curve99.txt" "data/curve99-labels.txt"
+
+/-- Curve 99 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+public instance : curve99.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+set_option linter.style.longLine false in
+/-- The `j`-invariant of curve 99. -/
+public theorem curve99_j : curve99.j = -117157893629007724623028521 / 1276357388188605753068 := j_eq_iff.mpr (by decide +kernel)
+
+end ECCompute
