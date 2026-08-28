@@ -109,7 +109,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, slope_of_X_ne hne, div_mul_cancel₀ _ (by grind)]
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, reduced_addX]
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curveZMod_addX]
   exact εp_sum_of_vieta (m := y₁ - ℓ * x₁) h hne (vieta_of_roots hne hx3 (by grind) (by grind))
 
 /-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the

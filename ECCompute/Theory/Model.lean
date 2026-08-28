@@ -80,13 +80,11 @@ public theorem curveQ_addX {x₁ x₂ ℓ : ℚ} :
   -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
     9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
-/-- The discriminant of the integral model `curve a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
-public theorem curve_Δ_eq : (curve a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
-  simp only [Δ, b₂, b₄, b₆, b₈, curve, discrInt]; grind
-
 /-- The numerator of the discriminant of `curveQ a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
 public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
-  rw [curveQ, baseChange, map_Δ, curve_Δ_eq]; simp
+  have : (curveQ a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
+    simp only [Δ, b₂, b₄, b₆, b₈, curveQ_eq, discrInt]; grind
+  rw [this, Rat.num_intCast]
 
 /-- The base change of the integral model to `ℚ` is `curveQ a₂ a₄ a₆`. -/
 theorem baseChange_curve_ℚ : (curve a₂ a₄ a₆)⁄ℚ = curveQ a₂ a₄ a₆ := rfl
@@ -104,13 +102,13 @@ public theorem curveZMod_eq :
 
 /-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
 @[grind =]
-public theorem reduced_negY {x y : ZMod p} :
+public theorem curveZMod_negY {x y : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curveZMod_eq]) (by simp [curveZMod_eq])
 
 /-- On the reduced curve, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
 @[grind =]
-public theorem reduced_addX {x₁ x₂ ℓ : ZMod p} :
+public theorem curveZMod_addX {x₁ x₂ ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
   simp only [Affine.addX, curveZMod_eq]; grind
 

@@ -537,7 +537,7 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p)
   obtain ⟨-, htan⟩ :=
     reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den Fact.out hd1 hd2 hd3_s) hd3_s
-  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans reduced_negY
+  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans curveZMod_negY
   have hY0 : (y₁ : ZMod p) + y₂ = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
