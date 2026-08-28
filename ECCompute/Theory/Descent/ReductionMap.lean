@@ -212,8 +212,8 @@ public theorem redP_of_den_ne (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠
   obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular Fact.out hΔ h hden hden'
-  rw [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne])]
-  simp only [trep_coord_zero hden hwne, trep_coord_one hden']
+  simp only [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne]),
+    trep_coord_zero hden hwne, trep_coord_one hden']
 
 end
 
