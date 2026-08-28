@@ -39,8 +39,8 @@ public theorem curve354_hasRankGE_8 : HasRankGE curve354 8 := by
 /-- Curve 354 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve354.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 354. -/
-public theorem curve354_j : curve354.j = 23342876121715006911992497 / 43133355126662221824 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve354_j : curve354.j = 23342876121715006911992497 / 43133355126662221824 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

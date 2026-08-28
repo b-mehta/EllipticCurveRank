@@ -39,8 +39,8 @@ public theorem curve101_hasRankGE_10 : HasRankGE curve101 10 := by
 /-- Curve 101 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve101.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 101. -/
-public theorem curve101_j : curve101.j = -10168979810787453005768313 / 78865885564446731516 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve101_j : curve101.j = -10168979810787453005768313 / 78865885564446731516 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

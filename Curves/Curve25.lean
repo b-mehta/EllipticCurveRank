@@ -41,6 +41,7 @@ public instance : curve25.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +ker
 
 set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 25. -/
-public theorem curve25_j : curve25.j = 11688691385338998159136562388304 / 7090647253657448221766025 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve25_j : curve25.j = 11688691385338998159136562388304 / 7090647253657448221766025 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

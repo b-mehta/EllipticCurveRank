@@ -39,8 +39,8 @@ public theorem curve44_hasRankGE_7 : HasRankGE curve44 7 := by
 /-- Curve 44 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve44.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 44. -/
-public theorem curve44_j : curve44.j = 433557066986496 / 47827988557 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve44_j : curve44.j = 433557066986496 / 47827988557 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

@@ -39,8 +39,8 @@ public theorem curve21_hasRankGE_6 : HasRankGE curve21 6 := by
 /-- Curve 21 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve21.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 21. -/
-public theorem curve21_j : curve21.j = 354813083418250756987504 / 2753479396763095275 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve21_j : curve21.j = 354813083418250756987504 / 2753479396763095275 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

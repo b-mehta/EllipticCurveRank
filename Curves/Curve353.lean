@@ -41,6 +41,7 @@ public instance : curve353.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +ke
 
 set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 353. -/
-public theorem curve353_j : curve353.j = -14320544650303169791402548841 / 300733579435137404332500 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve353_j : curve353.j = -14320544650303169791402548841 / 300733579435137404332500 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

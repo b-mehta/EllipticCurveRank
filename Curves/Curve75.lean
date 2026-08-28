@@ -39,8 +39,8 @@ public theorem curve75_hasRankGE_8 : HasRankGE curve75 8 := by
 /-- Curve 75 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve75.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 75. -/
-public theorem curve75_j : curve75.j = 1499645274373402624 / 409086620841461 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve75_j : curve75.j = 1499645274373402624 / 409086620841461 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

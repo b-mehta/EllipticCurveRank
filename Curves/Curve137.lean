@@ -39,8 +39,8 @@ public theorem curve137_hasRankGE_11 : HasRankGE curve137 11 := by
 /-- Curve 137 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve137.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 137. -/
-public theorem curve137_j : curve137.j = -7640195042367733779584638281 / 439152040586971624338548 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve137_j : curve137.j = -7640195042367733779584638281 / 439152040586971624338548 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute

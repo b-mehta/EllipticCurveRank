@@ -39,8 +39,8 @@ public theorem curve56_hasRankGE_6 : HasRankGE curve56 6 := by
 /-- Curve 56 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve56.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 56. -/
-public theorem curve56_j : curve56.j = -2350514958336 / 7647224363 := j_eq_iff.mpr (by decide +kernel)
+public theorem curve56_j : curve56.j = -2350514958336 / 7647224363 :=
+  j_eq_iff.mpr (by decide +kernel)
 
 end ECCompute
