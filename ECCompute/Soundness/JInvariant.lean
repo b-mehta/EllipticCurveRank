@@ -5,32 +5,12 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import ECCompute.ForMathlib.WeierstrassCurve
 
 /-!
-# Certifying the j-invariant
+# The j-invariant certification lemmas
 
-The j-invariant `j = c₄³ / Δ` is an isomorphism invariant: it is the same for every Weierstrass
-model of a curve (mathlib's `WeierstrassCurve.variableChange_j`), so it can be read off any integral
-model `⟨a₁, …, a₆⟩`.
-
-`j_eq_iff` reduces a claim `j = q` to the polynomial identity `c₄³ = Δ · q`;
-`isElliptic_of_Δ_ne_zero` supplies the `IsElliptic` instance from a nonzero discriminant.
+`WeierstrassCurve.j_eq_iff` and `WeierstrassCurve.isElliptic_of_Δ_ne_zero` live in
+`ECCompute.ForMathlib.WeierstrassCurve`. This module re-exports them for the generated `Curves/`
+files, which `open WeierstrassCurve` and reference the lemmas unqualified.
 -/
-
-public section
-
-namespace ECCompute
-
-open WeierstrassCurve
-
-variable {W : WeierstrassCurve ℚ}
-
-/-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ · q`. -/
-theorem j_eq_iff [W.IsElliptic] {q : ℚ} : W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
-  rw [j, Units.inv_mul_eq_iff_eq_mul, coe_Δ']
-
-/-- Over `ℚ`, a nonzero discriminant makes a model an elliptic curve (so `j` is defined). -/
-theorem isElliptic_of_Δ_ne_zero (hΔ : W.Δ ≠ 0) : W.IsElliptic := ⟨isUnit_iff_ne_zero.mpr hΔ⟩
-
-end ECCompute
