@@ -373,8 +373,8 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
   set x₃ := (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
   have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_baseChange_addX]
-  have hcv1 := equation_curve_baseChange h₁
-  have hcv2 := equation_curve_baseChange h₂
+  have hcv1 := curve_baseChange_equation h₁
+  have hcv2 := curve_baseChange_equation h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
   obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data hp h₂ hd2
   set A : ℤ := x₁.num

@@ -56,7 +56,7 @@ public theorem εpFinite_some (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsing
 @[local grind →]
 theorem equation_curveZMod (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) :
     y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by
-  simpa [fval] using equation_curve_baseChange h.1
+  simpa [fval] using curve_baseChange_equation h.1
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
