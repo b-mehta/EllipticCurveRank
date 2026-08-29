@@ -81,15 +81,6 @@ open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
 coefficients by `W.aᵢ ↦ vⁱ · W.aᵢ` and points by `(x, y) ↦ (v²x, v³y)`. -/
 public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
 
-/-- The `a₂` coefficient of the integral short model: `A₂ = a₁² + 4a₂ = b₂`. -/
-@[expose] public def intShortA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
-
-/-- The `a₄` coefficient of the integral short model: `A₄ = 16a₄ + 8a₁a₃ = 8·b₄`. -/
-@[expose] public def intShortA₄ (a₁ a₃ a₄ : ℤ) : ℤ := 16 * a₄ + 8 * a₁ * a₃
-
-/-- The `a₆` coefficient of the integral short model: `A₆ = 64a₆ + 16a₃² = 16·b₆`. -/
-@[expose] public def intShortA₆ (a₃ a₆ : ℤ) : ℤ := 64 * a₆ + 16 * a₃ ^ 2
-
 /-- The integral short model `curveQ (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
 integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 @[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
