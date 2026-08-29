@@ -17,7 +17,7 @@ import Mathlib.Tactic.Qify
 
 The reduction map `redP : E(ℚ) → E(𝔽ₚ)` (from `Descent.ReductionMap`) is an additive
 homomorphism. The proof runs in three stages: the group-law denominators survive reduction
-(`reduced_slope_eq`, `reduced_addY_eq`); the kernel of reduction is closed
+(`curveZMod_slope_eq`, `curve_baseChange_addY`); the kernel of reduction is closed
 under the group law (`den_addX_both_kernel`); and the full case analysis on the affine group law
 assembles these into `redP_map_add`, packaged as the homomorphism `redHom`.
 
@@ -64,9 +64,9 @@ theorem cast_secant_num (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMo
 
 /-- For the reduced secant slope, `slope·(y₁ + y₂) = x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄`. -/
 theorem slope_mul_add_eq (hne : x₁ ≠ x₂)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂) :
-    (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (y₁ + y₂)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Equation x₂ y₂) :
+    (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ * (y₁ + y₂)
       = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by grind [Affine.slope_of_X_ne]
 
 /-- The reduced secant slope is well-defined. When `X̄₁ = X̄₂` but `x₁ ≠ x₂` over `ℚ` and the
@@ -74,15 +74,15 @@ reduced point is not `2`-torsion (`Ȳ₁ + Ȳ₂ ≠ 0`), the standard slope `(y
 `0/0` mod `p`) equals the alternate form `(x₁² + x₁x₂ + x₂² + a₂(x₁ + x₂) + a₄)/(y₁ + y₂)`, whose
 denominator survives reduction. -/
 theorem reduced_slope_den (hne : x₁ ≠ x₂)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Equation x₂ y₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hy2 : (y₁ : ZMod p) + y₂ ≠ 0) :
-    (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
+    (((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
   have hy12 : y₁ + y₂ ≠ 0 := by
     intro h0; apply hy2; rw [← cast_add_of_ne_zero hdy1 hdy2, h0, cast_zero]
-  have halt : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
+  have halt : (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
       = (x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄) / (y₁ + y₂) := by
     rw [eq_div_iff hy12]; exact slope_mul_add_eq hne h₁ h₂
   have hy2' : ((y₁ + y₂ : ℚ) : ZMod p) ≠ 0 := by rwa [cast_add_of_ne_zero hdy1 hdy2]
@@ -97,22 +97,22 @@ theorem reduced_slope_den (hne : x₁ ≠ x₂)
 alternate-slope identity `S·(Ȳ₁ + Ȳ₂) = X̄₁² + X̄₁X̄₂ + X̄₂² + a₂(X̄₁ + X̄₂) + a₄`, for the reduced
 secant slope `S = (slope …)`. -/
 theorem reduced_tangent_eqs (hne : x₁ ≠ x₂)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Equation x₂ y₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
-    (hℓden : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0)
-    (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
-    ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) ^ 2
-        = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-            ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)
+    (hℓden : (((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0)
+    (hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
+      ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
+    ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) ^ 2
+        = (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
+            ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)
           + a₂ + x₁ + x₂
-      ∧ ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * (y₁ + y₂)
+      ∧ ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ : ZMod p) * (y₁ + y₂)
         = x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + a₂ * (x₁ + x₂) + a₄ := by
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
+  set ℓ := (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ with hℓdef
   refine ⟨?_, ?_⟩
-  · have hqeq : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
+  · have hqeq : ℓ ^ 2 = (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
     have hc := congrArg (Rat.cast : ℚ → ZMod p) hqeq
     rwa [cast_pow,
       cast_add_of_ne_zero
@@ -131,12 +131,12 @@ end
 does the slope. -/
 theorem slope_den_of_addX_den (hp : p.Prime)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
-    (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
-    (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
+    (hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
+      ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0) :
+    (((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 := by
   have : Fact p.Prime := ⟨hp⟩
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
-  have he : ℓ ^ 2 = (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
+  set ℓ := (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
+  have he : ℓ ^ 2 = (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ + a₂ + x₁ + x₂ := by grind
   have hℓ2 : ((ℓ ^ 2 : ℚ).den : ZMod p) ≠ 0 := by
     rw [he]
     exact den_add_ne_zero hp (den_add_ne_zero hp (den_add_ne_zero hp hd3 (by simp)) hd1) hd2
@@ -147,8 +147,8 @@ theorem slope_den_of_addX_den (hp : p.Prime)
 all do: `addX = ℓ² - a₂ - x₁ - x₂` has nonzero denominator mod `p`. -/
 theorem addX_den_ne (hp : p.Prime) {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
-    (haddX : (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂) :
-    (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 := by
+    (haddX : (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂) :
+    (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 := by
   have : Fact p.Prime := ⟨hp⟩
   rw [haddX]
   exact den_sub_ne_zero hp (den_sub_ne_zero hp (den_sub_ne_zero hp
@@ -161,34 +161,24 @@ variable [Fact p.Prime]
 
 /-- In the genuine-tangent case the reduced secant slope equals the reduced tangent slope `ℓ`:
 `slope x₁ x₁ y₁ y₁ = ℓ`, from the reduced tangent identity `htan`. -/
-theorem reduced_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
+theorem curveZMod_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (hYneg : y₁ ≠ (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁)
     (h2Yne : y₁ + y₁ ≠ 0)
     (htan : ℓ * (y₁ + y₁) = x₁ ^ 2 + x₁ * x₁ + x₁ ^ 2 + a₂ * (x₁ + x₁) + a₄) :
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
-  simp only [map_curveℤ_zmod]
+  simp only [curve_baseChange_eq]
   grind
-
-/-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
-@[grind =]
-theorem reduced_addY_eq {x y ℓ : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
-      = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
-  simp only [Affine.addY, Affine.negY, Affine.negAddY, map_curveℤ_zmod]; grind
 
 /-- When the slope, `x`-coordinates and `y`-coordinate have nonzero denominators mod `p`, the cast
 of the rational `addY` equals `-(ℓ·(addX - x₁) + y₁)` over `ZMod p`. -/
 theorem addY_cast_eq {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hdy1 : (y₁.den : ZMod p) ≠ 0)
-    (hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :
-    ((curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
-      = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-  have haddY : (curve a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
-      = -(ℓ * ((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-    simp only [Affine.addY, Affine.negY, Affine.negAddY, curve]; grind
-  rw [haddY, cast_neg,
+    (hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :
+    ((curveQ a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
+      = -(ℓ * ((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
+  rw [curve_baseChange_addY, cast_neg,
     cast_add_of_ne_zero (den_mul_ne_zero Fact.out hℓden (den_sub_ne_zero Fact.out hd3 hd1)) hdy1,
     cast_mul_of_ne_zero hℓden (den_sub_ne_zero Fact.out hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
 
@@ -221,7 +211,7 @@ variable {x y : ℚ}
 the origin (`p ∣ x.den`), it has integer coordinates `x = x.num/w²`, `y = y.num/w³` over a common
 `w` with `p ∣ w`, `w ≠ 0` and `p`-unit numerator `x.num`. -/
 theorem kernel_point_data (hp : p.Prime)
-    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
+    (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) (hd : (x.den : ZMod p) = 0) :
     ∃ w : ℤ, (x.num : ℚ) = x * w ^ 2 ∧ (y.num : ℚ) = y * w ^ 3
       ∧ (p : ℤ) ∣ w ∧ ¬ (p : ℤ) ∣ x.num ∧ w ≠ 0 := by
   obtain ⟨w, hxd, hyd⟩ := den_isSquare h
@@ -373,18 +363,18 @@ end
 distinct over `ℚ`, the `x`-coordinate `x₃ = addX x₁ x₂ (slope …)` of their sum satisfies
 `p ∣ x₃.den`, so the sum reduces to the origin as well. -/
 theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Equation x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Equation x₂ y₂)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Equation x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Equation x₂ y₂)
     (hne : x₁ ≠ x₂) (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
-    (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-        ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
+    (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
+        ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) = 0 := by
   have hpZ : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
-  set ℓ := (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
-  set x₃ := (curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
+  set ℓ := (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
+  set x₃ := (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
-  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_addX]
-  have hcv1 := equation_curve h₁
-  have hcv2 := equation_curve h₂
+  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_baseChange_addX]
+  have hcv1 := curve_baseChange_equation h₁
+  have hcv2 := curve_baseChange_equation h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
   obtain ⟨G, hC, hD, hpG, hpC, hGne⟩ := kernel_point_data hp h₂ hd2
   set A : ℤ := x₁.num
@@ -417,9 +407,9 @@ variable [Fact p.Prime]
 
 /-- Over `ℚ`, the affine point underlying the integer representative `intRep x y w` is `(x, y)`. -/
 theorem toAffine_g_intRep {x y : ℚ} {w : ℕ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+    (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
-    Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ intRep x y w)
+    Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ intRep x y w)
       = .some x y h := by
   have hw : w ≠ 0 := by grind [Rat.den_ne_zero]
   rw [intRep_map_ℚ hden hden',
@@ -429,26 +419,26 @@ theorem toAffine_g_intRep {x y : ℚ} {w : ℕ}
 /-- An integer projective representative whose rational affine point is a `some` is nonsingular
 over `ℚ` (the affine point of a singular representative is the origin). -/
 theorem nonsingular_of_toAffine_some {U : Fin 3 → ℤ} {X Y : ℚ}
-    {hR : (curve a₂ a₄ a₆).toAffine.Nonsingular X Y}
-    (hU : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ U) = .some X Y hR) :
-    (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ U) := by
+    {hR : (curveQ a₂ a₄ a₆).toAffine.Nonsingular X Y}
+    (hU : Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ U) = .some X Y hR) :
+    (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ U) := by
   grind [Point.toAffine_of_singular, Affine.Point.some_ne_zero]
 
 /-- If two integer projective representatives have the same (rational) affine point, then they are
 proportional over `ℤ`, with the cross scalars given by each other's `Z`-coordinate. -/
 theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
-    {hR : (curve a₂ a₄ a₆).toAffine.Nonsingular X Y}
-    (hS : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ S) = .some X Y hR)
-    (hT : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = .some X Y hR) :
+    {hR : (curveQ a₂ a₄ a₆).toAffine.Nonsingular X Y}
+    (hS : Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ S) = .some X Y hR)
+    (hT : Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = .some X Y hR) :
     T 2 • S = S 2 • T := by
   have key : ∀ U : Fin 3 → ℤ,
-      Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ U)
+      Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ U)
         = .some X Y hR → (U 0 : ℚ) = X * U 2 ∧ (U 1 : ℚ) = Y * U 2 := by
     intro U hU
     have hg : ∀ i, (Int.castRingHom ℚ ∘ U) i = (U i : ℚ) := fun i ↦ by simp [Function.comp_apply]
     have hUz : (Int.castRingHom ℚ ∘ U) 2 ≠ 0 := by
       grind [Point.toAffine_of_Z_eq_zero, Affine.Point.some_ne_zero]
-    have hns : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ U) :=
+    have hns : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ U) :=
       nonsingular_of_toAffine_some hU
     rw [Point.toAffine_of_Z_ne_zero hns hUz, Affine.Point.some.injEq] at hU
     rw [hg] at hUz
@@ -460,11 +450,11 @@ theorem int_smul_eq_of_toAffine_eq {S T : Fin 3 → ℤ} {X Y : ℚ}
 
 /-- Reduction is well-defined on classes: any integer projective representative `T` whose
 rational affine point is `R` reduces mod `p` to a representative equivalent to `repr R`. -/
-theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (R : (curve a₂ a₄ a₆).toAffine.Point) {T : Fin 3 → ℤ}
+theorem repr_equiv_of_toAffine (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (R : (curveQ a₂ a₄ a₆).toAffine.Point) {T : Fin 3 → ℤ}
     (hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ T))
-    (hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ T))
-    (hTℚ : Point.toAffine (curve a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = R) :
+    (hnsq : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ T))
+    (hTℚ : Point.toAffine (curveQ a₂ a₄ a₆).toProjective (Int.castRingHom ℚ ∘ T) = R) :
     repr p R ≈ Int.castRingHom (ZMod p) ∘ T := by
   cases R with
   | zero =>
@@ -490,20 +480,20 @@ theorem repr_equiv_of_toAffine (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) �
 representative `V` whose reduction is the reduced sum (`hadd`) and whose rational value is the
 rational sum of two nonsingular representatives `A`, `B` (`hgadd`) is equivalent mod `p` to `repr`
 of the affine sum `toAffine A + toAffine B`. -/
-theorem sum_repr_equiv (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {V : Fin 3 → ℤ}
-    {A B : Fin 3 → ℚ} (P Q : (curve a₂ a₄ a₆).toAffine.Point)
-    (hnsA : (curve a₂ a₄ a₆).toProjective.Nonsingular A)
-    (hnsB : (curve a₂ a₄ a₆).toProjective.Nonsingular B)
-    (hgadd : Int.castRingHom ℚ ∘ V = (curve a₂ a₄ a₆).toProjective.add A B)
-    (haffA : Point.toAffine (curve a₂ a₄ a₆).toProjective A = P)
-    (haffB : Point.toAffine (curve a₂ a₄ a₆).toProjective B = Q)
+theorem sum_repr_equiv (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0) {V : Fin 3 → ℤ}
+    {A B : Fin 3 → ℚ} (P Q : (curveQ a₂ a₄ a₆).toAffine.Point)
+    (hnsA : (curveQ a₂ a₄ a₆).toProjective.Nonsingular A)
+    (hnsB : (curveQ a₂ a₄ a₆).toProjective.Nonsingular B)
+    (hgadd : Int.castRingHom ℚ ∘ V = (curveQ a₂ a₄ a₆).toProjective.add A B)
+    (haffA : Point.toAffine (curveQ a₂ a₄ a₆).toProjective A = P)
+    (haffB : Point.toAffine (curveQ a₂ a₄ a₆).toProjective B = Q)
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
       (repr p P) (repr p Q) = Int.castRingHom (ZMod p) ∘ V) :
     repr p (P + Q) ≈ Int.castRingHom (ZMod p) ∘ V := by
   have hnsp : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular (Int.castRingHom (ZMod p) ∘ V) := by
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
-  have hnsq : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ V) := by
+  have hnsq : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ V) := by
     grind [nonsingular_add]
   exact repr_equiv_of_toAffine hΔ _ hnsp hnsq (by grind [Point.toAffine_add])
 
@@ -514,17 +504,17 @@ variable {x₁ y₁ x₂ y₂ : ℚ}
 /-- Distinct points sharing an `x`-coordinate are mutually negative: if `x₁ = x₂` but
 `(x₁, y₁) ≠ (x₂, y₂)`, then `y₁ = negY x₂ y₂` (so `P + Q = O`). -/
 theorem y_eq_negY_of_X_eq
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
-    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
-    y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hx12 : x₁ = x₂)
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
+    y₁ = (curveQ a₂ a₄ a₆).toAffine.negY x₂ y₂ := by
   grind [Affine.Y_eq_of_X_eq h₁.1 h₂.1 hx12, Affine.Point.some.injEq]
 
 /-- Additivity of `redP` in the tangent-mod-`p` `2`-torsion sub-case: the shared reduced point
 satisfies `Ȳ₁ = -Ȳ₁`, and both `redP (P + Q)` and `P̄ + P̄` are the origin. -/
-theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
+theorem redP_add_tangent_two_torsion (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hXbar : (x₁ : ZMod p) = x₂) (hYbar : (y₁ : ZMod p) = y₂)
@@ -537,51 +527,51 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod
   obtain ⟨-, htan⟩ :=
     reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den Fact.out hd1 hd2 hd3_s) hd3_s
-  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans reduced_negY
+  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans curve_baseChange_negY
   have hY0 : (y₁ : ZMod p) + y₂ = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine hΔ h₁ hd1
-  rw [Affine.nonsingular_iff, map_curveℤ_zmod] at hns
+  simp only [Affine.nonsingular_iff, curve_baseChange_eq] at hns
   grind
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
 `redP (P + Q)` is the tangent doubling of the common reduced point `P̄`. Both reduced `x`- and
 `y`-coordinates are matched against the doubling formulas via the reduced tangent identities. -/
-theorem redP_add_tangent_generic (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
+theorem redP_add_tangent_generic (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) (hne : x₁ ≠ x₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hd2 : (x₂.den : ZMod p) ≠ 0)
     (hdy1 : (y₁.den : ZMod p) ≠ 0) (hdy2 : (y₂.den : ZMod p) ≠ 0)
     (hXbar : (x₁ : ZMod p) = x₂) (hYbar : (y₁ : ZMod p) = y₂)
     (hYneg : ¬ (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY x₁ y₁) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
-  have hslX : (curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
+  have hslX : (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂ = (y₁ - y₂) / (x₁ - x₂) :=
     Affine.slope_of_X_ne hne
   set ℓ : ℚ := (y₁ - y₂) / (x₁ - x₂)
   have hy2 : (y₁ : ZMod p) + y₂ ≠ 0 := by grind
-  have hℓden_s : (((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
+  have hℓden_s : (((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂).den : ZMod p) ≠ 0 :=
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
-  have hd3 : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
-    addX_den_ne Fact.out hℓden hd1 hd2 curve_addX
-  have hd3_s : (((curve a₂ a₄ a₆).toAffine.addX x₁ x₂
-      ((curve a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
+  have hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
+    addX_den_ne Fact.out hℓden hd1 hd2 curve_baseChange_addX
+  have hd3_s : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
+      ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s
   rw [hslX] at hS2 htan
   have h2Yne : (y₁ : ZMod p) + y₁ ≠ 0 := by grind
   rw [← hXbar, ← hYbar] at htan
-  grind [reduced_slope_eq hYneg h2Yne htan, addY_cast_eq hℓden hd1 hdy1 hd3,
+  grind [curveZMod_slope_eq hYneg h2Yne htan, addY_cast_eq hℓden hd1 hdy1 hd3,
     Affine.nonsingular_add h₁ h₂ (fun hxy ↦ hne hxy.left), Affine.Point.add_of_X_ne,
     redP_of_den_ne, Affine.Point.add_of_Y_ne]
 
 /-- Additivity when both summands reduce to the origin (`p ∣ x₁.den`, `p ∣ x₂.den`): the sum also
 reduces to the origin. Uses `den_addX_both_kernel`. -/
 theorem redP_add_kernel
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
-    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hd1 : (x₁.den : ZMod p) = 0) (hd2 : (x₂.den : ZMod p) = 0) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂) = 0 := by
   obtain rfl | hx12 := eq_or_ne x₁ x₂
@@ -591,14 +581,14 @@ theorem redP_add_kernel
 
 /-- Additivity when the reduced points coincide and `Q = -P` over `ℚ` (`x₁ = x₂`): then `P + Q = 0`
 and the common reduced point is `2`-torsion, so `redP (P + Q) = 0 = P̄ + P̄`. -/
-theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
-    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
+theorem redP_add_neg (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hd1 : (x₁.den : ZMod p) ≠ 0) (hx12 : x₁ = x₂) (hYbar : (y₁ : ZMod p) = y₂) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₁ y₁ h₁) := by
-  have hy : y₁ = (curve a₂ a₄ a₆).toAffine.negY x₂ y₂ := y_eq_negY_of_X_eq h₁ h₂ hx12 hPQ
+  have hy : y₁ = (curveQ a₂ a₄ a₆).toAffine.negY x₂ y₂ := y_eq_negY_of_X_eq h₁ h₂ hx12 hPQ
   rw [Affine.Point.add_of_Y_eq hx12 hy, redP_zero, redP_of_den_ne hΔ h₁ hd1]
   have hyneg : (y₁ : ZMod p) = (curveZMod a₂ a₄ a₆ p).toAffine.negY
       (x₁ : ZMod p) (y₁ : ZMod p) := by
@@ -610,11 +600,11 @@ theorem redP_add_neg (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 /-- Additivity of `redP` when two affine points `P`, `Q` reduce to the same point of `E/𝔽ₚ`
 (`redP P = redP Q`) but are distinct over `ℚ`: the reduction of their rational sum equals the
 sum of their reductions. -/
-theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
+theorem redP_add_tangent (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (hred : redP p (.some x₁ y₁ h₁) = redP p (.some x₂ y₂ h₂))
-    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₂ y₂ h₂) := by
   by_cases hd1 : (x₁.den : ZMod p) = 0
@@ -650,19 +640,19 @@ theorem redP_add_tangent (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
 
 /-- Additivity of `redP` on `some + some` when the two reduced representatives are proportional
 mod `p` and the points are equal over `ℚ`: the reduced sum is an honest doubling. -/
-theorem redP_map_add_double (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    {w₁ : ℕ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+theorem redP_map_add_double (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    {w₁ : ℕ} (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
     (hden1 : x₁.den = w₁ ^ 2) (hden1' : y₁.den = w₁ ^ 3)
-    (hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
+    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₁ y₁ h₁))
-      = Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
     repr p (.some x₁ y₁ h₁ + .some x₁ y₁ h₁)
-      ≈ Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
-  have hgadd : Int.castRingHom ℚ ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)
-      = (curve a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
+  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)
+      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
           (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) := by
-    rw [add_self, ← map_curveℤ_ℚ]
+    rw [add_self, ← map_curveQ]
     exact (map_dblXYZ (Int.castRingHom ℚ) _).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns1 hgadd
     (toAffine_g_intRep h₁ hden1 hden1')
@@ -670,37 +660,38 @@ theorem redP_map_add_double (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0
 
 /-- Additivity of `redP` on `some + some` in the secant case (`¬ repr P ≈ repr Q` mod `p`): the
 reduced sum is a secant, and the two representatives are also inequivalent over `ℚ`. -/
-theorem redP_map_add_secant (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    {w₁ w₂ : ℕ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
+theorem redP_map_add_secant (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    {w₁ w₂ : ℕ} (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (hden1 : x₁.den = w₁ ^ 2) (hden1' : y₁.den = w₁ ^ 3)
     (hden2 : x₂.den = w₂ ^ 2) (hden2' : y₂.den = w₂ ^ 3)
-    (hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
-    (hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂))
+    (hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁))
+    (hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂))
     (heq : ¬ repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂)) :
     repr p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      ≈ Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
           (intRep x₂ y₂ w₂) := by
   have hℚne : ¬ Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁ ≈ Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂ := by
     intro hℚeq
     apply heq
-    have hpt : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) = .some x₂ y₂ h₂ := by
+    have hpt : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point)
+        = .some x₂ y₂ h₂ := by
       rw [← toAffine_g_intRep h₁ hden1 hden1', ← toAffine_g_intRep h₂ hden2 hden2']
       exact Point.toAffine_of_equiv hℚeq
     exact hpt ▸ Setoid.refl (repr p (.some x₁ y₁ h₁))
   have hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-      = Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
           (intRep x₂ y₂ w₂) := by
     rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1', repr_some h₂ hden2 hden2']
     exact map_addXYZ (Int.castRingHom (ZMod p)) _ _
-  have hgaddXYZ : (curve a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+  have hgaddXYZ : (curveQ a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
         (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂)
-      = Int.castRingHom ℚ ∘ (curveℤ a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
-          (intRep x₂ y₂ w₂) := by rw [← map_curveℤ_ℚ]; exact map_addXYZ (Int.castRingHom ℚ) _ _
-  have hgadd : Int.castRingHom ℚ ∘ (curveℤ a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+      = Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
+          (intRep x₂ y₂ w₂) := by rw [← map_curveQ]; exact map_addXYZ (Int.castRingHom ℚ) _ _
+  have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
         (intRep x₂ y₂ w₂)
-      = (curve a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
+      = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
           (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂) := by
     rw [← hgaddXYZ]; exact (add_of_not_equiv hℚne).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns2 hgadd
@@ -709,20 +700,20 @@ theorem redP_map_add_secant (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0
 /-- Additivity of `redP` on `some + some` in the tangent-mod-`p` case: the reduced
 representatives are proportional but the points differ over `ℚ`. The projective-class goal is
 reduced to the affine additivity supplied by `redP_add_tangent`. -/
-theorem redP_map_add_tangent_case (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    {w₁ : ℕ} (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
+theorem redP_map_add_tangent_case (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    {w₁ : ℕ} (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂)
     (heq : repr p (.some x₁ y₁ h₁) ≈ repr p (.some x₂ y₂ h₂))
-    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
+    (hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) ≠ .some x₂ y₂ h₂)
     (hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
         (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-      = Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
+      = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) :
     repr p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
-      ≈ Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
+      ≈ Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
   have hred : redP p (.some x₁ y₁ h₁) = redP p (.some x₂ y₂ h₂) := by
     rw [redP_eq_toAffine, redP_eq_toAffine]; exact Point.toAffine_of_equiv heq
   have hnspV : (curveZMod a₂ a₄ a₆ p).toProjective.Nonsingular
-      (Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) := by
+      (Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)) := by
     rw [← hadd]
     exact nonsingular_add (repr_nonsingular hΔ _) (repr_nonsingular hΔ _)
   refine equiv_of_toAffine_eq (repr_nonsingular hΔ _) hnspV ?_
@@ -733,16 +724,16 @@ theorem redP_map_add_tangent_case (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p)
 
 /-- Additivity of the reduction map on two `some` points, reduced to a projective-class
 equivalence and dispatched to the doubling, tangent-mod-`p` and secant sub-cases. -/
-theorem redP_map_add_some (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (h₁ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
-    (h₂ : (curve a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) :
+theorem redP_map_add_some (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (h₁ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x₂ y₂) :
     redP p (.some x₁ y₁ h₁ + .some x₂ y₂ h₂)
       = redP p (.some x₁ y₁ h₁) + redP p (.some x₂ y₂ h₂) := by
   obtain ⟨w₁, hden1, hden1'⟩ := den_isSquare h₁.1
   obtain ⟨w₂, hden2, hden2'⟩ := den_isSquare h₂.1
-  have hns1 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) :=
+  have hns1 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) :=
     nonsingular_of_toAffine_some (toAffine_g_intRep h₁ hden1 hden1')
-  have hns2 : (curve a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂) :=
+  have hns2 : (curveQ a₂ a₄ a₆).toProjective.Nonsingular (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂) :=
     nonsingular_of_toAffine_some (toAffine_g_intRep h₂ hden2 hden2')
   rw [redP_eq_toAffine, redP_eq_toAffine (.some x₁ y₁ h₁),
     redP_eq_toAffine (.some x₂ y₂ h₂),
@@ -752,20 +743,20 @@ theorem redP_map_add_some (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   · -- `repr P ≈ repr Q` mod `p`: the reduced sum is a doubling of `repr P`.
     have hadd : (curveZMod a₂ a₄ a₆ p).toProjective.add
           (repr p (.some x₁ y₁ h₁)) (repr p (.some x₂ y₂ h₂))
-        = Int.castRingHom (ZMod p) ∘ (curveℤ a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
+        = Int.castRingHom (ZMod p) ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁) := by
       rw [add_of_equiv heq, repr_some h₁ hden1 hden1']
       exact map_dblXYZ (Int.castRingHom (ZMod p)) _
     rw [hadd]
-    by_cases hPQ : (Affine.Point.some x₁ y₁ h₁ : (curve a₂ a₄ a₆).toAffine.Point) = .some x₂ y₂ h₂
+    by_cases hPQ : (Affine.Point.some x₁ y₁ h₁ : (curveQ a₂ a₄ a₆).toAffine.Point) = .some x₂ y₂ h₂
     · rw [← hPQ] at hadd ⊢; exact redP_map_add_double hΔ h₁ hden1 hden1' hns1 hadd
     · exact redP_map_add_tangent_case hΔ h₁ h₂ heq hPQ hadd
-  · rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1',
-      repr_some h₂ hden2 hden2', map_addXYZ (Int.castRingHom (ZMod p))]
+  · rw [add_of_not_equiv heq, repr_some h₁ hden1 hden1', repr_some h₂ hden2 hden2', curveZMod,
+      WeierstrassCurve.baseChange, algebraMap_int_eq, map_addXYZ (Int.castRingHom (ZMod p))]
     exact redP_map_add_secant hΔ h₁ h₂ hden1 hden1' hden2 hden2' hns1 hns2 heq
 
 /-- Additivity of the reduction map. -/
-theorem redP_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
-    (P Q : (curve a₂ a₄ a₆).toAffine.Point) :
+theorem redP_map_add (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
+    (P Q : (curveQ a₂ a₄ a₆).toAffine.Point) :
     redP p (P + Q) = redP p P + redP p Q := by
   cases P with
   | zero => rw [← Affine.Point.zero_def, zero_add, redP_zero, zero_add]
@@ -775,10 +766,10 @@ theorem redP_map_add (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   | some x₂ y₂ h₂ => exact redP_map_add_some hΔ h₁ h₂
 
 /-- The reduction map bundled as an additive homomorphism
-`(curve …).toAffine.Point →+ ((curveℤ …).map (Int.castRingHom (ZMod p))).toAffine.Point`. -/
+`(curve …).toAffine.Point →+ ((curve …).map (Int.castRingHom (ZMod p))).toAffine.Point`. -/
 @[expose, simps]
-public noncomputable def redHom (hΔ : ((curveℤ a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
-    (curve a₂ a₄ a₆).toAffine.Point →+ (curveZMod a₂ a₄ a₆ p).toAffine.Point where
+public noncomputable def redHom (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0) :
+    (curveQ a₂ a₄ a₆).toAffine.Point →+ (curveZMod a₂ a₄ a₆ p).toAffine.Point where
   toFun := redP p
   map_zero' := redP_zero
   map_add' := by exact redP_map_add hΔ

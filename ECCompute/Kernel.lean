@@ -61,7 +61,7 @@ noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
 
 /-! ## Descent label check -/
 
-/-- The discriminant of the short model `curve a₂ a₄ a₆`, for the kernel. -/
+/-- The discriminant of the integral model `curve a₂ a₄ a₆`, for the kernel. -/
 def discrIntK (a₂ a₄ a₆ : Int) : Int :=
   let b2 := Int.mul 4 a₂
   let b4 := Int.mul 2 a₄

@@ -38,7 +38,7 @@ variable {a₂ a₄ a₆ : ℤ}
 
 /-- For a solution `(x, y)` of the integral curve `y² = x³ + a₂x² + a₄x + a₆`, there is a
 natural number `w` with `x.den = w²` and `y.den = w³`. -/
-public theorem den_isSquare {x y : ℚ} (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+public theorem den_isSquare {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
     ∃ w : ℕ, x.den = w ^ 2 ∧ y.den = w ^ 3 := by
   set N : ℤ := x.num ^ 3 + x.den * (a₂ * x.num ^ 2 + a₄ * x.num * x.den + a₆ * x.den ^ 2)
   have key : y.num ^ 2 * x.den ^ 3 = y.den ^ 2 * N := by
@@ -63,7 +63,7 @@ public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod 
 /-- The `y`-denominator vanishes mod `p` iff the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
 public theorem ydenom_eq_zero_iff (hp : p.Prime) {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Equation x y) :
+    (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
     (y.den : ZMod p) = 0 ↔ (x.den : ZMod p) = 0 := by
   obtain ⟨w, hxw, hyw⟩ := den_isSquare h
   simp only [ZMod.natCast_eq_zero_iff]

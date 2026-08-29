@@ -154,7 +154,7 @@ theorem fderivResK_eq_val (hp : p ≠ 0) (htval : tval = θ) :
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
 and `x` has numerator `xp - xm` and denominator `xden`. -/
 public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
-    (h : (curve a₂ a₄ a₆).toAffine.Nonsingular x y)
+    (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
     (if lambdaK a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
       = lambda θ (.some x y h) := by

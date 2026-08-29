@@ -60,10 +60,10 @@ variable {c : Certificate} {pt : Fin c.ρ → ℚ × ℚ} {ls : Fin c.ρ → ℕ
 
 /-- The `2`-torsion of the span `H` of the certified points embeds into the `2`-torsion of the whole
 curve, so its cardinality is bounded by `|E(ℚ)[2]|`. -/
-theorem card_torsionBy_le (H : Submodule ℤ (curve a₂ a₄ a₆).toAffine.Point) :
-    Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curve a₂ a₄ a₆).twoTorsionPoints.ncard := by
+theorem card_torsionBy_le (H : Submodule ℤ (curveQ a₂ a₄ a₆).toAffine.Point) :
+    Nat.card (Submodule.torsionBy ℤ H 2) ≤ (curveQ a₂ a₄ a₆).twoTorsionPoints.ncard := by
   have hmap (x : Submodule.torsionBy ℤ H 2) :
-      (x : (curve a₂ a₄ a₆).toAffine.Point) ∈ (curve a₂ a₄ a₆).twoTorsionPoints := by
+      (x : (curveQ a₂ a₄ a₆).toAffine.Point) ∈ (curveQ a₂ a₄ a₆).twoTorsionPoints := by
     rw [mem_twoTorsionPoints, ← two_zsmul, ← Submodule.coe_smul, Submodule.smul_coe_torsionBy,
       Submodule.coe_zero]
   refine Nat.card_le_card_of_injective (fun x ↦ ⟨x, hmap x⟩) fun a b hab ↦ ?_
@@ -74,12 +74,12 @@ short model of these coefficients is the certificate's curve (`hmodel`), and a c
 satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.ρ - c.t`. -/
 public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate)
     (W : WeierstrassCurve ℚ)
-    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curve c.a₂ c.a₄ c.a₆)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curveQ c.a₂ c.a₄ c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
   subst hW
-  suffices HasRankGE (curve c.a₂ c.a₄ c.a₆) (c.ρ - c.t) from
+  suffices HasRankGE (curveQ c.a₂ c.a₄ c.a₆) (c.ρ - c.t) from
     hasRankGE_of_addEquiv (generalToShortEquiv a₁ a₂ a₃ a₄ a₆)
       (IntegralScaling.scaling_smul_shortModel.trans hmodel ▸ this)
   clear hmodel a₁ a₂ a₃ a₄ a₆
@@ -91,19 +91,19 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     checkLabels_true hlsC _ (List.getElem_mem _)
   replace hlsC (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
     descentHyp_of_checkLabel (hlsC j) (hlsP j)
-  replace hpt (i : Fin c.ρ) : (curve c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
+  replace hpt (i : Fin c.ρ) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
     hpt _ (List.getElem_mem _)
   classical
   have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
       if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
           (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0 :=
     checkB_true hlenB hlenP hlenL hlenQ hB
-  set E : Type := (curve c.a₂ c.a₄ c.a₆).toAffine.Point
+  set E : Type := (curveQ c.a₂ c.a₄ c.a₆).toAffine.Point
   set φ : E →+ (Fin c.ρ → ZMod 2) := AddMonoidHom.pi (fun j ↦ lambdaHom (hlsC j)) with hφ
   rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
   · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
-  have hΔ : (curve c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hlsC ⟨0, hρpos⟩).discr (by simp [hΔ0])
-  have hns (i) : (curve c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
+  have hΔ : (curveQ c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hlsC ⟨0, hρpos⟩).discr (by simp [hΔ0])
+  have hns (i) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
     (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
   let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
   -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.

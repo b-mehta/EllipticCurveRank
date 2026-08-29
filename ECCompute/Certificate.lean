@@ -87,6 +87,6 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- `M` inverts `B` over `𝔽₂`. -/
   inv : F2Invert.checkInv c.ρ c.B c.M
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/
-  tors : (curve c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t
+  tors : (curveQ c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t
 
 end ECCompute
