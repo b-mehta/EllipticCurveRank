@@ -21,7 +21,7 @@ discriminant over a field.
 * `WeierstrassCurve.Projective.equiv_of_proportional`: `V 2 • U = U 2 • V` implies `U ≈ V`.
 * `WeierstrassCurve.Projective.equiv_of_toAffine_eq`: equal affine points imply `U ≈ V`.
 * `WeierstrassCurve.j_eq_iff`: `j = q ↔ c₄³ = Δ · q` for a curve with invertible discriminant.
-* `WeierstrassCurve.isElliptic_of_Δ_ne_zero`: a nonzero discriminant over a field gives `IsElliptic`.
+* `WeierstrassCurve.isElliptic_of_Δ_ne_zero`: `Δ ≠ 0` over a field gives `IsElliptic`.
 -/
 
 public section
