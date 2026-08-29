@@ -11,14 +11,17 @@ public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 /-!
 # Weierstrass curve helpers for mathlib
 
-Negation on affine points when `a₁ = a₃ = 0`, and two criteria for equivalence of nonsingular
-projective representatives over a field.
+Negation on affine points when `a₁ = a₃ = 0`, two criteria for equivalence of nonsingular
+projective representatives over a field, and the `j`-invariant of a curve with nonzero
+discriminant over a field.
 
 ## Main results
 
 * `WeierstrassCurve.Affine.negY_of_a₁_a₃_eq_zero`: `negY x y = -y` when `a₁ = a₃ = 0`.
 * `WeierstrassCurve.Projective.equiv_of_proportional`: `V 2 • U = U 2 • V` implies `U ≈ V`.
 * `WeierstrassCurve.Projective.equiv_of_toAffine_eq`: equal affine points imply `U ≈ V`.
+* `WeierstrassCurve.j_eq_iff`: `j = q ↔ c₄³ = Δ · q` for a curve with invertible discriminant.
+* `WeierstrassCurve.isElliptic_of_Δ_ne_zero`: a nonzero discriminant over a field gives `IsElliptic`.
 -/
 
 public section
@@ -74,3 +77,16 @@ theorem equiv_of_toAffine_eq (hU : W.Nonsingular U) (hV : W.Nonsingular V)
   exact Quotient.exact (congrArg Point.point hmk)
 
 end WeierstrassCurve.Projective
+
+namespace WeierstrassCurve
+
+variable {F : Type*} [Field F] {W : WeierstrassCurve F}
+
+/-- For a Weierstrass curve with invertible discriminant, `j = q` iff `c₄³ = Δ · q`. -/
+theorem j_eq_iff [W.IsElliptic] {q : F} : W.j = q ↔ W.c₄ ^ 3 = W.Δ * q := by
+  rw [j, Units.inv_mul_eq_iff_eq_mul, coe_Δ']
+
+/-- Over a field, a nonzero discriminant makes a Weierstrass curve an elliptic curve. -/
+theorem isElliptic_of_Δ_ne_zero (hΔ : W.Δ ≠ 0) : W.IsElliptic := ⟨isUnit_iff_ne_zero.mpr hΔ⟩
+
+end WeierstrassCurve
