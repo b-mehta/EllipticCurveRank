@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.VariableChangePoint
+public import ECCompute.ForMathlib.VariableChangePoint
 public import ECCompute.Theory.Model
 
 /-!

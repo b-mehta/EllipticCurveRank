@@ -5,6 +5,7 @@ public import ECCompute.ForLean
 public import ECCompute.ForMathlib.ModuleTorsionQuotient
 public import ECCompute.ForMathlib.RatDenom
 public import ECCompute.ForMathlib.TwoTorsion
+public import ECCompute.ForMathlib.VariableChangePoint
 public import ECCompute.ForMathlib.WeierstrassCurve
 public import ECCompute.Kernel
 public import ECCompute.MainTheorem
@@ -29,4 +30,3 @@ public import ECCompute.Theory.Descent.ReductionMap
 public import ECCompute.Theory.Model
 public import ECCompute.Theory.RankDeduction
 public import ECCompute.Theory.ShortModel
-public import ECCompute.Theory.VariableChangePoint
