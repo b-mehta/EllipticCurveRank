@@ -94,10 +94,11 @@ public theorem curve_baseChange_equation {x y : R}
 
 end BaseChange
 
-/-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case); it equals
-`WeierstrassCurve.Δ` by `curveQ_Δ_num`. -/
+/-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
+`WeierstrassCurve.Δ`. -/
 @[expose] public def discrInt (a₂ a₄ a₆ : ℤ) : ℤ :=
-  16 * a₂ ^ 2 * a₄ ^ 2 - 64 * a₂ ^ 3 * a₆ - 64 * a₄ ^ 3 + 288 * a₂ * a₄ * a₆ - 432 * a₆ ^ 2
+  -(4 * a₂) ^ 2 * (4 * a₂ * a₆ - a₄ ^ 2) - 8 * (2 * a₄) ^ 3 - 27 * (4 * a₆) ^ 2 +
+    9 * (4 * a₂) * (2 * a₄) * (4 * a₆)
 
 /-- The numerator of the discriminant of `curveQ a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
 public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
