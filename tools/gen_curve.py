@@ -36,6 +36,10 @@ from sympy import Poly, QQ, Rational, Symbol, ZZ, jacobi_symbol, primerange
 
 _X = Symbol("X")
 
+# The prime ceiling for both the descent-column scan and the saturation escalation. The two
+# must agree: saturation may reach full rank on a prime that select_labels then has to find.
+MAX_PRIME = 200000
+
 
 # ---------- curve model ----------
 class Curve:
@@ -160,7 +164,7 @@ def halve(Q, A2, A4, A6):
     return None
 
 
-def saturate(curve, prime_cap=1000, max_cap=200000, max_rounds=60):
+def saturate(curve, prime_cap=1000, max_cap=MAX_PRIME, max_rounds=60):
     """2-saturate the witness points in place: while some F2-combination of the points is in
     2E(Q) (so no descent character separates it), replace one summand by the half. Starts at
     a small prime cap and escalates only when a relation is not yet resolved, so the common
@@ -187,7 +191,7 @@ def saturate(curve, prime_cap=1000, max_cap=200000, max_rounds=60):
     return False
 
 
-def select_labels(curve, prime_cap=100000):
+def select_labels(curve, prime_cap=MAX_PRIME):
     """Greedy F2-independent column set, scanning primes ascending, roots ascending.
     Matches the ordering the committed data files were built with."""
     n = len(curve.short)
