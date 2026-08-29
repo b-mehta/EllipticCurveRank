@@ -54,11 +54,11 @@ theorem shortModel_a₂ : (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
 
 @[simp]
 theorem shortModel_a₄ : (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  simp [shortModel, variableChange_a₄]; ring
+  simp [shortModel, variableChange_a₄]; grind
 
 @[simp]
 theorem shortModel_a₆ : (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  simp [shortModel, variableChange_a₆]; ring
+  simp [shortModel, variableChange_a₆]; grind
 
 /-- The completing-the-square change of variables induces a group isomorphism between the
 Mordell-Weil groups of the general model `W` and the short model `shortModel W`, so any rank lower
