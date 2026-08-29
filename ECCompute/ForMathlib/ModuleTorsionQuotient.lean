@@ -103,8 +103,8 @@ end LinearEquiv
 
 namespace Submodule
 
-variable {R : Type*} [Ring R] {M N : Type*} [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N]
+variable {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N] (a : R)
 
 /-- The quotient of a binary product by a product submodule splits as a product of quotients. -/
 public def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
@@ -140,8 +140,7 @@ public def prodSubtypeEquiv (S : Submodule R M) (T : Submodule R N) : ↥(S.prod
   right_inv _ := rfl
 
 /-- `a • ·` has range the product of the ranges of the coordinate maps. -/
-public lemma range_lsmul_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] (a : R) :
+public lemma range_lsmul_prod :
     LinearMap.range (LinearMap.lsmul R (M × N) a) =
       (LinearMap.range (LinearMap.lsmul R M a)).prod (LinearMap.range (LinearMap.lsmul R N a)) := by
   have h : LinearMap.lsmul R (M × N) a =
@@ -150,16 +149,14 @@ public lemma range_lsmul_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGro
   rw [h, LinearMap.range_prodMap]
 
 /-- The `a`-torsion of a product is the product of the `a`-torsions. -/
-public lemma torsionBy_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] (a : R) :
+public lemma torsionBy_prod :
     Submodule.torsionBy R (M × N) a =
       (Submodule.torsionBy R M a).prod (Submodule.torsionBy R N a) := by
   ext ⟨x, y⟩
   simp [Submodule.mem_torsionBy_iff, Submodule.mem_prod, Prod.smul_mk, Prod.ext_iff]
 
 /-- `Nat.card` of the `a`-torsion of a product multiplies over the factors. -/
-public lemma natCard_torsionBy_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M]
-    [Module R M] [AddCommGroup N] [Module R N] (a : R) :
+public lemma natCard_torsionBy_prod :
     Nat.card (Submodule.torsionBy R (M × N) a) =
       Nat.card (Submodule.torsionBy R M a) * Nat.card (Submodule.torsionBy R N a) := by
   rw [torsionBy_prod, ← Nat.card_prod]
