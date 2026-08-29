@@ -86,12 +86,13 @@ public theorem curve_baseChange_addY {x y ℓ : R} :
       = -(ℓ * (((curve a₂ a₄ a₆).baseChange R).toAffine.addX x x ℓ - x) + y) := by
   simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
 
-end BaseChange
-
-/-- The affine equation of `curveQ a₂ a₄ a₆` in cleared form. -/
+/-- The affine equation of `(curve a₂ a₄ a₆).baseChange R` in cleared form. -/
 @[grind →]
-public theorem equation_curveQ {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
+public theorem equation_curve_baseChange {x y : R}
+    (h : ((curve a₂ a₄ a₆).baseChange R).toAffine.Equation x y) :
     y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve_baseChange_eq]
+
+end BaseChange
 
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
 `WeierstrassCurve.Δ`. -/

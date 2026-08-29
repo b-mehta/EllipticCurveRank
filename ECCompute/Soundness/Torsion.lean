@@ -55,7 +55,7 @@ theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
   have hy0 : y = 0 := by grind [negY, curve_baseChange_eq]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
-  grind [equation_curveQ, h.1]
+  grind [equation_curve_baseChange, h.1]
 
 /-- Every nonzero rational `2`-torsion `x`-coordinate is a root of the `2`-division cubic. -/
 theorem twoTorsion_xcoord_mem_roots (x y : ℚ)
@@ -121,7 +121,7 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
     simpa using (card_twoTorsion_le_of_xcoords this).2
   intro x y hns hP
   obtain ⟨hy0, -⟩ := twoTorsion_y_eq_zero_and_root hns hP
-  have hxr : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0 := by grind [equation_curveQ hns.1]
+  have hxr : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0 := by grind [equation_curve_baseChange hns.1]
   -- `x` roots the monic integer cubic, so it is an integer
   set p : ℤ[X] := X ^ 3 + C a₂ * X ^ 2 + C a₄ * X + C a₆ with hp
   have hmonic : p.Monic := by simp only [hp]; monicity!
