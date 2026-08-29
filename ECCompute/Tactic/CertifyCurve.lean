@@ -154,7 +154,7 @@ meta def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × I
 meta def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
 
-/-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). The
+/-- Build the `Certificate` Expr directly with the `Meta` API. The
 short-model coefficients `sA2, sA4, sA6` are the precomputed integers `a₁²+4a₂`, `16a₄+8a₁a₃`,
 `64a₆+16a₃²`. -/
 meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
