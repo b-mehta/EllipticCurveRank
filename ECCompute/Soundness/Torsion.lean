@@ -52,7 +52,7 @@ theorem twoTorsion_y_eq_zero_and_root {x y : ℚ}
     y = 0 ∧ x ∈ (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).roots := by
   have hmonic : (⟨1, a₂, a₄, a₆⟩ : Cubic ℚ).toPoly.Monic := Cubic.monic_of_a_eq_one' ..
   have hy : y = (curveQ a₂ a₄ a₆).toAffine.negY x y := Y_eq_negY_of_add_self (curveQ a₂ a₄ a₆) h hP
-  have hy0 : y = 0 := by grind [negY, curveQ_eq]
+  have hy0 : y = 0 := by grind [negY, curve_baseChange_eq]
   refine ⟨hy0, ?_⟩
   rw [Cubic.mem_roots_iff hmonic.ne_zero]
   grind [equation_curveQ, h.1]

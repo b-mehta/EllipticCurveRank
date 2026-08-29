@@ -110,7 +110,7 @@ public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
   ext <;>
     simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
       variableChange_a₄, variableChange_a₆, shortModel_a₁, shortModel_a₂, shortModel_a₃,
-      shortModel_a₄, shortModel_a₆, intShortModel, curveQ_eq, inv_inv, Units.val_mk0] <;>
+      shortModel_a₄, shortModel_a₆, intShortModel, curve_baseChange_eq, inv_inv, Units.val_mk0] <;>
     push_cast <;> ring
 
 /-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by

@@ -56,7 +56,7 @@ public theorem εpFinite_some (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsing
 @[local grind →]
 theorem equation_curveZMod (h : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular x y) :
     y ^ 2 = fval (R := ZMod p) a₂ a₄ a₆ x := by
-  simpa [curveZMod_eq, fval] using (equation_iff x y).mp h.1
+  simpa [curve_baseChange_eq, fval] using (equation_iff x y).mp h.1
 
 /-- `p ≠ 2` under the descent hypotheses (from `p ∤ 6`). -/
 theorem DescentHyp.ne_two (h : DescentHyp a₂ a₄ a₆ p θ) : p ≠ 2 := fun hp ↦ h.ne_six (hp ▸ ⟨3, rfl⟩)
@@ -109,7 +109,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, slope_of_X_ne hne, div_mul_cancel₀ _ (by grind)]
-  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curveZMod_addX]
+  have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_baseChange_addX]
   exact εp_sum_of_vieta (m := y₁ - ℓ * x₁) h hne (vieta_of_roots hne hx3 (by grind) (by grind))
 
 /-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the
@@ -139,7 +139,8 @@ theorem εpFinite_double [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ p θ) {x 
   set ℓ := (curveZMod a₂ a₄ a₆ p).toAffine.slope x x y y with hℓdef
   set x₃ := (curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ with hx3def
   have hℓ : ℓ * (2 * y) = fderiv (a₂ : ZMod p) a₄ x := by
-    rw [hℓdef, slope_of_Y_ne rfl hyne, curveZMod_eq]
+    rw [hℓdef, slope_of_Y_ne rfl hyne]
+    simp only [curve_baseChange_eq]
     grind [fderiv]
   have hx3 : x₃ = ℓ ^ 2 - a₂ - 2 * x := by grind
   exact εp_double_of_vieta (m := y - ℓ * x) h (by grind)

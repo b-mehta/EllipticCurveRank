@@ -168,7 +168,7 @@ theorem curveZMod_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
     (curveZMod a₂ a₄ a₆ p).toAffine.slope x₁ x₁ y₁ y₁ = ℓ := by
   refine mul_right_cancel₀ h2Yne ?_
   rw [Affine.slope_of_Y_ne rfl hYneg]
-  simp only [curveZMod_eq]
+  simp only [curve_baseChange_eq]
   grind
 
 /-- The reduced-curve `addY` at a doubled point unfolds to `-(ℓ·(addX - x) + y)`. -/
@@ -176,7 +176,7 @@ theorem curveZMod_slope_eq {ℓ : ZMod p} {x₁ y₁ : ZMod p}
 theorem curveZMod_addY {x y ℓ : ZMod p} :
     (curveZMod a₂ a₄ a₆ p).toAffine.addY x x y ℓ
       = -(ℓ * ((curveZMod a₂ a₄ a₆ p).toAffine.addX x x ℓ - x) + y) := by
-  simp only [Affine.addY, Affine.negY, Affine.negAddY, curveZMod_eq]; grind
+  simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
 
 /-- When the slope, `x`-coordinates and `y`-coordinate have nonzero denominators mod `p`, the cast
 of the rational `addY` equals `-(ℓ·(addX - x₁) + y₁)` over `ZMod p`. -/
@@ -187,7 +187,7 @@ theorem addY_cast_eq {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
       = -(ℓ * ((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
   have haddY : (curveQ a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
       = -(ℓ * ((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-    simp only [Affine.addY, Affine.negY, Affine.negAddY, curveQ_eq]; grind
+    simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
   rw [haddY, cast_neg,
     cast_add_of_ne_zero (den_mul_ne_zero Fact.out hℓden (den_sub_ne_zero Fact.out hd3 hd1)) hdy1,
     cast_mul_of_ne_zero hℓden (den_sub_ne_zero Fact.out hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
@@ -382,7 +382,7 @@ theorem den_addX_both_kernel (hp : p.Prime) {x₁ y₁ x₂ y₂ : ℚ}
   set ℓ := (curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂
   set x₃ := (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ with hx3def
   have hℓ : ℓ * (x₁ - x₂) = y₁ - y₂ := by grind [Affine.slope_of_X_ne]
-  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curveQ_addX]
+  have haddX : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_baseChange_addX]
   have hcv1 := equation_curveQ h₁
   have hcv2 := equation_curveQ h₂
   obtain ⟨E, hA, hB, hpE, hpA, hEne⟩ := kernel_point_data hp h₁ hd1
@@ -537,12 +537,12 @@ theorem redP_add_tangent_two_torsion (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p)
   obtain ⟨-, htan⟩ :=
     reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2
       (slope_den_of_addX_den Fact.out hd1 hd2 hd3_s) hd3_s
-  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans curveZMod_negY
+  have hYeq : (y₁ : ZMod p) = -y₁ := hYneg.trans curve_baseChange_negY
   have hY0 : (y₁ : ZMod p) + y₂ = 0 := by grind
   rw [hY0, mul_zero] at htan
   have hns : (curveZMod a₂ a₄ a₆ p).toAffine.Nonsingular (x₁ : ZMod p) (y₁ : ZMod p) :=
     red_nonsingular_affine hΔ h₁ hd1
-  rw [Affine.nonsingular_iff, curveZMod_eq] at hns
+  simp only [Affine.nonsingular_iff, curve_baseChange_eq] at hns
   grind
 
 /-- Tangent-mod-`p` additivity, genuine-tangent sub-case (`Ȳ₁ + Ȳ₂ ≠ 0`): the reduced sum
@@ -565,7 +565,7 @@ theorem redP_add_tangent_generic (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠
     reduced_slope_den hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hy2
   have hℓden : (ℓ.den : ZMod p) ≠ 0 := by rwa [← hslX]
   have hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0 :=
-    addX_den_ne Fact.out hℓden hd1 hd2 curveQ_addX
+    addX_den_ne Fact.out hℓden hd1 hd2 curve_baseChange_addX
   have hd3_s : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂
       ((curveQ a₂ a₄ a₆).toAffine.slope x₁ x₂ y₁ y₂)).den : ZMod p) ≠ 0 := by rwa [hslX]
   obtain ⟨hS2, htan⟩ := reduced_tangent_eqs hne h₁.1 h₂.1 hd1 hd2 hdy1 hdy2 hℓden_s hd3_s

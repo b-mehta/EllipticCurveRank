@@ -68,30 +68,23 @@ public theorem curve_baseChange_eq :
   ext <;> simp [curve, WeierstrassCurve.baseChange]
 
 /-- On `(curve a₂ a₄ a₆).baseChange R`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
-public theorem curve_baseChange_addX (x₁ x₂ ℓ : R) :
+@[grind =]
+public theorem curve_baseChange_addX {x₁ x₂ ℓ : R} :
     ((curve a₂ a₄ a₆).baseChange R).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ := by
   simp only [Affine.addX, curve_baseChange_eq]; grind
 
 /-- On `(curve a₂ a₄ a₆).baseChange R` (where `a₁ = a₃ = 0`), the negation `negY` is `y ↦ -y`. -/
-public theorem curve_baseChange_negY (x y : R) :
+@[grind =]
+public theorem curve_baseChange_negY {x y : R} :
     ((curve a₂ a₄ a₆).baseChange R).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curve_baseChange_eq]) (by simp [curve_baseChange_eq])
 
 end BaseChange
 
-/-- `curveQ a₂ a₄ a₆` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ℚ`. -/
-public theorem curveQ_eq : curveQ a₂ a₄ a₆ = ⟨0, a₂, 0, a₄, a₆⟩ := curve_baseChange_eq
-
 /-- The affine equation of `curveQ a₂ a₄ a₆` in cleared form. -/
 @[grind →]
 public theorem equation_curveQ {x y : ℚ} (h : (curveQ a₂ a₄ a₆).toAffine.Equation x y) :
-    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curveQ_eq]
-
-/-- On the short model `curveQ a₂ a₄ a₆`, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
-@[grind =]
-public theorem curveQ_addX {x₁ x₂ ℓ : ℚ} :
-    (curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ :=
-  curve_baseChange_addX x₁ x₂ ℓ
+    y ^ 2 = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by grind [Affine.equation_iff, curve_baseChange_eq]
 
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆` (the `a₁ = a₃ = 0` case), matching
 `WeierstrassCurve.Δ`. -/
@@ -102,28 +95,11 @@ public theorem curveQ_addX {x₁ x₂ ℓ : ℚ} :
 /-- The numerator of the discriminant of `curveQ a₂ a₄ a₆` is `discrInt a₂ a₄ a₆`. -/
 public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a₄ a₆ := by
   have : (curveQ a₂ a₄ a₆).Δ = discrInt a₂ a₄ a₆ := by
-    simp only [Δ, b₂, b₄, b₆, b₈, curveQ_eq, discrInt]; grind
+    simp only [Δ, b₂, b₄, b₆, b₈, curve_baseChange_eq, discrInt]; grind
   rw [this, Rat.num_intCast]
 
 /-- The integral model maps to `curveQ a₂ a₄ a₆` under `ℤ → ℚ`. -/
 public theorem map_curve_Q : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
   rw [curveQ, baseChange, algebraMap_int_eq]
-
-variable {p : ℕ}
-
-/-- `curveZMod a₂ a₄ a₆ p` written as the coefficient tuple `⟨0, a₂, 0, a₄, a₆⟩` over `ZMod p`. -/
-public theorem curveZMod_eq :
-    curveZMod a₂ a₄ a₆ p = ⟨0, a₂, 0, a₄, a₆⟩ := curve_baseChange_eq
-
-/-- On the reduced curve (where `a₁ = a₃ = 0`) the negation `negY` is `y ↦ -y`. -/
-@[grind =]
-public theorem curveZMod_negY {x y : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.negY x y = -y := curve_baseChange_negY x y
-
-/-- On the reduced curve, the sum's `x`-coordinate is `ℓ² - a₂ - x₁ - x₂`. -/
-@[grind =]
-public theorem curveZMod_addX {x₁ x₂ ℓ : ZMod p} :
-    (curveZMod a₂ a₄ a₆ p).toAffine.addX x₁ x₂ ℓ = ℓ ^ 2 - a₂ - x₁ - x₂ :=
-  curve_baseChange_addX x₁ x₂ ℓ
 
 end ECCompute
