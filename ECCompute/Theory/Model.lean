@@ -79,6 +79,13 @@ public theorem curve_baseChange_negY {x y : R} :
     ((curve a₂ a₄ a₆).baseChange R).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curve_baseChange_eq]) (by simp [curve_baseChange_eq])
 
+/-- On `(curve a₂ a₄ a₆).baseChange R`, the doubling `addY` unfolds to `-(ℓ·(addX - x) + y)`. -/
+@[grind =]
+public theorem curve_baseChange_addY {x y ℓ : R} :
+    ((curve a₂ a₄ a₆).baseChange R).toAffine.addY x x y ℓ
+      = -(ℓ * (((curve a₂ a₄ a₆).baseChange R).toAffine.addX x x ℓ - x) + y) := by
+  simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
+
 end BaseChange
 
 /-- The affine equation of `curveQ a₂ a₄ a₆` in cleared form. -/
