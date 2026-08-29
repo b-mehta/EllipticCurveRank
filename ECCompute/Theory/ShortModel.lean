@@ -50,21 +50,15 @@ instance : (shortModel W).IsCharNeTwoNF := W.toCharNeTwoNF_spec
 
 @[simp]
 theorem shortModel_a₂ : (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
-  simp only [shortModel, variableChange_a₂, toCharNeTwoNF_u, toCharNeTwoNF_r, toCharNeTwoNF_s,
-    inv_one, Units.val_one, one_pow, invOf_eq_inv]
-  ring
+  simp [shortModel, variableChange_a₂, invOf_eq_inv]; ring
 
 @[simp]
 theorem shortModel_a₄ : (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  simp only [shortModel, variableChange_a₄, toCharNeTwoNF_u, toCharNeTwoNF_r, toCharNeTwoNF_s,
-    toCharNeTwoNF_t, inv_one, Units.val_one, invOf_eq_inv]
-  ring
+  simp [shortModel, variableChange_a₄, invOf_eq_inv]; ring
 
 @[simp]
 theorem shortModel_a₆ : (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  simp only [shortModel, variableChange_a₆, toCharNeTwoNF_u, toCharNeTwoNF_r, toCharNeTwoNF_t,
-    inv_one, Units.val_one, invOf_eq_inv]
-  ring
+  simp [shortModel, variableChange_a₆, invOf_eq_inv]; ring
 
 /-- The completing-the-square change of variables induces a group isomorphism between the
 Mordell-Weil groups of the general model `W` and the short model `shortModel W`, so any rank lower
