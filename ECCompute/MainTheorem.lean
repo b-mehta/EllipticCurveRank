@@ -31,8 +31,8 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
 ## Main results
 
 * `hasRankGE_of_certificate`: the bound for an arbitrary curve `W` whose coefficients are the
-  integers `a₁ … a₆`, obtained by transporting the short-model bound along
-  `IntegralScaling.generalToShortEquiv`.
+  integers `a₁ … a₆`, obtained by transporting the short-model bound back along the
+  complete-the-square and scaling changes of variables.
 -/
 
 namespace ECCompute
