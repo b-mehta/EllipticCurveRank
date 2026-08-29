@@ -105,11 +105,8 @@ rational root. -/
 public theorem no_rat_root_of_monicHasNoRootMod {b c : ℤ} (hℓ : 1 < ℓ)
     (h : monicHasNoRootMod [c, b] ℓ) {x : ℚ}
     (hx : x ^ 2 + b * x + c = 0) : False := by
-  set p : ℤ[X] := X ^ 2 + C b * X + C c with hp
-  have hmonic : p.Monic := by simp only [p]; monicity!
-  have haeval : p.aeval x = x ^ 2 + b * x + c := by simp [hp]
-  have hroot : p.aeval x = 0 := by grind
-  obtain ⟨z, hz⟩ := exists_int_of_aeval_eq_zero hmonic hroot
+  obtain ⟨z, hz⟩ :=
+    exists_int_of_aeval_eq_zero (p := X ^ 2 + C b * X + C c) (by monicity!) (by simpa using hx)
   refine no_int_root_of_monicHasNoRootMod hℓ h z ?_
   have hQ : (polyEval [c, b, 1] z : ℚ) = 0 := by
     simp only [polyEval]
