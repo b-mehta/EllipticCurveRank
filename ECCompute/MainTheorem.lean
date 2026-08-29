@@ -83,10 +83,11 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
   subst hW
   suffices this : HasRankGE (curveQ c.a₂ c.a₄ c.a₆) (c.ρ - c.t) from by
-    -- Complete the square and scale by `2` to land on the certificate's integral short model.
-    have hsm : scaling 2 two_ne_zero • (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toCharNeTwoNF •
+    -- Complete the square and scale by `2`, as a single variable change, to land on the
+    -- certificate's integral short model.
+    have hsm : (scaling 2 two_ne_zero * (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toCharNeTwoNF) •
         (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ) = curveQ c.a₂ c.a₄ c.a₆ := by
-      rw [← hmodel]
+      rw [mul_smul, ← hmodel]
       ext <;>
         simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
           variableChange_a₄, variableChange_a₆, toCharNeTwoNF_u, toCharNeTwoNF_r, toCharNeTwoNF_s,
@@ -94,8 +95,9 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
           invOf_eq_inv] <;>
         push_cast <;> ring
     exact hasRankGE_of_addEquiv
-      (VariableChange.pointAddEquiv (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toCharNeTwoNF)
-      (hasRankGE_of_addEquiv (VariableChange.pointAddEquiv (scaling 2 two_ne_zero)) (hsm ▸ this))
+      (VariableChange.pointAddEquiv
+        (scaling 2 two_ne_zero * (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toCharNeTwoNF))
+      (hsm ▸ this)
   clear hmodel a₁ a₂ a₃ a₄ a₆
   rw [checkPoints_iff] at hpt
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
