@@ -5,81 +5,32 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.ForMathlib.VariableChangePoint
 public import ECCompute.Theory.Model
-public import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
-import Mathlib.Algebra.CharP.Invertible
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 
 /-!
-# The general curve to the integral short model
+# The integral short model
 
 The certified rank bound lives on the integral short model `curveQ A₂ A₄ A₆`
 (`y² = x³ + A₂x² + A₄x + A₆`, `Aᵢ : ℤ`), where the descent character is defined. A general integral
-Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` is carried to it in two steps, each a group isomorphism of
-Mordell-Weil groups (so a rank lower bound transfers back):
+Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` reaches it by completing the square
+(`WeierstrassCurve.toCharNeTwoNF`) and then scaling by `v = 2`; that transport is carried out in
+`ECCompute.hasRankGE_of_certificate`.
 
-* completing the square, `WeierstrassCurve.toCharNeTwoNF`, to a *rational* short model
-  `shortModel W` (`CompleteSquare.pointAddEquiv`);
-* scaling by `v = 2`, `⟨1/2, 0, 0, 0⟩`, to the integral short model
-  (`IntegralScaling.generalToShortEquiv`).
+## Main declarations
 
-## Main results
-
-* `CompleteSquare.shortModel`, `CompleteSquare.pointAddEquiv`: the rational short model and its
-  group isomorphism to the general model.
-* `IntegralScaling.intShortModel`, `IntegralScaling.generalToShortEquiv`: the integral short model
-  and the composite group isomorphism to it.
+* `ECCompute.IntegralScaling.scaling`: the scaling change of variables `⟨1/v, 0, 0, 0⟩`.
+* `ECCompute.IntegralScaling.intShortModel`: the integral short model of `⟨a₁, a₂, a₃, a₄, a₆⟩`.
 -/
-
-section
-
-namespace ECCompute.CompleteSquare
-
-open WeierstrassCurve
-
-/-! ## The completing-the-square model isomorphism -/
-
-/-- The short model `y² = x³ + a₂'x² + a₄'x + a₆'` obtained from `W` by completing the square,
-i.e. mathlib's `WeierstrassCurve.toCharNeTwoNF = ⟨1, 0, ⅟2·-a₁, ⅟2·-a₃⟩` (over `ℚ`, where `2` is
-invertible), which clears the `a₁` and `a₃` coefficients. -/
-public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ := W.toCharNeTwoNF • W
-
-variable {W : WeierstrassCurve ℚ}
-
-instance : (shortModel W).IsCharNeTwoNF := W.toCharNeTwoNF_spec
-
-@[simp]
-theorem shortModel_a₂ : (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
-  simp [shortModel, variableChange_a₂]; grind
-
-@[simp]
-theorem shortModel_a₄ : (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  simp [shortModel, variableChange_a₄]; grind
-
-@[simp]
-theorem shortModel_a₆ : (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  simp [shortModel, variableChange_a₆]; grind
-
-/-- The completing-the-square change of variables induces a group isomorphism between the
-Mordell-Weil groups of the general model `W` and the short model `shortModel W`, so any rank lower
-bound on the short model transfers back. -/
-public def pointAddEquiv (W : WeierstrassCurve ℚ) :
-    W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
-  W.toCharNeTwoNF.pointAddEquiv
-
-end ECCompute.CompleteSquare
-
-end
 
 namespace ECCompute.IntegralScaling
 
-open WeierstrassCurve WeierstrassCurve.Affine CompleteSquare
-
-/-! ## The integral short model and the scaling change of variables -/
+open WeierstrassCurve
 
 /-- The pure scaling change of variables `⟨1/v, 0, 0, 0⟩` (`v ≠ 0`), whose action `C • W` scales the
 coefficients by `W.aᵢ ↦ vⁱ · W.aᵢ` and points by `(x, y) ↦ (v²x, v³y)`. -/
-public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
+@[expose] public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ :=
+  ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
 
 /-- The `a₂` coefficient of the integral short model: `A₂ = a₁² + 4a₂ = b₂`. -/
 @[expose] public def intShortA₂ (a₁ a₂ : ℤ) : ℤ := a₁ ^ 2 + 4 * a₂
@@ -94,25 +45,5 @@ public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ := ⟨(Units.mk
 integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
 @[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
   curveQ (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
-
-/-- Scaling the rational short model by `v = 2` produces the integral short model. -/
-public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
-    scaling 2 two_ne_zero • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)
-      = intShortModel a₁ a₂ a₃ a₄ a₆ := by
-  ext <;>
-    simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
-      variableChange_a₄, variableChange_a₆, a₁_of_isCharNeTwoNF, a₃_of_isCharNeTwoNF, shortModel_a₂,
-      shortModel_a₄, shortModel_a₆, intShortModel, curve_baseChange_eq, inv_inv, Units.val_mk0] <;>
-    push_cast <;> ring
-
-/-- The composite change of variables `⟨1/2, 0, -a₁/2, -a₃/2⟩` (complete the square, then scale by
-`v = 2`) is a group isomorphism from the general model `⟨a₁, a₂, a₃, a₄, a₆⟩` to its integral short
-model `scaling 2 • shortModel ⟨a₁, a₂, a₃, a₄, a₆⟩` (equal to `intShortModel a₁ a₂ a₃ a₄ a₆` by
-`scaling_smul_shortModel`), on which the descent character is stated. -/
-public def generalToShortEquiv (a₁ a₂ a₃ a₄ a₆ : ℤ) :
-    (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Point ≃+
-      (scaling 2 two_ne_zero
-          • shortModel (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ)).toAffine.Point :=
-  (pointAddEquiv ⟨a₁, a₂, a₃, a₄, a₆⟩).trans (VariableChange.pointAddEquiv (scaling 2 two_ne_zero))
 
 end ECCompute.IntegralScaling
