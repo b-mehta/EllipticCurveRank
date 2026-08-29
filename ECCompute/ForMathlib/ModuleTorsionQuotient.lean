@@ -31,9 +31,11 @@ binary product, and the free rank of a product with a finite factor.
 
 * `Module.natCard_eq_two_pow_finrank`: a finite `𝔽₂`-vector space has `2 ^ dimension` elements.
 * `LinearEquiv.map_range_lsmul`, `LinearEquiv.map_torsionBy`: transport of the range of `a • ·`
-  and of the `a`-torsion along a `ℤ`-linear equivalence.
+  and of the `a`-torsion along an `R`-linear equivalence.
 * `Submodule.prodQuotEquiv`: `(M × N) ⧸ (P.prod Q) ≃ₗ (M ⧸ P) × (N ⧸ Q)`.
 * `Submodule.prodSubtypeEquiv`: `↥(S.prod T) ≃ ↥S × ↥T`.
+* `Submodule.range_lsmul_prod`, `Submodule.torsionBy_prod`, `Submodule.natCard_torsionBy_prod`:
+  the range of `a • ·` and the `a`-torsion of a binary product split over the factors.
 * `Module.finrank_prod_finite`: `finrank ℤ (F × D) = finrank ℤ F` for a finite `D`.
 * `ModN.natCard_modN`: `|H ⧸ nH| = n ^ rank H · |H[n]|` for a finitely generated abelian group.
 -/
@@ -72,12 +74,13 @@ end Module
 
 namespace LinearEquiv
 
-variable {H K : Type*} [AddCommGroup H] [AddCommGroup K]
+variable {R : Type*} [CommRing R] {H K : Type*} [AddCommGroup H] [Module R H]
+  [AddCommGroup K] [Module R K]
 
 /-- A linear equivalence carries the range of `a • ·` to the range of `a • ·`. -/
-public lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) (a : ℤ) :
-    (LinearMap.range (LinearMap.lsmul ℤ H a)).map (e : H →ₗ[ℤ] K) =
-      LinearMap.range (LinearMap.lsmul ℤ K a) := by
+public lemma map_range_lsmul (e : H ≃ₗ[R] K) (a : R) :
+    (LinearMap.range (LinearMap.lsmul R H a)).map (e : H →ₗ[R] K) =
+      LinearMap.range (LinearMap.lsmul R K a) := by
   ext z
   simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply, LinearEquiv.coe_coe]
   constructor
@@ -87,8 +90,8 @@ public lemma map_range_lsmul (e : H ≃ₗ[ℤ] K) (a : ℤ) :
     exact ⟨a • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
 
 /-- A linear equivalence carries `a`-torsion to `a`-torsion. -/
-public lemma map_torsionBy (e : H ≃ₗ[ℤ] K) (a : ℤ) :
-    (Submodule.torsionBy ℤ H a).map (e : H →ₗ[ℤ] K) = Submodule.torsionBy ℤ K a := by
+public lemma map_torsionBy (e : H ≃ₗ[R] K) (a : R) :
+    (Submodule.torsionBy R H a).map (e : H →ₗ[R] K) = Submodule.torsionBy R K a := by
   ext z
   simp only [Submodule.mem_map, Submodule.mem_torsionBy_iff, LinearEquiv.coe_coe]
   constructor
@@ -130,12 +133,37 @@ public def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
     simp [← Submodule.Quotient.mk_add]
 
 /-- The subtype of a product submodule is the product of the subtypes. -/
-public def prodSubtypeEquiv {M N : Type*} [AddCommGroup M] [AddCommGroup N]
-    (S : Submodule ℤ M) (T : Submodule ℤ N) : ↥(S.prod T) ≃ ↥S × ↥T where
+public def prodSubtypeEquiv (S : Submodule R M) (T : Submodule R N) : ↥(S.prod T) ≃ ↥S × ↥T where
   toFun x := (⟨x.1.1, x.2.1⟩, ⟨x.1.2, x.2.2⟩)
   invFun y := ⟨(y.1.1, y.2.1), y.1.2, y.2.2⟩
   left_inv _ := rfl
   right_inv _ := rfl
+
+/-- `a • ·` has range the product of the ranges of the coordinate maps. -/
+public lemma range_lsmul_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (a : R) :
+    LinearMap.range (LinearMap.lsmul R (M × N) a) =
+      (LinearMap.range (LinearMap.lsmul R M a)).prod (LinearMap.range (LinearMap.lsmul R N a)) := by
+  have h : LinearMap.lsmul R (M × N) a =
+      LinearMap.prodMap (LinearMap.lsmul R M a) (LinearMap.lsmul R N a) := by
+    ext p <;> simp [LinearMap.lsmul_apply]
+  rw [h, LinearMap.range_prodMap]
+
+/-- The `a`-torsion of a product is the product of the `a`-torsions. -/
+public lemma torsionBy_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (a : R) :
+    Submodule.torsionBy R (M × N) a =
+      (Submodule.torsionBy R M a).prod (Submodule.torsionBy R N a) := by
+  ext ⟨x, y⟩
+  simp [Submodule.mem_torsionBy_iff, Submodule.mem_prod, Prod.smul_mk, Prod.ext_iff]
+
+/-- `Nat.card` of the `a`-torsion of a product multiplies over the factors. -/
+public lemma natCard_torsionBy_prod {R : Type*} [CommRing R] {M N : Type*} [AddCommGroup M]
+    [Module R M] [AddCommGroup N] [Module R N] (a : R) :
+    Nat.card (Submodule.torsionBy R (M × N) a) =
+      Nat.card (Submodule.torsionBy R M a) * Nat.card (Submodule.torsionBy R N a) := by
+  rw [torsionBy_prod, ← Nat.card_prod]
+  exact Nat.card_congr (prodSubtypeEquiv _ _)
 
 end Submodule
 
@@ -193,37 +221,13 @@ section Prod
 
 variable {M N : Type*} [AddCommGroup M] [AddCommGroup N]
 
-/-- `x ↦ n • x` has range the product of the ranges of the coordinate maps. -/
-lemma range_lsmul_prod :
-    LinearMap.range (LinearMap.lsmul ℤ (M × N) (n : ℤ)) =
-      (LinearMap.range (LinearMap.lsmul ℤ M (n : ℤ))).prod
-        (LinearMap.range (LinearMap.lsmul ℤ N (n : ℤ))) := by
-  have h : LinearMap.lsmul ℤ (M × N) (n : ℤ) =
-      LinearMap.prodMap (LinearMap.lsmul ℤ M (n : ℤ)) (LinearMap.lsmul ℤ N (n : ℤ)) := by
-    ext p <;> simp [LinearMap.lsmul_apply]
-  rw [h, LinearMap.range_prodMap]
-
 /-- `H ⧸ nH` for a product is the product of the factors' `H ⧸ nH`. -/
 lemma natCard_modN_prod :
     Nat.card (ModN (M × N) n) = Nat.card (ModN M n) * Nat.card (ModN N n) := by
   rw [← Nat.card_prod]
   exact Nat.card_congr
-    (((Submodule.quotEquivOfEq _ _ range_lsmul_prod).toEquiv).trans
+    (((Submodule.quotEquivOfEq _ _ (Submodule.range_lsmul_prod (n : ℤ))).toEquiv).trans
       (Submodule.prodQuotEquiv _ _).toEquiv)
-
-/-- The `n`-torsion of a product is the product of the `n`-torsions. -/
-lemma torsionBy_prod :
-    Submodule.torsionBy ℤ (M × N) n =
-      (Submodule.torsionBy ℤ M n).prod (Submodule.torsionBy ℤ N n) := by
-  ext ⟨a, b⟩
-  simp [Submodule.mem_torsionBy_iff, Submodule.mem_prod, Prod.smul_mk, Prod.ext_iff]
-
-/-- `H[n]` for a product is the product of the factors' `H[n]`. -/
-lemma natCard_torsionBy_prod :
-    Nat.card (Submodule.torsionBy ℤ (M × N) n) =
-      Nat.card (Submodule.torsionBy ℤ M n) * Nat.card (Submodule.torsionBy ℤ N n) := by
-  rw [torsionBy_prod, ← Nat.card_prod]
-  exact Nat.card_congr (Submodule.prodSubtypeEquiv _ _)
 
 end Prod
 
@@ -240,7 +244,7 @@ lemma natCard_modN_of_free_prod_finite [NeZero n]
     {D : Type*} [AddCommGroup D] [Finite D] :
     Nat.card (ModN (F × D) n) =
       n ^ finrank ℤ F * Nat.card (Submodule.torsionBy ℤ (F × D) n) := by
-  rw [natCard_modN_prod, natCard_torsionBy_prod, ModN.natCard_eq F n,
+  rw [natCard_modN_prod, Submodule.natCard_torsionBy_prod, ModN.natCard_eq F n,
     natCard_modN_of_finite D, natCard_torsionBy_eq_one_of_noZeroSMul F, one_mul]
 
 /-- For a finitely generated abelian group `H`, `|H ⧸ nH| = n ^ rank H · |H[n]|`. -/
