@@ -11,6 +11,7 @@ public import ECCompute.MainTheorem
 public import ECCompute.Soundness.DescentMatrix
 public import ECCompute.Soundness.F2Invert
 public import ECCompute.Soundness.Fold
+public import ECCompute.Soundness.JInvariant
 public import ECCompute.Soundness.Labels
 public import ECCompute.Soundness.LambdaCompute
 public import ECCompute.Soundness.Points
