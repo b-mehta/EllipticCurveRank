@@ -123,10 +123,8 @@ theorem card_twoTorsion_le_one_of_monicHasNoRootMod (hℓ : 1 < ℓ)
   obtain ⟨hy0, -⟩ := twoTorsion_y_eq_zero_and_root hns hP
   have hxr : x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ = 0 := by grind [curve_baseChange_equation hns.1]
   -- `x` roots the monic integer cubic, so it is an integer
-  set p : ℤ[X] := X ^ 3 + C a₂ * X ^ 2 + C a₄ * X + C a₆ with hp
-  have hmonic : p.Monic := by simp only [hp]; monicity!
-  have haeval : p.aeval x = x ^ 3 + a₂ * x ^ 2 + a₄ * x + a₆ := by simp [hp]
-  obtain ⟨z, hz⟩ := exists_int_of_aeval_eq_zero hmonic (haeval.trans hxr)
+  obtain ⟨z, hz⟩ := exists_int_of_aeval_eq_zero (p := X ^ 3 + C a₂ * X ^ 2 + C a₄ * X + C a₆)
+    (by monicity!) (by simpa using hxr)
   -- `4z = 4x` is an integer root of the scaled cubic, contradicting the no-root-mod witness
   refine (no_int_root_of_monicHasNoRootMod hℓ h (4 * z) ?_).elim
   have hQ : (polyEval [64 * a₆, 16 * a₄, 4 * a₂, 1] (4 * z) : ℚ) = 0 := by
