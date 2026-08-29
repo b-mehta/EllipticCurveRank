@@ -157,9 +157,9 @@ public theorem repr_nonsingular (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 
   cases P with
   | zero => exact nonsingular_zero
   | some x y h =>
-      obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
-      rw [repr_some h hden hden']
-      exact red_nonsingular Fact.out hΔ h hden hden'
+    obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
+    rw [repr_some h hden hden']
+    exact red_nonsingular Fact.out hΔ h hden hden'
 
 /-! ### The reduction map -/
 
@@ -178,21 +178,13 @@ public theorem redP_eq_toAffine (P : (curveQ a₂ a₄ a₆).toAffine.Point) :
 public theorem redP_zero : redP p (0 : (curveQ a₂ a₄ a₆).toAffine.Point) = 0 := by
   rw [redP_eq_toAffine]; exact Point.toAffine_zero
 
-/-- `redP` on a `some` point, through any witness `w` with `x.den = w²`, `y.den = w³`. -/
-theorem redP_some (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
-    (hden : x.den = w ^ 2) (hden' : y.den = w ^ 3) :
-    redP p (.some x y h)
-      = Point.toAffine
-          (curveZMod a₂ a₄ a₆ p).toProjective (Int.castRingHom (ZMod p) ∘ intRep x y w) := by
-  rw [redP_eq_toAffine, repr_some h hden hden']
-
 /-- When `p ∣ x.den` the representative has vanishing `z`-coordinate, so the point reduces to the
 origin. -/
 public theorem redP_of_den_zero (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (hd : (x.den : ZMod p) = 0) :
     redP p (.some x y h) = 0 := by
   obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
-  rw [redP_some h hden hden']
+  rw [redP_eq_toAffine, repr_some h hden hden']
   exact Point.toAffine_of_Z_eq_zero (by simpa [hden] using hd)
 
 /-- The reduced affine coordinates lie on the reduced curve and are nonsingular. -/
@@ -214,8 +206,8 @@ public theorem redP_of_den_ne (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   obtain ⟨w, hden, hden'⟩ := den_isSquare h.1
   have hwne : (w : ZMod p) ≠ 0 := by simpa [hden] using hd
   have hns := red_nonsingular Fact.out hΔ h hden hden'
-  simp only [redP_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne]),
-    intRep_coord_zero hden hwne, intRep_coord_one hden']
+  rw [redP_eq_toAffine, repr_some h hden hden', Point.toAffine_of_Z_ne_zero hns (by simp [hwne])]
+  simp only [intRep_coord_zero hden hwne, intRep_coord_one hden']
 
 end
 
