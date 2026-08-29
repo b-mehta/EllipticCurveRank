@@ -155,10 +155,10 @@ meta def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
 
 /-- Build the `Certificate` Expr directly with the `Meta` API (no `Syntax`/`quote`/`delab`). The
-short-model coefficient Exprs `sA2E, sA4E, sA6E` are the precomputed integer literals `a₁²+4a₂`,
-`16a₄+8a₁a₃`, `64a₆+16a₃²`. -/
+short-model coefficients `sA2, sA4, sA6` are the precomputed integers `a₁²+4a₂`, `16a₄+8a₁a₃`,
+`64a₆+16a₃²`. -/
 meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
-    (B M : List Nat) (t tp : Nat) (sA2E sA4E sA6E : Expr) : MetaM Expr := do
+    (B M : List Nat) (t tp : Nat) (sA2 sA4 sA6 : Int) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
   let ptExprs := pts.toList.map fun (xn, xd, yn, yd) ↦
@@ -167,7 +167,7 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
   return mkAppN (mkConst ``Certificate.mk)
-    #[sA2E, sA4E, sA6E, toExpr ρ, pointsE,
+    #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
@@ -181,11 +181,12 @@ checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]|
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
 `t = 2`. The model equality is discharged by `WeierstrassCurve.ext_of_beq` on the five coefficient
 `BEq`s. `torsRoot` supplies the `t = 1` root `R`. -/
-meta def mkCertProof (t : Nat) (torsRoot : Int)
-    (wE a1E a2E a3E a4E a6E sA2E sA4E sA6E cExpr hW : Expr) : MetaM Expr := do
+meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 sA6 : Int)
+    (wE cExpr hW : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
-  let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) #[a1E, a2E, a3E, a4E, a6E]
-  let wCurve := mkAppN (mkConst ``curveQ) #[sA2E, sA4E, sA6E]
+  let aEs := #[toExpr v1, toExpr v2, toExpr v3, toExpr v4, toExpr v6]
+  let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) aEs
+  let wCurve := mkAppN (mkConst ``curveQ) #[toExpr sA2, toExpr sA4, toExpr sA6]
   let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
     #[wModel, wCurve, rb, rb, rb, rb, rb]
   let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
@@ -214,7 +215,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int)
   let hValid := mkAppN (mkConst ``Certificate.Valid.mk)
     #[cExpr, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
-    #[a1E, a2E, a3E, a4E, a6E, cExpr, wE, hW, hmodel, hValid]
+    (aEs ++ #[cExpr, wE, hW, hmodel, hValid])
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
@@ -224,29 +225,23 @@ and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑
 meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
   let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
-  let a1E := toExpr v1
-  let a2E := toExpr v2
-  let a3E := toExpr v3
-  let a4E := toExpr v4
-  let a6E := toExpr v6
   let ρ := ρGoal + t
   let (pts, ls) ← readData path lpath ρ
   let xs := (pts.map fun (xn, xd, _, _) ↦ (xn, xd)).toList
   let sA2 := v1 ^ 2 + 4 * v2
   let sA4 := 16 * v4 + 8 * v1 * v3
   let sA6 := 64 * v6 + 16 * v3 ^ 2
-  let (sA2E, sA4E, sA6E) := (toExpr sA2, toExpr sA4, toExpr sA6)
   let (B, M) ← buildMats sA2 sA4 xs ls.toList ρ
-  let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2E sA4E sA6E
+  let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
   -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
   let ratTy := mkConst ``Rat
-  let castE (aE : Expr) : Expr :=
-    mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) aE
+  let castE (a : Int) : Expr :=
+    mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) (toExpr a)
   let litCurve := mkAppN (mkConst ``WeierstrassCurve.mk [Level.zero])
-    #[ratTy, castE a1E, castE a2E, castE a3E, castE a4E, castE a6E]
+    #[ratTy, castE v1, castE v2, castE v3, castE v4, castE v6]
   let rb := Lean.reflBoolTrue
   let hW := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq) #[wE, litCurve, rb, rb, rb, rb, rb]
-  goal.assign (← mkCertProof t torsRoot wE a1E a2E a3E a4E a6E sA2E sA4E sA6E cExpr hW)
+  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 sA2 sA4 sA6 wE cExpr hW)
   replaceMainGoal []
 
 elab_rules : tactic
