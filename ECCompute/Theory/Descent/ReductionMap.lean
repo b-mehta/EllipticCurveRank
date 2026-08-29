@@ -46,7 +46,7 @@ public def intRep (x y : ℚ) (w : ℕ) : Fin 3 → ℤ := ![x.num * w, y.num, w
 /-- The image of `curve` under `ℤ → ℚ`, in projective form, is the rational curve. -/
 theorem map_curve_toProjective :
     (curve a₂ a₄ a₆).toProjective.map (Int.castRingHom ℚ) = (curveQ a₂ a₄ a₆).toProjective :=
-  map_curve_Q
+  map_curveQ
 
 variable {x y : ℚ} {w : ℕ}
 

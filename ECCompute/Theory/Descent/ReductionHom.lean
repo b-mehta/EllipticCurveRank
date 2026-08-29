@@ -178,10 +178,7 @@ theorem addY_cast_eq {ℓ : ℚ} (hℓden : (ℓ.den : ZMod p) ≠ 0)
     (hd3 : (((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ).den : ZMod p) ≠ 0) :
     ((curveQ a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ : ZMod p)
       = -(ℓ * ((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-  have haddY : (curveQ a₂ a₄ a₆).toAffine.addY x₁ x₂ y₁ ℓ
-      = -(ℓ * ((curveQ a₂ a₄ a₆).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
-    simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
-  rw [haddY, cast_neg,
+  rw [curve_baseChange_addY, cast_neg,
     cast_add_of_ne_zero (den_mul_ne_zero Fact.out hℓden (den_sub_ne_zero Fact.out hd3 hd1)) hdy1,
     cast_mul_of_ne_zero hℓden (den_sub_ne_zero Fact.out hd3 hd1), cast_sub_of_ne_zero hd3 hd1]
 
@@ -655,7 +652,7 @@ theorem redP_map_add_double (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.dblXYZ (intRep x₁ y₁ w₁)
       = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
           (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁) := by
-    rw [add_self, ← map_curve_Q]
+    rw [add_self, ← map_curveQ]
     exact (map_dblXYZ (Int.castRingHom ℚ) _).symm
   exact sum_repr_equiv hΔ _ _ hns1 hns1 hgadd
     (toAffine_g_intRep h₁ hden1 hden1')
@@ -691,7 +688,7 @@ theorem redP_map_add_secant (hΔ : ((curve a₂ a₄ a₆).Δ : ZMod p) ≠ 0)
   have hgaddXYZ : (curveQ a₂ a₄ a₆).toProjective.addXYZ (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)
         (Int.castRingHom ℚ ∘ intRep x₂ y₂ w₂)
       = Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
-          (intRep x₂ y₂ w₂) := by rw [← map_curve_Q]; exact map_addXYZ (Int.castRingHom ℚ) _ _
+          (intRep x₂ y₂ w₂) := by rw [← map_curveQ]; exact map_addXYZ (Int.castRingHom ℚ) _ _
   have hgadd : Int.castRingHom ℚ ∘ (curve a₂ a₄ a₆).toProjective.addXYZ (intRep x₁ y₁ w₁)
         (intRep x₂ y₂ w₂)
       = (curveQ a₂ a₄ a₆).toProjective.add (Int.castRingHom ℚ ∘ intRep x₁ y₁ w₁)

@@ -79,11 +79,11 @@ public theorem curve_baseChange_negY {x y : R} :
     ((curve a₂ a₄ a₆).baseChange R).toAffine.negY x y = -y :=
   Affine.negY_of_a₁_a₃_eq_zero _ (by simp [curve_baseChange_eq]) (by simp [curve_baseChange_eq])
 
-/-- On `(curve a₂ a₄ a₆).baseChange R`, the doubling `addY` unfolds to `-(ℓ·(addX - x) + y)`. -/
+/-- On `(curve a₂ a₄ a₆).baseChange R`, `addY` unfolds to `-(ℓ·(addX - x₁) + y₁)`. -/
 @[grind =]
-public theorem curve_baseChange_addY {x y ℓ : R} :
-    ((curve a₂ a₄ a₆).baseChange R).toAffine.addY x x y ℓ
-      = -(ℓ * (((curve a₂ a₄ a₆).baseChange R).toAffine.addX x x ℓ - x) + y) := by
+public theorem curve_baseChange_addY {x₁ x₂ y₁ ℓ : R} :
+    ((curve a₂ a₄ a₆).baseChange R).toAffine.addY x₁ x₂ y₁ ℓ
+      = -(ℓ * (((curve a₂ a₄ a₆).baseChange R).toAffine.addX x₁ x₂ ℓ - x₁) + y₁) := by
   simp only [Affine.addY, Affine.negY, Affine.negAddY, curve_baseChange_eq]; grind
 
 /-- The affine equation of `(curve a₂ a₄ a₆).baseChange R` in cleared form. -/
@@ -107,7 +107,7 @@ public theorem curveQ_Δ_num : (curveQ a₂ a₄ a₆).Δ.num = discrInt a₂ a�
   rw [this, Rat.num_intCast]
 
 /-- The integral model maps to `curveQ a₂ a₄ a₆` under `ℤ → ℚ`. -/
-public theorem map_curve_Q : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
+public theorem map_curveQ : (curve a₂ a₄ a₆).map (Int.castRingHom ℚ) = curveQ a₂ a₄ a₆ := by
   rw [curveQ, baseChange, algebraMap_int_eq]
 
 end ECCompute
