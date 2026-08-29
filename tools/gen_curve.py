@@ -384,7 +384,7 @@ def main():
     if t == 1:
         tors_pts = [roots[0]]
     elif t == 2:
-        tors_pts = sorted(roots)[-2:]        # any two of the three are independent in E[2]
+        tors_pts = roots[-2:]                # any two of the three are independent in E[2]
     else:
         tors_pts = []
     for r in tors_pts:
