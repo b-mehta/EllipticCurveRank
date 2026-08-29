@@ -7,6 +7,8 @@ module
 
 public import ECCompute.ForMathlib.VariableChangePoint
 public import ECCompute.Theory.Model
+public import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+import Mathlib.Algebra.CharP.Invertible
 
 /-!
 # The general curve to the integral short model
@@ -16,8 +18,8 @@ The certified rank bound lives on the integral short model `curveQ A₂ A₄ A�
 Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` is carried to it in two steps, each a group isomorphism of
 Mordell-Weil groups (so a rank lower bound transfers back):
 
-* completing the square, `⟨1, 0, -a₁/2, -a₃/2⟩`, to a *rational* short model `shortModel W`
-  (`CompleteSquare.pointAddEquiv`);
+* completing the square, `WeierstrassCurve.toCharNeTwoNF`, to a *rational* short model
+  `shortModel W` (`CompleteSquare.pointAddEquiv`);
 * scaling by `v = 2`, `⟨1/2, 0, 0, 0⟩`, to the integral short model
   (`IntegralScaling.generalToShortEquiv`).
 
@@ -37,43 +39,33 @@ open WeierstrassCurve
 
 /-! ## The completing-the-square model isomorphism -/
 
-/-- The change of variables `⟨u, r, s, t⟩ = ⟨1, 0, -a₁/2, -a₃/2⟩` completing the square for a curve
-`W`: the substitution `y ↦ y - (W.a₁ x + W.a₃)/2` (over `ℚ`, where `2` is invertible) that clears
-the `a₁` and `a₃` coefficients. -/
-def completeSquare (W : WeierstrassCurve ℚ) : VariableChange ℚ := ⟨1, 0, -W.a₁ / 2, -W.a₃ / 2⟩
-
-/-- The short model `y² = x³ + a₂'x² + a₄'x + a₆'` obtained from `W` by completing the square. Its
-`a₁` and `a₃` coefficients vanish (`shortModel_a₁`, `shortModel_a₃`). -/
-public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ := completeSquare W • W
+/-- The short model `y² = x³ + a₂'x² + a₄'x + a₆'` obtained from `W` by completing the square,
+i.e. mathlib's `WeierstrassCurve.toCharNeTwoNF = ⟨1, 0, ⅟2·-a₁, ⅟2·-a₃⟩` (over `ℚ`, where `2` is
+invertible), which clears the `a₁` and `a₃` coefficients. -/
+public def shortModel (W : WeierstrassCurve ℚ) : WeierstrassCurve ℚ := W.toCharNeTwoNF • W
 
 variable {W : WeierstrassCurve ℚ}
 
-@[simp]
-theorem shortModel_a₁ : (shortModel W).a₁ = 0 := by
-  grind [shortModel, completeSquare, variableChange_a₁]
+instance : (shortModel W).IsCharNeTwoNF := W.toCharNeTwoNF_spec
 
 @[simp]
 theorem shortModel_a₂ : (shortModel W).a₂ = W.a₂ + W.a₁ ^ 2 / 4 := by
-  grind [shortModel, completeSquare, variableChange_a₂, inv_one, Units.val_one, one_pow]
-
-@[simp]
-theorem shortModel_a₃ : (shortModel W).a₃ = 0 := by
-  grind [shortModel, completeSquare, variableChange_a₃]
+  simp [shortModel, variableChange_a₂]; grind
 
 @[simp]
 theorem shortModel_a₄ : (shortModel W).a₄ = W.a₄ + W.a₁ * W.a₃ / 2 := by
-  grind [shortModel, completeSquare, variableChange_a₄, inv_one, Units.val_one, one_pow]
+  simp [shortModel, variableChange_a₄]; grind
 
 @[simp]
 theorem shortModel_a₆ : (shortModel W).a₆ = W.a₆ + W.a₃ ^ 2 / 4 := by
-  grind [shortModel, completeSquare, variableChange_a₆, inv_one, Units.val_one, one_pow]
+  simp [shortModel, variableChange_a₆]; grind
 
 /-- The completing-the-square change of variables induces a group isomorphism between the
 Mordell-Weil groups of the general model `W` and the short model `shortModel W`, so any rank lower
 bound on the short model transfers back. -/
 public def pointAddEquiv (W : WeierstrassCurve ℚ) :
     W.toAffine.Point ≃+ (shortModel W).toAffine.Point :=
-  VariableChange.pointAddEquiv (completeSquare W)
+  W.toCharNeTwoNF.pointAddEquiv
 
 end ECCompute.CompleteSquare
 
@@ -109,7 +101,7 @@ public theorem scaling_smul_shortModel {a₁ a₂ a₃ a₄ a₆ : ℤ} :
       = intShortModel a₁ a₂ a₃ a₄ a₆ := by
   ext <;>
     simp only [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃,
-      variableChange_a₄, variableChange_a₆, shortModel_a₁, shortModel_a₂, shortModel_a₃,
+      variableChange_a₄, variableChange_a₆, a₁_of_isCharNeTwoNF, a₃_of_isCharNeTwoNF, shortModel_a₂,
       shortModel_a₄, shortModel_a₆, intShortModel, curve_baseChange_eq, inv_inv, Units.val_mk0] <;>
     push_cast <;> ring
 
