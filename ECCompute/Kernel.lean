@@ -206,6 +206,36 @@ bits. -/
 noncomputable def checkInv (n : Nat) (B Mr : List Nat) : Bool :=
   (maskBelow n B).and' ((maskBelow n Mr).and' (checkInvGo Mr 0 B))
 
+/-! ### Bit-sliced variant
+
+`checkInvBS` checks `B · M = I` over `𝔽₂` with one wide `Nat.mul` per row instead of a
+per-row `List.rec` XOR fold. The tactic emits the packed literals:
+
+* `Mstack` packs `M`'s rows, each spread so bit `j` sits in `g`-bit field `j` (value `0`/`1`),
+  the `ρ` rows stacked with stride `L = ρ·g`: `Mstack = Σ_k spread(M[k]) <<< (k·L)`.
+* `bsp` (one per `B` row `i`) selects the rows: `bsp = Σ_{k : B[i][k]=1} 1 <<< ((ρ-1-k)·L)`.
+* `rep` is the stride-`g` repunit `Σ_{j<ρ} 1 <<< (j·g)`.
+
+Then in `Mstack · bsp` the block at offset `(ρ-1)·L` accumulates `Σ_{k : B[i][k]=1} spread(M[k])`,
+whose `g`-bit field `j` holds the integer count `(B·M)[i][j]` (< `2^g`, so no cross-field carry);
+`land rep` reads each field's low bit (its parity), giving `(B·M)[i]` spread by `g`, compared to
+the unit vector `1 <<< (i·g)`. -/
+
+/-- One bit-sliced row check: field `j` of the aligned window of `Mstack · bsp`, reduced to its
+column parities by `land rep`, equals the unit vector `1 <<< (i·g)`. -/
+noncomputable def checkRowBS (g rep Mstack shift i bsp : Nat) : Bool :=
+  (((Mstack.mul bsp).shiftRight shift).land rep).beq (Nat.shiftLeft 1 (i.mul g))
+
+/-- Fold the bit-sliced row check over the per-row selectors `bsps`, tracking the row index `i`. -/
+noncomputable def checkInvBSGo (g rep Mstack shift : Nat) (i : Nat) (bsps : List Nat) : Bool :=
+  bsps.rec (fun _ ↦ true)
+    (fun bsp _ ih i ↦ (checkRowBS g rep Mstack shift i bsp).and' (ih i.succ)) i
+
+/-- Bit-sliced `B · M = I` check over `𝔽₂` from the packed literals `Mstack`, `bsps`, and the
+stride-`g` repunit `rep`; `ρ` is the dimension. See the section note for the packing. -/
+noncomputable def checkInvBS (ρ g rep Mstack : Nat) (bsps : List Nat) : Bool :=
+  checkInvBSGo g rep Mstack ((ρ.sub 1).mul (ρ.mul g)) 0 bsps
+
 end F2Invert
 
 /-! ## Descent matrix -/

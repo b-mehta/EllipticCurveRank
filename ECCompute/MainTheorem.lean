@@ -82,7 +82,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     (h₄ : 16 * a₄ + 8 * a₁ * a₃ = c.a₄) (h₆ : 64 * a₆ + 16 * a₃ ^ 2 = c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
-  obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
+  obtain ⟨hlenP, hlenL, hlenB, _hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
   subst hW
   suffices this : HasRankGE (curveQ c.a₂ c.a₄ c.a₆) (c.ρ - c.t) by
     set W : WeierstrassCurve ℚ := ⟨a₁, a₂, a₃, a₄, a₆⟩
@@ -128,7 +128,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
           (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
       simp [hBmat]
     rw [hrow]
-    exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hlenB hlenM hinv)
+    exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInvBS_isUnit hlenB hinv)
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
   have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le

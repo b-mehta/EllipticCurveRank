@@ -141,4 +141,12 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
     rcases eq_or_ne i k with h' | h' <;> simp [h', bId, Fin.val_inj]
   exact .of_mul_eq_one (toMat M n) key
 
+/-- MEASUREMENT ONLY: soundness of the bit-sliced inverse check. If the bit-sliced checker
+`checkInvBS ρ g rep Mstack bsps` returns `true` (and `B` has length `ρ`), the matrix `toMat B ρ`
+over `𝔽₂` is a unit. The packing correctness (that `Mstack`/`bsps`/`rep` faithfully encode `B`, `M`
+and that the aligned-window column parities equal `B·M`) is unproved here. -/
+public theorem checkInvBS_isUnit {ρ g rep Mstack : ℕ} {bsps : List ℕ}
+    (hBlen : B.length = ρ) (h : checkInvBS ρ g rep Mstack bsps) : IsUnit (toMat B ρ) := by
+  sorry
+
 end ECCompute.F2Invert
