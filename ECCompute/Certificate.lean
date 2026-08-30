@@ -60,8 +60,6 @@ public structure Certificate where
   M : List Nat
   /-- Bit-sliced packing of `M`: rows spread to `g`-bit fields, stacked with stride `ρ·g`. -/
   Mstack : Nat
-  /-- Bit-sliced per-row selectors of `B`, one `Nat` per row (see `F2Invert.checkInvBS`). -/
-  bspreads : List Nat
   /-- Field width `⌈log₂(ρ+1)⌉` of the bit-sliced packing. -/
   g : Nat
   /-- The stride-`g` repunit `Σ_{j<ρ} 1 <<< (j·g)` of the bit-sliced packing. -/
@@ -100,8 +98,9 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a2r c.a4r c.a6r c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
-  /-- `M` inverts `B` over `𝔽₂`, checked bit-sliced against the packed `Mstack`/`bspreads`. -/
-  inv : F2Invert.checkInvBS c.ρ c.g c.rep c.Mstack c.bspreads
+  /-- `M` inverts `B` over `𝔽₂`, checked bit-sliced: the witness packing `Mstack` against the
+  per-row selectors built in-kernel from `B`. -/
+  inv : F2Invert.checkInvBS c.ρ c.g c.rep c.Mstack c.B
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/
   tors : (curveQ c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t
 

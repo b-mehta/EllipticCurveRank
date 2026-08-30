@@ -160,12 +160,6 @@ meta def packMstack (ρ g : Nat) (M : List Nat) : Nat :=
   let L := ρ * g
   (List.range ρ).foldl (fun acc k ↦ acc ||| (spreadRow ρ g (M.getD k 0) <<< (k * L))) 0
 
-/-- The per-row selector for `B`'s row `bi`: `Σ_{k : bit k of bi} 1 <<< ((ρ-1-k)·L)`, `L = ρ·g`. -/
-meta def packBspread (ρ g bi : Nat) : Nat :=
-  let L := ρ * g
-  (List.range ρ).foldl
-    (fun acc k ↦ if bi.testBit k then acc ||| (1 <<< ((ρ - 1 - k) * L)) else acc) 0
-
 /-- The stride-`g` repunit `Σ_{j<ρ} 1 <<< (j·g)`. -/
 meta def packRep (ρ g : Nat) : Nat :=
   (List.range ρ).foldl (fun acc j ↦ acc ||| (1 <<< (j * g))) 0
@@ -190,18 +184,17 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
   -- recomputes, them (`checkLabels`).
   let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
   let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
-  -- Bit-sliced inverse-check packing: field width `g = ⌈log₂(ρ+1)⌉`, `Mstack`, per-row `B`
-  -- selectors, and the stride-`g` repunit. See `F2Invert.checkInvBS`.
+  -- Bit-sliced inverse-check packing: field width `g = ⌈log₂(ρ+1)⌉`, the witness packing `Mstack`,
+  -- and the stride-`g` repunit. The per-row `B` selectors are built in-kernel. See `checkInvBS`.
   let g : Nat := Nat.log2 ρ + 1
   let Mstack : Nat := packMstack ρ g M
-  let bspreads : List Nat := (List.range ρ).map (fun i ↦ packBspread ρ g (B.getD i 0))
   let rep : Nat := packRep ρ g
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6,
       toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6),
       toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M,
-      toExpr Mstack, toExpr bspreads, toExpr g, toExpr rep,
+      toExpr Mstack, toExpr g, toExpr rep,
       toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
