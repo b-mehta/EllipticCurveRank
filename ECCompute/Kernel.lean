@@ -170,12 +170,21 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List 
         (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (ih (b.div 2))) b
 
-/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
-noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
+/-- Product of the label primes in `ls`. Since every label prime `p` divides this `P`, reducing a
+point coordinate mod `P` once and then mod `p` per label agrees with reducing the full coordinate
+mod `p`. -/
+noncomputable def prodPrimes : List (Nat × Nat × Nat) → Nat :=
+  List.rec 1 fun l _ acc ↦ l.1.mul acc
+
+/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. Each
+point's numerator/denominator is reduced mod `P` once here, so the per-label mods in `alphaResK`
+run on ≤`P`-sized operands. -/
+noncomputable def checkBGo (a₂ a₄ : Int) (P : Nat) (ls : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec true
-      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+      (fun p ps _ ↦ (checkBRow a₂ a₄ (p.1.num.toNat.mod P) ((-p.1.num).toNat.mod P) (p.1.den.mod P)
+          b ls).and'
         (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
@@ -187,7 +196,7 @@ mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
 noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   (checkMaskList (toLs ls q)).and'
-    (checkBGo a₂ a₄ (toLs ls q) B pt)
+    (checkBGo a₂ a₄ (prodPrimes (toLs ls q)) (toLs ls q) B pt)
 
 /-! ## Point on curve -/
 

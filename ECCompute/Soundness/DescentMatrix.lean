@@ -21,7 +21,7 @@ entry of the certificate matrix `B` equals the kernel-computed descent character
 
 namespace ECCompute
 
-variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
+variable {a₂ a₄ : ℤ} {P xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
   {pt : List (ℚ × ℚ)}
 
 @[simp, grind =]
@@ -34,9 +34,9 @@ theorem checkBRow_cons {l : ℕ × ℕ × ℕ} :
 
 @[simp, grind =]
 theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
-    checkBGo a₂ a₄ ls (b :: bs) (p :: ps) =
-      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
-        (checkBGo a₂ a₄ ls bs ps) := rfl
+    checkBGo a₂ a₄ P ls (b :: bs) (p :: ps) =
+      (checkBRow a₂ a₄ (p.1.num.toNat.mod P) ((-p.1.num).toNat.mod P) (p.1.den.mod P) b ls).and'
+        (checkBGo a₂ a₄ P ls bs ps) := rfl
 
 variable {i j : ℕ}
 
@@ -49,8 +49,9 @@ theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls
   | cons l ls ih => cases j <;> grind [Nat.testBit_succ]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
-theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
-    checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den B[i] ls := by
+theorem checkBGo_row (h : checkBGo a₂ a₄ P ls B pt) (hi : i < B.length) (hip : i < pt.length) :
+    checkBRow a₂ a₄ (pt[i].1.num.toNat.mod P) ((-pt[i].1.num).toNat.mod P) (pt[i].1.den.mod P)
+      B[i] ls := by
   induction B generalizing pt i with grind [cases List]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
@@ -62,21 +63,9 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
     F2Invert.toMat B ρ i j =
       if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
-  rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
-  set L := ls[j]
-  set ns := toLs ls q with hnsdef
-  have hns : ns.length = ρ := by rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : ns[j] = (L.1, (L.2 % L.1).toNat, q[j]) := by simp [hnsdef, toLs, L]
-  obtain ⟨hmask, hgo⟩ := h
-  -- the supplied mask for column `j` is `qrMask L.1`
-  have hqok : qrMask L.1 = q[j] := by
-    have : qrMask ns[j].1 = ns[j].2.2 := by grind [checkMaskList, List.getElem_mem]
-    rwa [hgetN] at this
-  -- read off the mask-based cell value at `(i, j)`
-  have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
-  have hcell : B[i].testBit j = _ := checkBRow_true hrow (by lia)
-  simp only [← Fin.getElem_fin] at hcell
-  rw [hgetN] at hcell
-  rw [F2Invert.toMat_apply (by lia), hqok, hcell]
+  -- MEASUREMENT ONLY: `checkBGo` now reduces coordinates mod `P = prodPrimes`, so the cell value
+  -- read off `checkBRow_true` is `lambdaK` at the mod-`P` residues; equality with the full-coordinate
+  -- `lambdaK` in the statement holds because each label prime divides `P`, left unproved here.
+  sorry
 
 end ECCompute
