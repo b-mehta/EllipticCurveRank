@@ -125,59 +125,26 @@ theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p)
   rw [ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero, Nat.mod_eq_of_lt hn]
 
 /-- The per-label passage: a passing `Nat`-path `checkLabelNat` on residues pinned to `a₂, a₄, a₆`
-mod `P` (with `p ∣ P` and `0 < P`) gives a passing `checkLabel`. -/
-theorem checkLabel_of_checkLabelNat {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
+mod `P` and the discriminant residue `dr = Δ mod P` (with `p ∣ P` and `0 < P`) gives a passing
+`checkLabel`.
+
+MEASUREMENT-ONLY: soundness with the shared `dr` literal is not yet reproved. -/
+theorem checkLabel_of_checkLabelNat {P a2r a4r a6r dr : ℕ} (hP : 0 < P) (hpP : p ∣ P)
     (h2 : a2r = (a₂ % (P : ℤ)).toNat) (h4 : a4r = (a₄ % (P : ℤ)).toNat)
-    (h6 : a6r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a2r a4r a6r p θ) :
+    (h6 : a6r = (a₆ % (P : ℤ)).toNat) (hdr : (discrModP a2r a4r a6r P).beq dr)
+    (h : checkLabelNat a2r a4r a6r dr p θ) :
     checkLabel a₂ a₄ a₆ p θ := by
-  have hp0 : 0 < p := Nat.pos_of_dvd_of_pos hpP hP
-  have hp1 : 1 < p := by
-    rcases Nat.lt_or_ge p 2 with h' | h'
-    · exfalso; interval_cases p; rw [checkLabelNat] at h; simp at h
-    · exact h'
-  have hr2 : ((a2r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
-  have hr4 : ((a4r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h4
-  have hr6 : ((a6r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h6
-  have hr2' : (((a2r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr2
-  have hr4' : (((a4r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr4
-  have hr6' : (((a6r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr6
-  -- The differing factors of the two checks agree as `Bool`s: the discriminant test and the cubic
-  -- test each read as the same vanishing condition in `ZMod p`.
-  have hf2 : (discrModP (a2r % p) (a4r % p) (a6r % p) p).beq 0
-      = ((discrIntK (a₂ % (p : ℤ)) (a₄ % (p : ℤ)) (a₆ % (p : ℤ))).emod (p : ℤ)).beq' 0 := by
-    rw [Bool.eq_iff_iff, Nat.beq_eq,
-      natCast_eq_zero_of_lt (p := p) (by rw [discrModP]; exact Nat.mod_lt _ hp0),
-      discrModP_cast hp0, discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
-      ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd, discrIntK_eq, discrInt_emod]
-  have hf3 : (cubicModP (a2r % p) (a4r % p) (a6r % p) p (θ.emod (p : ℤ)).toNat).beq 0
-      = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
-    rw [Bool.eq_iff_iff, Nat.beq_eq,
-      natCast_eq_zero_of_lt (p := p) (by rw [cubicModP]; exact Nat.mod_lt _ hp0),
-      cubicModP_cast, polyModL_beq hp1]
-    simp only [polyEval, Int.add_def, Int.mul_def]
-    push_cast
-    rw [hr2, hr4, hr6]
-    constructor <;> intro h <;> linear_combination h
-  simp only [checkLabelNat, Nat.mod_eq_mod] at h
-  simp only [checkLabel, Nat.mod_eq_mod]
-  rwa [hf2, hf3] at h
+  sorry
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. The `Nat`-path `checkLabels` verifies
-the emitted residue literals against `a₂, a₄, a₆ mod P` and runs the per-label check in `Nat`;
-`checkLabel_of_checkLabelNat` carries each label back to the `Int`-path `checkLabel`. -/
-public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : ℕ}
-    (h : checkLabels a₂ a₄ a₆ P a2r a4r a6r labels) :
+the emitted residue literals against `a₂, a₄, a₆ mod P` and the discriminant residue `dr` against
+`Δ mod P`, then runs the per-label check in `Nat`; `checkLabel_of_checkLabelNat` carries each label
+back to the `Int`-path `checkLabel`.
+
+MEASUREMENT-ONLY: soundness with the shared `dr` literal is not yet reproved. -/
+public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r dr : ℕ}
+    (h : checkLabels a₂ a₄ a₆ P a2r a4r a6r dr labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
-  rw [checkLabels] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true] at h
-  obtain ⟨hP, h2, h4, h6, hdvd, hfold⟩ := h
-  rw [Nat.ble_eq] at hP
-  rw [allList_iff] at hdvd hfold
-  simp only [Nat.beq_eq_beq, beq_iff_eq] at h2 h4 h6
-  intro l hl
-  have hpd : P % l.1 = 0 := by
-    have hl1 := hdvd l hl
-    rwa [Nat.mod_eq_mod, Nat.beq_eq_beq, beq_iff_eq] at hl1
-  exact checkLabel_of_checkLabelNat hP (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
+  sorry
 
 end ECCompute
