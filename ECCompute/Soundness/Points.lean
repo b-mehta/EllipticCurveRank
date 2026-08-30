@@ -60,13 +60,6 @@ theorem checkPointShort_iff {x y : ℚ} :
   push_cast
   grind
 
-/-- The signed magnitude `intSignNeg a` / `a.natAbs` reconstructs `a`. -/
-theorem intSignNeg_natAbs (a : ℤ) :
-    (if intSignNeg a then -(a.natAbs : ℤ) else (a.natAbs : ℤ)) = a := by
-  cases a with
-  | ofNat n => simp [intSignNeg]
-  | negSucc n => simp [intSignNeg, Int.negSucc_eq]
-
 /-- The flat-`Nat` point check equals the cleared integer Weierstrass identity of the short model,
 with the `x` numerator recovered from its magnitude `xn` and sign `sx`. -/
 theorem checkPointShortNat_intId {xn : ℕ} {sx : Bool} {xd yn yd : ℕ} :
@@ -77,7 +70,7 @@ theorem checkPointShortNat_intId {xn : ℕ} {sx : Bool} {xd yn yd : ℕ} :
           a₂ * (if sx then -(xn : ℤ) else (xn : ℤ)) ^ 2 * (xd : ℤ) * (yd : ℤ) ^ 2 +
           a₄ * (if sx then -(xn : ℤ) else (xn : ℤ)) * (xd : ℤ) ^ 2 * (yd : ℤ) ^ 2 +
           a₆ * (xd : ℤ) ^ 3 * (yd : ℤ) ^ 2 := by
-  simp only [checkPointShortNat, Bool.rec_eq, Nat.beq_eq_beq, beq_iff_eq]
+  simp only [checkPointShortNat, Bool.rec_eq, Nat.beq_eq]
   rw [← Nat.cast_inj (R := ℤ)]
   cases a₂ <;> cases a₄ <;> cases a₆ <;> cases sx <;>
     simp only [intSignNeg, Int.natAbs_ofNat, Int.natAbs_ofNat', Int.natAbs_negSucc,
@@ -86,8 +79,8 @@ theorem checkPointShortNat_intId {xn : ℕ} {sx : Bool} {xd yn yd : ℕ} :
     push_cast <;>
     constructor <;> intro h <;> linear_combination h
 
-/-- The cleared integer Weierstrass identity of the short model is exactly the affine equation at the
-decoded rational point, once both denominators are nonzero. -/
+/-- The cleared integer Weierstrass identity of the short model is exactly the affine equation at
+the decoded rational point, once both denominators are nonzero. -/
 theorem intId_iff_equation {xn : ℕ} {sx : Bool} {xd yn yd : ℕ}
     (hxdQ : (xd : ℚ) ≠ 0) (hydQ : (yd : ℚ) ≠ 0) :
     ((yn : ℤ) ^ 2 * (xd : ℤ) ^ 3 =
@@ -129,7 +122,7 @@ public theorem checkPointsShort_iff {pts : List (ℕ × Bool × ℕ × ℕ × �
   rw [checkPointsShort, allList_iff]
   refine forall_congr' fun p => imp_congr_right fun _ => ?_
   obtain ⟨xn, sx, xd, yn, yd⟩ := p
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.beq_eq_beq, beq_iff_eq, Nat.ble_eq, Nat.Coprime]
+  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.beq_eq, Nat.ble_eq, Nat.Coprime]
   constructor
   · rintro ⟨hchk, ⟨hcx, hdx⟩, hcy, hdy⟩
     exact ⟨(checkPointShortNat_iff hdx hdy).mp hchk, hcx, hdx, hcy, hdy⟩
