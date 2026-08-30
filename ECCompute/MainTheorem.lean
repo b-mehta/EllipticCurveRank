@@ -7,7 +7,7 @@ module
 
 public import ECCompute.Certificate
 public import ECCompute.Theory.RankDeduction
-public import ECCompute.Theory.ShortModel
+public import ECCompute.Theory.Model
 import ECCompute.Soundness.Labels
 import ECCompute.Soundness.Points
 import ECCompute.Soundness.Primes
@@ -37,7 +37,7 @@ lower bound on the Mordell-Weil rank of an elliptic curve over `ℚ`, and delive
 
 namespace ECCompute
 
-open WeierstrassCurve Module IntegralScaling
+open WeierstrassCurve Module
 
 /-- `HasRankGE W n` holds when the Mordell-Weil group `W(ℚ)` contains a finitely generated
 `ℤ`-submodule of free rank at least `n`, which is exactly `rank W(ℚ) ≥ n`. -/
@@ -86,15 +86,16 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   subst hW
   suffices this : HasRankGE (curveQ c.a₂ c.a₄ c.a₆) (c.ρ - c.t) by
     set W : WeierstrassCurve ℚ := ⟨a₁, a₂, a₃, a₄, a₆⟩
-    -- Complete the square and scale by `2`, as a single variable change, to land on the
-    -- certificate's integral short model.
-    have hsm : (scaling 2 two_ne_zero * W.toCharNeTwoNF) • W = curveQ c.a₂ c.a₄ c.a₆ := by
-      rw [mul_smul, ← h₂, ← h₄, ← h₆]
+    -- Complete the square (`toCharNeTwoNF`) and scale by `2` (the change `⟨1/2, 0, 0, 0⟩`), as a
+    -- single variable change `C`, to land on the certificate's integral short model.
+    set C : VariableChange ℚ := ⟨(Units.mk0 2 two_ne_zero)⁻¹, 0, 0, 0⟩ * W.toCharNeTwoNF with hC
+    have hsm : C • W = curveQ c.a₂ c.a₄ c.a₆ := by
+      rw [hC, mul_smul, ← h₂, ← h₄, ← h₆]
       ext <;>
-      simp [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
+      simp [variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
         variableChange_a₆, curve] <;>
       grind
-    exact hasRankGE_of_addEquiv (scaling 2 two_ne_zero * W.toCharNeTwoNF).pointAddEquiv (hsm ▸ this)
+    exact hasRankGE_of_addEquiv C.pointAddEquiv (hsm ▸ this)
   clear h₂ h₄ h₆ a₁ a₂ a₃ a₄ a₆
   rw [checkPoints_iff] at hpt
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]

@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 module
 
-public import ECCompute.Theory.ShortModel
+public import ECCompute.Theory.Model
 public import ECCompute.Soundness.Fold
 
 /-!
