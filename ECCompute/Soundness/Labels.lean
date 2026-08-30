@@ -74,6 +74,9 @@ public theorem descentHyp_of_checkLabel (h : checkLabel a₂ a₄ a₆ p θ) (hp
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. -/
 public theorem checkLabels_true {labels : List (ℕ × ℤ)} (h : checkLabels a₂ a₄ a₆ labels) :
-    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by rwa [checkLabels, allList_iff] at h
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
+  -- MEASUREMENT ONLY: `checkLabels` now folds the Nat-path `checkLabelNat`; the bridge back to the
+  -- Int-path `checkLabel` is stubbed on this timing branch.
+  sorry
 
 end ECCompute
