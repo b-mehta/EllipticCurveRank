@@ -28,6 +28,7 @@ Requires sympy (number theory). Usage:
 import argparse
 import json
 import sys
+import textwrap
 import urllib.request
 from fractions import Fraction
 from math import isqrt
@@ -301,6 +302,15 @@ def j_theorem(cid, jinv):
     return gate(doc + f"{head}\n  {proof}")
 
 
+def summary_paragraph(rank, submitter):
+    """The closing docstring paragraph: the rank claim and, when known, the submitter,
+    wrapped to 100 columns."""
+    text = f"over `ℚ`. It has Mordell-Weil rank at least `{rank}`."
+    if submitter:
+        text += f" Submitted to the leaderboard by {submitter}."
+    return "\n".join(textwrap.wrap(text, width=100))
+
+
 def lean_int(n):
     """A Lean integer literal that parses at `term:max`: negatives need parentheses."""
     return f"({n})" if n < 0 else str(n)
@@ -463,11 +473,10 @@ def main():
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
         f"public instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
     jblock = j_theorem(cid, jinv)
-    submitter = data.get("submitter")
-    attribution = f"\n\nSubmitted to the leaderboard by {submitter}." if submitter else ""
+    summary = summary_paragraph(rank_goal, data.get("submitter"))
     template = (Path(__file__).parent / "curve_template.lean").read_text()
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
-                           coeffs=coeff_block(ainvs[3], ainvs[4]), attribution=attribution,
+                           coeffs=coeff_block(ainvs[3], ainvs[4]), summary=summary,
                            defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
     with open(f"{repo}/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)

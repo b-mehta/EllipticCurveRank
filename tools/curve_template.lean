@@ -18,7 +18,7 @@ Leaderboard is
   `E : {eq}`,   with
 {coeffs}
 
-over `ℚ`. It has Mordell-Weil rank at least `{rank}`.{attribution}
+{summary}
 -/
 
 namespace ECCompute
