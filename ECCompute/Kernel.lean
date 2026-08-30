@@ -157,7 +157,8 @@ end F2Invert
 /-- The `Nat` label triples `(p, (θ % p).toNat, m)`, one for each label `(p, θ)` in `ls` paired
 with its quadratic-residue mask `m` in `q`. -/
 noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
-  List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
+  ls.rec (fun _ ↦ [])
+    (fun l _ ih q ↦ q.rec [] (fun m ms _ ↦ (l.1, (l.2.emod l.1).toNat, m) :: ih ms)) q
 
 /-- `true` iff bit `j` of `b` matches label `ls[j]`'s descent character at point
 `(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/

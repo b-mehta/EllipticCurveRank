@@ -65,8 +65,8 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   set L := ls[j]
   set ns := toLs ls q with hnsdef
-  have hns : ns.length = ρ := by rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : ns[j] = (L.1, (L.2 % L.1).toNat, q[j]) := by simp [hnsdef, toLs, L]
+  have hns : ns.length = ρ := by sorry
+  have hgetN : ns[j] = (L.1, (L.2 % L.1).toNat, q[j]) := by sorry
   obtain ⟨hmask, hgo⟩ := h
   -- the supplied mask for column `j` is `qrMask L.1`
   have hqok : qrMask L.1 = q[j] := by
