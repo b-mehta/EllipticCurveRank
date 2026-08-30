@@ -44,20 +44,20 @@ lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert +kernel
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
-/-- The `Nat → Nat → Nat` fold inside `invRowK`: consuming `ms` one row at a time, XOR the running
-accumulator with row `m` when the low bit of the running `b` is set, then shift `b` down. -/
-noncomputable def goRows (ms : List ℕ) (b acc : ℕ) : ℕ :=
-  ms.rec (motive := fun _ ↦ ℕ → ℕ → ℕ) (fun _ acc ↦ acc)
-    (fun m _ ih b acc ↦ ih (b >>> 1) (acc ^^^ m * (b &&& 1))) b acc
+/-- The `Nat → Nat` fold inside `invRowK`: consuming `ms` one row at a time, XOR row `m` (when the
+low bit of the running `b` is set) into the fold of the remaining rows over `b >>> 1`. -/
+noncomputable def goRows (ms : List ℕ) (b : ℕ) : ℕ :=
+  ms.rec (motive := fun _ ↦ ℕ → ℕ) (fun _ ↦ 0)
+    (fun m _ ih b ↦ m * (b &&& 1) ^^^ ih (b >>> 1)) b
 
-@[simp] theorem goRows_nil {b acc : ℕ} : goRows [] b acc = acc := rfl
+@[simp] theorem goRows_nil {b : ℕ} : goRows [] b = 0 := rfl
 
-@[simp] theorem goRows_cons {m b acc : ℕ} {ms : List ℕ} :
-    goRows (m :: ms) b acc = goRows ms (b >>> 1) (acc ^^^ m * (b &&& 1)) := rfl
+@[simp] theorem goRows_cons {m b : ℕ} {ms : List ℕ} :
+    goRows (m :: ms) b = m * (b &&& 1) ^^^ goRows ms (b >>> 1) := rfl
 
 /-- `invRowK` unfolds to the `beq` of the `goRows` fold against the unit vector `1 <<< i`. -/
 theorem invRowK_eq {i bi : ℕ} {Mr : List ℕ} :
-    invRowK i bi Mr = (goRows Mr bi 0).beq (1 <<< i) := rfl
+    invRowK i bi Mr = (goRows Mr bi).beq (1 <<< i) := rfl
 
 /-- Bit `j` of one selected term `m * (b &&& 1)`, as a `ZMod 2` product: the low bit of `b` times
 bit `j` of `m`. -/
@@ -66,13 +66,12 @@ private theorem bId_testBit_select {m b j : ℕ} :
   rcases Nat.mod_two_eq_zero_or_one b with h | h <;>
     simp [Nat.and_one_is_mod, Nat.testBit_zero, h, bId]
 
-/-- Bit `j` of the `goRows` fold, over `𝔽₂`: the accumulator's bit `j` plus, over each row `k`, the
-selector bit `b.testBit k` times bit `j` of row `k`. -/
-theorem bId_goRows_testBit {ms : List ℕ} {b acc j : ℕ} :
-    bId ((goRows ms b acc).testBit j)
-      = bId (acc.testBit j)
-        + ∑ k ∈ range ms.length, bId (b.testBit k) * bId ((ms.getD k 0).testBit j) := by
-  induction ms generalizing b acc with
+/-- Bit `j` of the `goRows` fold, over `𝔽₂`: over each row `k`, the selector bit `b.testBit k` times
+bit `j` of row `k`. -/
+theorem bId_goRows_testBit {ms : List ℕ} {b j : ℕ} :
+    bId ((goRows ms b).testBit j)
+      = ∑ k ∈ range ms.length, bId (b.testBit k) * bId ((ms.getD k 0).testBit j) := by
+  induction ms generalizing b with
   | nil => simp
   | cons m ms ih =>
     have hsum : (∑ k ∈ range ms.length, bId ((b >>> 1).testBit k) * bId ((ms.getD k 0).testBit j))
@@ -80,8 +79,8 @@ theorem bId_goRows_testBit {ms : List ℕ} {b acc j : ℕ} :
             bId (b.testBit (k + 1)) * bId (((m :: ms).getD (k + 1) 0).testBit j) :=
       Finset.sum_congr rfl fun k _ ↦ by
         rw [Nat.testBit_shiftRight, Nat.add_comm 1 k, List.getD_cons_succ]
-    rw [goRows_cons, ih, hsum, List.length_cons, sum_range_succ', List.getD_cons_zero,
-      Nat.testBit_xor, bId_xor, bId_testBit_select]
+    rw [goRows_cons, Nat.testBit_xor, bId_xor, ih, hsum, bId_testBit_select, List.length_cons,
+      sum_range_succ', List.getD_cons_zero]
     abel
 
 variable {n i i' : ℕ} {B M : List ℕ}
@@ -130,11 +129,10 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
   have key : toMat B n * toMat M n = 1 := by
     ext i k
     have hi : i.val < B.length := by rw [hBlen]; exact i.2
-    have hrow : goRows M B[i.val] 0 = 1 <<< i.val :=
+    have hrow : goRows M B[i.val] = 1 <<< i.val :=
       Nat.eq_of_beq_eq_true (invRowK_eq ▸ invRowK_true hi h)
-    have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (acc := 0) (j := k)
+    have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (j := k)
     rw [hMlen] at hg
-    simp only [Nat.zero_testBit, bId_false, zero_add] at hg
     rw [Matrix.mul_apply, Matrix.one_apply]
     simp only [toMat_eq_bId]
     rw [Fin.sum_univ_eq_sum_range
