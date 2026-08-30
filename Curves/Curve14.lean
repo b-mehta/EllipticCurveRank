@@ -9,22 +9,17 @@ public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Soundness.JInvariant
 
 /-!
-# Curve 14 has rank at least 4, with full rational 2-torsion
+# Curve 14 has rank at least 4
 
 The elliptic curve recorded as
 [curve 14](https://elliptic-rank.icarm.cloud/curve/14) on the ICARM Elliptic Curve Rank
 Leaderboard is
 
-  `E : y² = x³ - x² - 24649 x + 1355209`
+  `E : y² = x³ - x² + a₄·x + a₆`,   with
+  `a₄ = -24649`   and
+  `a₆ = 1355209`
 
-over `ℚ`, of Mordell-Weil rank at least `4` (a curve of Wiman, 1945). Its `2`-division cubic
-factors completely, `x³ - x² - 24649 x + 1355209 = (x - 67)(x - 113)(x + 179)`, so `E` has full
-rational `2`-torsion `E(ℚ)[2] ≅ (ℤ/2)²`, i.e. `t = 2`, and its discriminant is a perfect square.
-
-The certificate gives `ρ = 6` points with `𝔽₂`-independent descent images (the four rational
-points of infinite order plus the two `2`-torsion points `(67, 0)`, `(113, 0)`) and bounds the
-two torsion dimensions by `|E(ℚ)[2]| ≤ 4 = 2²`, giving `rank ≥ ρ - t = 6 - 2 = 4`. Points
-(short-model coordinates) in `data/curve14.txt`, descent labels in `data/curve14-labels.txt`.
+over `ℚ`. It has Mordell-Weil rank at least `4`. Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute

@@ -15,12 +15,11 @@ The elliptic curve recorded as
 [curve 74](https://elliptic-rank.icarm.cloud/curve/74) on the ICARM Elliptic Curve Rank
 Leaderboard is
 
-  `E : y² + xy + y = x³ + x² - 215843772422443922015169952702159835 x`
-  `                  - 19474361277787151947255961435459054151501792241320535`
+  `E : y² + xy + y = x³ + x² + a₄·x + a₆`,   with
+  `a₄ = -215843772422443922015169952702159835`   and
+  `a₆ = -19474361277787151947255961435459054151501792241320535`
 
-over `ℚ`. It has Mordell-Weil rank at least `21`, the 1994 rank record of K. Nagao and T. Kouya.
-Points in `data/curve74.txt`, descent labels in `data/curve74-labels.txt`; `certify_curve` does the
-rest.
+over `ℚ`. It has Mordell-Weil rank at least `21`. Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute
