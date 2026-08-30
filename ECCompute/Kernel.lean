@@ -173,11 +173,13 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bo
 
 /-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. -/
 noncomputable def lambdaBitK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Nat :=
-  ((xden.mod p).beq 0).rec
-    (((alphaResK p tval xp xm xden).beq 0).rec
-      (((qmask.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
-      (((qmask.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
-    0
+  Nat.rec (motive := fun _ ↦ Nat) 0
+    (fun _ _ ↦
+      Nat.rec (motive := fun _ ↦ Nat)
+        (((qmask.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1)
+        (fun k _ ↦ ((qmask.shiftRight (Nat.succ k)).land 1).xor 1)
+        (alphaResK p tval xp xm xden))
+    (xden.mod p)
 
 /-! ## 𝔽₂ matrix inverse -/
 

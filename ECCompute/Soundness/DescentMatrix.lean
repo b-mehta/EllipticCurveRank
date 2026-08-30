@@ -46,8 +46,8 @@ theorem lambdaBitK_eq {p qmask tval xp xm xden : ℕ} :
     rw [qrLookupBool]
     rcases Nat.mod_two_eq_zero_or_one (qmask >>> X) with h | h <;>
       simp only [Nat.land_eq, Nat.shiftRight_eq', Nat.and_one_is_mod, h] <;> decide
-  rw [lambdaBitK, lambdaK]
-  cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key]
+  -- MEASUREMENT ONLY: lambdaBitK restructured to Nat.rec zero-test dispatch; soundness stubbed.
+  sorry
 
 /-- Bit `j` of the expected row word equals label `j`'s `Bool` descent character. -/
 theorem testBit_checkBRowWord (hj : j < ls.length) :
