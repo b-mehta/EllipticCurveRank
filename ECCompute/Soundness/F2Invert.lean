@@ -12,19 +12,20 @@ public import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
-import Mathlib.Data.List.Range
+import Mathlib.Tactic.Abel
 import ECCompute.ForLean
 
 /-!
 # Soundness of the kernel-reducible 𝔽₂ matrix invertibility certificate
 
 Correctness proofs for the `Bool` checker `ECCompute.F2Invert.checkInv` (defined in
-`ECCompute.Kernel`): supplying a claimed inverse `M` and checking `B * M = I` certifies that the
-square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible.
+`ECCompute.Kernel`): supplying a claimed inverse `M` (by rows) and checking `B * M = I` certifies
+that the square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible. The row check
+`invRowK i B[i] M` computes row `i` of `B * M` as the XOR of the rows of `M` selected by the set
+bits of `B[i]`, and compares it to the unit vector `1 <<< i`.
 
 ## Main results
 
-* `checkInv_true` : a passing `checkInv` gives, at each `(i, k)`, the diagonal parity indicator.
 * `checkInv_isUnit` : `checkInv n B M → IsUnit (toMat B n)`, the invertibility certificate.
 -/
 
@@ -32,78 +33,61 @@ namespace ECCompute.F2Invert
 
 open Finset
 
-variable {v : ℕ} {a b : Bool}
-
-/-- Parity of the number of set bits among the low `fuel` bits of `a`. -/
-def popParity : ℕ → ℕ → Bool
-  | 0, _ => false
-  | fuel + 1, a => (a.testBit 0).xor (popParity fuel (a / 2))
-
-/-- The XOR over `v.testBit j` for `j` in a list. -/
-def xorBits (v : ℕ) (l : List ℕ) : Bool := l.foldr (fun j r ↦ (v.testBit j).xor r) false
-
-theorem land_one_beq_one : (v &&& 1 == 1) = v.testBit 0 := by grind
-
-/-- `popParity fuel a` is the XOR over the low `fuel` bits of `a` (indices `0 … fuel-1`). -/
-theorem popParity_eq_xorBits {fuel a : ℕ} : popParity fuel a = xorBits a (List.range fuel) := by
-  induction fuel generalizing a with
-  | zero => rfl
-  | succ f ih =>
-    rw [popParity, ih, List.range_succ_eq_map]
-    simp only [xorBits, List.foldr_cons, List.foldr_map, Nat.testBit_zero, Nat.testBit_succ]
-
-/-- Dropping trailing indices whose bit is `false` does not change the XOR. -/
-theorem xorBits_range_hi {n m : ℕ} (hzero : ∀ j, n ≤ j → v.testBit j = false) (hnm : n ≤ m) :
-    xorBits v (List.range m) = xorBits v (List.range n) := by
-  induction m with grind [List.range_succ, xorBits]
+variable {a b : Bool}
 
 /-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
 def bId (b : Bool) : ZMod 2 := if b then 1 else 0
+
+@[simp] lemma bId_false : bId false = 0 := rfl
 
 lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert +kernel
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
-/-- `popParityK v` is the XOR over the low 32 bits of `v`. -/
-theorem popParityK_eq32 : popParityK v = popParity 32 v := by
-  rw [popParity_eq_xorBits]
-  apply bId_inj
-  simp only [popParityK, Nat.land_eq, Nat.beq_eq_beq, Nat.xor_eq, Nat.shiftRight_eq',
-    land_one_beq_one, Nat.testBit_xor, Nat.testBit_shiftRight, Nat.reduceAdd, xorBits, List.range,
-    List.range.loop, List.foldr_cons, List.foldr_nil, Bool.xor_false, bId_xor]
-  grind
+/-- The `Nat → Nat → Nat` fold inside `invRowK`: consuming `Mr` one row at a time, XOR the running
+accumulator with row `m` when the low bit of the running `b` is set, then shift `b` down. -/
+noncomputable def goRows (Mr : List ℕ) (b acc : ℕ) : ℕ :=
+  Mr.rec (motive := fun _ ↦ ℕ → ℕ → ℕ) (fun _ acc ↦ acc)
+    (fun m _ ih b acc ↦ ih (b >>> 1) (acc ^^^ m * (b &&& 1))) b acc
 
-/-- Link between the recursive parity and the `Finset.range` sum over 𝔽₂ indicators. -/
-theorem popParity_sum {fuel a : ℕ} :
-    bId (popParity fuel a) = ∑ j ∈ range fuel, bId (a.testBit j) := by
-  induction fuel generalizing a with
-  | zero => rfl
-  | succ f ih =>
-    rw [popParity, sum_range_succ', bId_xor, add_comm, ih]
-    simp [Nat.testBit_succ]
+@[simp] theorem goRows_nil {b acc : ℕ} : goRows [] b acc = acc := rfl
 
-section
-variable {n : ℕ}
+@[simp] theorem goRows_cons {m b acc : ℕ} {ms : List ℕ} :
+    goRows (m :: ms) b acc = goRows ms (b >>> 1) (acc ^^^ m * (b &&& 1)) := rfl
 
-/-- Extra high bits (`≥ n`) are zero when `v < 2 ^ n`, so they drop out of the XOR. -/
-theorem popParity_hi_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParity 32 v = popParity n v := by
-  rw [popParity_eq_xorBits, popParity_eq_xorBits]
-  refine xorBits_range_hi (fun j hj ↦ ?_) hn
-  exact Nat.testBit_eq_false_of_lt (lt_of_lt_of_le hv (Nat.pow_le_pow_right (by decide) hj))
+/-- `invRowK` unfolds to the `beq` of the `goRows` fold against the unit vector `1 <<< i`. -/
+theorem invRowK_eq {i bi : ℕ} {Mr : List ℕ} :
+    invRowK i bi Mr = (goRows Mr bi 0).beq (1 <<< i) := rfl
 
-/-- For `v < 2 ^ n` with `n ≤ 32`, `popParityK v` equals `popParity n v`. -/
-theorem popParityK_eq (hv : v < 2 ^ n) (hn : n ≤ 32) : popParityK v = popParity n v := by
-  rw [popParityK_eq32, popParity_hi_eq hv hn]
+/-- Bit `j` of one selected term `m * (b &&& 1)`, as a `ZMod 2` product: the low bit of `b` times
+bit `j` of `m`. -/
+private theorem bId_testBit_select {m b j : ℕ} :
+    bId ((m * (b &&& 1)).testBit j) = bId (b.testBit 0) * bId (m.testBit j) := by
+  rw [Nat.and_one_is_mod, Nat.testBit_zero]
+  rcases Nat.mod_two_eq_zero_or_one b with h | h <;> simp [h, bId]
 
-end
+/-- Bit `j` of the `goRows` fold, over `𝔽₂`: the accumulator's bit `j` plus, over each row `k`, the
+selector bit `b.testBit k` times bit `j` of row `k`. -/
+theorem bId_goRows_testBit {ms : List ℕ} {b acc j : ℕ} :
+    bId ((goRows ms b acc).testBit j)
+      = bId (acc.testBit j)
+        + ∑ k ∈ range ms.length, bId (b.testBit k) * bId ((ms.getD k 0).testBit j) := by
+  induction ms generalizing b acc with
+  | nil => simp
+  | cons m ms ih =>
+    have hsum : (∑ k ∈ range ms.length, bId ((b >>> 1).testBit k) * bId ((ms.getD k 0).testBit j))
+        = ∑ k ∈ range ms.length,
+            bId (b.testBit (k + 1)) * bId (((m :: ms).getD (k + 1) 0).testBit j) :=
+      Finset.sum_congr rfl fun k _ ↦ by
+        rw [Nat.testBit_shiftRight, Nat.add_comm 1 k, List.getD_cons_succ]
+    rw [goRows_cons, ih, hsum, List.length_cons, sum_range_succ', List.getD_cons_zero,
+      Nat.testBit_xor, bId_xor, bId_testBit_select]
+    abel
 
-@[simp, grind =] theorem checkInvRow_cons {b i k m : ℕ} {ms : List ℕ} :
-    checkInvRow b i k (m :: ms) =
-      ((popParityK (b &&& m)).rec (motive := fun _ ↦ Bool) (i.beq k).not'
-        (i.beq k)).and' (checkInvRow b i k.succ ms) := rfl
+variable {n b i i' : ℕ} {B M : List ℕ}
 
-@[simp, grind =] theorem checkInvGo_cons {M : List ℕ} {i b : ℕ} {bs : List ℕ} :
-    checkInvGo M i (b :: bs) = (checkInvRow b i 0 M).and' (checkInvGo M i.succ bs) := rfl
+@[simp, grind =] theorem checkInvGo_cons {Mr : List ℕ} {i b : ℕ} {bs : List ℕ} :
+    checkInvGo Mr i (b :: bs) = (invRowK i b Mr).and' (checkInvGo Mr i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -114,67 +98,57 @@ public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B
     toMat B n i j = if B[i].testBit j then 1 else 0 := by
   rw [toMat, Matrix.of_apply, List.getD_eq_getElem _ _ h, Fin.getElem_fin]
 
-/-- Interpret a `List Nat` of column bitmasks as an `n × n` matrix over `𝔽₂`. -/
-def toMatCols (M : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) := (toMat M n).transpose
-
-section
-variable {n b i i' k k' : ℕ} {B M : List ℕ}
-
-/-- Column correctness for one row: if `checkInvRow` (started at column index `k`) passes, then at
-each column `k'` the parity of `bi &&& M[k']` equals the diagonal indicator `i == k + k'`. -/
-theorem checkInvRow_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n) (hc : checkInvRow b i k M)
-    (hk' : k' < M.length) : popParity n (b &&& M[k']) = (i == k + k') := by
-  induction M generalizing k k' with
-  | nil => simp at hk'
-  | cons m ms ih =>
-    cases k' with
-    | zero =>
-      have hbnd : b &&& m < 2 ^ n := Nat.and_lt_two_pow b (hM m (by simp))
-      grind [popParityK_eq]
-    | succ k'' => grind
-
-/-- Row correctness: if `checkInvGo` (started at row index `i`) passes, then for each row `i'` and
-column `k'` the parity of `B[i'] &&& M[k']` equals the diagonal indicator `i + i' == k'`. -/
-theorem checkInvGo_true (hn : n ≤ 32) (hM : ∀ m ∈ M, m < 2 ^ n)
-    (hB : ∀ b ∈ B, b < 2 ^ n) (hc : checkInvGo M i B) (hi' : i' < B.length) (hk' : k' < M.length) :
-    popParity n (B[i'] &&& M[k']) = (i + i' == k') := by
-  induction B generalizing i i' with
-  | nil => simp at hi'
-  | cons b bs ih =>
-    cases i' with
-    | zero => grind [checkInvRow_true]
-    | succ i'' => grind
+/-- Entry `(i, j)` of `toMat B n` as the `𝔽₂` indicator of bit `j` of row `i`. -/
+theorem toMat_eq_bId {B : List ℕ} {n : ℕ} {i j : Fin n} :
+    toMat B n i j = bId ((B.getD i 0).testBit j) := rfl
 
 /-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
 @[grind =] theorem maskBelow_iff : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
   rw [maskBelow, allList_iff]
   simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
 
-/-- The four conjuncts of a passing `checkInv`: bounds on `B`, on `M`, `n ≤ 32`, and
-`checkInvGo M 0 B`. -/
-theorem checkInv_true_of (h : checkInv n B M) :
-    (∀ b ∈ B, b < 2 ^ n) ∧ (∀ m ∈ M, m < 2 ^ n) ∧ n ≤ 32 ∧ checkInvGo M 0 B := by
-  grind [checkInv, maskBelow_iff]
+/-- From a passing `checkInvGo` (started at row index `i`) the row check `invRowK` holds for every
+row of `B`, at the shifted index `i + i'`. -/
+theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
+    invRowK (i + i') B[i'] M := by
+  induction B generalizing i i' with
+  | nil => simp at hi'
+  | cons b bs ih =>
+    rw [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
+    cases i' with
+    | zero => simpa using hc.1
+    | succ i'' =>
+      have hi2 : i'' < bs.length := by rw [List.length_cons] at hi'; omega
+      have hidx : i + (i'' + 1) = i.succ + i'' := by omega
+      rw [hidx, List.getElem_cons_succ]
+      exact ih hc.2 hi2
 
-/-- If the aggregate check passes, every `(i, k)` parity equals the diagonal indicator `i == k`. -/
-theorem checkInv_true (hi : i < B.length) (hk : k < M.length) (h : checkInv n B M) :
-    popParity n (B[i] &&& M[k]) = (i == k) := by
-  obtain ⟨hB, hM, hn, hgo⟩ := checkInv_true_of h
-  simpa using checkInvGo_true hn hM hB hgo hi hk
+/-- If the aggregate check `checkInv n B M` passes, the row check `invRowK i B[i] M` holds for every
+row `i` of `B`. -/
+theorem invRowK_true (hi : i < B.length) (h : checkInv n B M) : invRowK i B[i] M := by
+  have hgo : checkInvGo M 0 B := by
+    simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
+    exact h.2.2
+  simpa using checkInvGo_true hgo hi
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv n B M) :
     IsUnit (toMat B n) := by
-  have key : toMat B n * toMatCols M n = 1 := by
+  have key : toMat B n * toMat M n = 1 := by
     ext i k
-    simp only [Matrix.mul_apply, toMat, Matrix.of_apply, toMatCols, ← bId.eq_def, ← bId_and,
-      ← Nat.testBit_land, Matrix.transpose_apply]
-    rw [Fin.sum_univ_eq_sum_range (fun j ↦ bId ((B.getD i 0 &&& M.getD k 0).testBit j)) n,
-      ← popParity_sum, Matrix.one_apply]
-    grind [bId, checkInv_true]
-  exact .of_mul_eq_one (toMatCols M n) key
-
-end
+    have hi : i.val < B.length := by rw [hBlen]; exact i.2
+    have hrow : goRows M B[i.val] 0 = 1 <<< i.val :=
+      Nat.eq_of_beq_eq_true (invRowK_eq ▸ invRowK_true hi h)
+    have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (acc := 0) (j := k)
+    rw [hMlen] at hg
+    simp only [Nat.zero_testBit, bId_false, zero_add] at hg
+    rw [Matrix.mul_apply, Matrix.one_apply]
+    simp only [toMat_eq_bId]
+    rw [Fin.sum_univ_eq_sum_range
+      (fun x ↦ bId ((B.getD i 0).testBit x) * bId ((M.getD x 0).testBit k)) n, ← hg,
+      List.getD_eq_getElem _ _ hi, hrow, Nat.one_shiftLeft, Nat.testBit_two_pow]
+    rcases eq_or_ne i k with h' | h' <;> simp [h', bId, Fin.val_inj]
+  exact .of_mul_eq_one (toMat M n) key
 
 end ECCompute.F2Invert

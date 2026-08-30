@@ -26,7 +26,7 @@ general integral model.
 
 The four lists `points`, `labels`, `B`, and `M` all have length `ρ`; the `Certificate.Valid`
 checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
-by rows, `M` by columns), so `F2Invert.checkInv ρ B M` applies verbatim.
+and `M` both by rows), so `F2Invert.checkInv ρ B M` applies verbatim.
 -/
 
 namespace ECCompute
