@@ -170,24 +170,29 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List 
         (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
         (ih (b.div 2))) b
 
-/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
-noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
+/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. Each
+point's coordinates are reduced once mod the emitted literal `P` before the per-label loop; since
+every label prime divides `P` (checked in `checkB`), `(x mod P) mod p = x mod p`, so the descent
+values are unchanged while the per-label mods run on small residues. -/
+noncomputable def checkBGo (a₂ a₄ : Int) (P : Nat) (ls : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec true
-      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
-        (ih ps))) pt
+      (fun p ps _ ↦ (checkBRow a₂ a₄ (p.1.num.toNat.mod P) ((-p.1.num).toNat.mod P) (p.1.den.mod P)
+          b ls).and' (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
 noncomputable def checkMaskList (ls : List (Nat × Nat × Nat)) : Bool :=
   allList (fun l ↦ (qrMask l.1).beq l.2.2) ls
 
 /-- `true` iff every entry of `B` equals the descent character at its point in `pt`, with each
-mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
-noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
+mask in `q` checked against `qrMask`, and each label prime dividing the emitted literal `P`. Spec:
+`checkB_true`. -/
+noncomputable def checkB (a₂ a₄ : Int) (P : Nat) (ls : List (Nat × Int)) (q B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
-  (checkMaskList (toLs ls q)).and'
-    (checkBGo a₂ a₄ (toLs ls q) B pt)
+  (allList (fun l ↦ (P.mod l.1).beq 0) ls).and'
+    ((checkMaskList (toLs ls q)).and'
+      (checkBGo a₂ a₄ P (toLs ls q) B pt))
 
 /-! ## Point on curve -/
 

@@ -165,9 +165,11 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
+  -- The product of all label primes, computed host-side and emitted as a flat `Nat` literal.
+  let P : Nat := ls.foldl (fun acc l ↦ acc * l.1) 1
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr ρ, pointsE,
-      toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
+      toExpr ls.toList, toExpr P, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 public theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}

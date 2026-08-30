@@ -46,6 +46,10 @@ public structure Certificate where
   points : List (ℚ × ℚ)
   /-- The `ρ` descent-column labels `(p, θ)`: a prime `p` and a root `θ` mod `p`. -/
   labels : List (ℕ × ℤ)
+  /-- The product of all label primes, emitted as a flat `Nat` literal. Every label prime divides
+  `P` (`Certificate.Valid`), so reducing a point coordinate once mod `P` and then mod each label
+  prime `p` agrees with reducing it mod `p` directly. -/
+  P : ℕ
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
   B : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
@@ -83,7 +87,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
   labels : checkLabels c.a₂ c.a₄ c.a₆ c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
-  matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
+  matrix : checkB c.a₂ c.a₄ c.P c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
   inv : F2Invert.checkInv c.ρ c.B c.M
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/
