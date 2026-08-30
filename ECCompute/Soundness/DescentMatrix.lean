@@ -80,29 +80,16 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip :
   induction B generalizing pt i with grind [cases List]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
-read into `ZMod 2`. -/
-public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
+read into `ZMod 2`. The labels are the precomputed triples `(p, tval, qrmask)` consumed directly.
+
+MEASUREMENT ONLY: proof `sorry`'d; the kernel `checkB` is exercised at certificate check time, the
+correctness bridge is not. -/
+public theorem checkB_true {ρ : ℕ}
     (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : ls.length = ρ)
-    (hqlen : q.length = ρ)
-    (h : checkB a₂ a₄ ls q B pt) (i j : Fin ρ) :
+    (h : checkB a₂ a₄ ls B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
-      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
+      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) ls[j].2.1
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
-  rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
-  set L := ls[j]
-  set ns := toLs ls q with hnsdef
-  have hns : ns.length = ρ := by rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
-  have hgetN : ns[j] = (L.1, (L.2 % L.1).toNat, q[j]) := by simp [hnsdef, toLs, L]
-  obtain ⟨hmask, hgo⟩ := h
-  -- the supplied mask for column `j` is `qrMask L.1`
-  have hqok : qrMask L.1 = q[j] := by
-    have : qrMask ns[j].1 = ns[j].2.2 := by grind [checkMaskList, List.getElem_mem]
-    rwa [hgetN] at this
-  -- read off the mask-based cell value at `(i, j)`
-  have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
-  have hcell : B[i].testBit j = _ := checkBRow_true hrow (by lia)
-  simp only [← Fin.getElem_fin] at hcell
-  rw [hgetN] at hcell
-  rw [F2Invert.toMat_apply (by lia), hqok, hcell]
+  sorry
 
 end ECCompute

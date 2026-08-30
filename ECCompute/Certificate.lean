@@ -52,16 +52,15 @@ public structure Certificate where
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
   points : List (ℚ × ℚ)
-  /-- The `ρ` descent-column labels `(p, θ)`: a prime `p` and a root `θ` mod `p`. -/
-  labels : List (ℕ × ℤ)
+  /-- The `ρ` descent-column labels as precomputed `Nat` triples `(p, tval, qrmask)`: a prime `p`, the
+  root residue `tval = (θ mod p).toNat` of the `2`-division cubic mod `p`, and the quadratic-residue
+  bitmask `qrmask` whose bit `a` is set iff `a` is a nonzero square mod `p`. `Certificate.Valid`
+  checks `tval < p`, that `θ` is a root, and each mask against `qrMask`. -/
+  labels : List (ℕ × ℕ × ℕ)
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
   B : List Nat
   /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
   M : List Nat
-  /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
-  set iff `a` is a nonzero square mod `labels[j].1`. `Certificate.Valid` checks each against
-  `qrMask`. -/
-  qrMasks : List Nat
   /-- The rational `2`-torsion dimension `t = dim_{𝔽₂} E(ℚ)[2]`; the target bound is
   `rank ≥ ρ - t`. -/
   t : ℕ
@@ -82,8 +81,6 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   lenB : c.B.length = c.ρ
   /-- The column bitmask list `M` has `ρ` entries. -/
   lenM : c.M.length = c.ρ
-  /-- The quadratic-residue mask list has `ρ` entries. -/
-  lenQ : c.qrMasks.length = c.ρ
   /-- Each listed point lies on the short model. -/
   pts : checkPointsShort c.a₂ c.a₄ c.a₆ c.points
   /-- Each label carries a prime. -/
@@ -91,7 +88,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
   labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a2r c.a4r c.a6r c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
-  matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
+  matrix : checkB c.a₂ c.a₄ c.labels c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
   inv : F2Invert.checkInv c.ρ c.B c.M
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/

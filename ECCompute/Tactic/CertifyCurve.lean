@@ -164,7 +164,11 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
     mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
-  let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
+  -- Emit the labels as precomputed `Nat` triples `(p, tval, qrmask)`: the root residue
+  -- `tval = (θ mod p).toNat` and the quadratic-residue mask are computed host-side, so the kernel
+  -- checkers (`checkLabels`, `checkB`) read them as flat literals with no per-label `Int.emod`.
+  let triples : List (Nat × Nat × Nat) := ls.toList.map fun l ↦
+    (l.1, (l.2.emod (Int.ofNat l.1)).toNat, CertifyEval.qrMaskEval l.1)
   -- Reduce the big coefficients mod the label-prime product `P` once, host-side, and emit `P` and
   -- the three residues as flat `Nat` literals so the per-label kernel loop references, not
   -- recomputes, them (`checkLabels`).
@@ -174,7 +178,7 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
     #[toExpr sA2, toExpr sA4, toExpr sA6,
       toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6),
       toExpr ρ, pointsE,
-      toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
+      toExpr triples, toExpr B, toExpr M, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 public theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
@@ -200,12 +204,12 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
     mkAppN (mkConst ``List.length_beq_eq [Level.zero])
       #[elemTy, mkApp (mkConst field) cExpr, ρE, rb]
+  let natPairTy := mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) natTy natTy
   let hlenP := hlenOf ``Certificate.points ratPairTy
-  let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
-    natTy (mkConst ``Int))
+  let hlenL := hlenOf ``Certificate.labels
+    (mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) natTy natPairTy)
   let hlenB := hlenOf ``Certificate.B natTy
   let hlenM := hlenOf ``Certificate.M natTy
-  let hlenQ := hlenOf ``Certificate.qrMasks natTy
   -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curveQ c.a₂ …`.
   let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
   let a4C := mkApp (mkConst ``Certificate.a₄) cExpr
@@ -219,7 +223,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 
     else
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   let hValid := mkAppN (mkConst ``Certificate.Valid.mk)
-    #[cExpr, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
+    #[cExpr, hlenP, hlenL, hlenB, hlenM, rb, rb, rb, rb, rb, htors]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
     (aEs ++ #[cExpr, wE, hW, h₂, h₄, h₆, hValid])
 

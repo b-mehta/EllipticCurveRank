@@ -38,8 +38,9 @@ noncomputable def passes (x : Nat) : List Nat → Bool :=
 noncomputable def checkPrime (p : Nat) : Bool :=
   (Nat.ble 2 p).and' ((p.ble 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
 
-/-- `true` iff every label's prime component passes `checkPrime`. -/
-noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
+/-- `true` iff every label's prime component passes `checkPrime`. Labels are the precomputed triples
+`(p, tval, qrmask)`; the prime is the first component. -/
+noncomputable def checkPrimes (labels : List (Nat × Nat × Nat)) : Bool :=
   allList (fun l ↦ checkPrime l.1) labels
 
 /-! ## Polynomial residue search -/
@@ -116,29 +117,31 @@ noncomputable def cubicModP (rp2 rp4 rp6 p t : Nat) : Nat :=
   (rp6.add (t.mul e2)).mod p
 
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r2, r4, r6` (each already
-reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
-`Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`, `r6 = a₆ mod P` and
-`p ∣ P`. -/
-noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p : Nat) (θ : Int) : Bool :=
+reduced modulo the label-prime product `P`) and the precomputed root residue `tval = (θ mod p).toNat`
+carried in the certificate, reducing the coefficients to `p` in `Nat`. Verifies `tval < p` and
+computes the same `Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`,
+`r6 = a₆ mod P`, `p ∣ P`, and `θ ≡ tval (mod p)`. -/
+noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p tval : Nat) : Bool :=
   let rp2 := r2.mod p
   let rp4 := r4.mod p
   let rp6 := r6.mod p
   (((Nat.mod 6 p).beq 0).not').and'
-    ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
-      ((cubicModP rp2 rp4 rp6 p (θ.emod p).toNat).beq 0))
+    ((tval.blt p).and'
+      ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
+        ((cubicModP rp2 rp4 rp6 p tval).beq 0)))
 
 /-- `true` iff the descent check passes for every label. The label-prime product `P` is checked
 positive; the three big coefficients are reduced mod `P` **once** (the `Int.emod` here), verified
 against the emitted residue literals `a2r, a4r, a6r`; every label prime is checked to divide `P`;
 then each label is decided in `Nat` by `checkLabelNat` on those literal residues. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a2r a4r a6r : Nat)
-    (labels : List (Nat × Int)) : Bool :=
+    (labels : List (Nat × Nat × Nat)) : Bool :=
   (Nat.ble 1 P).and'
     ((a2r.beq (a₂.emod (Int.ofNat P)).toNat).and'
       ((a4r.beq (a₄.emod (Int.ofNat P)).toNat).and'
         ((a6r.beq (a₆.emod (Int.ofNat P)).toNat).and'
           ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-            (allList (fun l ↦ checkLabelNat a2r a4r a6r l.1 l.2) labels)))))
+            (allList (fun l ↦ checkLabelNat a2r a4r a6r l.1 l.2.1) labels)))))
 
 /-! ## Descent character -/
 
@@ -210,11 +213,6 @@ end F2Invert
 
 /-! ## Descent matrix -/
 
-/-- The `Nat` label triples `(p, (θ % p).toNat, m)`, one for each label `(p, θ)` in `ls` paired
-with its quadratic-residue mask `m` in `q`. -/
-noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
-  List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
-
 /-- The expected row word: bit `j` is label `ls[j]`'s descent character at point
 `(xnp - xnm) / xden`, LSB-first (head label at bit `0`). -/
 noncomputable def checkBRowWord (a₂ a₄ : Int) (xnp xnm xden : Nat)
@@ -241,11 +239,12 @@ noncomputable def checkMaskList (ls : List (Nat × Nat × Nat)) : Bool :=
   allList (fun l ↦ (qrMask l.1).beq l.2.2) ls
 
 /-- `true` iff every entry of `B` equals the descent character at its point in `pt`, with each
-mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
-noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
+label triple's mask checked against `qrMask`. The labels are the precomputed triples
+`(p, tval, qrmask)` consumed directly, so the row word and mask check read the certificate data with
+no per-label reduction. Spec: `checkB_true`. -/
+noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
-  (checkMaskList (toLs ls q)).and'
-    (checkBGo a₂ a₄ (toLs ls q) B pt)
+  (checkMaskList ls).and' (checkBGo a₂ a₄ ls B pt)
 
 /-! ## Point on curve -/
 
