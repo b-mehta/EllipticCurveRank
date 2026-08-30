@@ -80,16 +80,21 @@ theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip :
   induction B generalizing pt i with grind [cases List]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
-read into `ZMod 2`. The labels are the precomputed triples `(p, tval, qrmask)` consumed directly.
-
-MEASUREMENT ONLY: proof `sorry`'d; the kernel `checkB` is exercised at certificate check time, the
-correctness bridge is not. -/
+read into `ZMod 2`. The labels are the precomputed triples `(p, tval, qrmask)` consumed directly. -/
 public theorem checkB_true {ρ : ℕ}
     (hBlen : B.length = ρ) (hplen : pt.length = ρ) (hllen : ls.length = ρ)
     (h : checkB a₂ a₄ ls B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
       if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) ls[j].2.1
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
-  sorry
+  rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
+  obtain ⟨hmask, hgo⟩ := h
+  rw [checkMaskList, allList_iff] at hmask
+  have hqok : qrMask ls[j].1 = ls[j].2.2 :=
+    Nat.eq_of_beq_eq_true (hmask ls[j] (List.getElem_mem _))
+  have hrow := checkBGo_row (i := i) hgo (by lia) (by lia)
+  have hcell := checkBRow_true (j := (j : ℕ)) hrow (by lia)
+  simp only [← Fin.getElem_fin] at hcell
+  rw [F2Invert.toMat_apply (by lia), hqok, hcell]
 
 end ECCompute

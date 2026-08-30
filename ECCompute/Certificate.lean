@@ -52,10 +52,10 @@ public structure Certificate where
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
   points : List (ℚ × ℚ)
-  /-- The `ρ` descent-column labels as precomputed `Nat` triples `(p, tval, qrmask)`: a prime `p`, the
-  root residue `tval = (θ mod p).toNat` of the `2`-division cubic mod `p`, and the quadratic-residue
-  bitmask `qrmask` whose bit `a` is set iff `a` is a nonzero square mod `p`. `Certificate.Valid`
-  checks `tval < p`, that `θ` is a root, and each mask against `qrMask`. -/
+  /-- The `ρ` descent-column labels as precomputed `Nat` triples `(p, tval, qrmask)`: a prime `p`,
+  the root residue `tval = (θ mod p).toNat` of the `2`-division cubic mod `p`, and the
+  quadratic-residue bitmask `qrmask` whose bit `a` is set iff `a` is a nonzero square mod `p`.
+  `Certificate.Valid` checks `tval < p`, that `θ` is a root, and each mask against `qrMask`. -/
   labels : List (ℕ × ℕ × ℕ)
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
   B : List Nat
