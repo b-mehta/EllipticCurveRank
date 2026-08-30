@@ -44,10 +44,10 @@ lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert +kernel
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
-/-- The `Nat → Nat → Nat` fold inside `invRowK`: consuming `Mr` one row at a time, XOR the running
+/-- The `Nat → Nat → Nat` fold inside `invRowK`: consuming `ms` one row at a time, XOR the running
 accumulator with row `m` when the low bit of the running `b` is set, then shift `b` down. -/
-noncomputable def goRows (Mr : List ℕ) (b acc : ℕ) : ℕ :=
-  Mr.rec (motive := fun _ ↦ ℕ → ℕ → ℕ) (fun _ acc ↦ acc)
+noncomputable def goRows (ms : List ℕ) (b acc : ℕ) : ℕ :=
+  ms.rec (motive := fun _ ↦ ℕ → ℕ → ℕ) (fun _ acc ↦ acc)
     (fun m _ ih b acc ↦ ih (b >>> 1) (acc ^^^ m * (b &&& 1))) b acc
 
 @[simp] theorem goRows_nil {b acc : ℕ} : goRows [] b acc = acc := rfl
@@ -63,8 +63,8 @@ theorem invRowK_eq {i bi : ℕ} {Mr : List ℕ} :
 bit `j` of `m`. -/
 private theorem bId_testBit_select {m b j : ℕ} :
     bId ((m * (b &&& 1)).testBit j) = bId (b.testBit 0) * bId (m.testBit j) := by
-  rw [Nat.and_one_is_mod, Nat.testBit_zero]
-  rcases Nat.mod_two_eq_zero_or_one b with h | h <;> simp [h, bId]
+  rcases Nat.mod_two_eq_zero_or_one b with h | h <;>
+    simp [Nat.and_one_is_mod, Nat.testBit_zero, h, bId]
 
 /-- Bit `j` of the `goRows` fold, over `𝔽₂`: the accumulator's bit `j` plus, over each row `k`, the
 selector bit `b.testBit k` times bit `j` of row `k`. -/
@@ -84,10 +84,10 @@ theorem bId_goRows_testBit {ms : List ℕ} {b acc j : ℕ} :
       Nat.testBit_xor, bId_xor, bId_testBit_select]
     abel
 
-variable {n b i i' : ℕ} {B M : List ℕ}
+variable {n i i' : ℕ} {B M : List ℕ}
 
-@[simp, grind =] theorem checkInvGo_cons {Mr : List ℕ} {i b : ℕ} {bs : List ℕ} :
-    checkInvGo Mr i (b :: bs) = (invRowK i b Mr).and' (checkInvGo Mr i.succ bs) := rfl
+@[simp, grind =] theorem checkInvGo_cons {b : ℕ} {bs : List ℕ} :
+    checkInvGo M i (b :: bs) = (invRowK i b M).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -102,11 +102,6 @@ public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B
 theorem toMat_eq_bId {B : List ℕ} {n : ℕ} {i j : Fin n} :
     toMat B n i j = bId ((B.getD i 0).testBit j) := rfl
 
-/-- `maskBelow n M` is `true` exactly when every mask in `M` fits in `n` bits. -/
-@[grind =] theorem maskBelow_iff : maskBelow n M ↔ ∀ x ∈ M, x < 2 ^ n := by
-  rw [maskBelow, allList_iff]
-  simp [Nat.shiftLeft_eq', Nat.one_shiftLeft]
-
 /-- From a passing `checkInvGo` (started at row index `i`) the row check `invRowK` holds for every
 row of `B`, at the shifted index `i + i'`. -/
 theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
@@ -118,17 +113,14 @@ theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
     cases i' with
     | zero => simpa using hc.1
     | succ i'' =>
-      have hi2 : i'' < bs.length := by rw [List.length_cons] at hi'; omega
       have hidx : i + (i'' + 1) = i.succ + i'' := by omega
       rw [hidx, List.getElem_cons_succ]
-      exact ih hc.2 hi2
+      exact ih hc.2 (by simpa using hi')
 
 /-- If the aggregate check `checkInv n B M` passes, the row check `invRowK i B[i] M` holds for every
 row `i` of `B`. -/
 theorem invRowK_true (hi : i < B.length) (h : checkInv n B M) : invRowK i B[i] M := by
-  have hgo : checkInvGo M 0 B := by
-    simp only [checkInv, Bool.and'_eq_and, Bool.and_eq_true] at h
-    exact h.2.2
+  have hgo : checkInvGo M 0 B := by grind [checkInv]
   simpa using checkInvGo_true hgo hi
 
 /-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
