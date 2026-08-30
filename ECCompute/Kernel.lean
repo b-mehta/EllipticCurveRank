@@ -78,9 +78,68 @@ noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool 
     (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
       ((polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0))
 
-/-- `true` iff every label passes `checkLabel`. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : Int) (labels : List (Nat × Int)) : Bool :=
-  allList (fun l ↦ checkLabel a₂ a₄ a₆ l.1 l.2) labels
+/-! ### Nat-path label check (measurement branch)
+
+The per-label loop below touches only small `Nat` residues carried in the certificate. The big
+integer coefficients `a₂, a₄, a₆` are reduced modulo the label-prime product `P` exactly **once**
+(the three `Int.emod` in `checkLabels`, outside every loop); the emitted certificate literals `a2r,
+a4r, a6r` are those residues, verified against them. Each label then reduces the small residues to
+its prime `p` in `Nat` (the discriminant mod `p` and the monic cubic mod `p`), so no big-coefficient
+`Int.emod` and no `let`-bound big value is reachable from the per-label closure. Correctness of the
+computed `Bool` is what `Curves.Curve81` checks in the kernel; the abstract soundness proofs are
+stubbed on this branch. -/
+
+/-- `x - y` modulo `p`, for `x, y < p`: `(x + (p - y)) mod p`, staying in `Nat`. -/
+noncomputable def subModP (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
+
+/-- The discriminant `discrIntK` modulo `p`, computed on the pre-reduced nonneg residues
+`rp2, rp4, rp6 < p` entirely in `Nat`. Equals `(discrIntK rp2 rp4 rp6).emod p` as a residue in
+`[0, p)`. -/
+noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
+  let b2 := (Nat.mul 4 rp2).mod p
+  let b4 := (Nat.mul 2 rp4).mod p
+  let b6 := (Nat.mul 4 rp6).mod p
+  let inner := subModP p ((Nat.mul (Nat.mul 4 rp2) rp6).mod p) ((rp4.mul rp4).mod p)
+  let bigA := ((b2.mul b2).mod p).mul inner |>.mod p
+  let b4cube := (((b4.mul b4).mod p).mul b4).mod p
+  let t8 := (Nat.mul 8 b4cube).mod p
+  let b6sq := (b6.mul b6).mod p
+  let t27 := (Nat.mul 27 b6sq).mod p
+  let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
+  subModP p (subModP p (subModP p lastT bigA) t8) t27
+
+/-- The monic cubic `θ³ + a₂θ² + a₄θ + a₆` modulo `p` at residue `t = θ mod p`, computed by Horner on
+the pre-reduced nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. Equals
+`polyModL [a₆, a₄, a₂, 1] p t`. -/
+noncomputable def cubicModP (rp2 rp4 rp6 p t : Nat) : Nat :=
+  let e0 := (Nat.mod 1 p)
+  let e1 := (rp2.add (t.mul e0)).mod p
+  let e2 := (rp4.add (t.mul e1)).mod p
+  (rp6.add (t.mul e2)).mod p
+
+/-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r2, r4, r6` (each already
+reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
+`Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`, `r6 = a₆ mod P` and
+`p ∣ P`. -/
+noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p : Nat) (θ : Int) : Bool :=
+  let rp2 := r2.mod p
+  let rp4 := r4.mod p
+  let rp6 := r6.mod p
+  (((Nat.mod 6 p).beq 0).not').and'
+    ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
+      ((cubicModP rp2 rp4 rp6 p (θ.emod p).toNat).beq 0))
+
+/-- `true` iff the descent check passes for every label. The three big coefficients are reduced mod
+the label-prime product `P` **once** (the `Int.emod` here), verified against the emitted residue
+literals `a2r, a4r, a6r`; every label prime is checked to divide `P`; then each label is decided in
+`Nat` by `checkLabelNat` on those literal residues. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a2r a4r a6r : Nat)
+    (labels : List (Nat × Int)) : Bool :=
+  (a2r.beq (a₂.emod (Int.ofNat P)).toNat).and'
+    ((a4r.beq (a₄.emod (Int.ofNat P)).toNat).and'
+      ((a6r.beq (a₆.emod (Int.ofNat P)).toNat).and'
+        ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
+          (allList (fun l ↦ checkLabelNat a2r a4r a6r l.1 l.2) labels))))
 
 /-! ## Descent character -/
 

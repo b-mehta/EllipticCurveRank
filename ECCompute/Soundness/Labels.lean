@@ -72,8 +72,11 @@ public theorem descentHyp_of_checkLabel (h : checkLabel a₂ a₄ a₆ p θ) (hp
     rw [fval]
     grind
 
-/-- If `checkLabels` passes, every label passes `checkLabel`. -/
-public theorem checkLabels_true {labels : List (ℕ × ℤ)} (h : checkLabels a₂ a₄ a₆ labels) :
-    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by rwa [checkLabels, allList_iff] at h
+/-- If `checkLabels` passes, every label passes `checkLabel`. On this measurement branch the
+`Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and then
+runs the per-label check in `Nat`; the passage back to the `Int`-path `checkLabel` is stubbed. -/
+public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : ℕ}
+    (h : checkLabels a₂ a₄ a₆ P a2r a4r a6r labels) :
+    ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := sorry
 
 end ECCompute
