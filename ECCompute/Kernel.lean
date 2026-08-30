@@ -198,7 +198,7 @@ noncomputable def checkInvGo (Mr : List Nat) (i : Nat) (B : List Nat) : Bool :=
 
 /-- Every mask in `M` fits in `n` bits (`< 2 ^ n`). -/
 noncomputable def maskBelow (n : Nat) (M : List Nat) : Bool :=
-  allList (fun x ↦ x.blt (Nat.shiftLeft 1 n)) M
+  allList (fun x ↦ (x.shiftRight n).beq 0) M
 
 /-- `true` iff `B * M = I` over `𝔽₂`, where both `B` and `M` are given by
 rows (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all masks fit in `n`
