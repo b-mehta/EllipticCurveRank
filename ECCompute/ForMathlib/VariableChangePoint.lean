@@ -32,9 +32,6 @@ namespace VariableChange
 
 variable (C : VariableChange ℚ)
 
-attribute [grind =]
-  variableChange_a₁ variableChange_a₂ variableChange_a₃ variableChange_a₄ variableChange_a₆
-
 /-- The `x`-coordinate on `C • W` of the point with `x`-coordinate `x` on `W`: `u⁻²(x - r)`. -/
 def mapX (x : ℚ) : ℚ := (C.u : ℚ)⁻¹ ^ 2 * (x - C.r)
 
