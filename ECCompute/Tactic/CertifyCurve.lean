@@ -178,15 +178,16 @@ packaged via its constructor: the five length checks and the five `Bool`
 checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]| ≤ 2^t` by
 `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
-`t = 2`. The model equality `curveQ (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²) = curveQ c.a₂ c.a₄ c.a₆` is
-`rfl`, as `sA2 sA4 sA6` are those short-model coefficients. `torsRoot` supplies the `t = 1` root
-`R`. -/
+`t = 2`. The three short-model coefficient equalities `a₁²+4a₂ = c.a₂`, `16a₄+8a₁a₃ = c.a₄`,
+`64a₆+16a₃² = c.a₆` are `rfl`, as `sA2 sA4 sA6` are those coefficients. `torsRoot` supplies the
+`t = 1` root `R`. -/
 meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 sA6 : Int)
     (wE cExpr hW : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let aEs := #[toExpr v1, toExpr v2, toExpr v3, toExpr v4, toExpr v6]
-  let wModel := mkAppN (mkConst ``curveQ) #[toExpr sA2, toExpr sA4, toExpr sA6]
-  let hmodel ← mkEqRefl wModel
+  let h₂ ← mkEqRefl (toExpr sA2)
+  let h₄ ← mkEqRefl (toExpr sA4)
+  let h₆ ← mkEqRefl (toExpr sA6)
   let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
@@ -213,7 +214,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 
   let hValid := mkAppN (mkConst ``Certificate.Valid.mk)
     #[cExpr, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
-    (aEs ++ #[cExpr, wE, hW, hmodel, hValid])
+    (aEs ++ #[cExpr, wE, hW, h₂, h₄, h₆, hValid])
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
