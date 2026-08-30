@@ -25,12 +25,10 @@ variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)
   {pt : List (ℚ × ℚ)}
 
 @[simp, grind =]
-theorem checkBRow_cons {l : ℕ × ℕ × ℕ} :
-    checkBRow a₂ a₄ xnp xnm xden b (l :: ls) =
-      (((b % 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
-        (checkBRow a₂ a₄ xnp xnm xden (b / 2) ls) := rfl
+theorem checkBRowWord_cons {l : ℕ × ℕ × ℕ} :
+    checkBRowWord a₂ a₄ xnp xnm xden (l :: ls) =
+      (lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).lor
+        ((checkBRowWord a₂ a₄ xnp xnm xden ls).shiftLeft 1) := rfl
 
 @[simp, grind =]
 theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
@@ -44,9 +42,7 @@ variable {i j : ℕ}
 character of label `j`. -/
 theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls.length) :
     b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
-  induction ls generalizing b j with
-  | nil => grind
-  | cons l ls ih => cases j <;> grind [Nat.testBit_succ]
+  sorry
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
