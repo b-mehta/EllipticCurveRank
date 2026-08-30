@@ -210,4 +210,22 @@ noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : Int) (x y : Rat) : Bool
 noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
   allList (fun p ↦ checkPoint a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
 
+/-- `checkPointShort a₂ a₄ a₆ x y` tests the cleared short-model Weierstrass identity
+`yn²·xd³ = xn³·yd² + a₂·xn²·xd·yd² + a₄·xn·xd²·yd² + a₆·xd³·yd²` at `x = xn/xd`, `y = yn/yd`.
+Spec: `checkPointShort_iff`. -/
+noncomputable def checkPointShort (a₂ a₄ a₆ : Int) (x y : Rat) : Bool :=
+  let xn := x.num; let xd := x.den
+  let yn := y.num; let yd := y.den
+  let xd2 := xd.mul xd; let xd3 := xd2.mul xd
+  let yd2 := yd.mul yd
+  let xn2 := xn.mul xn; let xn3 := xn2.mul xn
+  let yn2 := yn.mul yn
+  (yn2.mul xd3).beq'
+    ((((xn3.mul yd2).add (((a₂.mul xn2).mul xd).mul yd2)).add
+        (((a₄.mul xn).mul xd2).mul yd2)).add ((a₆.mul xd3).mul yd2))
+
+/-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
+noncomputable def checkPointsShort (a₂ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
+  allList (fun p ↦ checkPointShort a₂ a₄ a₆ p.1 p.2) pts
+
 end ECCompute
