@@ -77,7 +77,9 @@ short model of these coefficients is the certificate's curve (`hmodel`), and a c
 satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.ρ - c.t`. -/
 public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate)
     (W : WeierstrassCurve ℚ)
-    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curveQ c.a₂ c.a₄ c.a₆)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩)
+    (hmodel : curveQ (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
+      = curveQ c.a₂ c.a₄ c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
@@ -90,7 +92,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
       rw [mul_smul, ← hmodel]
       ext <;>
       simp [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
-        variableChange_a₆, intShortModel, curve] <;>
+        variableChange_a₆, curve] <;>
       grind
     exact hasRankGE_of_addEquiv (scaling 2 two_ne_zero * W.toCharNeTwoNF).pointAddEquiv (hsm ▸ this)
   clear hmodel a₁ a₂ a₃ a₄ a₆

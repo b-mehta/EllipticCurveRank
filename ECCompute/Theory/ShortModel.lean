@@ -20,7 +20,6 @@ Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩` reaches it by completing 
 ## Main declarations
 
 * `ECCompute.IntegralScaling.scaling`: the scaling change of variables `⟨1/v, 0, 0, 0⟩`.
-* `ECCompute.IntegralScaling.intShortModel`: the integral short model of `⟨a₁, a₂, a₃, a₄, a₆⟩`.
 -/
 
 namespace ECCompute.IntegralScaling
@@ -31,10 +30,5 @@ open WeierstrassCurve
 coefficients by `W.aᵢ ↦ vⁱ · W.aᵢ` and points by `(x, y) ↦ (v²x, v³y)`. -/
 @[expose] public def scaling (v : ℚ) (hv : v ≠ 0) : VariableChange ℚ :=
   ⟨(Units.mk0 v hv)⁻¹, 0, 0, 0⟩
-
-/-- The integral short model `curveQ (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²)` associated to the general
-integral Weierstrass curve `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
-@[expose] public def intShortModel (a₁ a₂ a₃ a₄ a₆ : ℤ) : WeierstrassCurve ℚ :=
-  curveQ (a₁ ^ 2 + 4 * a₂) (16 * a₄ + 8 * a₁ * a₃) (64 * a₆ + 16 * a₃ ^ 2)
 
 end ECCompute.IntegralScaling

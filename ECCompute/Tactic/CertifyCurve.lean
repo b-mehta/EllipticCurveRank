@@ -178,14 +178,14 @@ packaged via its constructor: the five length checks and the five `Bool`
 checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]| ≤ 2^t` by
 `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
-`t = 2`. The model equality `intShortModel a₁…a₆ = curveQ c.a₂ c.a₄ c.a₆` is `rfl`. `torsRoot`
-supplies the `t = 1` root `R`. -/
-meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int)
+`t = 2`. The model equality `curveQ (a₁²+4a₂) (16a₄+8a₁a₃) (64a₆+16a₃²) = curveQ c.a₂ c.a₄ c.a₆` is
+`rfl`, as `sA2 sA4 sA6` are those short-model coefficients. `torsRoot` supplies the `t = 1` root
+`R`. -/
+meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 sA6 : Int)
     (wE cExpr hW : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let aEs := #[toExpr v1, toExpr v2, toExpr v3, toExpr v4, toExpr v6]
-  let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) aEs
-  -- `intShortModel a₁…a₆` unfolds to `curveQ c.a₂ c.a₄ c.a₆`, so this equality is `rfl`.
+  let wModel := mkAppN (mkConst ``curveQ) #[toExpr sA2, toExpr sA4, toExpr sA6]
   let hmodel ← mkEqRefl wModel
   let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
   let natTy := mkConst ``Nat
@@ -233,7 +233,7 @@ meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : Tac
   let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
   -- `W = ⟨↑a₁, …, ↑a₆⟩` holds by `rfl`: the goal curve reduces to that integer-cast literal.
   let hW ← mkEqRefl wE
-  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 wE cExpr hW)
+  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 sA2 sA4 sA6 wE cExpr hW)
   replaceMainGoal []
 
 elab_rules : tactic
