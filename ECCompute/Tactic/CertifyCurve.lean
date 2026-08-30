@@ -165,8 +165,15 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
+  -- Reduce the big coefficients mod the label-prime product `P` once, host-side, and emit `P` and
+  -- the three residues as flat `Nat` literals so the per-label kernel loop references, not
+  -- recomputes, them (`checkLabels`).
+  let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
+  let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
   return mkAppN (mkConst ``Certificate.mk)
-    #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr ρ, pointsE,
+    #[toExpr sA2, toExpr sA4, toExpr sA6,
+      toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6),
+      toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/

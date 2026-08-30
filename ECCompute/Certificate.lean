@@ -40,6 +40,14 @@ public structure Certificate where
   a₄ : ℤ
   /-- The constant coefficient of the short model. -/
   a₆ : ℤ
+  /-- The product of every label's prime; each label prime divides it (checked in `checkLabels`). -/
+  P : ℕ
+  /-- The residue `(a₂ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a2r : ℕ
+  /-- The residue `(a₄ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a4r : ℕ
+  /-- The residue `(a₆ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a6r : ℕ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
@@ -81,7 +89,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- Each label carries a prime. -/
   primes : checkPrimes c.labels
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
-  labels : checkLabels c.a₂ c.a₄ c.a₆ c.labels
+  labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a2r c.a4r c.a6r c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
