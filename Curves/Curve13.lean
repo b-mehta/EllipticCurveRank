@@ -9,18 +9,19 @@ public import ECCompute.Tactic.CertifyCurve
 public import ECCompute.Soundness.JInvariant
 
 /-!
-# Curve 13 has rank at least 3, with a single rational 2-torsion point
+# Curve 13 has rank at least 3
 
 The elliptic curve recorded as
 [curve 13](https://elliptic-rank.icarm.cloud/curve/13) on the ICARM Elliptic Curve Rank
-Leaderboard is `E : y² = x³ - 82 x` over `ℚ`, of Mordell-Weil rank at least `3`.
-Its `2`-division cubic factors as `x (x² - 82)`, and `x² - 82` is irreducible over `ℚ`,
-so the only nonzero rational `2`-torsion point is `(0, 0)` and `t = dim_𝔽₂ E(ℚ)[2] = 1`.
+Leaderboard is
 
-The certificate gives `ρ = 4` points with `𝔽₂`-independent descent images and bounds
-`|E(ℚ)[2]| ≤ 2` from the root `R = 0` and the witness prime `ℓ = 5`, at which `x² - 82`
-has no root mod `5`. These combine to `rank ≥ ρ - t = 4 - 1 = 3`. Points (short-model
-coordinates) are in `data/curve13.txt`, descent labels in `data/curve13-labels.txt`.
+  `E : y² = x³ + a₄·x + a₆`,   with
+  `a₄ = -82`   and
+  `a₆ = 0`
+
+over `ℚ`. It has Mordell-Weil rank at least `3`.
+
+Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute

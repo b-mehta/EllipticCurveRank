@@ -19,9 +19,9 @@ Leaderboard is
   `a₄ = -1189299700325816602093307071`   and
   `a₆ = 15790705709481148712666898533494358863001`
 
-over `ℚ`. It has Mordell-Weil rank at least `17`. The witness points from the leaderboard,
-transported to the integral short model, are in `data/curve187.txt`; descent labels are in
-`data/curve187-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
+over `ℚ`. It has Mordell-Weil rank at least `17`.
+
+Submitted to the leaderboard by Seewoo Lee.
 -/
 
 namespace ECCompute

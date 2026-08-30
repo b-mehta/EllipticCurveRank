@@ -15,12 +15,13 @@ The elliptic curve recorded as
 [curve 9](https://elliptic-rank.icarm.cloud/curve/9) on the ICARM Elliptic Curve Rank
 Leaderboard is
 
-  `E : y² + xy + y = x³ - 19252966408674012828065964616418441723 x`
-  `                    + 32685500727716376257923347071452044295907443056345614006`
+  `E : y² + xy + y = x³ + a₄·x + a₆`,   with
+  `a₄ = -19252966408674012828065964616418441723`   and
+  `a₆ = 32685500727716376257923347071452044295907443056345614006`
 
-over `ℚ`. It has Mordell-Weil rank at least `23`, a curve of R. Martin and W. McMillen. Points in
-`data/curve9.txt`, descent labels in `data/curve9-labels.txt` (primes `7` to `163`, from §2.3 of
-Cremona's *On the computation of Mordell-Weil and 2-Selmer groups*); `certify_curve` does the rest.
+over `ℚ`. It has Mordell-Weil rank at least `23`.
+
+Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute

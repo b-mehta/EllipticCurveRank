@@ -17,10 +17,12 @@ Leaderboard is
 
   `E : y² + xy + y = x³ - x² + a₄·x + a₆`,   with
   `a₄ = -20067762415575526585033208209338542750930230312178956502`   and
-  `a₆ = 34481611795030556467032985690390720374855944359319180361266008296291939448732243429`
+  `a₆ = 3448161179503055646703298569039072037485594435931918036126600829629193944873`
+  `     2243429`
 
-over `ℚ`. It has Mordell-Weil rank at least `28`, the 2006 rank record of N. D. Elkies. Points in
-`data/curve11.txt`, descent labels in `data/curve11-labels.txt`; `certify_curve` does the rest.
+over `ℚ`. It has Mordell-Weil rank at least `28`.
+
+Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute

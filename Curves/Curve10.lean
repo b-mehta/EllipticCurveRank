@@ -15,12 +15,13 @@ The elliptic curve recorded as
 [curve 10](https://elliptic-rank.icarm.cloud/curve/10) on the ICARM Elliptic Curve Rank
 Leaderboard is
 
-  `E : y² + xy + y = x³ - 120039822036992245303534619191166796374 x`
-  `                  + 504224992484910670010801799168082726759443756222911415116`
+  `E : y² + xy + y = x³ + a₄·x + a₆`,   with
+  `a₄ = -120039822036992245303534619191166796374`   and
+  `a₆ = 504224992484910670010801799168082726759443756222911415116`
 
-over `ℚ`. It has Mordell-Weil rank at least `24`, the 2000 rank record of R. Martin and W. McMillen.
-Points in `data/curve10.txt`, descent labels in `data/curve10-labels.txt`; `certify_curve` does the
-rest.
+over `ℚ`. It has Mordell-Weil rank at least `24`.
+
+Submitted to the leaderboard by David Renshaw.
 -/
 
 namespace ECCompute
