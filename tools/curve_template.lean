@@ -20,7 +20,7 @@ Leaderboard is
 
 over `ℚ`. It has Mordell-Weil rank at least `{rank}`. The witness points from the leaderboard,
 transported to the integral short model, are in `data/curve{id}.txt`; descent labels are in
-`data/curve{id}-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.
+`data/curve{id}-labels.txt`. The `certify_curve` tactic kernel-checks the resulting certificate.{attribution}
 -/
 
 namespace ECCompute

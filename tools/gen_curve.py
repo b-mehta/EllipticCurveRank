@@ -463,9 +463,11 @@ def main():
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
         f"public instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
     jblock = j_theorem(cid, jinv)
+    submitter = data.get("submitter")
+    attribution = f"\n\nSubmitted to the leaderboard by {submitter}." if submitter else ""
     template = (Path(__file__).parent / "curve_template.lean").read_text()
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
-                           coeffs=coeff_block(ainvs[3], ainvs[4]),
+                           coeffs=coeff_block(ainvs[3], ainvs[4]), attribution=attribution,
                            defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
     with open(f"{repo}/Curves/Curve{cid}.lean", "w") as fh:
         fh.write(lean)
