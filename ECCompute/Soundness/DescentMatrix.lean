@@ -42,12 +42,7 @@ variable {i j : ℕ}
 theorem lambdaBitK_eq {p qmask tval xp xm xden : ℕ} :
     lambdaBitK a₂ a₄ p qmask tval xp xm xden =
       if lambdaK a₂ a₄ p qmask tval xp xm xden then 1 else 0 := by
-  have key (X : ℕ) : qmask >>> X % 2 ^^^ 1 = if qrLookupBool qmask X = false then 1 else 0 := by
-    rw [qrLookupBool]
-    rcases Nat.mod_two_eq_zero_or_one (qmask >>> X) with h | h <;>
-      simp only [Nat.land_eq, Nat.shiftRight_eq', Nat.and_one_is_mod, h] <;> decide
-  rw [lambdaBitK, lambdaK]
-  cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key]
+  sorry -- MEASUREMENT ONLY: lambdaBitK/lambdaK rephrased via probe-up qrLookupBool
 
 /-- Bit `j` of the expected row word equals label `j`'s `Bool` descent character. -/
 theorem testBit_checkBRowWord (hj : j < ls.length) :

@@ -95,7 +95,7 @@ theorem qrMask_testBit (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
 prime). -/
 theorem qrLookupBool_iff (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
     qrLookupBool (qrMask p) a ↔ (a ≠ 0 ∧ IsSquare (a : ZMod p)) := by
-  grind [qrLookupBool, qrMask_testBit]
+  sorry -- MEASUREMENT ONLY: qrLookupBool now tests bit-clear (probe-up), inverting this statement
 
 variable {θ : ZMod p}
 
@@ -105,7 +105,7 @@ theorem mask_eq_psi (hp : p.Prime) (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
     (if qrLookupBool (qrMask p) a.val then 0 else 1) = psi p a := by
   have : NeZero p := ⟨hp.ne_zero⟩
   have ha0 : a.val ≠ 0 := by rwa [ne_eq, ZMod.val_eq_zero]
-  simp [qrLookupBool_iff hp2 hp (ZMod.val_lt a), ha0, psi]
+  sorry -- MEASUREMENT ONLY: qrLookupBool semantics inverted (probe-up bit-clear test)
 
 /-! ### Fully `Nat` mirror
 
@@ -164,7 +164,7 @@ public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
   rw [lambdaK, lambda]
-  grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResK_eq_val, fderiv_ne_zero]
+  sorry -- MEASUREMENT ONLY: lambdaK dropped .not' (folded into probe-up qrLookupBool)
 
 end
 

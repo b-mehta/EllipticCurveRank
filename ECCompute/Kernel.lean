@@ -152,8 +152,9 @@ noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
 noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
 /-- `true` iff bit `a` of the quadratic-residue mask `qmask` is
-set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
+clear, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is not a nonzero square mod `p`.
+Probes bit `a` by shifting the constant `1` up and testing the `land` for zero. -/
+noncomputable def qrLookupBool (qmask a : Nat) : Bool := (qmask.land (Nat.shiftLeft 1 a)).beq 0
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
 noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
@@ -167,16 +168,16 @@ noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
 noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
+      (qrLookupBool qmask (alphaResK p tval xp xm xden))
+      (qrLookupBool qmask (fderivResK a₂ a₄ p tval)))
     false
 
 /-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. -/
 noncomputable def lambdaBitK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Nat :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
-      (((qmask.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
-      (((qmask.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
+      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).rec 0 1)
+      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).rec 0 1))
     0
 
 /-! ## 𝔽₂ matrix inverse -/
