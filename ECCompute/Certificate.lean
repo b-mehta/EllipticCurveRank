@@ -50,8 +50,10 @@ public structure Certificate where
   a6r : ℕ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
-  /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
-  points : List (ℚ × ℚ)
+  /-- The `ρ` rational points, as the flat encoding `(xnA, xs, xd, ynA, yd)`: the magnitude and sign
+  (`true` = negative) of the `x` numerator, the `x` denominator, and the magnitude and denominator
+  of the `y` numerator. `Certificate.Valid` checks each is a point in lowest terms on the model. -/
+  points : List (ℕ × Bool × ℕ × ℕ × ℕ)
   /-- The `ρ` descent-column labels `(p, θ)`: a prime `p` and a root `θ` mod `p`. -/
   labels : List (ℕ × ℤ)
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/

@@ -60,12 +60,15 @@ theorem checkPointShort_iff {x y : ℚ} :
   push_cast
   grind
 
-/-- `checkPointsShort` holds iff every listed point satisfies the short-model equation. -/
-public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
+/-- `checkPointsShort` holds iff every listed point, decoded from its flat `(xnA, xs, xd, ynA, yd)`
+encoding, satisfies the short-model equation. -/
+public theorem checkPointsShort_iff {pts : List (ℕ × Bool × ℕ × ℕ × ℕ)} :
     checkPointsShort a₂ a₄ a₆ pts ↔
-      ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  -- MEASUREMENT ONLY: `checkPointsShort` now folds the signed-`Nat` point check
-  -- `checkPointShortNat`; the soundness bridge to `checkPointShort_iff` is not restated here.
+      ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation
+        ((if p.2.1 then -(p.1 : ℚ) else (p.1 : ℚ)) / (p.2.2.1 : ℚ))
+        ((p.2.2.2.1 : ℚ) / (p.2.2.2.2 : ℚ)) := by
+  -- MEASUREMENT ONLY: `checkPointsShort` now folds the flat-`Nat` point check `checkPointShortNat`
+  -- plus a reduced-form check; the soundness bridge to `checkPointShort_iff` is not restated here.
   sorry
 
 end ECCompute
