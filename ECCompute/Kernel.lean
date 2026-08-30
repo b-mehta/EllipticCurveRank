@@ -113,6 +113,15 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bo
       ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
     false
 
+/-- The descent character `λ_{p,θ}` at a point as a `Nat` bit (0 or 1). Mirrors `lambdaK` with the
+QR lookup kept as a `Nat` bit and inverted by `Nat.xor _ 1`. -/
+noncomputable def lambdaBitK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Nat :=
+  ((xden.mod p).beq 0).rec (motive := fun _ ↦ Nat)
+    (((alphaResK p tval xp xm xden).beq 0).rec (motive := fun _ ↦ Nat)
+      (((qmask.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
+      (((qmask.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
+    0
+
 /-! ## 𝔽₂ matrix inverse -/
 
 namespace F2Invert
@@ -149,16 +158,19 @@ with its quadratic-residue mask `m` in `q`. -/
 noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
   List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
 
+/-- The expected row word: bit `j` is label `ls[j]`'s descent character (`lambdaBitK`) at point
+`(xnp - xnm) / xden`, placed LSB-first (head label at bit 0). Horner fold: `bit ||| (rest <<< 1)`. -/
+noncomputable def checkBRowWord (a₂ a₄ : Int) (xnp xnm xden : Nat)
+    (ls : List (Nat × Nat × Nat)) : Nat :=
+  ls.rec (motive := fun _ ↦ Nat) 0
+    (fun l _ ih ↦ (lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).lor (ih.shiftLeft 1))
+
 /-- `true` iff bit `j` of `b` matches label `ls[j]`'s descent character at point
-`(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/
+`(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. One `beq` per
+row: the expected word `checkBRowWord` compared against `b`. -/
 noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List (Nat × Nat × Nat)) :
     Bool :=
-  ls.rec (fun _ ↦ true)
-    (fun l _ ih b ↦
-      (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
-        (ih (b.div 2))) b
+  (checkBRowWord a₂ a₄ xnp xnm xden ls).beq b
 
 /-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
 noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
