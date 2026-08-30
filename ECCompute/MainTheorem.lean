@@ -72,12 +72,14 @@ theorem card_torsionBy_le (H : Submodule ℤ (curveQ a₂ a₄ a₆).toAffine.Po
   refine Nat.card_le_card_of_injective (fun x ↦ ⟨x, hmap x⟩) fun a b hab ↦ ?_
   grind
 
-/-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), a proof that the
-short model of these coefficients is the certificate's curve (`hmodel`), and a certificate
-satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least `c.ρ - c.t`. -/
+/-- The rank bound for a general integral model: given `W = ⟨a₁, …, a₆⟩` (`hW`), proofs that its
+short-model coefficients `a₁²+4a₂, 16a₄+8a₁a₃, 64a₆+16a₃²` are the certificate's `c.a₂, c.a₄, c.a₆`
+(`h₂ h₄ h₆`), and a certificate satisfying `Certificate.Valid` (`hc`), the rank of `W` is at least
+`c.ρ - c.t`. -/
 public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Certificate)
     (W : WeierstrassCurve ℚ)
-    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (hmodel : intShortModel a₁ a₂ a₃ a₄ a₆ = curveQ c.a₂ c.a₄ c.a₆)
+    (hW : W = ⟨a₁, a₂, a₃, a₄, a₆⟩) (h₂ : a₁ ^ 2 + 4 * a₂ = c.a₂)
+    (h₄ : 16 * a₄ + 8 * a₁ * a₃ = c.a₄) (h₆ : 64 * a₆ + 16 * a₃ ^ 2 = c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
   obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
@@ -87,13 +89,13 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     -- Complete the square and scale by `2`, as a single variable change, to land on the
     -- certificate's integral short model.
     have hsm : (scaling 2 two_ne_zero * W.toCharNeTwoNF) • W = curveQ c.a₂ c.a₄ c.a₆ := by
-      rw [mul_smul, ← hmodel]
+      rw [mul_smul, ← h₂, ← h₄, ← h₆]
       ext <;>
       simp [scaling, variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
-        variableChange_a₆, intShortModel, curve] <;>
+        variableChange_a₆, curve] <;>
       grind
     exact hasRankGE_of_addEquiv (scaling 2 two_ne_zero * W.toCharNeTwoNF).pointAddEquiv (hsm ▸ this)
-  clear hmodel a₁ a₂ a₃ a₄ a₆
+  clear h₂ h₄ h₆ a₁ a₂ a₃ a₄ a₆
   rw [checkPoints_iff] at hpt
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
   set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
