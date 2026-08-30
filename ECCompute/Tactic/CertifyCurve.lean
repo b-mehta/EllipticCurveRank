@@ -173,36 +173,72 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
 public theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
     (h : l.length.beq n) : l.length = n := Nat.eq_of_beq_eq_true h
 
-/-- Build the `hasRankGE_of_certificate` proof term directly. The `Certificate.Valid` checks are
-packaged via its constructor: the five length checks and the five `Bool`
-checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]| ≤ 2^t` by
-`certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
-root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
-`t = 2`. The model equality `intShortModel a₁…a₆ = curveQ c.a₂ c.a₄ c.a₆` is `rfl`. `torsRoot`
-supplies the `t = 1` root `R`. -/
-meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int)
+/-- MEASUREMENT ONLY (P6): stage the certificate data and the four heavy `Bool` checkers
+(`checkPoints`, `checkLabels`, `checkB`, `F2Invert.checkInv`) as their own `addDecl`'d declarations
+under the prefix `stem`, so the single monolithic kernel reduction of `Certificate.Valid.mk` splits
+into separate declarations (lower peak RAM, one profiler node each). Emits
+`stem.cert : Certificate := <data>` and one theorem per checker,
+`stem.{pts,labels,matrix,inv} : <checker …> = true := reflBoolTrue`, whose types are read off the
+`Certificate.Valid.mk` field telescope so they match `Valid.mk`'s expected fields verbatim.
+
+Build the `hasRankGE_of_certificate` proof term directly. The `Certificate.Valid` checks are
+packaged via its constructor: the five length checks and the `checkPrimes` check are discharged by
+`Lean.reflBoolTrue`, the four heavy checks by the staged theorems, and the torsion check
+`|E(ℚ)[2]| ≤ 2^t` by `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`,
+`certTorsionBound_one` (a short-model root `R` plus three `Bool` witnesses) for `t = 1`, or the
+universal `certTorsionBound_two` for `t = 2`. The model equality
+`intShortModel a₁…a₆ = curveQ c.a₂ c.a₄ c.a₆` is `rfl`. `torsRoot` supplies the `t = 1` root `R`. -/
+meta def mkCertProof (t : Nat) (torsRoot : Int) (stem : Name) (v1 v2 v3 v4 v6 : Int)
     (wE cExpr hW : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let aEs := #[toExpr v1, toExpr v2, toExpr v3, toExpr v4, toExpr v6]
   let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) aEs
   -- `intShortModel a₁…a₆` unfolds to `curveQ c.a₂ c.a₄ c.a₆`, so this equality is `rfl`.
   let hmodel ← mkEqRefl wModel
-  let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
+  -- Stage the certificate data as its own declaration; the checker theorems reference its stable
+  -- projections, and `Valid.mk` references it too so the field types match without re-reduction.
+  let certName := stem ++ `cert
+  addDecl <| Declaration.defnDecl {
+    name := certName
+    levelParams := []
+    type := mkConst ``Certificate
+    value := cExpr
+    hints := .regular 0
+    safety := .safe }
+  let certE := mkConst certName
+  let ρE := mkApp (mkConst ``Certificate.ρ) certE
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
     mkAppN (mkConst ``List.length_beq_eq [Level.zero])
-      #[elemTy, mkApp (mkConst field) cExpr, ρE, rb]
+      #[elemTy, mkApp (mkConst field) certE, ρE, rb]
   let hlenP := hlenOf ``Certificate.points ratPairTy
   let hlenL := hlenOf ``Certificate.labels (mkApp2 (mkConst ``Prod [Level.zero, Level.zero])
     natTy (mkConst ``Int))
   let hlenB := hlenOf ``Certificate.B natTy
   let hlenM := hlenOf ``Certificate.M natTy
   let hlenQ := hlenOf ``Certificate.qrMasks natTy
+  -- Stage the four heavy `Bool` checks as separate theorems. Their exact types come from the
+  -- `Valid.mk` field telescope instantiated at `certE`, so `reflBoolTrue` proves each and the
+  -- `Valid.mk` field defeq is a syntactic match (no repeated reduction).
+  let mkTy := (← getConstInfo ``Certificate.Valid.mk).type
+  let instTy ← instantiateForall mkTy #[certE]
+  let (ptsThm, labelsThm, matrixThm, invThm) ← forallTelescope instTy fun fs _ => do
+    let stage (suffix : Name) (i : Nat) : MetaM Expr := do
+      let nm := stem ++ suffix
+      let ty ← fs[i]!.fvarId!.getType
+      addDecl <| Declaration.thmDecl {
+        name := nm
+        levelParams := []
+        type := ty
+        value := rb }
+      return mkConst nm
+    -- Field order: lenP lenL lenB lenM lenQ pts primes labels matrix inv tors.
+    return (← stage `pts 5, ← stage `labels 7, ← stage `matrix 8, ← stage `inv 9)
   -- The `2`-torsion bound, keyed to the certificate's coefficients so it matches `curveQ c.a₂ …`.
-  let a2C := mkApp (mkConst ``Certificate.a₂) cExpr
-  let a4C := mkApp (mkConst ``Certificate.a₄) cExpr
-  let a6C := mkApp (mkConst ``Certificate.a₆) cExpr
-  let tpC := mkApp (mkConst ``Certificate.torsionPrime) cExpr
+  let a2C := mkApp (mkConst ``Certificate.a₂) certE
+  let a4C := mkApp (mkConst ``Certificate.a₄) certE
+  let a6C := mkApp (mkConst ``Certificate.a₆) certE
+  let tpC := mkApp (mkConst ``Certificate.torsionPrime) certE
   let htors :=
     if t == 0 then
       mkAppN (mkConst ``certTorsionBound_zero) #[a2C, a4C, a6C, tpC, rb, rb]
@@ -211,16 +247,21 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int)
     else
       mkAppN (mkConst ``certTorsionBound_two) #[a2C, a4C, a6C]
   let hValid := mkAppN (mkConst ``Certificate.Valid.mk)
-    #[cExpr, hlenP, hlenL, hlenB, hlenM, hlenQ, rb, rb, rb, rb, rb, htors]
+    #[certE, hlenP, hlenL, hlenB, hlenM, hlenQ, ptsThm, rb, labelsThm, matrixThm, invThm, htors]
   return mkAppN (mkConst ``hasRankGE_of_certificate)
-    (aEs ++ #[cExpr, wE, hW, hmodel, hValid])
+    (aEs ++ #[certE, wE, hW, hmodel, hValid])
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
 and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by `rfl`,
 with no side goals. The certificate's `ρ` is
 `ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
-meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit :=
+meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
+  -- The staged declarations must live under the enclosing theorem's name: elaboration restricts
+  -- `addDecl` to that prefix. A fresh suffix keeps repeated invocations from clashing.
+  let base := (← Lean.Elab.Term.getDeclName?).getD (← getMainModule)
+  let fresh ← mkFreshId
+  let stem := base ++ Name.mkSimple s!"stg_{fresh.hash}"
   liftMetaFinishingTactic fun goal ↦ do
     let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
     let ρ := ρGoal + t
@@ -233,7 +274,7 @@ meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : Tac
     let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
     -- `W = ⟨↑a₁, …, ↑a₆⟩` holds by `rfl`: the goal curve reduces to that integer-cast literal.
     let hW ← mkEqRefl wE
-    goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 wE cExpr hW)
+    goal.assign (← mkCertProof t torsRoot stem v1 v2 v3 v4 v6 wE cExpr hW)
 
 elab_rules : tactic
   | `(tactic| certify_curve torsion $tp:num $path:str $lpath:str) => do
