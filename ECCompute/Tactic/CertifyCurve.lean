@@ -59,10 +59,16 @@ meta def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
-/-- `ℚ` Expr for `num / den` (reduced) via `mkRat`, whose reduction the kernel performs by
-computation, leaving the emitted term a bare numerator/denominator pair. -/
-meta def coordExpr (num : Int) (den : Nat) : Expr :=
-  mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
+/-- `ℚ` Expr for `num / den` (reduced) as a `Rat.mk'` constructor literal, so `.num`/`.den` are
+single kernel projections. `num, den` are already reduced; the `den ≠ 0` and coprimality proof
+obligations are discharged by `decide` (O(1) per coordinate). -/
+meta def coordExpr (num : Int) (den : Nat) : MetaM Expr := do
+  let numE := toExpr num
+  let denE := toExpr den
+  let hnz ← mkDecideProof (mkAppN (mkConst ``Ne [1]) #[mkConst ``Nat, denE, mkNatLit 0])
+  let natAbsE := mkApp (mkConst ``Int.natAbs) numE
+  let hred ← mkDecideProof (mkApp2 (mkConst ``Nat.Coprime) natAbsE denE)
+  return mkAppN (mkConst ``Rat.mk') #[numE, denE, hnz, hred]
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 meta def parseLabel (line : String) : Option (Nat × Int) :=
@@ -160,9 +166,9 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
     (B M : List Nat) (t tp : Nat) (sA2 sA4 sA6 : Int) : MetaM Expr := do
   let ratTy := mkConst ``Rat
   let pairTy := ratPairTy
-  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) ↦
-    mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
-      #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
+  let ptExprs ← pts.toList.mapM fun (xn, xd, yn, yd) ↦ do
+    return mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
+      #[ratTy, ratTy, ← coordExpr xn xd, ← coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
   return mkAppN (mkConst ``Certificate.mk)
