@@ -221,21 +221,20 @@ the two data files (`ρ_goal + t` entries each), computes the descent matrix and
 and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by `rfl`,
 with no side goals. The certificate's `ρ` is
 `ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
-meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
-  let goal ← getMainGoal
-  let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
-  let ρ := ρGoal + t
-  let (pts, ls) ← readData path lpath ρ
-  let xs := (pts.map fun (xn, xd, _, _) ↦ (xn, xd)).toList
-  let sA2 := v1 ^ 2 + 4 * v2
-  let sA4 := 16 * v4 + 8 * v1 * v3
-  let sA6 := 64 * v6 + 16 * v3 ^ 2
-  let (B, M) ← buildMats sA2 sA4 xs ls.toList ρ
-  let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
-  -- `W = ⟨↑a₁, …, ↑a₆⟩` holds by `rfl`: the goal curve reduces to that integer-cast literal.
-  let hW ← mkEqRefl wE
-  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 sA2 sA4 sA6 wE cExpr hW)
-  replaceMainGoal []
+meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit :=
+  liftMetaFinishingTactic fun goal ↦ do
+    let (ρGoal, wE, v1, v2, v3, v4, v6) ← readGoal goal
+    let ρ := ρGoal + t
+    let (pts, ls) ← readData path lpath ρ
+    let xs := (pts.map fun (xn, xd, _, _) ↦ (xn, xd)).toList
+    let sA2 := v1 ^ 2 + 4 * v2
+    let sA4 := 16 * v4 + 8 * v1 * v3
+    let sA6 := 64 * v6 + 16 * v3 ^ 2
+    let (B, M) ← buildMats sA2 sA4 xs ls.toList ρ
+    let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
+    -- `W = ⟨↑a₁, …, ↑a₆⟩` holds by `rfl`: the goal curve reduces to that integer-cast literal.
+    let hW ← mkEqRefl wE
+    goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 sA2 sA4 sA6 wE cExpr hW)
 
 elab_rules : tactic
   | `(tactic| certify_curve torsion $tp:num $path:str $lpath:str) => do
