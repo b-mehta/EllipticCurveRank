@@ -42,8 +42,7 @@ variable {i j : ℕ}
 theorem lambdaBitK_eq {p qmask tval xp xm xden : ℕ} :
     lambdaBitK a₂ a₄ p qmask tval xp xm xden =
       if lambdaK a₂ a₄ p qmask tval xp xm xden then 1 else 0 := by
-  have key : ∀ X : ℕ, qmask >>> X % 2 ^^^ 1 =
-      if qrLookupBool qmask X = false then 1 else 0 := fun X => by
+  have key (X : ℕ) : qmask >>> X % 2 ^^^ 1 = if qrLookupBool qmask X = false then 1 else 0 := by
     rw [qrLookupBool]
     rcases Nat.mod_two_eq_zero_or_one (qmask >>> X) with h | h <;>
       simp only [Nat.land_eq, Nat.shiftRight_eq', Nat.and_one_is_mod, h] <;> decide
@@ -61,12 +60,11 @@ theorem testBit_checkBRowWord (hj : j < ls.length) :
     | zero =>
       rw [checkBRowWord_cons, Nat.testBit_or, Nat.testBit_shiftLeft, lambdaBitK_eq,
         List.getElem_cons_zero]
-      cases h : lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp
+      cases lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp
     | succ k =>
-      have hk : k < ls.length := by simpa using hj
       rw [checkBRowWord_cons, Nat.testBit_or, Nat.testBit_shiftLeft, lambdaBitK_eq,
-        List.getElem_cons_succ, Nat.add_sub_cancel, ih hk]
-      cases h : lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp [Nat.testBit_succ]
+        List.getElem_cons_succ, Nat.add_sub_cancel, ih (by simpa using hj)]
+      cases lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp [Nat.testBit_succ]
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
