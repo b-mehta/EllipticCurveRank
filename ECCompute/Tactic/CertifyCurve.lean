@@ -178,16 +178,15 @@ packaged via its constructor: the five length checks and the five `Bool`
 checks are discharged by `Lean.reflBoolTrue`, and the torsion check `|E(ℚ)[2]| ≤ 2^t` by
 `certTorsionBound_zero` (two `Bool` witnesses) for `t = 0`, `certTorsionBound_one` (a short-model
 root `R` plus three `Bool` witnesses) for `t = 1`, or the universal `certTorsionBound_two` for
-`t = 2`. The model equality is discharged by `WeierstrassCurve.ext_of_beq` on the five coefficient
-`BEq`s. `torsRoot` supplies the `t = 1` root `R`. -/
-meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 sA6 : Int)
+`t = 2`. The model equality `intShortModel a₁…a₆ = curveQ c.a₂ c.a₄ c.a₆` is `rfl`. `torsRoot`
+supplies the `t = 1` root `R`. -/
+meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int)
     (wE cExpr hW : Expr) : MetaM Expr := do
   let rb := Lean.reflBoolTrue
   let aEs := #[toExpr v1, toExpr v2, toExpr v3, toExpr v4, toExpr v6]
   let wModel := mkAppN (mkConst ``IntegralScaling.intShortModel) aEs
-  let wCurve := mkAppN (mkConst ``curveQ) #[toExpr sA2, toExpr sA4, toExpr sA6]
-  let hmodel := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq)
-    #[wModel, wCurve, rb, rb, rb, rb, rb]
+  -- `intShortModel a₁…a₆` unfolds to `curveQ c.a₂ c.a₄ c.a₆`, so this equality is `rfl`.
+  let hmodel ← mkEqRefl wModel
   let ρE := mkApp (mkConst ``Certificate.ρ) cExpr
   let natTy := mkConst ``Nat
   let hlenOf (field : Name) (elemTy : Expr) : Expr :=
@@ -218,8 +217,8 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 
 
 /-- Reads the goal curve `W`, its integer coefficients `a₁…a₆`, and target rank `ρ_goal`, parses
 the two data files (`ρ_goal + t` entries each), computes the descent matrix and its `𝔽₂` inverse,
-and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by
-`ext_of_beq` on five `reflBoolTrue` `BEq` checks, with no side goals. The certificate's `ρ` is
+and assigns the `hasRankGE_of_certificate` proof term. `W = ⟨↑a₁, …, ↑a₆⟩` is proved by `rfl`,
+with no side goals. The certificate's `ρ` is
 `ρ_goal + t`, so `rank ≥ ρ - t` is defeq to the goal `rank ≥ ρ_goal`. -/
 meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : TacticM Unit := do
   let goal ← getMainGoal
@@ -232,15 +231,9 @@ meta def runCertify (t tpNat : Nat) (torsRoot : Int) (path lpath : String) : Tac
   let sA6 := 64 * v6 + 16 * v3 ^ 2
   let (B, M) ← buildMats sA2 sA4 xs ls.toList ρ
   let cExpr ← mkCertExpr ρ pts ls B M t tpNat sA2 sA4 sA6
-  -- `W = ⟨↑a₁, …, ↑a₆⟩` via `ext_of_beq` on five ℚ-`BEq` checks, each `reflBoolTrue`.
-  let ratTy := mkConst ``Rat
-  let castE (a : Int) : Expr :=
-    mkApp3 (mkConst ``Int.cast [Level.zero]) ratTy (mkConst ``Rat.instIntCast) (toExpr a)
-  let litCurve := mkAppN (mkConst ``WeierstrassCurve.mk [Level.zero])
-    #[ratTy, castE v1, castE v2, castE v3, castE v4, castE v6]
-  let rb := Lean.reflBoolTrue
-  let hW := mkAppN (mkConst ``WeierstrassCurve.ext_of_beq) #[wE, litCurve, rb, rb, rb, rb, rb]
-  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 sA2 sA4 sA6 wE cExpr hW)
+  -- `W = ⟨↑a₁, …, ↑a₆⟩` holds by `rfl`: the goal curve reduces to that integer-cast literal.
+  let hW ← mkEqRefl wE
+  goal.assign (← mkCertProof t torsRoot v1 v2 v3 v4 v6 wE cExpr hW)
   replaceMainGoal []
 
 elab_rules : tactic
