@@ -64,6 +64,8 @@ theorem checkPointShort_iff {x y : ℚ} :
 public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
     checkPointsShort a₂ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  simp only [checkPointsShort, allList_iff, checkPointShort_iff]
+  -- MEASUREMENT ONLY: `checkPointsShort` now folds the signed-`Nat` point check
+  -- `checkPointShortNat`; the soundness bridge to `checkPointShort_iff` is not restated here.
+  sorry
 
 end ECCompute

@@ -223,8 +223,49 @@ noncomputable def checkPointShort (a₂ a₄ a₆ : Int) (x y : Rat) : Bool :=
     ((((xn3.mul yd2).add (((a₂.mul xn2).mul xd).mul yd2)).add
         (((a₄.mul xn).mul xd2).mul yd2)).add ((a₆.mul xd3).mul yd2))
 
-/-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
+/-- `true` iff the integer `a` is negative (`Int.negSucc`), read off the constructor with `Int.rec`
+so the kernel never routes the sign test through `Decidable`. -/
+noncomputable def intSignNeg (a : Int) : Bool :=
+  Int.rec (motive := fun _ ↦ Bool) (fun _ ↦ false) (fun _ ↦ true) a
+
+/-- The short-model point check on `Nat` magnitudes. `aiA`/`si` are the magnitude and sign
+(`true` = negative) of each coefficient. Every term of the cleared Weierstrass identity
+`yn²·xd³ = xn³·yd² + a₂·xn²·xd·yd² + a₄·xn·xd²·yd² + a₆·xd³·yd²` is split by sign into a positive
+and a negative `Nat` accumulator; the identity holds iff the two accumulators are equal. All the
+big products and sums run on `Nat`; the only `Int` operations are one `Int.natAbs`/`intSignNeg`
+per coordinate. -/
+noncomputable def checkPointShortNat (a₂A a₄A a₆A : Nat) (s₂ s₄ s₆ : Bool) (x y : Rat) : Bool :=
+  let xn := x.num.natAbs; let sx := intSignNeg x.num
+  let xd := x.den
+  let yn := y.num.natAbs
+  let yd := y.den
+  let xd2 := xd.mul xd; let xd3 := xd2.mul xd
+  let yd2 := yd.mul yd
+  let xn2 := xn.mul xn; let xn3 := xn2.mul xn
+  let yn2 := yn.mul yn
+  -- term magnitudes
+  let mL := yn2.mul xd3                          -- yn²·xd³   (always ≥ 0)
+  let m1 := xn3.mul yd2                          -- xn³·yd²,        sign sx
+  let m2 := ((a₂A.mul xn2).mul xd).mul yd2       -- a₂·xn²·xd·yd²,  sign s₂
+  let m3 := ((a₄A.mul xn).mul xd2).mul yd2       -- a₄·xn·xd²·yd²,  sign s₄ xor sx
+  let m4 := (a₆A.mul xd3).mul yd2                -- a₆·xd³·yd²,     sign s₆
+  let s3 := Bool.rec (motive := fun _ ↦ Bool) s₄ s₄.not' sx  -- sign of a₄·xn
+  -- move every term to one side of `L - RHS = 0`: a term counts toward `pos` when its own
+  -- contribution to that difference is positive, toward `neg` otherwise.
+  let pos := mL.add ((Bool.rec (motive := fun _ ↦ Nat) 0 m1 sx).add
+    ((Bool.rec (motive := fun _ ↦ Nat) 0 m2 s₂).add
+      ((Bool.rec (motive := fun _ ↦ Nat) 0 m3 s3).add
+        (Bool.rec (motive := fun _ ↦ Nat) 0 m4 s₆))))
+  let neg := (Bool.rec (motive := fun _ ↦ Nat) m1 0 sx).add
+    ((Bool.rec (motive := fun _ ↦ Nat) m2 0 s₂).add
+      ((Bool.rec (motive := fun _ ↦ Nat) m3 0 s3).add
+        (Bool.rec (motive := fun _ ↦ Nat) m4 0 s₆)))
+  pos.beq neg
+
+/-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩`. The coefficient
+magnitudes and signs are extracted once, then the per-point check runs entirely on `Nat`. -/
 noncomputable def checkPointsShort (a₂ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
-  allList (fun p ↦ checkPointShort a₂ a₄ a₆ p.1 p.2) pts
+  allList (fun p ↦ checkPointShortNat a₂.natAbs a₄.natAbs a₆.natAbs
+    (intSignNeg a₂) (intSignNeg a₄) (intSignNeg a₆) p.1 p.2) pts
 
 end ECCompute
