@@ -120,8 +120,8 @@ namespace F2Invert
 /-- `true` iff row `i` of `B * M` over `𝔽₂` is the unit vector `1 <<< i`: the XOR of the rows of
 `M` (row-major, `Mr`) selected by the set bits of row `bi` of `B` equals `1 <<< i`. -/
 noncomputable def invRowK (i bi : Nat) (Mr : List Nat) : Bool :=
-  (Mr.rec (motive := fun _ ↦ Nat → Nat → Nat) (fun _ acc ↦ acc)
-    (fun m _ ih b acc ↦ ih (b.shiftRight 1) (acc.xor (m.mul (b.land 1)))) bi 0).beq
+  (Mr.rec (motive := fun _ ↦ Nat → Nat) (fun _ ↦ 0)
+    (fun m _ ih b ↦ (m.mul (b.land 1)).xor (ih (b.shiftRight 1))) bi).beq
     (Nat.shiftLeft 1 i)
 
 /-- Fold over the rows of `B`, checking each row `b` at index `i` against the rows of `M` (`Mr`)
