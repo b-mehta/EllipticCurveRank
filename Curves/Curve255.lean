@@ -19,9 +19,7 @@ Leaderboard is
   `a₄ = 97151`   and
   `a₆ = 91204`
 
-over `ℚ`. It has Mordell-Weil rank at least `7`.
-
-Submitted to the leaderboard by Warricker-hash.
+over `ℚ`. It has Mordell-Weil rank at least `7`. Submitted to the leaderboard by Warricker-hash.
 -/
 
 namespace ECCompute

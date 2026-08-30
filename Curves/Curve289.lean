@@ -21,9 +21,7 @@ Leaderboard is
   `     0000000000000000000000000000000020000000000000000000000000000000000000000000`
   `     00000000000000000000000000000000000000000000000000000000000000001`
 
-over `ℚ`. It has Mordell-Weil rank at least `1`.
-
-Submitted to the leaderboard by sorinmg.
+over `ℚ`. It has Mordell-Weil rank at least `1`. Submitted to the leaderboard by sorinmg.
 -/
 
 namespace ECCompute

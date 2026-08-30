@@ -23,9 +23,7 @@ Leaderboard is
   `     6071645032711825103302418810081300662501472259167570967698071160387295414337`
   `     79190900631367109100625`
 
-over `ℚ`. It has Mordell-Weil rank at least `1`.
-
-Submitted to the leaderboard by sorinmg.
+over `ℚ`. It has Mordell-Weil rank at least `1`. Submitted to the leaderboard by sorinmg.
 -/
 
 namespace ECCompute

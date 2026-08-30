@@ -19,9 +19,7 @@ Leaderboard is
   `a₄ = -17376238614102880805191699606601`   and
   `a₆ = 27567969093931513230545328071325120978929115848`
 
-over `ℚ`. It has Mordell-Weil rank at least `19`.
-
-Submitted to the leaderboard by 7fff-zip.
+over `ℚ`. It has Mordell-Weil rank at least `19`. Submitted to the leaderboard by 7fff-zip.
 -/
 
 namespace ECCompute
