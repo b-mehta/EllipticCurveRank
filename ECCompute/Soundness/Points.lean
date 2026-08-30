@@ -61,11 +61,12 @@ theorem checkPointShort_iff {x y : ℚ} :
   grind
 
 /-- `checkPointsShort` holds iff every listed point satisfies the short-model equation. -/
-public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
-    checkPointsShort a₂ a₄ a₆ pts ↔
+public theorem checkPointsShort_iff {a2A a4A a6A : ℕ} {s₂ s₄ s₆ : Bool} {pts : List (ℚ × ℚ)} :
+    checkPointsShort a₂ a₄ a₆ a2A a4A a6A s₂ s₄ s₆ pts ↔
       ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  -- MEASUREMENT ONLY: `checkPointsShort` now folds the signed-`Nat` point check
-  -- `checkPointShortNat`; the soundness bridge to `checkPointShort_iff` is not restated here.
+  -- MEASUREMENT ONLY: `checkPointsShort` verifies the coefficient magnitude/sign literals once and
+  -- folds the signed-`Nat` point check `checkPointShortNat`; the soundness bridge to
+  -- `checkPointShort_iff` is not restated here.
   sorry
 
 end ECCompute

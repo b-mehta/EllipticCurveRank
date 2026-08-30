@@ -48,6 +48,18 @@ public structure Certificate where
   a4r : ℕ
   /-- The residue `(a₆ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
   a6r : ℕ
+  /-- The magnitude `a₂.natAbs`, as a `Nat` literal; verified once in `checkPointsShort`. -/
+  a2A : ℕ
+  /-- The magnitude `a₄.natAbs`, as a `Nat` literal; verified once in `checkPointsShort`. -/
+  a4A : ℕ
+  /-- The magnitude `a₆.natAbs`, as a `Nat` literal; verified once in `checkPointsShort`. -/
+  a6A : ℕ
+  /-- The sign of `a₂` (`true` = negative), as a `Bool` literal; verified once in `checkPointsShort`. -/
+  s₂ : Bool
+  /-- The sign of `a₄` (`true` = negative), as a `Bool` literal; verified once in `checkPointsShort`. -/
+  s₄ : Bool
+  /-- The sign of `a₆` (`true` = negative), as a `Bool` literal; verified once in `checkPointsShort`. -/
+  s₆ : Bool
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
@@ -85,7 +97,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- The quadratic-residue mask list has `ρ` entries. -/
   lenQ : c.qrMasks.length = c.ρ
   /-- Each listed point lies on the short model. -/
-  pts : checkPointsShort c.a₂ c.a₄ c.a₆ c.points
+  pts : checkPointsShort c.a₂ c.a₄ c.a₆ c.a2A c.a4A c.a6A c.s₂ c.s₄ c.s₆ c.points
   /-- Each label carries a prime. -/
   primes : checkPrimes c.labels
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/

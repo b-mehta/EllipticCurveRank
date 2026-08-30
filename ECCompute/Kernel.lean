@@ -321,9 +321,16 @@ noncomputable def checkPointShortNat (a₂A a₄A a₆A : Nat) (s₂ s₄ s₆ :
   pos.beq neg
 
 /-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩`. The coefficient
-magnitudes and signs are extracted once, then the per-point check runs entirely on `Nat`. -/
-noncomputable def checkPointsShort (a₂ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
-  allList (fun p ↦ checkPointShortNat a₂.natAbs a₄.natAbs a₆.natAbs
-    (intSignNeg a₂) (intSignNeg a₄) (intSignNeg a₆) p.1 p.2) pts
+magnitudes `a2A a4A a6A` and signs `s₂ s₄ s₆` are carried as certificate literals, verified once
+against `a₂ a₄ a₆` here (`a2A.beq a₂.natAbs`, sign equalities), then the per-point fold references
+those literals so no `Int.natAbs`/`intSignNeg` on a coefficient is reachable from the loop. -/
+noncomputable def checkPointsShort (a₂ a₄ a₆ : Int) (a2A a4A a6A : Nat) (s₂ s₄ s₆ : Bool)
+    (pts : List (Rat × Rat)) : Bool :=
+  (a2A.beq a₂.natAbs).and'
+    ((a4A.beq a₄.natAbs).and'
+      ((a6A.beq a₆.natAbs).and'
+        (((s₂.xor (intSignNeg a₂)).not'.and'
+            (((s₄.xor (intSignNeg a₄)).not').and' ((s₆.xor (intSignNeg a₆)).not'))).and'
+          (allList (fun p ↦ checkPointShortNat a2A a4A a6A s₂ s₄ s₆ p.1 p.2) pts))))
 
 end ECCompute

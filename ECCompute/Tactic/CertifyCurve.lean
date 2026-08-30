@@ -170,9 +170,14 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
   -- recomputes, them (`checkLabels`).
   let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
   let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
+  -- Extract the point-check coefficient magnitudes and signs once, host-side, as flat literals so
+  -- the per-point kernel fold references, not recomputes, them (`checkPointsShort`).
+  let sign (a : Int) : Bool := decide (a < 0)
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6,
       toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6),
+      toExpr sA2.natAbs, toExpr sA4.natAbs, toExpr sA6.natAbs,
+      toExpr (sign sA2), toExpr (sign sA4), toExpr (sign sA6),
       toExpr ρ, pointsE,
       toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
 
