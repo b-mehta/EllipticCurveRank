@@ -44,4 +44,26 @@ public theorem checkPoints_iff {pts : List (ℚ × ℚ)} :
       ∀ p ∈ pts, (⟨a₁, a₂, a₃, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_iff, checkPoint_iff]
 
+/-- `checkPointShort a₂ a₄ a₆ x y` holds iff `(x, y)` satisfies the affine Weierstrass equation of
+the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
+theorem checkPointShort_iff {x y : ℚ} :
+    checkPointShort a₂ a₄ a₆ x y ↔
+      (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
+  simp only [Affine.equation_iff, checkPointShort, Int.beq'_eq, Int.mul_def, Int.add_def]
+  have hxd : (x.den : ℚ) ≠ 0 := mod_cast x.den_nz
+  have hyd : (y.den : ℚ) ≠ 0 := mod_cast y.den_nz
+  have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
+  have hy : (y.num : ℚ) = y * y.den := (div_eq_iff hyd).mp (Rat.num_div_den y)
+  have hD : (x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2 ≠ 0 :=
+    mul_ne_zero (pow_ne_zero _ hxd) (pow_ne_zero _ hyd)
+  rw [← Int.cast_inj (α := ℚ)]
+  push_cast
+  grind
+
+/-- `checkPointsShort` holds iff every listed point satisfies the short-model equation. -/
+public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
+    checkPointsShort a₂ a₄ a₆ pts ↔
+      ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
+  simp only [checkPointsShort, allList_iff, checkPointShort_iff]
+
 end ECCompute
