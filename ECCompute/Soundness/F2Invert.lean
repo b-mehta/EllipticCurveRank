@@ -130,7 +130,7 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
     ext i k
     have hi : i.val < B.length := by rw [hBlen]; exact i.2
     have hrow : goRows M B[i.val] = 1 <<< i.val :=
-      Nat.eq_of_beq_eq_true (invRowK_eq ▸ invRowK_true hi h)
+      Nat.eq_of_beq_eq_true (by rw [← invRowK_eq]; exact invRowK_true hi h)
     have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (j := k)
     rw [hMlen] at hg
     rw [Matrix.mul_apply, Matrix.one_apply]
