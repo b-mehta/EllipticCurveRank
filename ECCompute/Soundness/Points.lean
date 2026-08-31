@@ -33,8 +33,6 @@ theorem checkPoint_iff {x y : ℚ} :
   have hyd : (y.den : ℚ) ≠ 0 := mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
   have hy : (y.num : ℚ) = y * y.den := (div_eq_iff hyd).mp (Rat.num_div_den y)
-  have hD : (x.den : ℚ) ^ 3 * (y.den : ℚ) ^ 2 ≠ 0 :=
-    mul_ne_zero (pow_ne_zero _ hxd) (pow_ne_zero _ hyd)
   rw [← Int.cast_inj (α := ℚ)]
   push_cast
   grind
