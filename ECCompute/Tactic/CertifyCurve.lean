@@ -150,6 +150,24 @@ meta def buildMats (sA2 sA4 : Int) (xs : List (Int × Nat)) (ls : List (Nat × I
     | throwError "certify_curve: the descent-character matrix is singular over 𝔽₂"
   return (B, M)
 
+/-- Host-side twin of `ECCompute.subModP`: `(x + (p - y)) % p`, for `x, y < p`. -/
+meta def subModPEval (p x y : Nat) : Nat := (x + (p - y)) % p
+
+/-- Host-side twin of `ECCompute.discrModP`, mirroring its `Nat` primitive ops exactly so the
+emitted literal `dr` matches `discrModP a2r a4r a6r P` under the kernel's `BEq` verification. -/
+meta def discrModPEval (rp2 rp4 rp6 p : Nat) : Nat :=
+  let b2 := (4 * rp2) % p
+  let b4 := (2 * rp4) % p
+  let b6 := (4 * rp6) % p
+  let inner := subModPEval p (((4 * rp2) * rp6) % p) ((rp4 * rp4) % p)
+  let bigA := ((b2 * b2) % p * inner) % p
+  let b4cube := (((b4 * b4) % p) * b4) % p
+  let t8 := (8 * b4cube) % p
+  let b6sq := (b6 * b6) % p
+  let t27 := (27 * b6sq) % p
+  let lastT := ((((9 * b2) % p) * b4) % p * b6) % p
+  subModPEval p (subModPEval p (subModPEval p lastT bigA) t8) t27
+
 /-- The pair type `ℚ × ℚ` as an `Expr`. -/
 meta def ratPairTy : Expr :=
   mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
@@ -174,9 +192,12 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
   -- recomputes, them (`checkLabels`).
   let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
   let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
+  -- The discriminant residue `dr = Δ mod P`, emitted once as a flat literal so the per-label loop
+  -- reads it down to each prime instead of recomputing the discriminant (`checkLabelNat`).
+  let dr : Nat := discrModPEval (residue sA2) (residue sA4) (residue sA6) P
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6,
-      toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6),
+      toExpr P, toExpr (residue sA2), toExpr (residue sA4), toExpr (residue sA6), toExpr dr,
       toExpr ρ, pointsE,
       toExpr triples, toExpr B, toExpr M, toExpr t, toExpr tp]
 

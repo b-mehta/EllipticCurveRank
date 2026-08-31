@@ -118,30 +118,35 @@ noncomputable def cubicModP (rp2 rp4 rp6 p t : Nat) : Nat :=
 
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r2, r4, r6` (each already
 reduced modulo the label-prime product `P`) and the precomputed root residue `tval = (θ mod p).toNat`
-carried in the certificate, reducing the coefficients to `p` in `Nat`. Verifies `tval < p` and
-computes the same `Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`,
-`r6 = a₆ mod P`, `p ∣ P`, and `θ ≡ tval (mod p)`. -/
-noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p tval : Nat) : Bool :=
+carried in the certificate, reducing the coefficients to `p` in `Nat`. The `p ∤ Δ` test reads the
+certificate literal `dr = Δ mod P` down to `p` (`(dr mod p).beq 0`), skipping the per-label
+discriminant recomputation. Verifies `tval < p` and computes the same `Bool` as
+`checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`, `r6 = a₆ mod P`, `dr = Δ mod P`,
+`p ∣ P`, and `θ ≡ tval (mod p)`. -/
+noncomputable def checkLabelNat (r2 r4 r6 dr : Nat) (p tval : Nat) : Bool :=
   let rp2 := r2.mod p
   let rp4 := r4.mod p
   let rp6 := r6.mod p
   (((Nat.mod 6 p).beq 0).not').and'
     ((tval.blt p).and'
-      ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
+      ((((dr.mod p).beq 0).not').and'
         ((cubicModP rp2 rp4 rp6 p tval).beq 0)))
 
 /-- `true` iff the descent check passes for every label. The label-prime product `P` is checked
 positive; the three big coefficients are reduced mod `P` **once** (the `Int.emod` here), verified
-against the emitted residue literals `a2r, a4r, a6r`; every label prime is checked to divide `P`;
-then each label is decided in `Nat` by `checkLabelNat` on those literal residues. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a2r a4r a6r : Nat)
+against the emitted residue literals `a2r, a4r, a6r`; the discriminant residue literal `dr` is
+verified **once** against `discrModP a2r a4r a6r P` (i.e. `Δ mod P`); every label prime is checked
+to divide `P`; then each label is decided in `Nat` by `checkLabelNat`, whose `p ∤ Δ` test reduces
+`dr` to `p` rather than recomputing the discriminant. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a2r a4r a6r dr : Nat)
     (labels : List (Nat × Nat × Nat)) : Bool :=
   (Nat.ble 1 P).and'
     ((a2r.beq (a₂.emod (Int.ofNat P)).toNat).and'
       ((a4r.beq (a₄.emod (Int.ofNat P)).toNat).and'
         ((a6r.beq (a₆.emod (Int.ofNat P)).toNat).and'
-          ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-            (allList (fun l ↦ checkLabelNat a2r a4r a6r l.1 l.2.1) labels)))))
+          (((discrModP a2r a4r a6r P).beq dr).and'
+            ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
+              (allList (fun l ↦ checkLabelNat a2r a4r a6r dr l.1 l.2.1) labels))))))
 
 /-! ## Descent character -/
 
