@@ -127,7 +127,7 @@ theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p)
 
 /-- The per-label passage: a passing `Nat`-path `checkLabelNat` on residues pinned to `a₂, a₄, a₆`
 mod `P` (with `p ∣ P` and `0 < P`) gives a passing `checkLabel`. -/
-theorem checkLabel_of_checkLabelNat {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
+theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
     (h2 : a2r = (a₂ % (P : ℤ)).toNat) (h4 : a4r = (a₄ % (P : ℤ)).toNat)
     (h6 : a6r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a2r a4r a6r p θ) :
     checkLabel a₂ a₄ a₆ p θ := by
@@ -165,7 +165,7 @@ theorem checkLabel_of_checkLabelNat {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p 
 
 /-- If `checkLabels` passes, every label passes `checkLabel`. The `Nat`-path `checkLabels` verifies
 the emitted residue literals against `a₂, a₄, a₆ mod P` and runs the per-label check in `Nat`;
-`checkLabel_of_checkLabelNat` carries each label back to the `Int`-path `checkLabel`. -/
+`checkLabelNat_true` carries each label back to the `Int`-path `checkLabel`. -/
 public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : ℕ}
     (h : checkLabels a₂ a₄ a₆ P a2r a4r a6r labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
@@ -179,6 +179,6 @@ public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : �
   have hpd : P % l.1 = 0 := by
     have hl1 := hdvd l hl
     rwa [Nat.mod_eq_mod, Nat.beq_eq_beq, beq_iff_eq] at hl1
-  exact checkLabel_of_checkLabelNat hP (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
+  exact checkLabelNat_true hP (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
 
 end ECCompute
