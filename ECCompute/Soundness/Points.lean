@@ -11,8 +11,8 @@ public import ECCompute.Soundness.Fold
 /-!
 # Soundness of the point-on-curve check
 
-`checkPointShort_iff` and `checkPointsShort_iff` show that the kernel checks
-`ECCompute.checkPointShort` and `ECCompute.checkPointsShort` (from `Kernel`) hold exactly when the
+`checkPoint_iff` and `checkPoints_iff` show that the kernel checks
+`ECCompute.checkPoint` and `ECCompute.checkPoints` (from `Kernel`) hold exactly when the
 point, respectively every point in a list, satisfies the affine Weierstrass equation of the short
 model `⟨0, a₂, 0, a₄, a₆⟩`.
 -/
@@ -23,12 +23,12 @@ open WeierstrassCurve
 
 variable {a₂ a₄ a₆ : ℤ}
 
-/-- `checkPointShort a₂ a₄ a₆ x y` holds iff `(x, y)` satisfies the affine Weierstrass equation of
+/-- `checkPoint a₂ a₄ a₆ x y` holds iff `(x, y)` satisfies the affine Weierstrass equation of
 the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
-theorem checkPointShort_iff {x y : ℚ} :
-    checkPointShort a₂ a₄ a₆ x y ↔
+theorem checkPoint_iff {x y : ℚ} :
+    checkPoint a₂ a₄ a₆ x y ↔
       (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
-  simp only [Affine.equation_iff, checkPointShort, Int.beq'_eq, Int.mul_def, Int.add_def]
+  simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
   have hxd : (x.den : ℚ) ≠ 0 := mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
@@ -39,10 +39,10 @@ theorem checkPointShort_iff {x y : ℚ} :
   push_cast
   grind
 
-/-- `checkPointsShort` holds iff every listed point satisfies the short-model equation. -/
-public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
-    checkPointsShort a₂ a₄ a₆ pts ↔
+/-- `checkPoints` holds iff every listed point satisfies the short-model equation. -/
+public theorem checkPoints_iff {pts : List (ℚ × ℚ)} :
+    checkPoints a₂ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  simp only [checkPointsShort, allList_iff, checkPointShort_iff]
+  simp only [checkPoints, allList_iff, checkPoint_iff]
 
 end ECCompute

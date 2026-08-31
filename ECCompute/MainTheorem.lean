@@ -97,7 +97,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
       grind
     exact hasRankGE_of_addEquiv C.pointAddEquiv (hsm ▸ this)
   clear h₂ h₄ h₆ a₁ a₂ a₃ a₄ a₆
-  rw [checkPointsShort_iff] at hpt
+  rw [checkPoints_iff] at hpt
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
   set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
   replace hlsP (j : Fin c.ρ) : (ls j).1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
