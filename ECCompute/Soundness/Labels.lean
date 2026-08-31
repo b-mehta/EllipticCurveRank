@@ -80,15 +80,16 @@ The lemmas below cast the `Nat` discriminant and cubic back into `ZMod p` and ma
 `checkLabel`. -/
 
 /-- `subModP` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
-theorem subModP_cast {x z : ℕ} (hp : 0 < p) :
+theorem subModP_cast {x z : ℕ} (hp : p ≠ 0) :
     (subModP p x (z % p) : ZMod p) = (x : ZMod p) - z := by
   have hsub : p.sub (z % p) = p - z % p := rfl
+  have hp0 : 0 < p := Nat.pos_of_ne_zero hp
   rw [subModP, Nat.mod_eq_mod, ZMod.natCast_mod, Nat.add_eq, Nat.cast_add,
-    hsub, Nat.cast_sub (Nat.mod_lt z hp).le, ZMod.natCast_self, ZMod.natCast_mod]
+    hsub, Nat.cast_sub (Nat.mod_lt z hp0).le, ZMod.natCast_self, ZMod.natCast_mod]
   ring
 
 /-- The `Nat` discriminant `discrModP` casts to the integer discriminant of its residues. -/
-theorem discrModP_cast (hp : 0 < p) {rp2 rp4 rp6 : ℕ} :
+theorem discrModP_cast (hp : p ≠ 0) {rp2 rp4 rp6 : ℕ} :
     (discrModP rp2 rp4 rp6 p : ZMod p) = discrInt rp2 rp4 rp6 := by
   simp only [discrModP, Nat.mod_eq_mod, Nat.mul_eq, discrInt]
   push_cast [ZMod.natCast_mod, subModP_cast hp]
@@ -111,9 +112,9 @@ theorem cubicModP_cast {rp2 rp4 rp6 t : ℕ} :
 
 /-- A residue mod the label-prime product `P` reduces mod any divisor `p` of `P` to the coefficient
 itself in `ZMod p`. -/
-theorem resP_cast {P : ℕ} {a : ℤ} (hP : 0 < P) (hpP : p ∣ P) {r : ℕ}
+theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
     (hr : r = (a % (P : ℤ)).toNat) : ((r % p : ℕ) : ZMod p) = (a : ZMod p) := by
-  have hnn : 0 ≤ a % (P : ℤ) := Int.emod_nonneg a (by exact_mod_cast hP.ne')
+  have hnn : 0 ≤ a % (P : ℤ) := Int.emod_nonneg a (by exact_mod_cast hP)
   rw [ZMod.natCast_mod, hr, ← Int.cast_natCast, Int.toNat_of_nonneg hnn,
     ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd a (by exact_mod_cast hpP)
@@ -123,12 +124,12 @@ theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p)
   rw [ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero, Nat.mod_eq_of_lt hn]
 
 /-- The per-label passage: a passing `Nat`-path `checkLabelNat` on residues pinned to `a₂, a₄, a₆`
-mod `P` (with `p ∣ P` and `0 < P`) gives a passing `checkLabel`. -/
-theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
+mod `P` (with `p ∣ P` and `P ≠ 0`) gives a passing `checkLabel`. -/
+theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
     (h2 : a2r = (a₂ % (P : ℤ)).toNat) (h4 : a4r = (a₄ % (P : ℤ)).toNat)
     (h6 : a6r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a2r a4r a6r p θ) :
     checkLabel a₂ a₄ a₆ p θ := by
-  have hp0 : 0 < p := Nat.pos_of_dvd_of_pos hpP hP
+  have hp0 : 0 < p := Nat.pos_of_dvd_of_pos hpP (Nat.pos_of_ne_zero hP)
   have hp1 : 1 < p := lt_of_le_of_ne hp0 (by rintro rfl; rw [checkLabelNat] at h; simp at h)
   have hr2 : ((a2r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
   have hr4 : ((a4r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h4
@@ -142,7 +143,7 @@ theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
       = ((discrIntK (a₂ % (p : ℤ)) (a₄ % (p : ℤ)) (a₆ % (p : ℤ))).emod (p : ℤ)).beq' 0 := by
     rw [Bool.eq_iff_iff, Nat.beq_eq,
       natCast_eq_zero_of_lt (p := p) (by rw [discrModP]; exact Nat.mod_lt _ hp0),
-      discrModP_cast hp0, discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
+      discrModP_cast hp0.ne', discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
       ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd, discrIntK_eq, discrInt_emod]
   have hf3 : (cubicModP (a2r % p) (a4r % p) (a6r % p) p (θ.emod (p : ℤ)).toNat).beq 0
       = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
@@ -173,6 +174,6 @@ public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : �
   have hpd : P % l.1 = 0 := by
     have hl1 := hdvd l hl
     rwa [Nat.mod_eq_mod, Nat.beq_eq_beq, beq_iff_eq] at hl1
-  exact checkLabelNat_true hP (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
+  exact checkLabelNat_true (by lia) (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
 
 end ECCompute
