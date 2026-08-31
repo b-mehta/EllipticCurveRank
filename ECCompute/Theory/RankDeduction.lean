@@ -25,11 +25,11 @@ space) and `H[p] = Submodule.torsionBy ℤ H p` for the `p`-torsion. The cardina
 
 ## Main results
 
-* `RankDeduction.rank_ge_le`: `ρ ≤ rank H + t` when `Nat.card H[p] ≤ p ^ t` and `ρ` group
-  elements have linearly independent images under a descent-character hom
+* `RankDeduction.rank_ge_le`: `Nat.card ι ≤ rank H + t` when `Nat.card H[p] ≤ p ^ t` and a
+  finite family `g : ι → H` has linearly independent images under a descent-character hom
   `φ : H →+ (ι → ZMod p)`, the form the certificate uses at `p = 2`.
 
-An invertible `ρ × ρ` matrix over `ZMod p` supplies the linear-independence hypothesis.
+An invertible matrix over `ZMod p` supplies the linear-independence hypothesis.
 -/
 
 open Module ModN
@@ -38,10 +38,10 @@ namespace RankDeduction
 
 variable {ι H : Type*} [AddCommGroup H] [Finite ι] {p : ℕ}
 
-/-- If `ρ` group elements have linearly independent images under an additive hom
-`φ : H →+ (ι → ZMod p)`, then `H ⧸ pH` has dimension at least `ρ`. (The hom automatically
-factors through `H ⧸ pH`, since the target has characteristic `p`.) -/
-theorem ρ_le_finrank_modN (hp : p.Prime) [Module.Finite ℤ H] (g : ι → H)
+/-- If a finite family `g : ι → H` has linearly independent images under an additive hom
+`φ : H →+ (ι → ZMod p)`, then `H ⧸ pH` has dimension at least `Nat.card ι`. (The hom
+automatically factors through `H ⧸ pH`, since the target has characteristic `p`.) -/
+theorem card_le_finrank_modN (hp : p.Prime) [Module.Finite ℤ H] (g : ι → H)
     (φ : H →+ (ι → ZMod p)) (hindep : LinearIndependent (ZMod p) (fun i ↦ φ (g i))) :
     Nat.card ι ≤ finrank (ZMod p) (ModN H p) := by
   have : Fact p.Prime := ⟨hp⟩
@@ -54,14 +54,15 @@ theorem ρ_le_finrank_modN (hp : p.Prime) [Module.Finite ℤ H] (g : ι → H)
     LinearIndependent.of_comp ψ (by simpa only [Function.comp_def, hψ] using hindep)
   simpa using hmk.fintype_card_le_finrank
 
-/-- From `|H[p]| ≤ p ^ t` and `ρ` group elements whose images under `φ` are linearly
-independent, `ρ ≤ rank H + t`. This is the form the certificate uses at `p = 2`. -/
+/-- From `|H[p]| ≤ p ^ t` and a finite family of group elements whose images under `φ` are
+linearly independent, `Nat.card ι ≤ rank H + t`. This is the form the certificate uses at
+`p = 2`. -/
 public theorem rank_ge_le (hp : p.Prime) [Module.Finite ℤ H] {t : ℕ} (g : ι → H)
     (φ : H →+ (ι → ZMod p)) (hindep : LinearIndependent (ZMod p) (fun i ↦ φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H p) ≤ p ^ t) :
     Nat.card ι ≤ finrank ℤ H + t := by
   have : Fact p.Prime := ⟨hp⟩
-  grw [ρ_le_finrank_modN hp g φ hindep, ← Nat.pow_le_pow_iff_right hp.one_lt]
+  grw [card_le_finrank_modN hp g φ hindep, ← Nat.pow_le_pow_iff_right hp.one_lt]
   calc
     p ^ finrank (ZMod p) (ModN H p)
     _ = Nat.card (ZMod p) ^ finrank (ZMod p) (ModN H p) := by simp
