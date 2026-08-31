@@ -93,9 +93,9 @@ noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
 /-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
-/-- `true` iff bit `a` of the quadratic-residue mask `qmask` is
-set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
+/-- `true` iff bit `a` of the quadratic-residue mask `qm` is
+set, i.e. (for `qm = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
+noncomputable def qrLookupBool (qm a : Nat) : Bool := ((qm.shiftRight a).land 1).beq 1
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
 noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
@@ -106,19 +106,19 @@ noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
 /-- The value of the descent character `λ_{p,θ}` at a point. -/
-noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
+noncomputable def lambdaK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
+      ((qrLookupBool qm (alphaResK p tval xp xm xden)).not')
+      ((qrLookupBool qm (fderivResK a₂ a₄ p tval)).not'))
     false
 
 /-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. -/
-noncomputable def lambdaBitK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Nat :=
+noncomputable def lambdaBitK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Nat :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
-      (((qmask.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
-      (((qmask.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
+      (((qm.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
+      (((qm.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
     0
 
 /-! ## 𝔽₂ matrix inverse -/
