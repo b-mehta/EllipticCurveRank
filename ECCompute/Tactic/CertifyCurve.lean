@@ -165,9 +165,8 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
-  -- Reduce the big coefficients mod the label-prime product `P` once, host-side, and emit `P` and
-  -- the three residues as flat `Nat` literals for the per-label kernel loop to reference as literals
-  -- (`checkLabels`).
+  -- Reduce the big coefficients mod the label-prime product `P` once, host-side, and emit `P` with
+  -- the three residues as flat `Nat` literals the per-label kernel loop reads (`checkLabels`).
   let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
   let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
   return mkAppN (mkConst ``Certificate.mk)

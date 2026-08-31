@@ -106,8 +106,8 @@ noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
   let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
   subModP p (subModP p (subModP p lastT bigA) t8) t27
 
-/-- The monic cubic `θ³ + a₂θ² + a₄θ + a₆` modulo `p` at residue `t = θ mod p`, computed by Horner on
-the pre-reduced nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. Equals
+/-- The monic cubic `θ³ + a₂θ² + a₄θ + a₆` modulo `p` at residue `t = θ mod p`, computed by Horner
+on the pre-reduced nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. Equals
 `polyModL [a₆, a₄, a₂, 1] p t`. -/
 noncomputable def cubicModP (rp2 rp4 rp6 p t : Nat) : Nat :=
   let e0 := (Nat.mod 1 p)
