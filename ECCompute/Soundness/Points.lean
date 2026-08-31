@@ -14,7 +14,7 @@ public import ECCompute.Soundness.Fold
 `checkPoint_iff` and `checkPoints_iff` show that the kernel checks
 `ECCompute.checkPoint` and `ECCompute.checkPoints` (from `Kernel`) hold exactly when the
 point, respectively every point in a list, satisfies the affine Weierstrass equation of the short
-model `⟨0, a₂, 0, a₄, a₆⟩`.
+model `curveQ a₂ a₄ a₆`.
 -/
 
 namespace ECCompute
@@ -24,10 +24,9 @@ open WeierstrassCurve
 variable {a₂ a₄ a₆ : ℤ}
 
 /-- `checkPoint a₂ a₄ a₆ x y` holds iff `(x, y)` satisfies the affine Weierstrass equation of
-the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
+the short model `curveQ a₂ a₄ a₆`. -/
 theorem checkPoint_iff {x y : ℚ} :
-    checkPoint a₂ a₄ a₆ x y ↔
-      (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation x y := by
+    checkPoint a₂ a₄ a₆ x y ↔ (curveQ a₂ a₄ a₆).toAffine.Equation x y := by
   simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
   have hxd : (x.den : ℚ) ≠ 0 := mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := mod_cast y.den_nz
@@ -42,7 +41,7 @@ theorem checkPoint_iff {x y : ℚ} :
 /-- `checkPoints` holds iff every listed point satisfies the short-model equation. -/
 public theorem checkPoints_iff {pts : List (ℚ × ℚ)} :
     checkPoints a₂ a₄ a₆ pts ↔
-      ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
+      ∀ p ∈ pts, (curveQ a₂ a₄ a₆).toAffine.Equation p.1 p.2 := by
   simp only [checkPoints, allList_iff, checkPoint_iff]
 
 end ECCompute
