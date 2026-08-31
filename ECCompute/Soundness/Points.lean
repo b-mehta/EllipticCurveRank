@@ -27,7 +27,8 @@ variable {a₂ a₄ a₆ : ℤ}
 the short model `curveQ a₂ a₄ a₆`. -/
 theorem checkPoint_iff {x y : ℚ} :
     checkPoint a₂ a₄ a₆ x y ↔ (curveQ a₂ a₄ a₆).toAffine.Equation x y := by
-  simp only [Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
+  simp only [curveQ, baseChange, curve, map_a₁, map_a₂, map_a₃, map_a₄, map_a₆, algebraMap_int_eq,
+    eq_intCast, Affine.equation_iff, checkPoint, Int.beq'_eq, Int.mul_def, Int.add_def]
   have hxd : (x.den : ℚ) ≠ 0 := mod_cast x.den_nz
   have hyd : (y.den : ℚ) ≠ 0 := mod_cast y.den_nz
   have hx : (x.num : ℚ) = x * x.den := (div_eq_iff hxd).mp (Rat.num_div_den x)
