@@ -87,8 +87,8 @@ noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool 
 
 The per-label loop below touches only small `Nat` residues carried in the certificate. The big
 integer coefficients `a₂, a₄, a₆` are reduced modulo the label-prime product `P` exactly **once**
-(the three `Int.emod` in `checkLabels`, outside every loop); the emitted certificate literals `a2r,
-a4r, a6r` are those residues, verified against them. Each label then reduces the small residues to
+(the three `Int.emod` in `checkLabels`, outside every loop); the emitted certificate literals `a₂r,
+a₄r, a₆r` are those residues, verified against them. Each label then reduces the small residues to
 its prime `p` in `Nat` (the discriminant mod `p` and the monic cubic mod `p`), so no big-coefficient
 `Int.emod` is reachable from the per-label closure. -/
 
@@ -125,16 +125,16 @@ noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p : Nat) (θ : Int) : Bool :=
 
 /-- `true` iff the descent check passes for every label. The label-prime product `P` is checked
 positive; the three big coefficients are reduced mod `P` **once** (the `Int.emod` here), verified
-against the emitted residue literals `a2r, a4r, a6r`; every label prime is checked to divide `P`;
+against the emitted residue literals `a₂r, a₄r, a₆r`; every label prime is checked to divide `P`;
 then each label is decided in `Nat` by `checkLabelNat` on those literal residues. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a2r a4r a6r : Nat)
+noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
     (labels : List (Nat × Int)) : Bool :=
   (Nat.ble 1 P).and'
-    ((a2r.beq (a₂.emod (Int.ofNat P)).toNat).and'
-      ((a4r.beq (a₄.emod (Int.ofNat P)).toNat).and'
-        ((a6r.beq (a₆.emod (Int.ofNat P)).toNat).and'
+    ((a₂r.beq (a₂.emod (Int.ofNat P)).toNat).and'
+      ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and'
+        ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and'
           ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-            (allList (fun l ↦ checkLabelNat a2r a4r a6r l.1 l.2) labels)))))
+            (allList (fun l ↦ checkLabelNat a₂r a₄r a₆r l.1 l.2) labels)))))
 
 /-! ## Descent character -/
 

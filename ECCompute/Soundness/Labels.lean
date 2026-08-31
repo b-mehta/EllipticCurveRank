@@ -75,7 +75,7 @@ public theorem descentHyp_of_checkLabel (h : checkLabel a₂ a₄ a₆ p θ) (hp
 /-! ### The `Nat`-path label check reduces to `checkLabel`
 
 `checkLabels` reduces the big coefficients modulo the label-prime product `P` once, records the
-residues as `Nat` literals `a2r, a4r, a6r`, and runs each label's check in `Nat` (`checkLabelNat`).
+residues as `Nat` literals `a₂r, a₄r, a₆r`, and runs each label's check in `Nat` (`checkLabelNat`).
 The lemmas below cast the `Nat` discriminant and cubic back into `ZMod p` and match them with
 `checkLabel`. -/
 
@@ -131,27 +131,27 @@ theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p)
 
 /-- The per-label passage: a passing `Nat`-path `checkLabelNat` on residues pinned to `a₂, a₄, a₆`
 mod `P` (with `p ∣ P` and `P ≠ 0`) gives a passing `checkLabel`. -/
-theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
-    (h2 : a2r = (a₂ % (P : ℤ)).toNat) (h4 : a4r = (a₄ % (P : ℤ)).toNat)
-    (h6 : a6r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a2r a4r a6r p θ) :
+theorem checkLabelNat_true {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
+    (h2 : a₂r = (a₂ % (P : ℤ)).toNat) (h4 : a₄r = (a₄ % (P : ℤ)).toNat)
+    (h6 : a₆r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a₂r a₄r a₆r p θ) :
     checkLabel a₂ a₄ a₆ p θ := by
   have hp0 : 0 < p := Nat.pos_of_dvd_of_pos hpP (Nat.pos_of_ne_zero hP)
   have hp1 : 1 < p := lt_of_le_of_ne hp0 (by rintro rfl; rw [checkLabelNat] at h; simp at h)
-  have hr2 : ((a2r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
-  have hr4 : ((a4r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h4
-  have hr6 : ((a6r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h6
-  have hr2' : (((a2r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr2
-  have hr4' : (((a4r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr4
-  have hr6' : (((a6r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr6
+  have hr2 : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
+  have hr4 : ((a₄r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h4
+  have hr6 : ((a₆r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h6
+  have hr2' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr2
+  have hr4' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr4
+  have hr6' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr6
   -- The differing factors of the two checks agree as `Bool`s: the discriminant test and the cubic
   -- test each read as the same vanishing condition in `ZMod p`.
-  have hf2 : (discrModP (a2r % p) (a4r % p) (a6r % p) p).beq 0
+  have hf2 : (discrModP (a₂r % p) (a₄r % p) (a₆r % p) p).beq 0
       = ((discrIntK (a₂ % (p : ℤ)) (a₄ % (p : ℤ)) (a₆ % (p : ℤ))).emod (p : ℤ)).beq' 0 := by
     rw [Bool.eq_iff_iff, Nat.beq_eq,
       natCast_eq_zero_of_lt (p := p) (by rw [discrModP]; exact Nat.mod_lt _ hp0),
       discrModP_cast hp0.ne', discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
       ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd, discrIntK_eq, discrInt_emod]
-  have hf3 : (polyModNat [a6r % p, a4r % p, a2r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
+  have hf3 : (polyModNat [a₆r % p, a₄r % p, a₂r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
       = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
     rw [polyModNat_eq_polyModL, Bool.eq_iff_iff, polyModL_beq hp1, polyModL_beq hp1]
     simp only [List.map_cons, List.map_nil, Int.ofNat_eq_natCast, polyEval, Int.add_def,
@@ -165,8 +165,8 @@ theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
 /-- If `checkLabels` passes, every label passes `checkLabel`. The `Nat`-path `checkLabels` verifies
 the emitted residue literals against `a₂, a₄, a₆ mod P` and runs the per-label check in `Nat`;
 `checkLabelNat_true` carries each label back to the `Int`-path `checkLabel`. -/
-public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a2r a4r a6r : ℕ}
-    (h : checkLabels a₂ a₄ a₆ P a2r a4r a6r labels) :
+public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ}
+    (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r labels) :
     ∀ l ∈ labels, checkLabel a₂ a₄ a₆ l.1 l.2 := by
   rw [checkLabels] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true] at h
