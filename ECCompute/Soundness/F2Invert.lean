@@ -40,7 +40,6 @@ def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
 @[simp] lemma bId_false : bId false = 0 := rfl
 
-lemma bId_inj (h : bId a = bId b) : a = b := by decide +revert +kernel
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
