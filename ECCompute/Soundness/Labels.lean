@@ -82,10 +82,9 @@ The lemmas below cast the `Nat` discriminant and cubic back into `ZMod p` and ma
 /-- `subModP` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
 theorem subModP_cast {x z : ℕ} (hp : 0 < p) :
     (subModP p x (z % p) : ZMod p) = (x : ZMod p) - z := by
-  have hle : z % p ≤ p := (Nat.mod_lt z hp).le
   have hsub : p.sub (z % p) = p - z % p := rfl
   rw [subModP, Nat.mod_eq_mod, ZMod.natCast_mod, Nat.add_eq, Nat.cast_add,
-    hsub, Nat.cast_sub hle, ZMod.natCast_self, ZMod.natCast_mod]
+    hsub, Nat.cast_sub (Nat.mod_lt z hp).le, ZMod.natCast_self, ZMod.natCast_mod]
   ring
 
 /-- The `Nat` discriminant `discrModP` casts to the integer discriminant of its residues. -/
