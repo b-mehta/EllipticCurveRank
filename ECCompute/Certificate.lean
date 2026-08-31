@@ -77,7 +77,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- The quadratic-residue mask list has `ρ` entries. -/
   lenQ : c.qrMasks.length = c.ρ
   /-- Each listed point lies on the short model. -/
-  pts : checkPoints 0 c.a₂ 0 c.a₄ c.a₆ c.points
+  pts : checkPoints c.a₂ c.a₄ c.a₆ c.points
   /-- Each label carries a prime. -/
   primes : checkPrimes c.labels
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
