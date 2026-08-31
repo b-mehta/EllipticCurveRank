@@ -36,12 +36,12 @@ open Module ModN
 
 namespace RankDeduction
 
-variable {ι H : Type*} [AddCommGroup H] [Finite ι] {p : ℕ}
+variable {ι H : Type*} [AddCommGroup H] [Module.Finite ℤ H] [Finite ι] {p : ℕ}
 
 /-- If a finite family `g : ι → H` has linearly independent images under an additive hom
 `φ : H →+ (ι → ZMod p)`, then `H ⧸ pH` has dimension at least `Nat.card ι`. (The hom
 automatically factors through `H ⧸ pH`, since the target has characteristic `p`.) -/
-theorem card_le_finrank_modN (hp : p.Prime) [Module.Finite ℤ H] (g : ι → H)
+theorem card_le_finrank_modN (hp : p.Prime) (g : ι → H)
     (φ : H →+ (ι → ZMod p)) (hindep : LinearIndependent (ZMod p) (fun i ↦ φ (g i))) :
     Nat.card ι ≤ finrank (ZMod p) (ModN H p) := by
   have : Fact p.Prime := ⟨hp⟩
@@ -57,7 +57,7 @@ theorem card_le_finrank_modN (hp : p.Prime) [Module.Finite ℤ H] (g : ι → H)
 /-- From `|H[p]| ≤ p ^ t` and a finite family of group elements whose images under `φ` are
 linearly independent, `Nat.card ι ≤ rank H + t`. This is the form the certificate uses at
 `p = 2`. -/
-public theorem rank_ge_le (hp : p.Prime) [Module.Finite ℤ H] {t : ℕ} (g : ι → H)
+public theorem rank_ge_le (hp : p.Prime) {t : ℕ} (g : ι → H)
     (φ : H →+ (ι → ZMod p)) (hindep : LinearIndependent (ZMod p) (fun i ↦ φ (g i)))
     (ht : Nat.card (Submodule.torsionBy ℤ H p) ≤ p ^ t) :
     Nat.card ι ≤ finrank ℤ H + t := by
