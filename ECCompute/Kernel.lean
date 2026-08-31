@@ -45,11 +45,7 @@ noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
 /-! ## Polynomial residue search -/
 
 /-- The integer polynomial with coefficients `cs` (constant term first, leading coefficient last),
-evaluated at `u`. -/
-noncomputable def polyEval (cs : List Int) (u : Int) : Int :=
-  cs.rec 0 fun c _ acc ↦ c.add (u.mul acc)
-
-/-- `polyEval` at `r` reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the Horner
+evaluated at `r` and reduced mod `ℓ` in `Nat`, each coefficient taken to its residue as the Horner
 fold reaches it. -/
 noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ

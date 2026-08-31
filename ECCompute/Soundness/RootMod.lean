@@ -37,6 +37,11 @@ public theorem intResNat_cast {p : ℕ} {z : ℤ} (hp : p ≠ 0) : ((z % p).toNa
   rw [← Int.cast_natCast, Int.toNat_of_nonneg hnn, ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd z dvd_rfl
 
+/-- The integer polynomial with coefficients `cs` (constant term first, leading coefficient last),
+evaluated at `u`. The `Nat` residue mirror is `polyModL`. -/
+@[expose] public noncomputable def polyEval (cs : List Int) (u : Int) : Int :=
+  cs.rec 0 fun c _ acc ↦ c.add (u.mul acc)
+
 @[simp, grind =] lemma polyEval_cons {c u : ℤ} : polyEval (c :: cs) u = c + u * polyEval cs u := by
   simp [polyEval]
 
