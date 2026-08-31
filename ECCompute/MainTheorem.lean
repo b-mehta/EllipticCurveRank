@@ -131,9 +131,9 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hlenB hlenM hinv)
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
-    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
-    (φ.comp H.subtype.toAddMonoidHom) hindep ((card_torsionBy_le H).trans htors)
-  exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
+  refine ⟨H, hHfin, ?_⟩
+  simpa using RankDeduction.rank_ge_le (H := H) Nat.prime_two
+    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩) (φ.comp H.subtype.toAddMonoidHom)
+    hindep ((card_torsionBy_le H).trans htors)
 
 end ECCompute
