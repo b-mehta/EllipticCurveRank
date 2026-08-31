@@ -111,14 +111,14 @@ noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
   let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
   subModP p (subModP p (subModP p lastT bigA) t8) t27
 
-/-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r2, r4, r6` (each already
+/-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r₂, r₄, r₆` (each already
 reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
-`Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`, `r6 = a₆ mod P` and
+`Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r₂ = a₂ mod P`, `r₄ = a₄ mod P`, `r₆ = a₆ mod P` and
 `p ∣ P`. -/
-noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p : Nat) (θ : Int) : Bool :=
-  let rp2 := r2.mod p
-  let rp4 := r4.mod p
-  let rp6 := r6.mod p
+noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool :=
+  let rp2 := r₂.mod p
+  let rp4 := r₄.mod p
+  let rp6 := r₆.mod p
   (((Nat.mod 6 p).beq 0).not').and'
     ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
       ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
