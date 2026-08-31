@@ -9,11 +9,13 @@ public import ECCompute.Theory.Model
 public import ECCompute.Soundness.Fold
 
 /-!
-# Soundness of the point-on-curve check
+# Soundness of the point-on-curve checks
 
-`checkPoint_iff` and `checkPoints_iff` show that the kernel checks `ECCompute.checkPoint` and
-`ECCompute.checkPoints` (from `Kernel`) hold exactly when the point, respectively every point
-in a list, satisfies the affine Weierstrass equation of the model `⟨a₁, a₂, a₃, a₄, a₆⟩`.
+`checkPoint_iff`/`checkPoints_iff` and `checkPointShort_iff`/`checkPointsShort_iff` relate the
+kernel point checks from `Kernel` to the affine Weierstrass equation, at a single point and at every
+point of a list, for the full model `⟨a₁, a₂, a₃, a₄, a₆⟩` and the short model `⟨0, a₂, 0, a₄, a₆⟩`.
+`checkPointsShort` runs the `Nat` check `checkPointShortNat`, related to the `Int` `checkPointShort`
+by `checkPointShortNat_eq`.
 -/
 
 namespace ECCompute
@@ -60,12 +62,24 @@ theorem checkPointShort_iff {x y : ℚ} :
   push_cast
   grind
 
+/-- The sign-split `Nat` point check computes the same `Bool` as the `Int` check: the coefficient
+magnitudes and signs `(a.natAbs, intSignNeg a)` reconstruct each signed term of the Weierstrass
+identity. Casing every coordinate's sign leaves a polynomial identity per case. -/
+theorem checkPointShortNat_eq {x y : ℚ} :
+    checkPointShortNat a₂.natAbs a₄.natAbs a₆.natAbs (intSignNeg a₂) (intSignNeg a₄) (intSignNeg a₆)
+        x y = checkPointShort a₂ a₄ a₆ x y := by
+  rcases a₂ with n₂ | n₂ <;> rcases a₄ with n₄ | n₄ <;> rcases a₆ with n₆ | n₆ <;>
+    rcases hx : x.num with xn | xn <;> rcases hy : y.num with yn | yn <;>
+    simp only [checkPointShortNat, checkPointShort, intSignNeg, Int.natAbs, Bool.not',
+      Nat.mul_eq, Nat.add_eq, Int.mul_def, Int.add_def, hx, hy] <;>
+    rw [Bool.eq_iff_iff, Nat.beq_eq, Int.beq'_eq, ← Nat.cast_inj (R := ℤ)] <;>
+    push_cast [Int.negSucc_eq] <;>
+    constructor <;> intro h <;> linear_combination h
+
 /-- `checkPointsShort` holds iff every listed point satisfies the short-model equation. -/
 public theorem checkPointsShort_iff {pts : List (ℚ × ℚ)} :
     checkPointsShort a₂ a₄ a₆ pts ↔
       ∀ p ∈ pts, (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation p.1 p.2 := by
-  -- MEASUREMENT ONLY: `checkPointsShort` now folds the signed-`Nat` point check
-  -- `checkPointShortNat`; the soundness bridge to `checkPointShort_iff` is not restated here.
-  sorry
+  simp only [checkPointsShort, allList_iff, checkPointShortNat_eq, checkPointShort_iff]
 
 end ECCompute
