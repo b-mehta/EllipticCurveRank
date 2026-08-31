@@ -53,8 +53,10 @@ public structure Certificate where
   dr : ℕ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
-  /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
-  points : List (ℚ × ℚ)
+  /-- The `ρ` rational points, as the flat encoding `(xnA, xs, xd, ynA, yd)`: the magnitude and sign
+  (`true` = negative) of the `x` numerator, the `x` denominator, and the magnitude and denominator
+  of the `y` numerator. `Certificate.Valid` checks each is a point in lowest terms on the model. -/
+  points : List (ℕ × Bool × ℕ × ℕ × ℕ)
   /-- The `ρ` descent-column labels as precomputed `Nat` triples `(p, tval, qrmask)`: a prime `p`,
   the root residue `tval = (θ mod p).toNat` of the `2`-division cubic mod `p`, and the
   quadratic-residue bitmask `qrmask` whose bit `a` is set iff `a` is a nonzero square mod `p`.

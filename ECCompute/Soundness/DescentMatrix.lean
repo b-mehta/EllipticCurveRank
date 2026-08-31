@@ -22,7 +22,7 @@ entry of the certificate matrix `B` equals the kernel-computed descent character
 namespace ECCompute
 
 variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
-  {pt : List (ℚ × ℚ)}
+  {pt : List (ℕ × Bool × ℕ × ℕ × ℕ)}
 
 @[simp, grind =]
 theorem checkBRowWord_cons {l : ℕ × ℕ × ℕ} :
@@ -31,9 +31,11 @@ theorem checkBRowWord_cons {l : ℕ × ℕ × ℕ} :
         checkBRowWord a₂ a₄ xnp xnm xden ls <<< 1 := rfl
 
 @[simp, grind =]
-theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
+theorem checkBGo_cons_cons {bs : List ℕ} {p : ℕ × Bool × ℕ × ℕ × ℕ}
+    {ps : List (ℕ × Bool × ℕ × ℕ × ℕ)} :
     checkBGo a₂ a₄ ls (b :: bs) (p :: ps) =
-      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+      (checkBRow a₂ a₄ (Bool.rec (motive := fun _ ↦ ℕ) p.1 0 p.2.1)
+          (Bool.rec (motive := fun _ ↦ ℕ) 0 p.1 p.2.1) p.2.2.1 b ls).and'
         (checkBGo a₂ a₄ ls bs ps) := rfl
 
 variable {i j : ℕ}
@@ -76,7 +78,8 @@ theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
-    checkBRow a₂ a₄ pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den B[i] ls := by
+    checkBRow a₂ a₄ (Bool.rec (motive := fun _ ↦ ℕ) pt[i].1 0 pt[i].2.1)
+      (Bool.rec (motive := fun _ ↦ ℕ) 0 pt[i].1 pt[i].2.1) pt[i].2.2.1 B[i] ls := by
   induction B generalizing pt i with grind [cases List]
 
 /-- If the aggregate check passes, every matrix entry equals the kernel-computed descent character,
@@ -86,7 +89,8 @@ public theorem checkB_true {ρ : ℕ}
     (h : checkB a₂ a₄ ls B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
       if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) ls[j].2.1
-          pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
+          (Bool.rec (motive := fun _ ↦ ℕ) pt[i].1 0 pt[i].2.1)
+          (Bool.rec (motive := fun _ ↦ ℕ) 0 pt[i].1 pt[i].2.1) pt[i].2.2.1 then 1 else 0 := by
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   obtain ⟨hmask, hgo⟩ := h
   rw [checkMaskList, allList_iff] at hmask

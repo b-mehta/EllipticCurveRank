@@ -43,8 +43,9 @@ public theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
 /-- ASCII-trim `s`, returning a `String`. -/
 meta def strTrim (s : String) : String := s.trimAscii.toString
 
-/-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`, using
-the same `mkRat` normalisation the emitted term (`coordExpr`) uses. -/
+/-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`, via a
+host-side `mkRat` normalisation. The emitted term carries only the resulting `Nat`/`Bool` literals
+(`flatPointExpr`); no `mkRat` reaches the certificate. -/
 meta def parseCoord (s : String) : Int × Nat :=
   match (strTrim s).splitOn "/" with
   | [a, b] => let q := mkRat (strTrim a).toInt! (strTrim b).toNat!; (q.num, q.den)
@@ -59,10 +60,26 @@ meta def parseLine (line : String) : Option (Int × Nat × Int × Nat) :=
   | [xs, ys] => let (xn, xd) := parseCoord xs; let (yn, yd) := parseCoord ys; some (xn, xd, yn, yd)
   | _ => none
 
-/-- `ℚ` Expr for `num / den` (reduced) via `mkRat`, whose reduction the kernel performs by
-computation, leaving the emitted term a bare numerator/denominator pair. -/
-meta def coordExpr (num : Int) (den : Nat) : Expr :=
-  mkApp2 (mkConst ``mkRat) (toExpr num) (toExpr den)
+/-- The flat point encoding type `ℕ × Bool × ℕ × ℕ × ℕ` as an `Expr`. -/
+meta def flatPointTy : Expr :=
+  let n := mkConst ``Nat
+  let b := mkConst ``Bool
+  let prod := fun x y ↦ mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) x y
+  prod n (prod b (prod n (prod n n)))
+
+/-- The flat point encoding `(xnA, xs, xd, ynA, yd)` as an `Expr` of type `ℕ × Bool × ℕ × ℕ × ℕ`,
+computed host-side from a point's reduced coordinates `x = xn/xd`, `y = yn/yd`: `xnA = |xn|`,
+`xs = decide (xn < 0)`, `xd`, `ynA = |yn|`, `yd`. No `mkRat` reaches the emitted term. -/
+meta def flatPointExpr (xn : Int) (xd : Nat) (yn : Int) (yd : Nat) : Expr :=
+  let n := mkConst ``Nat
+  let b := mkConst ``Bool
+  let prod := fun x y ↦ mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) x y
+  let mk := fun tx ty vx vy ↦
+    mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero]) #[tx, ty, vx, vy]
+  mk n (prod b (prod n (prod n n))) (toExpr xn.natAbs)
+    (mk b (prod n (prod n n)) (toExpr (decide (xn < 0)))
+      (mk n (prod n n) (toExpr xd)
+        (mk n n (toExpr yn.natAbs) (toExpr yd))))
 
 /-- Parse one line `"p θ"` of a labels file into the descent column `(p, θ)`. -/
 meta def parseLabel (line : String) : Option (Nat × Int) :=
@@ -168,20 +185,12 @@ meta def discrModPEval (rp2 rp4 rp6 p : Nat) : Nat :=
   let lastT := ((((9 * b2) % p) * b4) % p * b6) % p
   subModPEval p (subModPEval p (subModPEval p lastT bigA) t8) t27
 
-/-- The pair type `ℚ × ℚ` as an `Expr`. -/
-meta def ratPairTy : Expr :=
-  mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) (mkConst ``Rat) (mkConst ``Rat)
-
 /-- Build the `Certificate` Expr directly with the `Meta` API. The short-model coefficients
 `sA2, sA4, sA6` are the precomputed integers `a₁²+4a₂`, `16a₄+8a₁a₃`, `64a₆+16a₃²`. -/
 meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Array (Nat × Int))
     (B M : List Nat) (t tp : Nat) (sA2 sA4 sA6 : Int) : MetaM Expr := do
-  let ratTy := mkConst ``Rat
-  let pairTy := ratPairTy
-  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) ↦
-    mkAppN (mkConst ``Prod.mk [Level.zero, Level.zero])
-      #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
-  let pointsE ← mkListLit pairTy ptExprs
+  let ptExprs := pts.toList.map fun (xn, xd, yn, yd) ↦ flatPointExpr xn xd yn yd
+  let pointsE ← mkListLit flatPointTy ptExprs
   -- Emit the labels as precomputed `Nat` triples `(p, tval, qrmask)`: the root residue
   -- `tval = (θ mod p).toNat` and the quadratic-residue mask are computed host-side, so the kernel
   -- checkers (`checkLabels`, `checkB`) read them as flat literals with no per-label `Int.emod`.
@@ -226,7 +235,7 @@ meta def mkCertProof (t : Nat) (torsRoot : Int) (v1 v2 v3 v4 v6 : Int) (sA2 sA4 
     mkAppN (mkConst ``List.length_beq_eq [Level.zero])
       #[elemTy, mkApp (mkConst field) cExpr, ρE, rb]
   let natPairTy := mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) natTy natTy
-  let hlenP := hlenOf ``Certificate.points ratPairTy
+  let hlenP := hlenOf ``Certificate.points flatPointTy
   let hlenL := hlenOf ``Certificate.labels
     (mkApp2 (mkConst ``Prod [Level.zero, Level.zero]) natTy natPairTy)
   let hlenB := hlenOf ``Certificate.B natTy
