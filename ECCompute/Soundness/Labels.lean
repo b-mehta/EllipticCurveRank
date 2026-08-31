@@ -102,13 +102,19 @@ theorem discrInt_zmod_congr {X Y Z : ℤ} (hx : (X : ZMod p) = a₂) (hy : (Y : 
   push_cast
   rw [hx, hy, hz]
 
-/-- The `Nat` cubic `cubicModP` casts to the monic cubic `polyEval [a₆, a₄, a₂, 1]` in `ZMod p`. -/
-theorem cubicModP_cast {rp2 rp4 rp6 t : ℕ} :
-    (cubicModP rp2 rp4 rp6 p t : ZMod p) =
-      (rp6 : ZMod p) + t * (rp4 + t * (rp2 + t)) := by
-  simp only [cubicModP, Nat.mod_eq_mod, Nat.add_eq, Nat.mul_eq]
-  push_cast [ZMod.natCast_mod]
-  ring
+@[simp] theorem polyModNat_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
+    polyModNat (c :: cs) ℓ r = ((c % ℓ) + r * polyModNat cs ℓ r) % ℓ := by simp [polyModNat]
+
+/-- `polyModNat` is `polyModL` on the coefficients cast to `ℤ`. -/
+theorem polyModNat_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
+    polyModNat cs ℓ r = polyModL (cs.map (Int.ofNat)) ℓ r := by
+  induction cs with
+  | nil => rfl
+  | cons c cs ih =>
+    have hcons : polyModL (Int.ofNat c :: cs.map Int.ofNat) ℓ r
+        = ((Int.ofNat c % ℓ).toNat + r * polyModL (cs.map Int.ofNat) ℓ r) % ℓ := by simp [polyModL]
+    rw [polyModNat_cons, ih, List.map_cons, hcons]
+    congr 2
 
 /-- A residue mod the label-prime product `P` reduces mod any divisor `p` of `P` to the coefficient
 itself in `ZMod p`. -/
@@ -145,15 +151,13 @@ theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
       natCast_eq_zero_of_lt (p := p) (by rw [discrModP]; exact Nat.mod_lt _ hp0),
       discrModP_cast hp0.ne', discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
       ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd, discrIntK_eq, discrInt_emod]
-  have hf3 : (cubicModP (a2r % p) (a4r % p) (a6r % p) p (θ.emod (p : ℤ)).toNat).beq 0
+  have hf3 : (polyModNat [a6r % p, a4r % p, a2r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
       = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
-    rw [Bool.eq_iff_iff, Nat.beq_eq,
-      natCast_eq_zero_of_lt (p := p) (by rw [cubicModP]; exact Nat.mod_lt _ hp0),
-      cubicModP_cast, polyModL_beq hp1]
-    simp only [polyEval, Int.add_def, Int.mul_def]
+    rw [polyModNat_eq_polyModL, Bool.eq_iff_iff, polyModL_beq hp1, polyModL_beq hp1]
+    simp only [List.map_cons, List.map_nil, Int.ofNat_eq_natCast, polyEval, Int.add_def,
+      Int.mul_def]
     push_cast
-    rw [hr2, hr4, hr6]
-    constructor <;> intro h <;> linear_combination h
+    grind
   simp only [checkLabelNat, Nat.mod_eq_mod] at h
   simp only [checkLabel, Nat.mod_eq_mod]
   rwa [hf2, hf3] at h

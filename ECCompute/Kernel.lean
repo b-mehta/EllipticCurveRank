@@ -54,6 +54,11 @@ fold reaches it. -/
 noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
+/-- `polyModL` on `Nat` coefficients, staying in `Nat` throughout: the Horner fold of the polynomial
+with coefficients `cs` (constant term first) evaluated at `r` and reduced mod `ℓ`. -/
+noncomputable def polyModNat (cs : List Nat) (ℓ r : Nat) : Nat :=
+  cs.rec 0 fun c _ acc ↦ ((c.mod ℓ).add (r.mul acc)).mod ℓ
+
 /-- `true` iff the monic integer polynomial with lower coefficients `cs`
 (implicit leading coefficient `1`) has no root modulo `ℓ`, trying every residue `0, …, ℓ - 1`. -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
@@ -106,15 +111,6 @@ noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
   let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
   subModP p (subModP p (subModP p lastT bigA) t8) t27
 
-/-- The monic cubic `θ³ + a₂θ² + a₄θ + a₆` modulo `p` at residue `t = θ mod p`, computed by Horner
-on the pre-reduced nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. Equals
-`polyModL [a₆, a₄, a₂, 1] p t`. -/
-noncomputable def cubicModP (rp2 rp4 rp6 p t : Nat) : Nat :=
-  let e0 := (Nat.mod 1 p)
-  let e1 := (rp2.add (t.mul e0)).mod p
-  let e2 := (rp4.add (t.mul e1)).mod p
-  (rp6.add (t.mul e2)).mod p
-
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r2, r4, r6` (each already
 reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
 `Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r2 = a₂ mod P`, `r4 = a₄ mod P`, `r6 = a₆ mod P` and
@@ -125,7 +121,7 @@ noncomputable def checkLabelNat (r2 r4 r6 : Nat) (p : Nat) (θ : Int) : Bool :=
   let rp6 := r6.mod p
   (((Nat.mod 6 p).beq 0).not').and'
     ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
-      ((cubicModP rp2 rp4 rp6 p (θ.emod p).toNat).beq 0))
+      ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff the descent check passes for every label. The label-prime product `P` is checked
 positive; the three big coefficients are reduced mod `P` **once** (the `Int.emod` here), verified
