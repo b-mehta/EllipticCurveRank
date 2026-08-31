@@ -191,25 +191,6 @@ noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List 
 
 /-! ## Point on curve -/
 
-/-- `true` iff `(x, y)` lies on the curve. Writing `x = xn/xd` and `y = yn/yd` in lowest terms, the
-Weierstrass equation `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` is equivalent, after clearing the
-denominator `xd³·yd²`, to an identity between integers, which `checkPoint` tests. -/
-noncomputable def checkPoint (a₁ a₂ a₃ a₄ a₆ : Int) (x y : Rat) : Bool :=
-  let xn := x.num; let xd := x.den
-  let yn := y.num; let yd := y.den
-  let xd2 := xd.mul xd; let xd3 := xd2.mul xd
-  let yd2 := yd.mul yd
-  let xn2 := xn.mul xn; let xn3 := xn2.mul xn
-  let yn2 := yn.mul yn
-  (((yn2.mul xd3).add ((((a₁.mul xn).mul yn).mul xd2).mul yd)).add
-      (((a₃.mul yn).mul xd3).mul yd)).beq'
-    ((((xn3.mul yd2).add (((a₂.mul xn2).mul xd).mul yd2)).add
-        (((a₄.mul xn).mul xd2).mul yd2)).add ((a₆.mul xd3).mul yd2))
-
-/-- `true` iff every point in `pts` lies on the model `⟨a₁, a₂, a₃, a₄, a₆⟩`. -/
-noncomputable def checkPoints (a₁ a₂ a₃ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
-  allList (fun p ↦ checkPoint a₁ a₂ a₃ a₄ a₆ p.1 p.2) pts
-
 /-- `checkPointShort a₂ a₄ a₆ x y` tests the cleared short-model Weierstrass identity
 `yn²·xd³ = xn³·yd² + a₂·xn²·xd·yd² + a₄·xn·xd²·yd² + a₆·xd³·yd²` at `x = xn/xd`, `y = yn/yd`.
 Spec: `checkPointShort_iff`. -/
