@@ -130,10 +130,7 @@ theorem checkLabelNat_true {P a2r a4r a6r : ℕ} (hP : 0 < P) (hpP : p ∣ P)
     (h6 : a6r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a2r a4r a6r p θ) :
     checkLabel a₂ a₄ a₆ p θ := by
   have hp0 : 0 < p := Nat.pos_of_dvd_of_pos hpP hP
-  have hp1 : 1 < p := by
-    rcases Nat.lt_or_ge p 2 with h' | h'
-    · exfalso; interval_cases p; rw [checkLabelNat] at h; simp at h
-    · exact h'
+  have hp1 : 1 < p := lt_of_le_of_ne hp0 (by rintro rfl; rw [checkLabelNat] at h; simp at h)
   have hr2 : ((a2r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
   have hr4 : ((a4r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h4
   have hr6 : ((a6r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h6
