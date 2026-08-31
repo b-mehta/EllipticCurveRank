@@ -108,7 +108,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   replace hpt (i : Fin c.ρ) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
     hpt _ (List.getElem_mem _)
   have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
-      if lambdaK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
+      if lambdaBool c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
           (pt i).1.num.toNat (-(pt i).1.num).toNat (pt i).1.den then 1 else 0 :=
     checkB_true hlenB hlenP hlenL hlenQ hB
   set E : Type := (curveQ c.a₂ c.a₄ c.a₆).toAffine.Point
@@ -124,7 +124,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.ρ).row := by
       ext i j
       rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
-        ← lambdaK_eq (hlsC j) (hns i) (intResNat_cast (hlsC j).prime.ne_zero)
+        ← lambdaBool_eq (hlsC j) (hns i) (intResNat_cast (hlsC j).prime.ne_zero)
           (Int.toNat_sub_toNat_neg (pt i).1.num).symm rfl]
       simp [hBmat]
     rw [hrow]

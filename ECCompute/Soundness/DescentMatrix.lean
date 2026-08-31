@@ -16,7 +16,7 @@ import ECCompute.ForLean
 
 `checkB_true` proves the kernel-reducible `checkB` (`ECCompute.Kernel`) sound: when it passes, every
 entry of the certificate matrix `B` equals the kernel-computed descent character
-`lambdaK`, read into `ZMod 2`, at the matching point.
+`lambdaBool`, read into `ZMod 2`, at the matching point.
 -/
 
 namespace ECCompute
@@ -38,21 +38,21 @@ theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × �
 
 variable {i j : ℕ}
 
-/-- `lambdaBitK` is the `Nat` bit `0`/`1` of the `Bool` descent character `lambdaK`. -/
+/-- `lambdaBitK` is the `Nat` bit `0`/`1` of the `Bool` descent character `lambdaBool`. -/
 theorem lambdaBitK_eq {p qm tval xp xm xden : ℕ} :
     lambdaBitK a₂ a₄ p qm tval xp xm xden =
-      if lambdaK a₂ a₄ p qm tval xp xm xden then 1 else 0 := by
+      if lambdaBool a₂ a₄ p qm tval xp xm xden then 1 else 0 := by
   have key (X : ℕ) : qm >>> X % 2 ^^^ 1 = if qrLookupBool qm X = false then 1 else 0 := by
     rw [qrLookupBool]
     rcases Nat.mod_two_eq_zero_or_one (qm >>> X) with h | h <;>
       simp only [Nat.land_eq, Nat.shiftRight_eq', Nat.and_one_is_mod, h] <;> decide
-  rw [lambdaBitK, lambdaK]
+  rw [lambdaBitK, lambdaBool]
   cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key]
 
 /-- Bit `j` of the expected row word equals label `j`'s `Bool` descent character. -/
 theorem testBit_checkBRowWord (hj : j < ls.length) :
     (checkBRowWord a₂ a₄ xnp xnm xden ls).testBit j =
-      lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
+      lambdaBool a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
   induction ls generalizing j with
   | nil => simp at hj
   | cons l ls ih =>
@@ -60,16 +60,16 @@ theorem testBit_checkBRowWord (hj : j < ls.length) :
     | zero =>
       rw [checkBRowWord_cons, Nat.testBit_or, Nat.testBit_shiftLeft, lambdaBitK_eq,
         List.getElem_cons_zero]
-      cases lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp
+      cases lambdaBool a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp
     | succ k =>
       rw [checkBRowWord_cons, Nat.testBit_or, Nat.testBit_shiftLeft, lambdaBitK_eq,
         List.getElem_cons_succ, Nat.add_sub_cancel, ih (by simpa using hj)]
-      cases lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp [Nat.testBit_succ]
+      cases lambdaBool a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden <;> simp [Nat.testBit_succ]
 
 /-- Row correctness: if `checkBRow` passes, bit `j` of the row bitmask equals the `Bool` descent
 character of label `j`. -/
 theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls.length) :
-    b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
+    b.testBit j = lambdaBool a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
   rw [checkBRow] at hb
   rw [← Nat.eq_of_beq_eq_true hb]
   exact testBit_checkBRowWord hj
@@ -86,7 +86,7 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
     (hqlen : q.length = ρ)
     (h : checkB a₂ a₄ ls q B pt) (i j : Fin ρ) :
     F2Invert.toMat B ρ i j =
-      if lambdaK a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
+      if lambdaBool a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
           pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den then 1 else 0 := by
   rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
   set L := ls[j]

@@ -12,17 +12,18 @@ import Mathlib.Data.Nat.Bitwise
 import ECCompute.ForLean
 
 /-!
-# Soundness of the kernel-reducible descent character
+# Soundness of the descent character
 
-The kernel `Bool`/`Nat` builders that evaluate the descent character `λ_{p,θ}`
-(`qrMask`, `qrLookupBool`, `lambdaK`, …) live in `ECCompute.Kernel`; this file
-proves them correct.
+The `Bool` descent character `λ_{p,θ}` on residue coordinates is `lambdaBool`, with the
+quadratic-residue mask lookup `qrLookupBool`; both are defined here. The kernel row-word builder
+`lambdaBitK` (in `ECCompute.Kernel`) computes their bit, and the certificate's supplied
+quadratic-residue mask is checked against `qrMask` (also in `ECCompute.Kernel`).
 
 ## Main declarations
 
 * `ECCompute.qrLookupBool_iff`: the mask bit test decides whether `a` is a nonzero square mod `p`.
-* `ECCompute.lambdaK_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,
-  agrees with the abstract character `lambda`.
+* `ECCompute.lambdaBool_eq`: `lambdaBool`, read into `ZMod 2`, agrees with the abstract
+  character `lambda`.
 -/
 
 namespace ECCompute
@@ -91,6 +92,11 @@ theorem qrMask_testBit (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
   rw [shiftRight_land_one_eq_one_iff, qrMask, testBit_qrMaskGo]
   exact exists_sq_iff hp hp2 ha
 
+/-- `true` iff bit `a` of the quadratic-residue mask `qm` is set, i.e. (for `qm = qrMask p`,
+`a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. Spec: `qrLookupBool_iff`. -/
+@[expose] public noncomputable def qrLookupBool (qm a : Nat) : Bool :=
+  ((qm.shiftRight a).land 1).beq 1
+
 /-- The mask bit test decides whether `a` is a nonzero square mod `p` (for `a < p`, `p` an odd
 prime). -/
 theorem qrLookupBool_iff (hp2 : p ≠ 2) (hp : p.Prime) (ha : a < p) :
@@ -107,10 +113,10 @@ theorem mask_eq_psi (hp : p.Prime) (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
   have ha0 : a.val ≠ 0 := by rwa [ne_eq, ZMod.val_eq_zero]
   simp [qrLookupBool_iff hp2 hp (ZMod.val_lt a), ha0, psi]
 
-/-! ### Fully `Nat` mirror
+/-! ### The `Bool` descent character
 
-`lambdaK_eq` proves the kernel-reducible `Nat` builder `lambdaK`,
-read into `ZMod 2`, agrees with the abstract character `lambda`. -/
+`lambdaBool_eq` proves that `lambdaBool`, read into `ZMod 2`, agrees with the abstract
+character `lambda`. -/
 
 section
 variable {tval xp xm xden : ℕ}
@@ -150,20 +156,29 @@ theorem fderivResK_eq_val (hp : p ≠ 0) (htval : tval = θ) :
   have hlt : fderivResK a₂ a₄ p tval < p := by simp only [fderivResK]; exact polyModL_lt hp
   rw [← fderivResK_cast hp htval, ZMod.val_cast_of_lt hlt]
 
-/-- `lambdaK` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
+/-- The descent character `λ_{p,θ}` at a point, as a `Bool` on the residue coordinates: the
+specification of the kernel row-word builder `lambdaBitK`. Spec: `lambdaBool_eq`. -/
+@[expose] public noncomputable def lambdaBool (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Bool :=
+  ((xden.mod p).beq 0).rec
+    (((alphaResK p tval xp xm xden).beq 0).rec
+      ((qrLookupBool qm (alphaResK p tval xp xm xden)).not')
+      ((qrLookupBool qm (fderivResK a₂ a₄ p tval)).not'))
+    false
+
+/-- `lambdaBool` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
 and `x` has numerator `xp - xm` and denominator `xden`. -/
-public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
+public theorem lambdaBool_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
-    (if lambdaK a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
+    (if lambdaBool a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
       = lambda θ (.some x y h) := by
   have hp : p ≠ 0 := hyp.prime.ne_zero
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have halpha := alphaResK_eq_val hp htval hxnum hxden
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
-  rw [lambdaK, lambda]
+  rw [lambdaBool, lambda]
   grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResK_eq_val, fderiv_ne_zero]
 
 end
