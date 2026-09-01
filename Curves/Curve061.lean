@@ -1,0 +1,43 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under the GNU General Public License version 3.0 as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
+
+/-!
+# Curve 61 has rank at least 13
+
+The elliptic curve recorded as
+[curve 61](https://elliptic-rank.icarm.cloud/curve/61) on the ICARM Elliptic Curve Rank
+Leaderboard is
+
+  `E : y² + y = x³ + a₄·x + a₆`,   with
+  `a₄ = 0`   and
+  `a₆ = 752558524241981430`
+
+over `ℚ`. It has Mordell-Weil rank at least `13`. Submitted to the leaderboard by David Renshaw.
+-/
+
+namespace ECCompute
+
+open WeierstrassCurve
+
+/-- ICARM leaderboard curve 61 over `ℚ`. -/
+@[expose] public def curve061 : WeierstrassCurve ℚ := ⟨0, 0, 1, 0, 752558524241981430⟩
+
+/-- ICARM leaderboard curve 61 has Mordell-Weil rank at least `13`. -/
+public theorem curve061_hasRankGE_13 : HasRankGE curve061 13 := by
+  unfold curve061
+  certify_curve torsion 7 "data/curve061.txt" "data/curve061-labels.txt"
+
+/-- Curve 61 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+public instance : curve061.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+/-- The `j`-invariant of curve 61. -/
+public theorem curve061_j : curve061.j = 0 := j_eq_iff.mpr (by decide +kernel)
+
+end ECCompute
