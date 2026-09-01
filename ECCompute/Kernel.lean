@@ -109,7 +109,7 @@ noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
   let b6sq := (b6.mul b6).mod p
   let t27 := (Nat.mul 27 b6sq).mod p
   let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
-  subModP p (subModP p (subModP p lastT bigA) t8) t27
+  subModP p lastT (((bigA.add t8).add t27).mod p)
 
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r₂, r₄, r₆` (each already
 reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
