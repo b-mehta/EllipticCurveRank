@@ -290,12 +290,12 @@ def gate(decl):
     return decl
 
 
-def j_theorem(cid, jinv):
+def j_theorem(cid, pid, jinv):
     """The `j`-invariant theorem. Short statements stay on one line; longer ones move the
     proof to its own line, and only a statement whose numeral overflows keeps the longLine
     suppression."""
     doc = f"/-- The `j`-invariant of curve {cid}. -/\n"
-    head = f"public theorem curve{cid}_j : curve{cid}.j = {jinv} :="
+    head = f"public theorem curve{pid}_j : curve{pid}.j = {jinv} :="
     proof = "j_eq_iff.mpr (by decide +kernel)"
     if len(f"{head} {proof}") <= 100:
         return doc + f"{head} {proof}"
@@ -339,11 +339,11 @@ def weier_eq(a1, a2, a3):
     return f"{lhs} = {rhs}"
 
 
-def def_block(cid, a):
+def def_block(pid, a):
     """The inlined `def curve<id>` matching the curve-abbrev design: one line if it fits
     under 100 columns, else break after `:=`, else split `a₆` onto its own line."""
     tup = f"⟨{a[0]}, {a[1]}, {a[2]}, {a[3]}, {a[4]}⟩"
-    head = f"@[expose] public def curve{cid} : WeierstrassCurve ℚ :="
+    head = f"@[expose] public def curve{pid} : WeierstrassCurve ℚ :="
     if len(f"{head} {tup}") <= 100:
         return f"{head} {tup}"
     if len(f"  {tup}") <= 100:
@@ -379,6 +379,8 @@ def main():
 
     data = load(args)
     cid = args.id or str(data.get("id"))
+    pid = f"{int(cid):03d}"  # zero-padded id for filenames and Lean identifiers (Curve042);
+                             # cid stays the real leaderboard id for the module prose and URL.
     ainvs = [int(a) for a in data["ainvs"]]
     if len(ainvs) != 5:
         raise SystemExit("gen_curve: expected 5 a-invariants")
@@ -410,7 +412,7 @@ def main():
     achieved = len(labels)
     rank_goal = achieved - t
 
-    data_args = f'"data/curve{cid}.txt" "data/curve{cid}-labels.txt"'
+    data_args = f'"data/curve{pid}.txt" "data/curve{pid}-labels.txt"'
     ell0 = ellq = None
     if t == 0:
         ell0 = torsion_prime(curve)
@@ -457,33 +459,33 @@ def main():
         return
 
     repo = args.repo.rstrip("/")
-    with open(f"{repo}/data/curve{cid}.txt", "w") as fh:
+    with open(f"{repo}/data/curve{pid}.txt", "w") as fh:
         for (xn, xd, yn, yd) in curve.short:
             fh.write(f"{frac(xn, xd)} {frac(yn, yd)}\n")
-    with open(f"{repo}/data/curve{cid}-labels.txt", "w") as fh:
+    with open(f"{repo}/data/curve{pid}-labels.txt", "w") as fh:
         for (p, th) in sorted(labels):
             fh.write(f"{p} {th}\n")
     jinv = j_lit(j_invariant(*ainvs))
-    defblock = gate(f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(cid, ainvs)}")
+    defblock = gate(f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(pid, ainvs)}")
     rankblock = gate(
         f"/-- ICARM leaderboard curve {cid} has Mordell-Weil rank at least `{rank_goal}`. -/\n"
-        f"public theorem curve{cid}_hasRankGE_{rank_goal} : HasRankGE curve{cid} {rank_goal} := by\n"
-        f"  unfold curve{cid}\n  {tactic}")
+        f"public theorem curve{pid}_hasRankGE_{rank_goal} : HasRankGE curve{pid} {rank_goal} := by\n"
+        f"  unfold curve{pid}\n  {tactic}")
     ellblock = gate(
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
-        f"public instance : curve{cid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
-    jblock = j_theorem(cid, jinv)
+        f"public instance : curve{pid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
+    jblock = j_theorem(cid, pid, jinv)
     summary = summary_paragraph(rank_goal, data.get("submitter"))
     template = (Path(__file__).parent / "curve_template.lean").read_text()
     lean = template.format(id=cid, rank=rank_goal, eq=weier_eq(*ainvs[:3]),
                            coeffs=coeff_block(ainvs[3], ainvs[4]), summary=summary,
                            defblock=defblock, rankblock=rankblock, ellblock=ellblock, jblock=jblock)
-    with open(f"{repo}/Curves/Curve{cid}.lean", "w") as fh:
+    with open(f"{repo}/Curves/Curve{pid}.lean", "w") as fh:
         fh.write(lean)
 
-    print(f"\nwrote data/curve{cid}.txt, data/curve{cid}-labels.txt, "
-          f"Curves/Curve{cid}.lean")
-    print(f"add to Curves.lean:  import Curves.Curve{cid}")
+    print(f"\nwrote data/curve{pid}.txt, data/curve{pid}-labels.txt, "
+          f"Curves/Curve{pid}.lean")
+    print(f"add to Curves.lean:  import Curves.Curve{pid}")
 
 
 if __name__ == "__main__":
