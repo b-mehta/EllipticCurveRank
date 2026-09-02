@@ -120,10 +120,10 @@ theorem polyModNat_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
 itself in `ZMod p`. -/
 theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
     (hr : r = (a % (P : ℤ)).toNat) : ((r % p : ℕ) : ZMod p) = (a : ZMod p) := by
-  have hnn : 0 ≤ a % (P : ℤ) := Int.emod_nonneg a (by exact_mod_cast hP)
+  have hnn : 0 ≤ a % (P : ℤ) := Int.emod_nonneg a (by exact mod_cast hP)
   rw [ZMod.natCast_mod, hr, ← Int.cast_natCast, Int.toNat_of_nonneg hnn,
     ZMod.intCast_eq_intCast_iff']
-  exact Int.emod_emod_of_dvd a (by exact_mod_cast hpP)
+  exact Int.emod_emod_of_dvd a (by exact mod_cast hpP)
 
 /-- A `Nat` residue `n < p` vanishes iff it vanishes in `ZMod p`. -/
 theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p) = 0) := by
