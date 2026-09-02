@@ -107,10 +107,12 @@ theorem discrInt_zmod_congr {X Y Z : ℤ} (hx : (X : ZMod p) = a₂) (hy : (Y : 
 
 /-- `polyModNat` is `polyModL` on the coefficients cast to `ℤ`. -/
 theorem polyModNat_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
-    polyModNat cs ℓ r = polyModL (cs.map (Int.ofNat)) ℓ r := by
+    polyModNat cs ℓ r = polyModL (cs.map Int.ofNat) ℓ r := by
   induction cs with
   | nil => rfl
-  | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
+  | cons c cs ih =>
+    simp only [List.map_cons]
+    grind [polyModL]
 
 /-- A residue mod the label-prime product `P` reduces mod any divisor `p` of `P` to the coefficient
 itself in `ZMod p`. -/
