@@ -171,9 +171,7 @@ public theorem checkLabels_true {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆
   rw [allList_iff] at hdvd hfold
   simp only [Nat.beq_eq_beq, beq_iff_eq] at h2 h4 h6
   intro l hl
-  have hpd : P % l.1 = 0 := by
-    have hl1 := hdvd l hl
-    rwa [Nat.mod_eq_mod, Nat.beq_eq_beq, beq_iff_eq] at hl1
+  have hpd : P % l.1 = 0 := by have := hdvd l hl; grind
   exact checkLabelNat_true (by lia) (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl)
 
 end ECCompute
