@@ -79,20 +79,20 @@ residues as `Nat` literals `a₂r, a₄r, a₆r`, and runs each label's check in
 The lemmas below cast the `Nat` discriminant and cubic back into `ZMod p` and match them with
 `checkLabel`. -/
 
-/-- `subModP` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
-theorem subModP_cast {x z : ℕ} (hp : p ≠ 0) :
-    (subModP p x (z % p) : ZMod p) = (x : ZMod p) - z := by
+/-- `subModK` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
+theorem subModK_cast {x z : ℕ} (hp : p ≠ 0) :
+    (subModK p x (z % p) : ZMod p) = (x : ZMod p) - z := by
   have hsub : p.sub (z % p) = p - z % p := rfl
   have hp0 : 0 < p := Nat.pos_of_ne_zero hp
-  rw [subModP, Nat.mod_eq_mod, ZMod.natCast_mod, Nat.add_eq, Nat.cast_add,
+  rw [subModK, Nat.mod_eq_mod, ZMod.natCast_mod, Nat.add_eq, Nat.cast_add,
     hsub, Nat.cast_sub (Nat.mod_lt z hp0).le, ZMod.natCast_self, ZMod.natCast_mod]
   ring
 
-/-- The `Nat` discriminant `discrModP` casts to the integer discriminant of its residues. -/
-theorem discrModP_cast (hp : p ≠ 0) {rp2 rp4 rp6 : ℕ} :
-    (discrModP rp2 rp4 rp6 p : ZMod p) = discrInt rp2 rp4 rp6 := by
-  simp only [discrModP, Nat.mod_eq_mod, Nat.mul_eq, Nat.add_eq, discrInt]
-  push_cast [ZMod.natCast_mod, subModP_cast hp]
+/-- The `Nat` discriminant `discrModK` casts to the integer discriminant of its residues. -/
+theorem discrModK_cast (hp : p ≠ 0) {rp2 rp4 rp6 : ℕ} :
+    (discrModK rp2 rp4 rp6 p : ZMod p) = discrInt rp2 rp4 rp6 := by
+  simp only [discrModK, Nat.mod_eq_mod, Nat.mul_eq, Nat.add_eq, discrInt]
+  push_cast [ZMod.natCast_mod, subModK_cast hp]
   ring
 
 /-- Casting the integer discriminant through agreeing residues in `ZMod p`. -/
@@ -141,11 +141,11 @@ theorem checkLabelNat_true {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP : p �
   have hr6' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr6
   -- The differing factors of the two checks agree as `Bool`s: the discriminant test and the cubic
   -- test each read as the same vanishing condition in `ZMod p`.
-  have hf2 : (discrModP (a₂r % p) (a₄r % p) (a₆r % p) p).beq 0
+  have hf2 : (discrModK (a₂r % p) (a₄r % p) (a₆r % p) p).beq 0
       = ((discrIntK (a₂ % (p : ℤ)) (a₄ % (p : ℤ)) (a₆ % (p : ℤ))).emod (p : ℤ)).beq' 0 := by
     rw [Bool.eq_iff_iff, Nat.beq_eq,
-      natCast_eq_zero_of_lt (p := p) (by rw [discrModP]; exact Nat.mod_lt _ hp0),
-      discrModP_cast hp0.ne', discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
+      natCast_eq_zero_of_lt (p := p) (by rw [discrModK]; exact Nat.mod_lt _ hp0),
+      discrModK_cast hp0.ne', discrInt_zmod_congr hr2' hr4' hr6', Int.emod_eq, Int.beq'_eq,
       ← Int.dvd_iff_emod_eq_zero, ← ZMod.intCast_zmod_eq_zero_iff_dvd, discrIntK_eq, discrInt_emod]
   have hf3 : (polyModNat [a₆r % p, a₄r % p, a₂r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
       = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by

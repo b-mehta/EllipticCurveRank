@@ -91,21 +91,21 @@ discriminant and the monic cubic there. `checkLabels_true` proves this agrees wi
 `checkLabel`. -/
 
 /-- `x - y` modulo `p`, for `x, y < p`: `(x + (p - y)) mod p`, staying in `Nat`. -/
-noncomputable def subModP (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
+noncomputable def subModK (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
 
 /-- The discriminant `discrIntK` modulo `p`, computed on the pre-reduced nonneg residues
 `rp2, rp4, rp6 < p` entirely in `Nat`. Equals `(discrIntK rp2 rp4 rp6).emod p` as a residue in
 `[0, p)`. -/
-noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
+noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
   let b2 := rp2.mul 4
   let b4 := rp4.mul 2
   let b6 := rp6.mul 4
-  let inner := subModP p ((b2.mul rp6).mod p) ((rp4.mul rp4).mod p)
+  let inner := subModK p ((b2.mul rp6).mod p) ((rp4.mul rp4).mod p)
   let bigA := ((b2.mul b2).mul inner).mod p
   let t8 := (((b4.mul b4).mul b4).mul 8).mod p
   let t27 := ((b6.mul b6).mul 27).mod p
   let lastT := (((b2.mul 9).mul b4).mul b6).mod p
-  subModP p lastT (((bigA.add t8).add t27).mod p)
+  subModK p lastT (((bigA.add t8).add t27).mod p)
 
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r₂, r₄, r₆` (each already
 reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
@@ -116,7 +116,7 @@ noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bo
   let rp4 := r₄.mod p
   let rp6 := r₆.mod p
   (((Nat.mod 6 p).beq 0).not').and'
-    ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
+    ((((discrModK rp2 rp4 rp6 p).beq 0).not').and'
       ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
