@@ -85,12 +85,10 @@ noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool 
 
 /-! ### Nat-path label check
 
-The per-label loop below touches only small `Nat` residues carried in the certificate. The big
-integer coefficients `a₂, a₄, a₆` are reduced modulo the label-prime product `P` exactly **once**
-(the three `Int.emod` in `checkLabels`, outside every loop); the emitted certificate literals `a₂r,
-a₄r, a₆r` are those residues, verified against them. Each label then reduces the small residues to
-its prime `p` in `Nat` (the discriminant mod `p` and the monic cubic mod `p`), so no big-coefficient
-`Int.emod` is reachable from the per-label closure. -/
+Each label's check runs in `Nat` on the coefficient residues modulo the label-prime product `P`
+carried in the certificate (`a₂r, a₄r, a₆r`): it reduces them to the label prime and tests the
+discriminant and the monic cubic there. `checkLabels_true` proves this agrees with the `Int`-path
+`checkLabel`. -/
 
 /-- `x - y` modulo `p`, for `x, y < p`: `(x + (p - y)) mod p`, staying in `Nat`. -/
 noncomputable def subModP (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
@@ -121,10 +119,9 @@ noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bo
     ((((discrModP rp2 rp4 rp6 p).beq 0).not').and'
       ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
 
-/-- `true` iff the descent check passes for every label. The label-prime product `P` is checked
-positive; the three big coefficients are reduced mod `P` **once** (the `Int.emod` here), verified
-against the emitted residue literals `a₂r, a₄r, a₆r`; every label prime is checked to divide `P`;
-then each label is decided in `Nat` by `checkLabelNat` on those literal residues. -/
+/-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
+`P`, every label prime divides `P`, and every label passes `checkLabelNat` on those residues.
+Sound by `checkLabels_true`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
     (labels : List (Nat × Int)) : Bool :=
   (Nat.ble 1 P).and'
