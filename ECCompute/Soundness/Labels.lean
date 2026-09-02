@@ -110,11 +110,7 @@ theorem polyModNat_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
     polyModNat cs ℓ r = polyModL (cs.map (Int.ofNat)) ℓ r := by
   induction cs with
   | nil => rfl
-  | cons c cs ih =>
-    have hcons : polyModL (Int.ofNat c :: cs.map Int.ofNat) ℓ r
-        = ((Int.ofNat c % ℓ).toNat + r * polyModL (cs.map Int.ofNat) ℓ r) % ℓ := by simp [polyModL]
-    rw [polyModNat_cons, ih, List.map_cons, hcons]
-    congr 2
+  | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
 
 /-- A residue mod the label-prime product `P` reduces mod any divisor `p` of `P` to the coefficient
 itself in `ZMod p`. -/
