@@ -102,7 +102,7 @@ theorem discrInt_zmod_congr {X Y Z : ℤ} (hx : (X : ZMod p) = a₂) (hy : (Y : 
   push_cast
   rw [hx, hy, hz]
 
-@[simp] theorem polyModNat_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
+theorem polyModNat_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
     polyModNat (c :: cs) ℓ r = ((c % ℓ) + r * polyModNat cs ℓ r) % ℓ := by simp [polyModNat]
 
 /-- `polyModNat` is `polyModL` on the coefficients cast to `ℤ`. -/
