@@ -99,16 +99,14 @@ noncomputable def subModP (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
 `rp2, rp4, rp6 < p` entirely in `Nat`. Equals `(discrIntK rp2 rp4 rp6).emod p` as a residue in
 `[0, p)`. -/
 noncomputable def discrModP (rp2 rp4 rp6 p : Nat) : Nat :=
-  let b2 := (Nat.mul 4 rp2).mod p
-  let b4 := (Nat.mul 2 rp4).mod p
-  let b6 := (Nat.mul 4 rp6).mod p
+  let b2 := Nat.mul 4 rp2
+  let b4 := Nat.mul 2 rp4
+  let b6 := Nat.mul 4 rp6
   let inner := subModP p ((Nat.mul (Nat.mul 4 rp2) rp6).mod p) ((rp4.mul rp4).mod p)
-  let bigA := ((b2.mul b2).mod p).mul inner |>.mod p
-  let b4cube := (((b4.mul b4).mod p).mul b4).mod p
-  let t8 := (Nat.mul 8 b4cube).mod p
-  let b6sq := (b6.mul b6).mod p
-  let t27 := (Nat.mul 27 b6sq).mod p
-  let lastT := ((((Nat.mul 9 b2).mod p).mul b4).mod p).mul b6 |>.mod p
+  let bigA := ((b2.mul b2).mul inner).mod p
+  let t8 := (Nat.mul 8 ((b4.mul b4).mul b4)).mod p
+  let t27 := (Nat.mul 27 (b6.mul b6)).mod p
+  let lastT := (((Nat.mul 9 b2).mul b4).mul b6).mod p
   subModP p lastT (((bigA.add t8).add t27).mod p)
 
 /-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r₂, r₄, r₆` (each already
