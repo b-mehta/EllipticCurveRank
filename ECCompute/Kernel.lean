@@ -64,38 +64,18 @@ noncomputable def polyModNat (cs : List Nat) (ℓ r : Nat) : Nat :=
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
   allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not'
 
-/-! ## Descent label check -/
-
-/-- The discriminant of the integral model `curve a₂ a₄ a₆`, for the kernel. -/
-def discrIntK (a₂ a₄ a₆ : Int) : Int :=
-  let b2 := Int.mul 4 a₂
-  let b4 := Int.mul 2 a₄
-  let b6 := Int.mul 4 a₆
-  ((((b2.mul b2).mul (((Int.mul 4 a₂).mul a₆).sub (a₄.mul a₄))).neg.sub
-      (Int.mul 8 ((b4.mul b4).mul b4))).sub (Int.mul 27 (b6.mul b6))).add
-    (((Int.mul 9 b2).mul b4).mul b6)
-
-/-- `true` iff the label `(p, θ)` satisfies the descent hypotheses `p ∤ 6`,
-`p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, where `f(θ) = θ³ + a₂θ² + a₄θ + a₆` is read as the monic cubic
-`polyModL [a₆, a₄, a₂, 1]` evaluated at the residue of `θ`. -/
-noncomputable def checkLabel (a₂ a₄ a₆ : Int) (p : Nat) (θ : Int) : Bool :=
-  (((Nat.mod 6 p).beq 0).not').and'
-    (((((discrIntK (a₂.emod p) (a₄.emod p) (a₆.emod p)).emod p).beq' 0).not').and'
-      ((polyModL [a₆, a₄, a₂, 1] p (θ.emod p).toNat).beq 0))
-
-/-! ### Nat-path label check
+/-! ## Descent label check
 
 Each label's check runs in `Nat` on the coefficient residues modulo the label-prime product `P`
-carried in the certificate (`a₂r, a₄r, a₆r`): it reduces them to the label prime and tests the
-discriminant and the monic cubic there. `checkLabels_true` proves this agrees with the `Int`-path
-`checkLabel`. -/
+carried in the certificate (`a₂r, a₄r, a₆r`): it reduces them to the label prime and tests `p ∤ 6`,
+the discriminant, and the monic cubic there. `descentHyp_of_checkLabels` proves this gives the
+descent hypotheses. -/
 
 /-- `x - y` modulo `p`, for `x, y < p`: `(x + (p - y)) mod p`, staying in `Nat`. -/
 noncomputable def subModK (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
 
-/-- The discriminant `discrIntK` modulo `p`, computed on the pre-reduced nonneg residues
-`rp2, rp4, rp6 < p` entirely in `Nat`. Equals `(discrIntK rp2 rp4 rp6).emod p` as a residue in
-`[0, p)`. -/
+/-- The discriminant of the integral model `curve a₂ a₄ a₆` modulo `p`, computed on the pre-reduced
+nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. -/
 noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
   let b2 := rp2.mul 4
   let b4 := rp4.mul 2
@@ -107,10 +87,9 @@ noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
   let lastT := (((b2.mul 9).mul b4).mul b6).mod p
   subModK p lastT (((bigA.add t8).add t27).mod p)
 
-/-- `checkLabel` on a label `(p, θ)`, taking the coefficient residues `r₂, r₄, r₆` (each already
-reduced modulo the label-prime product `P`) and reducing them to `p` in `Nat`. Computes the same
-`Bool` as `checkLabel a₂ a₄ a₆ p θ` whenever `r₂ = a₂ mod P`, `r₄ = a₄ mod P`, `r₆ = a₆ mod P` and
-`p ∣ P`. -/
+/-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided in
+`Nat` from the coefficient residues `r₂, r₄, r₆` (each already reduced modulo the label-prime
+product `P`) by reducing them to `p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
 noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool :=
   let rp2 := r₂.mod p
   let rp4 := r₄.mod p
@@ -121,7 +100,7 @@ noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bo
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
 `P`, every label prime divides `P`, and every label passes `checkLabelNat` on those residues.
-Sound by `checkLabels_true`. -/
+Sound by `descentHyp_of_checkLabels`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
     (labels : List (Nat × Int)) : Bool :=
   (Nat.ble 1 P).and'
