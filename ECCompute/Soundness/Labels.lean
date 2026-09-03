@@ -119,8 +119,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
   obtain ⟨h6', hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
-    rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
-    grind
+    grind [Nat.dvd_iff_mod_eq_zero]
   · -- `p ∤ Δ`: the `Nat` discriminant is nonzero, hence so is `Δ.num` in `ZMod p`
     rw [curveQ_Δ_num, Ne, ← discrInt_zmod_congr hr2' hr4' hr6', ← discrModK_cast hp0.ne',
       ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
