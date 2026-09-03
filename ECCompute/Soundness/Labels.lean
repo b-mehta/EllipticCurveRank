@@ -124,7 +124,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
   · -- `p ∤ Δ`: the `Nat` discriminant is nonzero, hence so is `Δ.num` in `ZMod p`
     rw [curveQ_Δ_num, Ne, ← discrInt_zmod_congr hr2' hr4' hr6', ← discrModK_cast hp0.ne',
       ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
-    simpa [Nat.beq_eq] using hΔ
+    grind
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
     have hbridge : (polyModNat [a₆r % p, a₄r % p, a₂r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
         = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
