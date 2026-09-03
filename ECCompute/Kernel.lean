@@ -90,7 +90,7 @@ noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
 /-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided in
 `Nat` from the coefficient residues `r₂, r₄, r₆` (each already reduced modulo the label-prime
 product `P`) by reducing them to `p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
-noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool :=
+noncomputable def checkLabel (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool :=
   let rp2 := r₂.mod p
   let rp4 := r₄.mod p
   let rp6 := r₆.mod p
@@ -99,7 +99,7 @@ noncomputable def checkLabelNat (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bo
       ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
-`P`, every label prime divides `P`, and every label passes `checkLabelNat` on those residues.
+`P`, every label prime divides `P`, and every label passes `checkLabel` on those residues.
 Sound by `descentHyp_of_checkLabels`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
     (labels : List (Nat × Int)) : Bool :=
@@ -108,7 +108,7 @@ noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
       ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and'
         ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and'
           ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-            (allList (fun l ↦ checkLabelNat a₂r a₄r a₆r l.1 l.2) labels)))))
+            (allList (fun l ↦ checkLabel a₂r a₄r a₆r l.1 l.2) labels)))))
 
 /-! ## Descent character -/
 

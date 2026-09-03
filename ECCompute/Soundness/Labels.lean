@@ -20,14 +20,14 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 * `p ∤ Δ`     where `Δ` is the integer discriminant of `y² = x³ + a₂x² + a₄x + a₆`;
 * `f(θ) ≡ 0 (mod p)`.
 
-The kernel `Bool` checker `ECCompute.checkLabelNat` (defined in `ECCompute.Kernel`) decides all
+The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`) decides all
 three in `Nat` on the coefficient residues carried in the certificate;
-`descentHyp_of_checkLabelNat` turns a passing check (with a separately supplied primality proof)
+`descentHyp_of_checkLabel` turns a passing check (with a separately supplied primality proof)
 into a `DescentHyp`.
 
 ## Main declarations
 
-* `ECCompute.descentHyp_of_checkLabelNat`: a passing `checkLabelNat` gives `DescentHyp`.
+* `ECCompute.descentHyp_of_checkLabel`: a passing `checkLabel` gives `DescentHyp`.
 * `ECCompute.descentHyp_of_checkLabels`: a passing `checkLabels` gives `DescentHyp` for every label.
 -/
 
@@ -51,7 +51,7 @@ theorem fval_iff (hp : 1 < p) :
 /-! ### The `Nat`-path label check gives the descent hypotheses
 
 `checkLabels` reduces the big coefficients modulo the label-prime product `P` once, records the
-residues as `Nat` literals `a₂r, a₄r, a₆r`, and runs each label's check in `Nat` (`checkLabelNat`).
+residues as `Nat` literals `a₂r, a₄r, a₆r`, and runs each label's check in `Nat` (`checkLabel`).
 The lemmas below cast the `Nat` discriminant and cubic into `ZMod p` and read off `DescentHyp`. -/
 
 /-- `subModK` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
@@ -102,11 +102,11 @@ theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
 theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p) = 0) := by
   rw [ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero, Nat.mod_eq_of_lt hn]
 
-/-- A passing `Nat`-path `checkLabelNat` on residues pinned to `a₂, a₄, a₆` mod `P` (with `p ∣ P`,
+/-- A passing `Nat`-path `checkLabel` on residues pinned to `a₂, a₄, a₆` mod `P` (with `p ∣ P`,
 `P ≠ 0`, and `p` prime) gives `DescentHyp` for the label `(p, θ)`. -/
-theorem descentHyp_of_checkLabelNat {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
+theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
     (h2 : a₂r = (a₂ % (P : ℤ)).toNat) (h4 : a₄r = (a₄ % (P : ℤ)).toNat)
-    (h6 : a₆r = (a₆ % (P : ℤ)).toNat) (h : checkLabelNat a₂r a₄r a₆r p θ) (hp : p.Prime) :
+    (h6 : a₆r = (a₆ % (P : ℤ)).toNat) (h : checkLabel a₂r a₄r a₆r p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   have hp0 : 0 < p := hp.pos
   have hr2 : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h2
@@ -115,7 +115,7 @@ theorem descentHyp_of_checkLabelNat {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (
   have hr2' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr2
   have hr4' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr4
   have hr6' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr6
-  rw [checkLabelNat] at h
+  rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
   obtain ⟨h6', hΔ, hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
@@ -144,7 +144,7 @@ theorem descentHyp_of_checkLabelNat {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). The
 `Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and runs
-the per-label check in `Nat`; `descentHyp_of_checkLabelNat` carries each label to `DescentHyp`. -/
+the per-label check in `Nat`; `descentHyp_of_checkLabel` carries each label to `DescentHyp`. -/
 public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ}
     (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r labels) {l : ℕ × ℤ} (hl : l ∈ labels)
     (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) := by
@@ -155,6 +155,6 @@ public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a
   rw [allList_iff] at hdvd hfold
   simp only [Nat.beq_eq_beq, beq_iff_eq] at h2 h4 h6
   have hpd : P % l.1 = 0 := by have := hdvd l hl; grind
-  exact descentHyp_of_checkLabelNat (by lia) (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl) hp
+  exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero hpd) h2 h4 h6 (hfold l hl) hp
 
 end ECCompute
