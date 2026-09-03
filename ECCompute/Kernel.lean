@@ -56,7 +56,7 @@ noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
 
 /-- `polyModL` on `Nat` coefficients, staying in `Nat` throughout: the Horner fold of the polynomial
 with coefficients `cs` (constant term first) evaluated at `r` and reduced mod `ℓ`. -/
-noncomputable def polyModNat (cs : List Nat) (ℓ r : Nat) : Nat :=
+noncomputable def polyModK (cs : List Nat) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.mod ℓ).add (r.mul acc)).mod ℓ
 
 /-- `true` iff the monic integer polynomial with lower coefficients `cs`
@@ -96,7 +96,7 @@ noncomputable def checkLabel (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool 
   let rp6 := r₆.mod p
   (((Nat.mod 6 p).beq 0).not').and'
     ((((discrModK rp2 rp4 rp6 p).beq 0).not').and'
-      ((polyModNat [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
+      ((polyModK [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
 `P`, every label prime divides `P`, and every label passes `checkLabel` on those residues.

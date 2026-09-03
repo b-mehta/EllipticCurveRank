@@ -76,12 +76,12 @@ theorem discrInt_zmod_congr {X Y Z : ℤ} (hx : (X : ZMod p) = a₂) (hy : (Y : 
   push_cast
   rw [hx, hy, hz]
 
-@[simp, grind =] theorem polyModNat_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
-    polyModNat (c :: cs) ℓ r = ((c % ℓ) + r * polyModNat cs ℓ r) % ℓ := by simp [polyModNat]
+@[simp, grind =] theorem polyModK_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
+    polyModK (c :: cs) ℓ r = ((c % ℓ) + r * polyModK cs ℓ r) % ℓ := by simp [polyModK]
 
-/-- `polyModNat` is `polyModL` on the coefficients cast to `ℤ`. -/
-theorem polyModNat_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
-    polyModNat cs ℓ r = polyModL (cs.map Int.ofNat) ℓ r := by
+/-- `polyModK` is `polyModL` on the coefficients cast to `ℤ`. -/
+theorem polyModK_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
+    polyModK cs ℓ r = polyModL (cs.map Int.ofNat) ℓ r := by
   induction cs with
   | nil => rfl
   | cons c cs ih =>
@@ -125,7 +125,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
       ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
     grind
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
-    grind [fval_iff, fval, polyModNat_eq_polyModL, polyModL_beq]
+    grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq]
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). The
 `Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and runs
