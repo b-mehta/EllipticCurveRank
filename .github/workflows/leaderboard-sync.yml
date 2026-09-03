@@ -1,0 +1,66 @@
+# Hourly sync with the ICARM Elliptic Curve Rank Leaderboard. Generates rank
+# certificates for any leaderboard curve not yet in the Curves library and opens
+# (or updates) a single PR adding them.
+#
+# The generator (tools/gen_curve.py, tools/curve_template.lean) and the sync
+# driver (tools/leaderboard_sync.py) live on the gen-curve-script branch (PR #60),
+# not master, and are pulled in at runtime. This workflow file is the only piece
+# that has to sit on master, because scheduled workflows always run the copy on
+# the default branch.
+name: Leaderboard Sync
+
+on:
+  schedule:
+    - cron: "5 * * * *" # hourly, at :05 to sit off the top-of-hour runner spike
+  workflow_dispatch:     # allow manual runs from the Actions tab
+
+concurrency:
+  group: leaderboard-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # push the sync branch
+      pull-requests: write # open / update the sync PR
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install sympy
+        run: pip install sympy
+
+      # The generator and driver are not on master; pull them from the branch
+      # that owns them (PR #60). leaderboard_sync.py deletes tools/ again once it
+      # has run, so the pulled files never land in the sync PR.
+      - name: Pull the generator and driver from gen-curve-script
+        run: |
+          git fetch origin gen-curve-script --depth=1
+          git checkout FETCH_HEAD -- \
+            tools/gen_curve.py tools/curve_template.lean tools/leaderboard_sync.py
+
+      - name: Generate certificates for new leaderboard curves
+        id: gen
+        run: python3 tools/leaderboard_sync.py
+
+      # A PAT so the sync PR triggers Lean Action CI; the default GITHUB_TOKEN
+      # would not. If the secret is unset this falls back to GITHUB_TOKEN and the
+      # PR still opens, just without CI running on it.
+      - name: Open or update the sync PR
+        if: steps.gen.outputs.has_new == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.HOPSCOTCH_PAT || github.token }}
+          branch: leaderboard-sync-bot
+          base: master
+          title: "Add new leaderboard curves"
+          body-path: ${{ runner.temp }}/pr_body.md
+          commit-message: "Add new leaderboard curves via 2-saturation"
+          add-paths: |
+            Curves/
+            data/
+            Curves.lean
