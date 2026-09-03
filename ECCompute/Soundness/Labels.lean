@@ -133,10 +133,8 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
         Int.mul_def]
       push_cast
       grind
-    have hcast : ((θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ : ℤ) : ZMod p) = 0 :=
-      (fval_iff hp.one_lt).mp (hbridge.symm.trans hf)
     rw [fval]
-    grind
+    grind [(fval_iff hp.one_lt).mp (hbridge.symm.trans hf)]
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). The
 `Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and runs
