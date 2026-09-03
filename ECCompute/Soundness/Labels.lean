@@ -47,7 +47,6 @@ theorem fval_iff (hp : 1 < p) :
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by grind [polyEval]
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
-
 /-! ### The `Nat`-path label check gives the descent hypotheses
 
 `checkLabels` reduces the big coefficients modulo the label-prime product `P` once, records the
@@ -123,10 +122,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
     rw [Nat.dvd_iff_mod_eq_zero, ← Nat.mod_eq_mod]
     simpa [Nat.beq_eq_beq, beq_eq_false_iff_ne] using h6'
   · -- `p ∤ Δ`: the `Nat` discriminant is nonzero, hence so is `Δ.num` in `ZMod p`
-    have hcast : (discrModK (a₂r % p) (a₄r % p) (a₆r % p) p : ZMod p)
-        = ((discrInt a₂ a₄ a₆ : ℤ) : ZMod p) := by
-      rw [discrModK_cast hp0.ne']; exact discrInt_zmod_congr hr2' hr4' hr6'
-    rw [curveQ_Δ_num, Ne, ← hcast,
+    rw [curveQ_Δ_num, Ne, ← discrInt_zmod_congr hr2' hr4' hr6', ← discrModK_cast hp0.ne',
       ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
     simpa [Nat.beq_eq] using hΔ
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
