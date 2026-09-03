@@ -47,11 +47,7 @@ theorem fval_iff (hp : 1 < p) :
   have hpoly : polyEval [a₆, a₄, a₂, 1] θ = θ ^ 3 + a₂ * θ ^ 2 + a₄ * θ + a₆ := by grind [polyEval]
   rw [polyModL_beq hp, polyEval_modEq hmod, hpoly]
 
-/-! ### The `Nat`-path label check gives the descent hypotheses
-
-`checkLabels` reduces the big coefficients modulo the label-prime product `P` once, records the
-residues as `Nat` literals `a₂r, a₄r, a₆r`, and runs each label's check in `Nat` (`checkLabel`).
-The lemmas below cast the `Nat` discriminant and cubic into `ZMod p` and read off `DescentHyp`. -/
+/-! ### The `Nat`-path label check gives the descent hypotheses -/
 
 /-- `subModK` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
 theorem subModK_cast {x z : ℕ} (hp : p ≠ 0) :
