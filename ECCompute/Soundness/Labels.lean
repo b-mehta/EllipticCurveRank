@@ -49,23 +49,8 @@ theorem fval_iff (hp : 1 < p) :
 
 /-! ### The `Nat`-path label check gives the descent hypotheses -/
 
-/-- `subModK` casts to a subtraction in `ZMod p` once the subtrahend is a residue mod `p`. -/
-theorem subModK_cast {x z : ℕ} (hp : p ≠ 0) :
-    (subModK p x (z % p) : ZMod p) = (x : ZMod p) - z := by
-  rw [subModK, Nat.mod_eq_mod, ZMod.natCast_mod, Nat.add_eq, Nat.cast_add, Nat.sub_eq,
-    Nat.cast_sub (Nat.mod_lt z hp.bot_lt).le, ZMod.natCast_self, ZMod.natCast_mod]
-  ring
-
-/-- The `Nat` discriminant `discrModK` casts to the integer discriminant of its residues. -/
-theorem discrModK_cast (hp : p ≠ 0) {r₂ r₄ r₆ : ℕ} :
-    (discrModK r₂ r₄ r₆ p : ZMod p) = discrInt r₂ r₄ r₆ := by
-  simp [discrModK, discrInt, subModK_cast hp]
-  grind
-
-/-- Casting the integer discriminant through agreeing residues in `ZMod p`. -/
-theorem discrInt_zmod_congr {X Y Z : ℤ} (hx : (X : ZMod p) = a₂) (hy : (Y : ZMod p) = a₄)
-    (hz : (Z : ZMod p) = a₆) : (discrInt X Y Z : ZMod p) = discrInt a₂ a₄ a₆ := by
-  simp [discrInt, hx, hy, hz]
+/-- `discrIntK a₂ a₄ a₆` equals the integer discriminant `discrInt a₂ a₄ a₆`. -/
+theorem discrIntK_eq : discrIntK a₂ a₄ a₆ = discrInt a₂ a₄ a₆ := by grind [discrIntK, discrInt]
 
 @[simp, grind =] theorem polyModK_cons {c : ℕ} {cs : List ℕ} {ℓ r : ℕ} :
     polyModK (c :: cs) ℓ r = (c % ℓ + r * polyModK cs ℓ r) % ℓ := rfl
@@ -92,9 +77,9 @@ theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p)
 
 /-- A passing `Nat`-path `checkLabel` on residues pinned to `a₂, a₄, a₆` mod `P` (with `p ∣ P`,
 `P ≠ 0`, and `p` prime) gives `DescentHyp` for the label `(p, θ)`. -/
-theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
-    (h₂ : a₂r = (a₂ % P).toNat) (h₄ : a₄r = (a₄ % P).toNat)
-    (h₆ : a₆r = (a₆ % P).toNat) (h : checkLabel a₂r a₄r a₆r p θ) (hp : p.Prime) :
+theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r Δr : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
+    (h₂ : a₂r = (a₂ % P).toNat) (h₄ : a₄r = (a₄ % P).toNat) (h₆ : a₆r = (a₆ % P).toNat)
+    (hΔ : Δr = (discrInt a₂ a₄ a₆ % P).toNat) (h : checkLabel a₂r a₄r a₆r Δr p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   have hp0 : 0 < p := hp.pos
   have hr₂ : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h₂
@@ -105,27 +90,25 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
   have hr₆' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr₆
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
-  obtain ⟨h6', hΔ, hf⟩ := h
+  obtain ⟨h6', hΔ', hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
     grind [Nat.dvd_iff_mod_eq_zero]
-  · -- `p ∤ Δ`: the `Nat` discriminant is nonzero, hence so is `Δ.num` in `ZMod p`
-    rw [curveQ_Δ_num, Ne, ← discrInt_zmod_congr hr₂' hr₄' hr₆', ← discrModK_cast hp0.ne',
-      ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
-    grind
+  · -- `p ∤ Δ`: the precomputed discriminant residue is nonzero mod `p`
+    rw [curveQ_Δ_num, Ne, ← resP_cast hP hpP hΔ, ← natCast_eq_zero_of_lt (Nat.mod_lt _ hp0)]
+    simpa using hΔ'
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
     grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq]
 
-/-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). The
-`Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and runs
-the per-label check in `Nat`; `descentHyp_of_checkLabel` carries each label to `DescentHyp`. -/
-public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ}
-    (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r labels) {l : ℕ × ℤ} (hl : l ∈ labels)
+/-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). -/
+public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r Δr : ℕ}
+    (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r Δr labels) {l : ℕ × ℤ} (hl : l ∈ labels)
     (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) := by
   rw [checkLabels] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq] at h
-  obtain ⟨hP, h₂, h₄, h₆, hdvd, hfold⟩ := h
+  obtain ⟨hP, h₂, h₄, h₆, hΔ, hdvd, hfold⟩ := h
+  rw [discrIntK_eq] at hΔ
   have hpd : P % l.1 = 0 := by grind
-  exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero hpd) h₂ h₄ h₆ (hfold l hl) hp
+  exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero hpd) h₂ h₄ h₆ hΔ (hfold l hl) hp
 
 end ECCompute
