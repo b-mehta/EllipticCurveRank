@@ -63,8 +63,8 @@ theorem subModK_cast {x z : ℕ} (hp : p ≠ 0) :
   ring
 
 /-- The `Nat` discriminant `discrModK` casts to the integer discriminant of its residues. -/
-theorem discrModK_cast (hp : p ≠ 0) {rp2 rp4 rp6 : ℕ} :
-    (discrModK rp2 rp4 rp6 p : ZMod p) = discrInt rp2 rp4 rp6 := by
+theorem discrModK_cast (hp : p ≠ 0) {r₂ r₄ r₆ : ℕ} :
+    (discrModK r₂ r₄ r₆ p : ZMod p) = discrInt r₂ r₄ r₆ := by
   simp only [discrModK, Nat.mod_eq_mod, Nat.mul_eq, Nat.add_eq, discrInt]
   push_cast [ZMod.natCast_mod, subModK_cast hp]
   ring

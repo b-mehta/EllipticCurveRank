@@ -75,12 +75,12 @@ descent hypotheses. -/
 noncomputable def subModK (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
 
 /-- The discriminant of the integral model `curve a₂ a₄ a₆` modulo `p`, computed on the pre-reduced
-nonneg residues `rp2, rp4, rp6 < p` entirely in `Nat`. -/
-noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
-  let b2 := rp2.mul 4
-  let b4 := rp4.mul 2
-  let b6 := rp6.mul 4
-  let inner := subModK p ((b2.mul rp6).mod p) ((rp4.mul rp4).mod p)
+nonneg residues `r₂, r₄, r₆ < p` entirely in `Nat`. -/
+noncomputable def discrModK (r₂ r₄ r₆ p : Nat) : Nat :=
+  let b2 := r₂.mul 4
+  let b4 := r₄.mul 2
+  let b6 := r₆.mul 4
+  let inner := subModK p ((b2.mul r₆).mod p) ((r₄.mul r₄).mod p)
   let bigA := ((b2.mul b2).mul inner).mod p
   let t8 := (((b4.mul b4).mul b4).mul 8).mod p
   let t27 := ((b6.mul b6).mul 27).mod p
@@ -88,15 +88,15 @@ noncomputable def discrModK (rp2 rp4 rp6 p : Nat) : Nat :=
   subModK p lastT (((bigA.add t8).add t27).mod p)
 
 /-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided in
-`Nat` from the coefficient residues `r₂, r₄, r₆` (each already reduced modulo the label-prime
+`Nat` from the coefficient residues `a₂r, a₄r, a₆r` (each already reduced modulo the label-prime
 product `P`) by reducing them to `p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
-noncomputable def checkLabel (r₂ r₄ r₆ : Nat) (p : Nat) (θ : Int) : Bool :=
-  let rp2 := r₂.mod p
-  let rp4 := r₄.mod p
-  let rp6 := r₆.mod p
+noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (p : Nat) (θ : Int) : Bool :=
+  let r₂ := a₂r.mod p
+  let r₄ := a₄r.mod p
+  let r₆ := a₆r.mod p
   (((Nat.mod 6 p).beq 0).not').and'
-    ((((discrModK rp2 rp4 rp6 p).beq 0).not').and'
-      ((polyModK [rp6, rp4, rp2, 1] p (θ.emod p).toNat).beq 0))
+    ((((discrModK r₂ r₄ r₆ p).beq 0).not').and'
+      ((polyModK [r₆, r₄, r₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
 `P`, every label prime divides `P`, and every label passes `checkLabel` on those residues.
