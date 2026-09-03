@@ -125,14 +125,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} (hP : P ≠ 0) (hpP
       ← natCast_eq_zero_of_lt (by rw [discrModK]; exact Nat.mod_lt _ hp0)]
     grind
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
-    have hbridge : (polyModNat [a₆r % p, a₄r % p, a₂r % p, 1] p (θ.emod (p : ℤ)).toNat).beq 0
-        = (polyModL [a₆, a₄, a₂, 1] p (θ.emod (p : ℤ)).toNat).beq 0 := by
-      rw [polyModNat_eq_polyModL, Bool.eq_iff_iff, polyModL_beq hp.one_lt, polyModL_beq hp.one_lt]
-      simp only [List.map_cons, List.map_nil, Int.ofNat_eq_natCast, polyEval, Int.add_def,
-        Int.mul_def]
-      push_cast
-      grind
-    grind [fval_iff, fval]
+    grind [fval_iff, fval, polyModNat_eq_polyModL, polyModL_beq]
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). The
 `Nat`-path `checkLabels` verifies the emitted residue literals against `a₂, a₄, a₆ mod P` and runs
