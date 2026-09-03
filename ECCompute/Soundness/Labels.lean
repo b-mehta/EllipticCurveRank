@@ -123,12 +123,9 @@ public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a
     (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r labels) {l : ℕ × ℤ} (hl : l ∈ labels)
     (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) := by
   rw [checkLabels] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true] at h
+  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq] at h
   obtain ⟨hP, h₂, h₄, h₆, hdvd, hfold⟩ := h
-  rw [Nat.ble_eq] at hP
-  rw [allList_iff] at hdvd hfold
-  simp only [Nat.beq_eq_beq, beq_iff_eq] at h₂ h₄ h₆
-  have hpd : P % l.1 = 0 := by have := hdvd l hl; grind
+  have hpd : P % l.1 = 0 := by grind
   exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero hpd) h₂ h₄ h₆ (hfold l hl) hp
 
 end ECCompute
