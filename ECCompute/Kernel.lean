@@ -94,8 +94,8 @@ noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (p : Nat) (θ : Int) : Bo
   let r₂ := a₂r.mod p
   let r₄ := a₄r.mod p
   let r₆ := a₆r.mod p
-  (((Nat.mod 6 p).beq 0).not').and'
-    ((((discrModK r₂ r₄ r₆ p).beq 0).not').and'
+  ((Nat.mod 6 p).beq 0).not'.and'
+    (((discrModK r₂ r₄ r₆ p).beq 0).not'.and'
       ((polyModK [r₆, r₄, r₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
