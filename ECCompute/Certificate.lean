@@ -48,6 +48,8 @@ public structure Certificate where
   a₄r : ℕ
   /-- The residue `(a₆ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
   a₆r : ℕ
+  /-- The discriminant `discrInt a₂ a₄ a₆`, as an `Int` literal; verified in `checkLabels`. -/
+  Δ : ℤ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
@@ -89,7 +91,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- Each label carries a prime. -/
   primes : checkPrimes c.labels
   /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
-  labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a₂r c.a₄r c.a₆r c.labels
+  labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a₂r c.a₄r c.a₆r c.Δ c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/

@@ -71,44 +71,38 @@ carried in the certificate (`a₂r, a₄r, a₆r`): it reduces them to the label
 the discriminant, and the monic cubic there. `descentHyp_of_checkLabels` proves this gives the
 descent hypotheses. -/
 
-/-- `x - y` modulo `p`, for `x, y < p`: `(x + (p - y)) mod p`, staying in `Nat`. -/
-noncomputable def subModK (p x y : Nat) : Nat := (x.add (p.sub y)).mod p
+/-- The discriminant of the integral model `curve a₂ a₄ a₆`, for the kernel. -/
+def discrIntK (a₂ a₄ a₆ : Int) : Int :=
+  let b2 := Int.mul 4 a₂
+  let b4 := Int.mul 2 a₄
+  let b6 := Int.mul 4 a₆
+  ((((b2.mul b2).mul (((Int.mul 4 a₂).mul a₆).sub (a₄.mul a₄))).neg.sub
+      (Int.mul 8 ((b4.mul b4).mul b4))).sub (Int.mul 27 (b6.mul b6))).add
+    (((Int.mul 9 b2).mul b4).mul b6)
 
-/-- The discriminant of the integral model `curve a₂ a₄ a₆` modulo `p`, computed on the pre-reduced
-nonneg residues `r₂, r₄, r₆ < p` entirely in `Nat`. -/
-noncomputable def discrModK (r₂ r₄ r₆ p : Nat) : Nat :=
-  let b2 := r₂.mul 4
-  let b4 := r₄.mul 2
-  let b6 := r₆.mul 4
-  let inner := subModK p ((b2.mul r₆).mod p) ((r₄.mul r₄).mod p)
-  let bigA := ((b2.mul b2).mul inner).mod p
-  let t8 := (((b4.mul b4).mul b4).mul 8).mod p
-  let t27 := ((b6.mul b6).mul 27).mod p
-  let lastT := (((b2.mul 9).mul b4).mul b6).mod p
-  subModK p lastT (((bigA.add t8).add t27).mod p)
-
-/-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided in
-`Nat` from the coefficient residues `a₂r, a₄r, a₆r` (each already reduced modulo the label-prime
-product `P`) by reducing them to `p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
-noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (p : Nat) (θ : Int) : Bool :=
+/-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided from
+the coefficient residues `a₂r, a₄r, a₆r` (reduced mod `P`) and the discriminant `Δ`, by reducing to
+`p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
+noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (Δ : Int) (p : Nat) (θ : Int) : Bool :=
   let r₂ := a₂r.mod p
   let r₄ := a₄r.mod p
   let r₆ := a₆r.mod p
   ((Nat.mod 6 p).beq 0).not'.and'
-    (((discrModK r₂ r₄ r₆ p).beq 0).not'.and'
+    (((Δ.emod p).beq' 0).not'.and'
       ((polyModK [r₆, r₄, r₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
-`P`, every label prime divides `P`, and every label passes `checkLabel` on those residues.
-Sound by `descentHyp_of_checkLabels`. -/
-noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
+`P`, the discriminant `Δ` equals `discrIntK a₂ a₄ a₆`, every label prime divides `P`, and every
+label passes `checkLabel`. Sound by `descentHyp_of_checkLabels`. -/
+noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat) (Δ : Int)
     (labels : List (Nat × Int)) : Bool :=
   (Nat.ble 1 P).and'
     ((a₂r.beq (a₂.emod (Int.ofNat P)).toNat).and'
       ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and'
         ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and'
-          ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-            (allList (fun l ↦ checkLabel a₂r a₄r a₆r l.1 l.2) labels)))))
+          ((Δ.beq' (discrIntK a₂ a₄ a₆)).and'
+            ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
+              (allList (fun l ↦ checkLabel a₂r a₄r a₆r Δ l.1 l.2) labels))))))
 
 /-! ## Descent character -/
 
