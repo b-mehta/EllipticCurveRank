@@ -75,11 +75,16 @@ theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
 theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p) = 0) := by
   rw [ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero, Nat.mod_eq_of_lt hn]
 
-/-- A passing `Nat`-path `checkLabel` on residues pinned to `a₂, a₄, a₆` mod `P` (with `p ∣ P`,
-`P ≠ 0`, and `p` prime) gives `DescentHyp` for the label `(p, θ)`. -/
-theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r Δr : ℕ} (hP : P ≠ 0) (hpP : p ∣ P)
+/-- `m.emod p` vanishes iff `m` vanishes in `ZMod p`. -/
+theorem intEmod_eq_zero_iff {m : ℤ} : (m.emod p = 0) ↔ ((m : ZMod p) = 0) := by
+  rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
+  exact ⟨Int.dvd_of_emod_eq_zero, Int.emod_eq_zero_of_dvd⟩
+
+/-- A passing `checkLabel` (coefficient residues pinned mod `P`, `Δ` the discriminant) gives
+`DescentHyp` for the label `(p, θ)`. -/
+theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P ≠ 0) (hpP : p ∣ P)
     (h₂ : a₂r = (a₂ % P).toNat) (h₄ : a₄r = (a₄ % P).toNat) (h₆ : a₆r = (a₆ % P).toNat)
-    (hΔ : Δr = (discrInt a₂ a₄ a₆ % P).toNat) (h : checkLabel a₂r a₄r a₆r Δr p θ) (hp : p.Prime) :
+    (hΔ : Δ = discrInt a₂ a₄ a₆) (h : checkLabel a₂r a₄r a₆r Δ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
   have hp0 : 0 < p := hp.pos
   have hr₂ : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h₂
@@ -94,18 +99,19 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r Δr : ℕ} (hP : P ≠ 0) 
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
     grind [Nat.dvd_iff_mod_eq_zero]
-  · -- `p ∤ Δ`: the precomputed discriminant residue is nonzero mod `p`
-    rw [curveQ_Δ_num, Ne, ← resP_cast hP hpP hΔ, ← natCast_eq_zero_of_lt (Nat.mod_lt _ hp0)]
-    simpa using hΔ'
+  · -- `p ∤ Δ`: the discriminant is nonzero mod `p`
+    rw [curveQ_Δ_num, Ne, ← hΔ, ← intEmod_eq_zero_iff]
+    simpa [Int.beq'_eq] using hΔ'
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
     grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq]
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). -/
-public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r Δr : ℕ}
-    (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r Δr labels) {l : ℕ × ℤ} (hl : l ∈ labels)
+public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ} {Δ : ℤ}
+    (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r Δ labels) {l : ℕ × ℤ} (hl : l ∈ labels)
     (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) := by
   rw [checkLabels] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq] at h
+  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq,
+    Int.beq'_eq] at h
   obtain ⟨hP, h₂, h₄, h₆, hΔ, hdvd, hfold⟩ := h
   rw [discrIntK_eq] at hΔ
   have hpd : P % l.1 = 0 := by grind

@@ -177,7 +177,7 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
     - 27 * (b6 * b6) + 9 * b2 * b4 * b6
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr P, toExpr (residue sA2), toExpr (residue sA4),
-      toExpr (residue sA6), toExpr (residue discr), toExpr ρ, pointsE, toExpr ls.toList, toExpr B,
+      toExpr (residue sA6), toExpr discr, toExpr ρ, pointsE, toExpr ls.toList, toExpr B,
       toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
