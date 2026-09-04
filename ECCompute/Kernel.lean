@@ -66,19 +66,19 @@ noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
 
 /-! ## Descent label check
 
-Each label's check runs in `Nat` on the coefficient residues modulo the label-prime product `P`
-carried in the certificate (`a₂r, a₄r, a₆r`): it reduces them to the label prime and tests `p ∤ 6`,
-the discriminant, and the monic cubic there. `descentHyp_of_checkLabels` proves this gives the
-descent hypotheses. -/
+For each label `(p, θ)`, `checkLabel` tests `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, reading the
+coefficient residues `a₂r, a₄r, a₆r` (mod the label-prime product `P`) and the discriminant `Δ` from
+the certificate. `descentHyp_of_checkLabels` proves a passing check gives the descent hypotheses. -/
 
-/-- The discriminant of the integral model `curve a₂ a₄ a₆`, for the kernel. -/
+/-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆`; `discrIntK_eq` identifies it with
+`discrInt`. -/
 def discrIntK (a₂ a₄ a₆ : Int) : Int :=
-  let b2 := Int.mul 4 a₂
-  let b4 := Int.mul 2 a₄
-  let b6 := Int.mul 4 a₆
-  ((((b2.mul b2).mul (((Int.mul 4 a₂).mul a₆).sub (a₄.mul a₄))).neg.sub
-      (Int.mul 8 ((b4.mul b4).mul b4))).sub (Int.mul 27 (b6.mul b6))).add
-    (((Int.mul 9 b2).mul b4).mul b6)
+  let b2 := a₂.mul 4
+  let b4 := a₄.mul 2
+  let b6 := a₆.mul 4
+  ((((b2.mul b2).mul (((a₂.mul 4).mul a₆).sub (a₄.mul a₄))).neg.sub
+      (((b4.mul b4).mul b4).mul 8)).sub ((b6.mul b6).mul 27)).add
+    (((b2.mul 9).mul b4).mul b6)
 
 /-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided from
 the coefficient residues `a₂r, a₄r, a₆r` (reduced mod `P`) and the discriminant `Δ`, by reducing to
