@@ -21,7 +21,7 @@ of the descent lemma packaged as `ECCompute.DescentHyp`:
 * `f(θ) ≡ 0 (mod p)`.
 
 The kernel `Bool` checker `ECCompute.checkLabel` (defined in `ECCompute.Kernel`) decides all
-three in `Nat` on the coefficient residues carried in the certificate;
+three from the coefficient residues and the discriminant carried in the certificate;
 `descentHyp_of_checkLabel` turns a passing check (with a separately supplied primality proof)
 into a `DescentHyp`.
 
