@@ -90,9 +90,6 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
   have hr₂ : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h₂
   have hr₄ : ((a₄r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h₄
   have hr₆ : ((a₆r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h₆
-  have hr₂' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr₂
-  have hr₄' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr₄
-  have hr₆' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr₆
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
   obtain ⟨h6', hΔ', hf⟩ := h
@@ -103,7 +100,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
     rw [curveQ_Δ_num, Ne, ← hΔ, ← intEmod_eq_zero_iff]
     simpa [Int.beq'_eq] using hΔ'
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
-    grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq]
+    grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq, Int.cast_natCast]
 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). -/
 public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ} {Δ : ℤ}
