@@ -27,13 +27,10 @@ into a `DescentHyp`.
 
 ## Main declarations
 
-* `ECCompute.descentHyp_of_checkLabel`: a passing `checkLabel` gives `DescentHyp`.
 * `ECCompute.descentHyp_of_checkLabels`: a passing `checkLabels` gives `DescentHyp` for every label.
 -/
 
 namespace ECCompute
-
-open WeierstrassCurve
 
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
@@ -62,37 +59,27 @@ theorem polyModK_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
   | nil => rfl
   | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
 
-/-- A residue mod the label-prime product `P` reduces mod any divisor `p` of `P` to the coefficient
-itself in `ZMod p`. -/
+/-- A residue mod `P` reduces mod any divisor `p` of `P` to the coefficient itself in `ZMod p`. -/
 theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
-    (hr : r = (a % P).toNat) : (r % p : ZMod p) = (a : ZMod p) := by
+    (hr : r = (a % P).toNat) : (r % p : ZMod p) = a := by
   have hnn : 0 ≤ a % P := Int.emod_nonneg a (by exact mod_cast hP)
   rw [ZMod.natCast_mod, hr, ← Int.cast_natCast, Int.toNat_of_nonneg hnn,
     ZMod.intCast_eq_intCast_iff']
   exact Int.emod_emod_of_dvd a (by exact mod_cast hpP)
-
-/-- A `Nat` residue `n < p` vanishes iff it vanishes in `ZMod p`. -/
-theorem natCast_eq_zero_of_lt {n : ℕ} (hn : n < p) : (n = 0) ↔ ((n : ZMod p) = 0) := by
-  rw [ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero, Nat.mod_eq_of_lt hn]
-
-/-- `m.emod p` vanishes iff `m` vanishes in `ZMod p`. -/
-theorem intEmod_eq_zero_iff {m : ℤ} : (m.emod p = 0) ↔ ((m : ZMod p) = 0) := by
-  rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
-  exact ⟨Int.dvd_of_emod_eq_zero, Int.emod_eq_zero_of_dvd⟩
 
 /-- A passing `checkLabel` (coefficient residues pinned mod `P`, `Δ` the discriminant) gives
 `DescentHyp` for the label `(p, θ)`. -/
 theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P ≠ 0) (hpP : p ∣ P)
     (h₂ : a₂r = (a₂ % P).toNat) (h₄ : a₄r = (a₄ % P).toNat) (h₆ : a₆r = (a₆ % P).toNat)
     (hΔ : Δ = discrInt a₂ a₄ a₆) (h : checkLabel a₂r a₄r a₆r Δ p θ) (hp : p.Prime) :
-    DescentHyp a₂ a₄ a₆ p (θ : ZMod p) := by
+    DescentHyp a₂ a₄ a₆ p θ := by
   have hp0 : 0 < p := hp.pos
-  have hr₂ : ((a₂r % p : ℕ) : ZMod p) = a₂ := resP_cast hP hpP h₂
-  have hr₄ : ((a₄r % p : ℕ) : ZMod p) = a₄ := resP_cast hP hpP h₄
-  have hr₆ : ((a₆r % p : ℕ) : ZMod p) = a₆ := resP_cast hP hpP h₆
-  have hr₂' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by rw [Int.cast_natCast]; exact hr₂
-  have hr₄' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by rw [Int.cast_natCast]; exact hr₄
-  have hr₆' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by rw [Int.cast_natCast]; exact hr₆
+  have hr₂' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by
+    simpa only [Int.cast_natCast] using resP_cast hP hpP h₂
+  have hr₄' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by
+    simpa only [Int.cast_natCast] using resP_cast hP hpP h₄
+  have hr₆' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by
+    simpa only [Int.cast_natCast] using resP_cast hP hpP h₆
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
   obtain ⟨h6', hΔ', hf⟩ := h
@@ -100,7 +87,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
   · -- `p ∤ 6`
     grind [Nat.dvd_iff_mod_eq_zero]
   · -- `p ∤ Δ`: the discriminant is nonzero mod `p`
-    rw [curveQ_Δ_num, Ne, ← hΔ, ← intEmod_eq_zero_iff]
+    rw [curveQ_Δ_num, Ne, ← hΔ, ZMod.intCast_zmod_eq_zero_iff_dvd, Int.dvd_iff_emod_eq_zero]
     simpa [Int.beq'_eq] using hΔ'
   · -- `f(θ) ≡ 0 (mod p)`: the `Nat` cubic residue vanishes
     grind [fval_iff, fval, polyModK_eq_polyModL, polyModL_beq]
@@ -108,7 +95,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
 /-- If `checkLabels` passes, every label satisfies `DescentHyp` (given its prime is prime). -/
 public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a₄r a₆r : ℕ} {Δ : ℤ}
     (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r Δ labels) {l : ℕ × ℤ} (hl : l ∈ labels)
-    (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 (l.2 : ZMod l.1) := by
+    (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 l.2 := by
   rw [checkLabels] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq,
     Int.beq'_eq] at h
