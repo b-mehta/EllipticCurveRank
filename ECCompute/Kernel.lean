@@ -54,8 +54,8 @@ fold reaches it. -/
 noncomputable def polyModL (cs : List Int) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.emod ℓ).toNat.add (r.mul acc)).mod ℓ
 
-/-- `polyModL` on `Nat` coefficients, staying in `Nat` throughout: the Horner fold of the polynomial
-with coefficients `cs` (constant term first) evaluated at `r` and reduced mod `ℓ`. -/
+/-- The residue mod `ℓ` of the polynomial with coefficients `cs` (constant term first), evaluated at
+`r`. -/
 noncomputable def polyModK (cs : List Nat) (ℓ r : Nat) : Nat :=
   cs.rec 0 fun c _ acc ↦ ((c.mod ℓ).add (r.mul acc)).mod ℓ
 
@@ -67,8 +67,8 @@ noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
 /-! ## Descent label check
 
 For each label `(p, θ)`, `checkLabel` tests `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, reading the
-coefficient residues `a₂r, a₄r, a₆r` (mod the label-prime product `P`) and the discriminant `Δ` from
-the certificate. `descentHyp_of_checkLabels` proves a passing check gives the descent hypotheses. -/
+coefficient residues `a₂r, a₄r, a₆r` and the discriminant `Δ` from the certificate.
+`descentHyp_of_checkLabels` proves a passing check gives the descent hypotheses. -/
 
 /-- The integer discriminant of `y² = x³ + a₂x² + a₄x + a₆`; `discrIntK_eq` identifies it with
 `discrInt`. -/
@@ -80,9 +80,9 @@ def discrIntK (a₂ a₄ a₆ : Int) : Int :=
       (((b4.mul b4).mul b4).mul 8)).sub ((b6.mul b6).mul 27)).add
     (((b2.mul 9).mul b4).mul b6)
 
-/-- `true` iff the label `(p, θ)` satisfies `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, decided from
-the coefficient residues `a₂r, a₄r, a₆r` (reduced mod `P`) and the discriminant `Δ`, by reducing to
-`p`. Here `f(θ) = θ³ + a₂θ² + a₄θ + a₆`. -/
+/-- `true` iff `p ∤ 6`, `p ∤ Δ`, and `f(θ) ≡ 0 (mod p)`, computed from the coefficient residues
+`a₂r, a₄r, a₆r`, the discriminant `Δ`, and the root `θ`, reducing each mod `p`. Here
+`f(θ) = θ³ + a₂θ² + a₄θ + a₆`. The residues' agreement with the curve mod `p` is `checkLabels`. -/
 noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (Δ : Int) (p : Nat) (θ : Int) : Bool :=
   let r₂ := a₂r.mod p
   let r₄ := a₄r.mod p
