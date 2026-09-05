@@ -24,9 +24,9 @@ general integral model.
 
 ## Implementation notes
 
-The four lists `points`, `labels`, `B`, and `M` all have length `ρ`; the `Certificate.Valid`
-checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
-by rows, `M` by columns), so `F2Invert.checkInv ρ B M` applies verbatim.
+The five lists `points`, `labels`, `B`, `M`, and `qrMasks` all have length `ρ`; the
+`Certificate.Valid` checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of
+`ECCompute.F2Invert` (`B` by rows, `M` by columns), so `F2Invert.checkInv ρ B M` applies verbatim.
 -/
 
 namespace ECCompute
@@ -40,6 +40,16 @@ public structure Certificate where
   a₄ : ℤ
   /-- The constant coefficient of the short model. -/
   a₆ : ℤ
+  /-- A positive common multiple of the label primes; each divides it (checked in `checkLabels`). -/
+  P : ℕ
+  /-- The residue `(a₂ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a₂r : ℕ
+  /-- The residue `(a₄ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a₄r : ℕ
+  /-- The residue `(a₆ mod P)`, as a `Nat` literal; verified in `checkLabels`. -/
+  a₆r : ℕ
+  /-- The discriminant `discrInt a₂ a₄ a₆`, as an `Int` literal; verified in `checkLabels`. -/
+  Δ : ℤ
   /-- The claimed number of independent points, `ρ`; the target bound is `rank ≥ ρ - t`. -/
   ρ : ℕ
   /-- The `ρ` rational points, as affine coordinates `(x, y)`. -/
@@ -80,8 +90,9 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   pts : checkPoints c.a₂ c.a₄ c.a₆ c.points
   /-- Each label carries a prime. -/
   primes : checkPrimes c.labels
-  /-- Each label's `θ` is a root of the `2`-division cubic mod its prime. -/
-  labels : checkLabels c.a₂ c.a₄ c.a₆ c.labels
+  /-- `P`, the coefficient residues, and the discriminant match the curve, every label prime divides
+  `P`, and each label's `θ` is a root of the `2`-division cubic mod its prime. -/
+  labels : checkLabels c.a₂ c.a₄ c.a₆ c.P c.a₂r c.a₄r c.a₆r c.Δ c.labels
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
