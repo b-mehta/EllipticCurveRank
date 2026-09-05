@@ -117,38 +117,28 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bo
 
 namespace F2Invert
 
-/-- XOR of the low 32 bits of `v`, folded into bit 0 by five shift-xor stages (16, 8, 4, 2, 1).
-For input `v < 2 ^ n` this equals the spec `popParity n v` (`popParityK_eq`), the range `checkInv`
-enforces through `maskBelow`. -/
-noncomputable def popParityK (v : Nat) : Bool :=
-  let v := v.xor (v.shiftRight 16); let v := v.xor (v.shiftRight 8)
-  let v := v.xor (v.shiftRight 4); let v := v.xor (v.shiftRight 2)
-  let v := v.xor (v.shiftRight 1)
-  (v.land 1).beq 1
+/-- `true` iff row `i` of `B * M` over `𝔽₂` is the unit vector `1 <<< i`: the XOR of the rows of
+`M` (row-major, `Mr`) selected by the set bits of row `bi` of `B` equals `1 <<< i`. -/
+noncomputable def invRowK (i bi : Nat) (Mr : List Nat) : Bool :=
+  (Mr.rec (motive := fun _ ↦ Nat → Nat) (fun _ ↦ 0)
+    (fun m _ ih b ↦ (m.mul (b.land 1)).xor (ih (b.shiftRight 1))) bi).beq
+    (Nat.shiftLeft 1 i)
 
-/-- One row's contribution to the inverse check: for the row bitmask `bi` at row index `i`, fold
-over the columns of `M`, comparing the parity of `bi &&& mₖ` (via `popParityK`) against the diagonal
-indicator `i == k`. Soundness of the fold requires `bi, mₖ < 2 ^ n` with `n ≤ 32`, which `checkInv`
-verifies separately. -/
-noncomputable def checkInvRow (bi i k : Nat) (M : List Nat) : Bool :=
-  M.rec (fun _ ↦ true)
-    (fun m _ ih k ↦ ((popParityK (bi.land m)).rec (motive := fun _ ↦ Bool)
-      (i.beq k).not' (i.beq k)).and' (ih k.succ)) k
-
-/-- Fold over the rows of `B`, checking each against the columns of `M` with `checkInvRow`. -/
-noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
+/-- Fold over the rows of `B`, checking each row `b` at index `i` against the rows of `M` (`Mr`)
+with `invRowK`. -/
+noncomputable def checkInvGo (Mr : List Nat) (i : Nat) (B : List Nat) : Bool :=
   B.rec (fun _ ↦ true)
-    (fun b _ ih i ↦ (checkInvRow b i 0 M).and' (ih i.succ)) i
+    (fun b _ ih i ↦ (invRowK i b Mr).and' (ih i.succ)) i
 
 /-- Every mask in `M` fits in `n` bits (`< 2 ^ n`). -/
 noncomputable def maskBelow (n : Nat) (M : List Nat) : Bool :=
   allList (fun x ↦ x.blt (Nat.shiftLeft 1 n)) M
 
-/-- `true` iff `B * M = I` over `𝔽₂`, where `B` is given by
-rows and `M` by columns (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all
-masks fit in `n ≤ 32` bits, which `popParityK` relies on for soundness. -/
-noncomputable def checkInv (n : Nat) (B M : List Nat) : Bool :=
-  (maskBelow n B).and' ((maskBelow n M).and' ((n.ble 32).and' (checkInvGo M 0 B)))
+/-- `true` iff `B * M = I` over `𝔽₂`, where both `B` and `M` are given by
+rows (each a `Nat` bitmask), and `n` is the dimension. Also verifies that all masks fit in `n`
+bits. -/
+noncomputable def checkInv (n : Nat) (B Mr : List Nat) : Bool :=
+  (maskBelow n B).and' ((maskBelow n Mr).and' (checkInvGo Mr 0 B))
 
 end F2Invert
 
