@@ -101,8 +101,8 @@ noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat)
       ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and'
         ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and'
           ((Δ.beq' (discrIntK a₂ a₄ a₆)).and'
-            ((allList (fun l ↦ (P.mod l.1).beq 0) labels).and'
-              (allList (fun l ↦ checkLabel a₂r a₄r a₆r Δ l.1 l.2) labels))))))
+            (allList (fun l ↦ ((P.mod l.1).beq 0).and' (checkLabel a₂r a₄r a₆r Δ l.1 l.2))
+              labels)))))
 
 /-! ## Descent character -/
 

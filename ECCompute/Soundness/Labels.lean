@@ -99,9 +99,9 @@ public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a
   rw [checkLabels] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq,
     Int.beq'_eq] at h
-  obtain ⟨hP, h₂, h₄, h₆, hΔ, hdvd, hfold⟩ := h
+  obtain ⟨hP, h₂, h₄, h₆, hΔ, hfold⟩ := h
   rw [discrIntK_eq] at hΔ
-  have hpd : P % l.1 = 0 := by grind
-  exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero hpd) h₂ h₄ h₆ hΔ (hfold l hl) hp
+  obtain ⟨hpd, hchk⟩ := hfold l hl
+  exact descentHyp_of_checkLabel (by lia) (Nat.dvd_of_mod_eq_zero (by grind)) h₂ h₄ h₆ hΔ hchk hp
 
 end ECCompute
