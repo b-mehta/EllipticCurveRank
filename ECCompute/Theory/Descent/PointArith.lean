@@ -56,10 +56,6 @@ public noncomputable def xbar (p : ℕ) [Fact p.Prime] (x : ℚ) : ZMod p := (x 
 
 variable {p : ℕ}
 
-/-- Cast identity: `(x.num : ZMod p) = xbar · (x.den : ZMod p)` when `p ∤ x.den`. -/
-public theorem num_eq_xbar_mul_den [Fact p.Prime] {x : ℚ} (hd : (x.den : ZMod p) ≠ 0) :
-    x.num = xbar p x * x.den := by rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
-
 /-- The `y`-denominator vanishes mod `p` iff the `x`-denominator does (since
 `x.den = w²`, `y.den = w³`). -/
 public theorem ydenom_eq_zero_iff (hp : p.Prime) {x y : ℚ}
