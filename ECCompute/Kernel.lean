@@ -93,9 +93,9 @@ noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
 /-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
-/-- `true` iff bit `a` of the quadratic-residue mask `qmask` is
-set, i.e. (for `qmask = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrLookupBool (qmask a : Nat) : Bool := ((qmask.shiftRight a).land 1).beq 1
+/-- `true` iff bit `a` of the quadratic-residue mask `qm` is
+set, i.e. (for `qm = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
+noncomputable def qrLookupBool (qm a : Nat) : Bool := ((qm.shiftRight a).land 1).beq 1
 
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
 noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
@@ -106,12 +106,20 @@ noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
 /-- The value of the descent character `λ_{p,θ}` at a point. -/
-noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bool :=
+noncomputable def lambdaK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Bool :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qmask (alphaResK p tval xp xm xden)).not')
-      ((qrLookupBool qmask (fderivResK a₂ a₄ p tval)).not'))
+      ((qrLookupBool qm (alphaResK p tval xp xm xden)).not')
+      ((qrLookupBool qm (fderivResK a₂ a₄ p tval)).not'))
     false
+
+/-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. -/
+noncomputable def lambdaBitK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Nat :=
+  ((xden.mod p).beq 0).rec
+    (((alphaResK p tval xp xm xden).beq 0).rec
+      (((qm.shiftRight (alphaResK p tval xp xm xden)).land 1).xor 1)
+      (((qm.shiftRight (fderivResK a₂ a₄ p tval)).land 1).xor 1))
+    0
 
 /-! ## 𝔽₂ matrix inverse -/
 
@@ -159,16 +167,18 @@ with its quadratic-residue mask `m` in `q`. -/
 noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Nat × Nat) :=
   List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
 
+/-- The expected row word: bit `j` is label `ls[j]`'s descent character at point
+`(xnp - xnm) / xden`, LSB-first (head label at bit `0`). -/
+noncomputable def checkBRowWord (a₂ a₄ : Int) (xnp xnm xden : Nat)
+    (ls : List (Nat × Nat × Nat)) : Nat :=
+  ls.rec 0
+    (fun l _ ih ↦ (lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).lor (ih.shiftLeft 1))
+
 /-- `true` iff bit `j` of `b` matches label `ls[j]`'s descent character at point
 `(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/
 noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List (Nat × Nat × Nat)) :
     Bool :=
-  ls.rec (fun _ ↦ true)
-    (fun l _ ih b ↦
-      (((b.mod 2).beq 1).rec (motive := fun _ ↦ Bool)
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).not'
-        (lambdaK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden)).and'
-        (ih (b.div 2))) b
+  (checkBRowWord a₂ a₄ xnp xnm xden ls).beq b
 
 /-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
 noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
