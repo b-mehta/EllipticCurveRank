@@ -20,6 +20,4 @@ name = "ECCompute"
 
 [[lean_lib]]
 name = "Curves"
-# The curve defs and j-invariants carry very long integer literals; the long-line
-# linter is pure noise on this library, so disable it here rather than per file.
 leanOptions = { weak.linter.style.longLine = false }
