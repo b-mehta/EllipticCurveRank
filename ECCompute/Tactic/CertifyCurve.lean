@@ -169,9 +169,12 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
   -- the three residues as flat `Nat` literals the per-label kernel loop reads (`checkLabels`).
   let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
   let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
-  -- The discriminant `Δ` as an `Int` literal, from the compiled `discrInt` (checked against
-  -- its kernel twin `discrIntK` in `checkLabels`).
-  let discr : Int := discrInt sA2 sA4 sA6
+  -- The discriminant `Δ = discrInt a₂ a₄ a₆` as an `Int` literal (checked against `discrIntK`).
+  let b2 := 4 * sA2
+  let b4 := 2 * sA4
+  let b6 := 4 * sA6
+  let discr : Int := -(b2 * b2 * (4 * sA2 * sA6 - sA4 * sA4)) - 8 * (b4 * b4 * b4)
+    - 27 * (b6 * b6) + 9 * b2 * b4 * b6
   return mkAppN (mkConst ``Certificate.mk)
     #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr P, toExpr (residue sA2), toExpr (residue sA4),
       toExpr (residue sA6), toExpr discr, toExpr ρ, pointsE, toExpr ls.toList, toExpr B,
