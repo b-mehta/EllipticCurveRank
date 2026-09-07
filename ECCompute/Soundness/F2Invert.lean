@@ -55,8 +55,8 @@ noncomputable def goRows (ms : List ℕ) (b : ℕ) : ℕ :=
     goRows (m :: ms) b = m * (b &&& 1) ^^^ goRows ms (b >>> 1) := rfl
 
 /-- `invRowK` unfolds to the `beq` of the `goRows` fold against the unit vector `1 <<< i`. -/
-theorem invRowK_eq {i bi : ℕ} {Mr : List ℕ} :
-    invRowK i bi Mr = (goRows Mr bi).beq (1 <<< i) := rfl
+theorem invRowK_eq {i bi : ℕ} {M : List ℕ} :
+    invRowK i bi M = (goRows M bi).beq (1 <<< i) := rfl
 
 /-- Bit `j` of one selected term `m * (b &&& 1)`, as a `ZMod 2` product: the low bit of `b` times
 bit `j` of `m`. -/
