@@ -38,7 +38,6 @@ public theorem curve421_hasRankGE_20 : HasRankGE curve421 20 := by
 /-- Curve 421 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve421.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 421. -/
 public theorem curve421_j : curve421.j = -138946213617053377829338182089916505498172730542175716646113249857591609931200854512800570576 / 1061827858705220506007842685101938445261211871778999746452629148646075956317806286921875 :=
   j_eq_iff.mpr (by decide +kernel)

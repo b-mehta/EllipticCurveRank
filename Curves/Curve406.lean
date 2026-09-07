@@ -38,7 +38,6 @@ public theorem curve406_hasRankGE_18 : HasRankGE curve406 18 := by
 /-- Curve 406 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve406.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 406. -/
 public theorem curve406_j : curve406.j = 1424537211143632906429068508511158109875595217523000559559570235044292388431129 / 12303449509474462298669957222976879904473937131578840667199591419187200000 :=
   j_eq_iff.mpr (by decide +kernel)
