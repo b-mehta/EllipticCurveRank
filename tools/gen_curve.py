@@ -281,25 +281,15 @@ def j_lit(j):
     return str(j.numerator) if j.denominator == 1 else f"{j.numerator} / {j.denominator}"
 
 
-def gate(decl):
-    """A declaration (its docstring and body), prefixed with `set_option linter.style.longLine
-    false in` when any line exceeds 100 columns — an unbreakable numeral in a def, a tactic line,
-    or a theorem statement."""
-    if any(len(line) > 100 for line in decl.splitlines()):
-        return f"set_option linter.style.longLine false in\n{decl}"
-    return decl
-
-
 def j_theorem(cid, pid, jinv):
     """The `j`-invariant theorem. Short statements stay on one line; longer ones move the
-    proof to its own line, and only a statement whose numeral overflows keeps the longLine
-    suppression."""
+    proof to its own line."""
     doc = f"/-- The `j`-invariant of curve {cid}. -/\n"
     head = f"public theorem curve{pid}_j : curve{pid}.j = {jinv} :="
     proof = "j_eq_iff.mpr (by decide +kernel)"
     if len(f"{head} {proof}") <= 100:
         return doc + f"{head} {proof}"
-    return gate(doc + f"{head}\n  {proof}")
+    return doc + f"{head}\n  {proof}"
 
 
 def summary_paragraph(rank, submitter):
@@ -466,12 +456,12 @@ def main():
         for (p, th) in sorted(labels):
             fh.write(f"{p} {th}\n")
     jinv = j_lit(j_invariant(*ainvs))
-    defblock = gate(f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(pid, ainvs)}")
-    rankblock = gate(
+    defblock = f"/-- ICARM leaderboard curve {cid} over `ℚ`. -/\n{def_block(pid, ainvs)}"
+    rankblock = (
         f"/-- ICARM leaderboard curve {cid} has Mordell-Weil rank at least `{rank_goal}`. -/\n"
         f"public theorem curve{pid}_hasRankGE_{rank_goal} : HasRankGE curve{pid} {rank_goal} := by\n"
         f"  unfold curve{pid}\n  {tactic}")
-    ellblock = gate(
+    ellblock = (
         f"/-- Curve {cid} is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/\n"
         f"public instance : curve{pid}.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)")
     jblock = j_theorem(cid, pid, jinv)
