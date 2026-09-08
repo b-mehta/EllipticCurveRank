@@ -21,8 +21,9 @@ required checks into a `Certificate.Valid`, and applies `hasRankGE_of_certificat
 Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
 of the 2-division cubic mod `p`. A relative file path is resolved against the directory of the
-file invoking the tactic, then each enclosing directory in turn, so the same invocation works
-wherever the package is checked out (in particular, as a dependency of another project).
+file invoking the tactic, then each enclosing directory up to the surrounding package root, so
+the same invocation works wherever the package is checked out (in particular, as a dependency of
+another project).
 
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
@@ -122,9 +123,13 @@ meta def readGoal (goal : MVarId) :
   return (ρ, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
+/-- Whether `dir` is a Lean package root: it contains a lakefile or a `lean-toolchain` file. -/
+meta def isPackageRoot (dir : System.FilePath) : IO Bool := do
+  (["lakefile.toml", "lakefile.lean", "lean-toolchain"].anyM fun f ↦ (dir / f).pathExists)
+
 /-- Resolve a relative data-file `path` against the directory of the file invoking the tactic,
-then each enclosing directory in turn, returning the first candidate that exists. An absolute
-path is returned as given. -/
+then each enclosing directory up to the surrounding package root, returning the first candidate
+that exists. An absolute path is returned as given. -/
 meta def resolveDataPath (path : String) : MetaM System.FilePath := do
   let p := System.FilePath.mk path
   if p.isAbsolute then return p
@@ -135,10 +140,10 @@ meta def resolveDataPath (path : String) : MetaM System.FilePath := do
     | some d =>
       let cand := d / p
       if ← cand.pathExists then return cand
-      dir? := d.parent
+      dir? := if ← isPackageRoot d then none else d.parent
     | none => break
   throwError "certify_curve: data file '{path}' not found in {src.parent.getD "."} or any \
-    enclosing directory"
+    enclosing directory of its package"
 
 /-- Read the data file at `path` (located by `resolveDataPath`), drop blank lines, and parse each
 remaining line with `parse`. `what` names the line kind in the error message. -/
