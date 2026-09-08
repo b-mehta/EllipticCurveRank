@@ -38,7 +38,6 @@ public theorem curve450_hasRankGE_20 : HasRankGE curve450 20 := by
 /-- Curve 450 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve450.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 450. -/
 public theorem curve450_j : curve450.j = 5138352345589965811190825911046902041694918952638694917623773701342255932668964451501560090511825 / 1631023508137834318478546180465511805422333259202002327206952103580097231698773755476507230208 :=
   j_eq_iff.mpr (by decide +kernel)

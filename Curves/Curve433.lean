@@ -38,7 +38,6 @@ public theorem curve433_hasRankGE_21 : HasRankGE curve433 21 := by
 /-- Curve 433 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve433.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 433. -/
 public theorem curve433_j : curve433.j = -628059706092055781149359452524263294174623521263957709900692353639620581147824075685720620427984 / 26983724778405469128465707819683263945687858399066963338314215617488279740646457280771093647 :=
   j_eq_iff.mpr (by decide +kernel)

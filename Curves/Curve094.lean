@@ -38,7 +38,6 @@ public theorem curve094_hasRankGE_18 : HasRankGE curve094 18 := by
 /-- Curve 94 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve094.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 94. -/
 public theorem curve094_j : curve094.j = 16234149627581448753576568183446697100352967616369047022072123486430843964358043838175597281 / 30329481606266546964270732939527654191747398716945306980836010472365688288267827200000 :=
   j_eq_iff.mpr (by decide +kernel)

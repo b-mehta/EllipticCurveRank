@@ -39,7 +39,6 @@ public theorem curve432_hasRankGE_21 : HasRankGE curve432 21 := by
 /-- Curve 432 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve432.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 432. -/
 public theorem curve432_j : curve432.j = -268620657473875726978320671213702439536744449659313009129105012494574846190695792806843968667121175353634764801 / 2239196697651177772152759233975931016330047275115124817633287595245219412904559503368757740795534131200000 :=
   j_eq_iff.mpr (by decide +kernel)

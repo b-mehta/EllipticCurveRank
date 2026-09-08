@@ -32,7 +32,6 @@ open WeierstrassCurve
   ⟨1, -1, 1, -244537673336319601463803487168961769270757573821859853707,
     961710182053183034546222979258806817743270682028964434238957830989898438151121499931⟩
 
-set_option linter.style.longLine false in
 /-- ICARM leaderboard curve 40 has Mordell-Weil rank at least `20`. -/
 public theorem curve040_hasRankGE_20 : HasRankGE curve040 20 := by
   unfold curve040
@@ -41,7 +40,6 @@ public theorem curve040_hasRankGE_20 : HasRankGE curve040 20 := by
 /-- Curve 40 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve040.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 40. -/
 public theorem curve040_j : curve040.j = 986778376604714863187144673896668670633954068195910022898650009220478313927479626858189803118039781407817008771460743086812969840527237498224909421694448555984698699 / 327253952526479892358729374121654267775601616913273008692153366081310871797514250636466316047452603065873426523620705118520045561454150918662272037751521218240000 :=
   j_eq_iff.mpr (by decide +kernel)

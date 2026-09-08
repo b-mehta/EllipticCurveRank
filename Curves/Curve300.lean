@@ -37,7 +37,6 @@ public theorem curve300_hasRankGE_9 : HasRankGE curve300 9 := by
 /-- Curve 300 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve300.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 300. -/
 public theorem curve300_j : curve300.j = 18474780236578927166503532079361 / 389183972361856823597248512 :=
   j_eq_iff.mpr (by decide +kernel)
