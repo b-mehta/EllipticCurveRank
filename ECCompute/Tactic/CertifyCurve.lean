@@ -20,7 +20,9 @@ required checks into a `Certificate.Valid`, and applies `hasRankGE_of_certificat
 
 Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
-of the 2-division cubic mod `p`.
+of the 2-division cubic mod `p`. A relative file path is resolved against the directory of the
+file invoking the tactic, then each enclosing directory in turn, so the same invocation works
+wherever the package is checked out (in particular, as a dependency of another project).
 
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
@@ -120,11 +122,29 @@ meta def readGoal (goal : MVarId) :
   return (ρ, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
-/-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
-line kind in the error message. -/
+/-- Resolve a relative data-file `path` against the directory of the file invoking the tactic,
+then each enclosing directory in turn, returning the first candidate that exists. An absolute
+path is returned as given. -/
+meta def resolveDataPath (path : String) : MetaM System.FilePath := do
+  let p := System.FilePath.mk path
+  if p.isAbsolute then return p
+  let src ← IO.FS.realPath (← getFileName)
+  let mut dir? := src.parent
+  repeat
+    match dir? with
+    | some d =>
+      let cand := d / p
+      if ← cand.pathExists then return cand
+      dir? := d.parent
+    | none => break
+  throwError "certify_curve: data file '{path}' not found in {src.parent.getD "."} or any \
+    enclosing directory"
+
+/-- Read the data file at `path` (located by `resolveDataPath`), drop blank lines, and parse each
+remaining line with `parse`. `what` names the line kind in the error message. -/
 meta def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
     MetaM (Array α) := do
-  ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l ↦ do
+  ((← IO.FS.readFile (← resolveDataPath path)).splitOn "\n").toArray.filterMapM fun l ↦ do
     if (strTrim l).isEmpty then return none
     match parse l with
     | some a => return some a
