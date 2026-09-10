@@ -20,9 +20,9 @@ import ECCompute.ForLean
 
 Correctness proofs for the `Bool` checker `ECCompute.F2Invert.checkInv` (defined in
 `ECCompute.Kernel`): supplying a claimed inverse `M` (by rows) and checking `B * M = I` certifies
-that the square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible. The row check
-`invRowK i B[i] M` computes row `i` of `B * M` as the XOR of the rows of `M` selected by the set
-bits of `B[i]`, and compares it to the unit vector `1 <<< i`.
+that the square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible. `invRowK B[i] M`
+computes row `i` of `B * M` as the XOR of the rows of `M` selected by the set bits of `B[i]`, and
+`checkInvGo` compares each to the unit vector `1 <<< i`.
 
 ## Main results
 
@@ -54,9 +54,8 @@ noncomputable def goRows (ms : List ℕ) (b : ℕ) : ℕ :=
 @[simp] theorem goRows_cons {m b : ℕ} {ms : List ℕ} :
     goRows (m :: ms) b = m * (b &&& 1) ^^^ goRows ms (b >>> 1) := rfl
 
-/-- `invRowK` unfolds to the `beq` of the `goRows` fold against the unit vector `1 <<< i`. -/
-theorem invRowK_eq {i bi : ℕ} {M : List ℕ} :
-    invRowK i bi M = (goRows M bi).beq (1 <<< i) := rfl
+/-- `invRowK` is the `goRows` fold over the selected rows of `M`. -/
+theorem invRowK_eq {bi : ℕ} {M : List ℕ} : invRowK bi M = goRows M bi := rfl
 
 /-- Bit `j` of one selected term `m * (b &&& 1)`, as a `ZMod 2` product: the low bit of `b` times
 bit `j` of `m`. -/
@@ -85,7 +84,7 @@ theorem bId_goRows_testBit {ms : List ℕ} {b j : ℕ} :
 variable {n i i' : ℕ} {B M : List ℕ}
 
 @[simp, grind =] theorem checkInvGo_cons {b : ℕ} {bs : List ℕ} :
-    checkInvGo M i (b :: bs) = (invRowK i b M).and' (checkInvGo M i.succ bs) := rfl
+    checkInvGo M i (b :: bs) = ((invRowK b M).beq (1 <<< i)).and' (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
@@ -100,24 +99,24 @@ public theorem toMat_apply {B : List ℕ} {n : ℕ} {i j : Fin n} (h : i.val < B
 theorem toMat_eq_bId {B : List ℕ} {n : ℕ} {i j : Fin n} :
     toMat B n i j = bId ((B.getD i 0).testBit j) := rfl
 
-/-- From a passing `checkInvGo` (started at row index `i`) the row check `invRowK` holds for every
-row of `B`, at the shifted index `i + i'`. -/
+/-- From a passing `checkInvGo` (started at row index `i`), the row `invRowK B[i'] M` equals the
+unit vector `1 <<< (i + i')` for every row of `B`. -/
 theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
-    invRowK (i + i') B[i'] M := by
+    invRowK B[i'] M = 1 <<< (i + i') := by
   induction B generalizing i i' with
   | nil => simp at hi'
   | cons b bs ih =>
     rw [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
     cases i' with
-    | zero => simpa using hc.1
+    | zero => simpa using Nat.eq_of_beq_eq_true hc.1
     | succ i'' =>
       have hidx : i + (i'' + 1) = i.succ + i'' := by omega
       rw [hidx, List.getElem_cons_succ]
       exact ih hc.2 (by simpa using hi')
 
-/-- If the aggregate check `checkInv n B M` passes, the row check `invRowK i B[i] M` holds for every
-row `i` of `B`. -/
-theorem invRowK_true (hi : i < B.length) (h : checkInv n B M) : invRowK i B[i] M := by
+/-- If the aggregate check `checkInv n B M` passes, row `invRowK B[i] M` equals the unit vector
+`1 <<< i` for every row `i` of `B`. -/
+theorem invRowK_true (hi : i < B.length) (h : checkInv n B M) : invRowK B[i] M = 1 <<< i := by
   have hgo : checkInvGo M 0 B := by grind [checkInv]
   simpa using checkInvGo_true hgo hi
 
@@ -128,8 +127,8 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
   have key : toMat B n * toMat M n = 1 := by
     ext i k
     have hi : i.val < B.length := by rw [hBlen]; exact i.2
-    have hrow : goRows M B[i.val] = 1 <<< i.val :=
-      Nat.eq_of_beq_eq_true (by rw [← invRowK_eq]; exact invRowK_true hi h)
+    have hrow : goRows M B[i.val] = 1 <<< i.val := by
+      rw [← invRowK_eq]; exact invRowK_true hi h
     have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (j := k)
     rw [hMlen] at hg
     rw [Matrix.mul_apply, Matrix.one_apply]

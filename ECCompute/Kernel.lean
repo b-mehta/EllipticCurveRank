@@ -117,18 +117,17 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bo
 
 namespace F2Invert
 
-/-- `true` iff row `i` of `B * M` over `𝔽₂` is the unit vector `1 <<< i`: the XOR of the rows of
-`M` (row-major) selected by the set bits of row `bi` of `B` equals `1 <<< i`. -/
-noncomputable def invRowK (i bi : Nat) (M : List Nat) : Bool :=
-  (M.rec (motive := fun _ ↦ Nat → Nat) (fun _ ↦ 0)
-    (fun m _ ih b ↦ (m.mul (b.land 1)).xor (ih (b.shiftRight 1))) bi).beq
-    (Nat.shiftLeft 1 i)
+/-- Row `bi · M` over `𝔽₂` as a `Nat` bitmask: the XOR of the rows of `M` (row-major) selected by
+the set bits of `bi`. -/
+noncomputable def invRowK (bi : Nat) (M : List Nat) : Nat :=
+  M.rec (motive := fun _ ↦ Nat → Nat) (fun _ ↦ 0)
+    (fun m _ ih b ↦ (m.mul (b.land 1)).xor (ih (b.shiftRight 1))) bi
 
-/-- Fold over the rows of `B`, checking each row `b` at index `i` against the rows of `M`
-with `invRowK`. -/
+/-- Fold over the rows of `B`, checking each row `b` at index `i` computes through `invRowK` to the
+unit vector `1 <<< i`. -/
 noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
   B.rec (fun _ ↦ true)
-    (fun b _ ih i ↦ (invRowK i b M).and' (ih i.succ)) i
+    (fun b _ ih i ↦ ((invRowK b M).beq (Nat.shiftLeft 1 i)).and' (ih i.succ)) i
 
 /-- Every mask in `M` fits in `n` bits (`< 2 ^ n`). -/
 noncomputable def maskBelow (n : Nat) (M : List Nat) : Bool :=
