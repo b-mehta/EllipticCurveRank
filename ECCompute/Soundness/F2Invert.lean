@@ -18,15 +18,13 @@ import ECCompute.ForLean
 /-!
 # Soundness of the kernel-reducible 𝔽₂ matrix invertibility certificate
 
-Correctness proofs for the `Bool` checker `ECCompute.F2Invert.checkInv` (defined in
-`ECCompute.Kernel`): supplying a claimed inverse `M` (by rows) and checking `B * M = I` certifies
-that the square matrix over `𝔽₂ = ZMod 2` interpreted from `B` is invertible. `invRowK B[i] M`
-computes row `i` of `B * M` as the XOR of the rows of `M` selected by the set bits of `B[i]`, and
-`checkInvGo` compares each to the unit vector `1 <<< i`.
+Correctness of the `Bool` checker `ECCompute.F2Invert.checkInv` (defined in `ECCompute.Kernel`):
+a passing `checkInv B M`, with a claimed inverse `M` by rows, certifies that the square matrix over
+`𝔽₂ = ZMod 2` interpreted from the rows of `B` is invertible.
 
 ## Main results
 
-* `checkInv_isUnit` : `checkInv n B M → IsUnit (toMat B n)`, the invertibility certificate.
+* `checkInv_isUnit` : `checkInv B M → IsUnit (toMat B n)`, the invertibility certificate.
 -/
 
 namespace ECCompute.F2Invert
@@ -43,42 +41,29 @@ def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
-/-- The `Nat → Nat` fold inside `invRowK`: consuming `ms` one row at a time, XOR row `m` (when the
-low bit of the running `b` is set) into the fold of the remaining rows over `b >>> 1`. -/
-noncomputable def goRows (ms : List ℕ) (b : ℕ) : ℕ :=
-  ms.rec (motive := fun _ ↦ ℕ → ℕ) (fun _ ↦ 0)
-    (fun m _ ih b ↦ m * (b &&& 1) ^^^ ih (b >>> 1)) b
+@[simp, grind =] theorem invRowK_nil {b : ℕ} : invRowK b [] = 0 := rfl
 
-@[simp] theorem goRows_nil {b : ℕ} : goRows [] b = 0 := rfl
-
-@[simp] theorem goRows_cons {m b : ℕ} {ms : List ℕ} :
-    goRows (m :: ms) b = m * (b &&& 1) ^^^ goRows ms (b >>> 1) := rfl
-
-/-- `invRowK` is the `goRows` fold over the selected rows of `M`. -/
-theorem invRowK_eq {bi : ℕ} {M : List ℕ} : invRowK bi M = goRows M bi := rfl
+@[simp, grind =] theorem invRowK_cons {b m : ℕ} {ms : List ℕ} :
+    invRowK b (m :: ms) = m * (b &&& 1) ^^^ invRowK (b >>> 1) ms := rfl
 
 /-- Bit `j` of one selected term `m * (b &&& 1)`, as a `ZMod 2` product: the low bit of `b` times
 bit `j` of `m`. -/
-private theorem bId_testBit_select {m b j : ℕ} :
+theorem bId_testBit_select {m b j : ℕ} :
     bId ((m * (b &&& 1)).testBit j) = bId (b.testBit 0) * bId (m.testBit j) := by
   rcases Nat.mod_two_eq_zero_or_one b with h | h <;>
     simp [Nat.and_one_is_mod, Nat.testBit_zero, h, bId]
 
-/-- Bit `j` of the `goRows` fold, over `𝔽₂`: over each row `k`, the selector bit `b.testBit k` times
+/-- Bit `j` of `invRowK`, over `𝔽₂`: over each row `k`, the selector bit `b.testBit k` times
 bit `j` of row `k`. -/
-theorem bId_goRows_testBit {ms : List ℕ} {b j : ℕ} :
-    bId ((goRows ms b).testBit j)
+theorem bId_invRowK_testBit {ms : List ℕ} {b j : ℕ} :
+    bId ((invRowK b ms).testBit j)
       = ∑ k ∈ range ms.length, bId (b.testBit k) * bId ((ms.getD k 0).testBit j) := by
   induction ms generalizing b with
   | nil => simp
   | cons m ms ih =>
-    have hsum : (∑ k ∈ range ms.length, bId ((b >>> 1).testBit k) * bId ((ms.getD k 0).testBit j))
-        = ∑ k ∈ range ms.length,
-            bId (b.testBit (k + 1)) * bId (((m :: ms).getD (k + 1) 0).testBit j) :=
-      Finset.sum_congr rfl fun k _ ↦ by
-        rw [Nat.testBit_shiftRight, Nat.add_comm 1 k, List.getD_cons_succ]
-    rw [goRows_cons, Nat.testBit_xor, bId_xor, ih, hsum, bId_testBit_select, List.length_cons,
-      sum_range_succ', List.getD_cons_zero]
+    simp only [invRowK_cons, Nat.testBit_xor, bId_xor, ih, bId_testBit_select, List.length_cons,
+      sum_range_succ', List.getD_cons_zero, List.getD_cons_succ, Nat.testBit_shiftRight,
+      Nat.add_comm 1]
     abel
 
 variable {n i i' : ℕ} {B M : List ℕ}
@@ -105,31 +90,23 @@ theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
     invRowK B[i'] M = 1 <<< (i + i') := by
   induction B generalizing i i' with
   | nil => simp at hi'
-  | cons b bs ih =>
-    rw [checkInvGo_cons, Bool.and'_eq_and, Bool.and_eq_true] at hc
-    cases i' with
-    | zero => simpa using Nat.eq_of_beq_eq_true hc.1
-    | succ i'' =>
-      have hidx : i + (i'' + 1) = i.succ + i'' := by omega
-      rw [hidx, List.getElem_cons_succ]
-      exact ih hc.2 (by simpa using hi')
+  | cons b bs ih => cases i' <;> grind
 
-/-- If the aggregate check `checkInv n B M` passes, row `invRowK B[i] M` equals the unit vector
+/-- If the aggregate check `checkInv B M` passes, row `invRowK B[i] M` equals the unit vector
 `1 <<< i` for every row `i` of `B`. -/
-theorem invRowK_true (hi : i < B.length) (h : checkInv n B M) : invRowK B[i] M = 1 <<< i := by
+theorem invRowK_true (hi : i < B.length) (h : checkInv B M) : invRowK B[i] M = 1 <<< i := by
   have hgo : checkInvGo M 0 B := by grind [checkInv]
   simpa using checkInvGo_true hgo hi
 
-/-- If the kernel-reducible checker `checkInv n B M` returns `true` (and `B`, `M` have length `n`),
+/-- If the kernel-reducible checker `checkInv B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
-public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv n B M) :
+public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv B M) :
     IsUnit (toMat B n) := by
   have key : toMat B n * toMat M n = 1 := by
     ext i k
     have hi : i.val < B.length := by rw [hBlen]; exact i.2
-    have hrow : goRows M B[i.val] = 1 <<< i.val := by
-      rw [← invRowK_eq]; exact invRowK_true hi h
-    have hg := bId_goRows_testBit (ms := M) (b := B.getD i 0) (j := k)
+    have hrow : invRowK B[i.val] M = 1 <<< i.val := invRowK_true hi h
+    have hg := bId_invRowK_testBit (ms := M) (b := B.getD i 0) (j := k)
     rw [hMlen] at hg
     rw [Matrix.mul_apply, Matrix.one_apply]
     simp only [toMat_eq_bId]

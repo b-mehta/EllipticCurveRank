@@ -26,7 +26,7 @@ general integral model.
 
 The four lists `points`, `labels`, `B`, and `M` all have length `ρ`; the `Certificate.Valid`
 checks enforce this. `B` / `M` follow the `List Nat` bitmask layout of `ECCompute.F2Invert` (`B`
-and `M` both by rows), so `F2Invert.checkInv ρ B M` applies verbatim.
+and `M` both by rows), so `F2Invert.checkInv B M` applies verbatim.
 -/
 
 namespace ECCompute
@@ -48,7 +48,7 @@ public structure Certificate where
   labels : List (ℕ × ℤ)
   /-- The `ρ × ρ` character matrix `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
   B : List Nat
-  /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` column bitmasks (see `F2Invert`). -/
+  /-- The claimed inverse `M` of `B` over `𝔽₂`, as `List Nat` row bitmasks (see `F2Invert`). -/
   M : List Nat
   /-- The `ρ` quadratic-residue masks, one per label: `qrMasks[j]` is the bitmask whose bit `a` is
   set iff `a` is a nonzero square mod `labels[j].1`. `Certificate.Valid` checks each against
@@ -72,7 +72,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   lenL : c.labels.length = c.ρ
   /-- The row bitmask list `B` has `ρ` entries. -/
   lenB : c.B.length = c.ρ
-  /-- The column bitmask list `M` has `ρ` entries. -/
+  /-- The row bitmask list `M` has `ρ` entries. -/
   lenM : c.M.length = c.ρ
   /-- The quadratic-residue mask list has `ρ` entries. -/
   lenQ : c.qrMasks.length = c.ρ
@@ -85,7 +85,7 @@ public structure Certificate.Valid (c : Certificate) : Prop where
   /-- `B` is the descent-character matrix the labels induce on the points. -/
   matrix : checkB c.a₂ c.a₄ c.labels c.qrMasks c.B c.points
   /-- `M` inverts `B` over `𝔽₂`. -/
-  inv : F2Invert.checkInv c.ρ c.B c.M
+  inv : F2Invert.checkInv c.B c.M
   /-- The rational `2`-torsion has order at most `2 ^ t`. -/
   tors : (curveQ c.a₂ c.a₄ c.a₆).twoTorsionPoints.ncard ≤ 2 ^ c.t
 
