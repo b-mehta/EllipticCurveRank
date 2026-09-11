@@ -117,8 +117,8 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qmask tval xp xm xden : Nat) : Bo
 
 namespace F2Invert
 
-/-- The XOR of the rows of `M` selected by the set bits of `bi`, as a `Nat` bitmask (row `bi` of
-`B` times `M` over `𝔽₂`). -/
+/-- The XOR of the rows of `M` selected by the set bits of `bi`, as a `Nat` bitmask (`bi` times `M`
+over `𝔽₂`). -/
 noncomputable def invRowK (bi : Nat) (M : List Nat) : Nat :=
   M.rec (motive := fun _ ↦ Nat → Nat) (fun _ ↦ 0)
     (fun m _ ih b ↦ (m.mul (b.land 1)).xor (ih (b.shiftRight 1))) bi

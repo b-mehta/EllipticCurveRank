@@ -24,7 +24,7 @@ a passing `checkInv B M`, with a claimed inverse `M` by rows, certifies that the
 
 ## Main results
 
-* `checkInv_isUnit` : `checkInv B M → IsUnit (toMat B n)`, the invertibility certificate.
+* `checkInv_isUnit` : for `B`, `M` of length `n`, `checkInv B M → IsUnit (toMat B n)`.
 -/
 
 namespace ECCompute.F2Invert
@@ -92,20 +92,14 @@ theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
   | nil => simp at hi'
   | cons b bs ih => cases i' <;> grind
 
-/-- If the aggregate check `checkInv B M` passes, row `invRowK B[i] M` equals the unit vector
-`1 <<< i` for every row `i` of `B`. -/
-theorem invRowK_true (hi : i < B.length) (h : checkInv B M) : invRowK B[i] M = 1 <<< i := by
-  have hgo : checkInvGo M 0 B := by grind [checkInv]
-  simpa using checkInvGo_true hgo hi
-
 /-- If the kernel-reducible checker `checkInv B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
 public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h : checkInv B M) :
     IsUnit (toMat B n) := by
   have key : toMat B n * toMat M n = 1 := by
     ext i k
-    have hi : i.val < B.length := by rw [hBlen]; exact i.2
-    have hrow : invRowK B[i.val] M = 1 <<< i.val := invRowK_true hi h
+    have hi : i.val < B.length := by omega
+    have hrow : invRowK B[i.val] M = 1 <<< i.val := by simpa using checkInvGo_true h hi
     have hg := bId_invRowK_testBit (ms := M) (b := B.getD i 0) (j := k)
     rw [hMlen] at hg
     rw [Matrix.mul_apply, Matrix.one_apply]
