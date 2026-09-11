@@ -37,7 +37,6 @@ public theorem curve284_hasRankGE_9 : HasRankGE curve284 9 := by
 /-- Curve 284 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve284.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 284. -/
 public theorem curve284_j : curve284.j = -119148350566855571620939238400 / 9750111573338048823843947 :=
   j_eq_iff.mpr (by decide +kernel)

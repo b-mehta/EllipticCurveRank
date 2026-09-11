@@ -37,7 +37,6 @@ public theorem curve361_hasRankGE_8 : HasRankGE curve361 8 := by
 /-- Curve 361 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve361.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 361. -/
 public theorem curve361_j : curve361.j = 9106420487134731277452124170241 / 254002281318218462945513472 :=
   j_eq_iff.mpr (by decide +kernel)

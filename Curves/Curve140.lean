@@ -38,7 +38,6 @@ public theorem curve140_hasRankGE_17 : HasRankGE curve140 17 := by
 /-- Curve 140 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve140.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 140. -/
 public theorem curve140_j : curve140.j = 328593705212759091728619447773313214590023848395477010103337336793 / 47837701648975701684345670558535998864936696868772679998790656 :=
   j_eq_iff.mpr (by decide +kernel)

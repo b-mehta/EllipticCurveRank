@@ -38,7 +38,6 @@ public theorem curve171_hasRankGE_16 : HasRankGE curve171 16 := by
 /-- Curve 171 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve171.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 171. -/
 public theorem curve171_j : curve171.j = 1587523419414951143821855709654276041720141093999092753162349373194132526881 / 1979571123617220930817947516260302552311906430241986844098656704000000 :=
   j_eq_iff.mpr (by decide +kernel)

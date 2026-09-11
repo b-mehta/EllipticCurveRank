@@ -1,0 +1,44 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under the GNU General Public License version 3.0 as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
+
+/-!
+# Curve 75 has rank at least 8
+
+The elliptic curve recorded as
+[curve 75](https://elliptic-rank.icarm.cloud/curve/75) on the ICARM Elliptic Curve Rank
+Leaderboard is
+
+  `E : y² + y = x³ + x² + a₄·x + a₆`,   with
+  `a₄ = -23846`   and
+  `a₆ = 1022562`
+
+over `ℚ`. It has Mordell-Weil rank at least `8`. Submitted to the leaderboard by David Renshaw.
+-/
+
+namespace ECCompute
+
+open WeierstrassCurve
+
+/-- ICARM leaderboard curve 75 over `ℚ`. -/
+@[expose] public def curve075 : WeierstrassCurve ℚ := ⟨0, 1, 1, -23846, 1022562⟩
+
+/-- ICARM leaderboard curve 75 has Mordell-Weil rank at least `8`. -/
+public theorem curve075_hasRankGE_8 : HasRankGE curve075 8 := by
+  unfold curve075
+  certify_curve torsion 5 "data/curve075.txt" "data/curve075-labels.txt"
+
+/-- Curve 75 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+public instance : curve075.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+/-- The `j`-invariant of curve 75. -/
+public theorem curve075_j : curve075.j = 1499645274373402624 / 409086620841461 :=
+  j_eq_iff.mpr (by decide +kernel)
+
+end ECCompute

@@ -37,7 +37,6 @@ public theorem curve301_hasRankGE_10 : HasRankGE curve301 10 := by
 /-- Curve 301 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve301.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 301. -/
 public theorem curve301_j : curve301.j = -649316871102534000494420912321536 / 108968401810731977801235808963 :=
   j_eq_iff.mpr (by decide +kernel)
