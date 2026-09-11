@@ -12,7 +12,6 @@ public import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Nat.Bitwise
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
-import Mathlib.Tactic.Abel
 import ECCompute.ForLean
 
 /-!
@@ -36,8 +35,8 @@ variable {a b : Bool}
 /-- `ZMod 2` indicator of a `Bool`: `true ↦ 1`, `false ↦ 0`. -/
 def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 
-@[simp] lemma bId_false : bId false = 0 := rfl
-
+@[simp, grind =] lemma bId_false : bId false = 0 := rfl
+@[simp, grind =] lemma bId_true : bId true = 1 := rfl
 @[simp] lemma bId_xor : bId (a ^^ b) = bId a + bId b := by decide +revert +kernel
 @[simp] lemma bId_and : bId (a && b) = bId a * bId b := by decide +revert +kernel
 
@@ -50,8 +49,7 @@ def bId (b : Bool) : ZMod 2 := if b then 1 else 0
 bit `j` of `m`. -/
 theorem bId_testBit_select {m b j : ℕ} :
     bId ((m * (b &&& 1)).testBit j) = bId (b.testBit 0) * bId (m.testBit j) := by
-  rcases Nat.mod_two_eq_zero_or_one b with h | h <;>
-    simp [Nat.and_one_is_mod, Nat.testBit_zero, h, bId]
+  rcases Nat.mod_two_eq_zero_or_one b with h | h <;> simp [Nat.and_one_is_mod, h]
 
 /-- Bit `j` of `invRowK`, over `𝔽₂`: over each row `k`, the selector bit `b.testBit k` times
 bit `j` of row `k`. -/
@@ -61,10 +59,9 @@ theorem bId_invRowK_testBit {ms : List ℕ} {b j : ℕ} :
   induction ms generalizing b with
   | nil => simp
   | cons m ms ih =>
-    simp only [invRowK_cons, Nat.testBit_xor, bId_xor, ih, bId_testBit_select, List.length_cons,
-      sum_range_succ', List.getD_cons_zero, List.getD_cons_succ, Nat.testBit_shiftRight,
-      Nat.add_comm 1]
-    abel
+    simp only [invRowK_cons, Nat.testBit_xor, bId_xor, bId_testBit_select, List.length_cons,
+      sum_range_succ']
+    grind
 
 variable {n i i' : ℕ} {B M : List ℕ}
 
@@ -100,14 +97,13 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
     ext i k
     have hi : i.val < B.length := by omega
     have hrow : invRowK B[i.val] M = 1 <<< i.val := by simpa using checkInvGo_true h hi
-    have hg := bId_invRowK_testBit (ms := M) (b := B.getD i 0) (j := k)
-    rw [hMlen] at hg
+    subst hMlen
     rw [Matrix.mul_apply, Matrix.one_apply]
     simp only [toMat_eq_bId]
     rw [Fin.sum_univ_eq_sum_range
-      (fun x ↦ bId ((B.getD i 0).testBit x) * bId ((M.getD x 0).testBit k)) n, ← hg,
-      List.getD_eq_getElem _ _ hi, hrow, Nat.one_shiftLeft, Nat.testBit_two_pow]
-    rcases eq_or_ne i k with h' | h' <;> simp [h', bId, Fin.val_inj]
+      (fun x ↦ bId ((B.getD i 0).testBit x) * bId ((M.getD x 0).testBit k)), ← bId_invRowK_testBit,
+      List.getD_eq_getElem _ _ hi, hrow, Nat.one_shiftLeft]
+    grind
   exact .of_mul_eq_one (toMat M n) key
 
 end ECCompute.F2Invert
