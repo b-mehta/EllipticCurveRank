@@ -95,7 +95,7 @@ public theorem checkInv_isUnit (hBlen : B.length = n) (hMlen : M.length = n) (h 
     IsUnit (toMat B n) := by
   have key : toMat B n * toMat M n = 1 := by
     ext i k
-    have hi : i.val < B.length := by omega
+    have hi : i.val < B.length := by grind
     have hrow : invRowK B[i.val] M = 1 <<< i.val := by simpa using checkInvGo_true h hi
     subst hMlen
     rw [Matrix.mul_apply, Matrix.one_apply]
