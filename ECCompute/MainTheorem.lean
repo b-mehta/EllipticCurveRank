@@ -101,10 +101,8 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
   set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
   replace hlsP (j : Fin c.ρ) : (ls j).1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
-  replace hlsC (j : Fin c.ρ) : checkLabel c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
-    checkLabels_true hlsC _ (List.getElem_mem _)
-  replace hlsC (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
-    descentHyp_of_checkLabel (hlsC j) (hlsP j)
+  replace hlsC (j : Fin c.ρ) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
+    descentHyp_of_checkLabels hlsC (List.getElem_mem _) (hlsP j)
   replace hpt (i : Fin c.ρ) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
     hpt _ (List.getElem_mem _)
   have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
