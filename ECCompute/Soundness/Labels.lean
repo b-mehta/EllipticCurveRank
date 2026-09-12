@@ -57,7 +57,7 @@ theorem polyModK_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
     polyModK cs ℓ r = polyModL (cs.map Int.ofNat) ℓ r := by
   induction cs with
   | nil => rfl
-  | cons c cs ih => grind [polyModL, List.map_cons]
+  | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
 
 /-- A residue mod `P` reduces mod any divisor `p` of `P` to the coefficient itself in `ZMod p`. -/
 theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
