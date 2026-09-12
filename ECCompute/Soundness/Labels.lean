@@ -59,6 +59,8 @@ theorem polyModK_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
   | nil => rfl
   | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
 
+-- TODO (BM): the fact that this is helpful suggests something else is weirdly designed
+-- needs investigation
 /-- A residue mod `P` reduces mod any divisor `p` of `P` to the coefficient itself in `ZMod p`. -/
 theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
     (hr : r = (a % P).toNat) : (((r % p : ℕ) : ℤ) : ZMod p) = a := by
