@@ -57,11 +57,12 @@ theorem polyModK_eq_polyModL {cs : List ℕ} {ℓ r : ℕ} :
     polyModK cs ℓ r = polyModL (cs.map Int.ofNat) ℓ r := by
   induction cs with
   | nil => rfl
-  | cons c cs ih => simp only [List.map_cons]; grind [polyModL]
+  | cons c cs ih => grind [polyModL, List.map_cons]
 
 /-- A residue mod `P` reduces mod any divisor `p` of `P` to the coefficient itself in `ZMod p`. -/
 theorem resP_cast {P : ℕ} {a : ℤ} (hP : P ≠ 0) (hpP : p ∣ P) {r : ℕ}
-    (hr : r = (a % P).toNat) : (r % p : ZMod p) = a := by
+    (hr : r = (a % P).toNat) : (((r % p : ℕ) : ℤ) : ZMod p) = a := by
+  rw [Int.cast_natCast]
   have hnn : 0 ≤ a % P := Int.emod_nonneg a (by exact mod_cast hP)
   rw [ZMod.natCast_mod, hr, ← Int.cast_natCast, Int.toNat_of_nonneg hnn,
     ZMod.intCast_eq_intCast_iff']
@@ -74,12 +75,9 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
     (hΔ : Δ = discrInt a₂ a₄ a₆) (h : checkLabel a₂r a₄r a₆r Δ p θ) (hp : p.Prime) :
     DescentHyp a₂ a₄ a₆ p θ := by
   have hp0 : 0 < p := hp.pos
-  have hr₂' : (((a₂r % p : ℕ) : ℤ) : ZMod p) = a₂ := by
-    simpa only [Int.cast_natCast] using resP_cast hP hpP h₂
-  have hr₄' : (((a₄r % p : ℕ) : ℤ) : ZMod p) = a₄ := by
-    simpa only [Int.cast_natCast] using resP_cast hP hpP h₄
-  have hr₆' : (((a₆r % p : ℕ) : ℤ) : ZMod p) = a₆ := by
-    simpa only [Int.cast_natCast] using resP_cast hP hpP h₆
+  have hr₂' := resP_cast hP hpP h₂
+  have hr₄' := resP_cast hP hpP h₄
+  have hr₆' := resP_cast hP hpP h₆
   rw [checkLabel] at h
   simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
   obtain ⟨h6', hΔ', hf⟩ := h
