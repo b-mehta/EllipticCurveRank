@@ -135,7 +135,7 @@ noncomputable def lambdaK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Bool 
       ((qrLookupBool qm (fderivResK a₂ a₄ p tval)).not'))
     false
 
-/-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. -/
+/-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. Spec: `lambdaBitK_eq`. -/
 noncomputable def lambdaBitK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Nat :=
   ((xden.mod p).beq 0).rec
     (((alphaResK p tval xp xm xden).beq 0).rec
@@ -171,14 +171,13 @@ noncomputable def toLs (ls : List (Nat × Int)) (q : List Nat) : List (Nat × Na
   List.zipWith (fun l m ↦ (l.1, (l.2.emod l.1).toNat, m)) ls q
 
 /-- The expected row word: bit `j` is label `ls[j]`'s descent character at point
-`(xnp - xnm) / xden`, LSB-first (head label at bit `0`). -/
+`(xnp - xnm) / xden`, LSB-first (head label at bit `0`). Spec: `testBit_checkBRowWord`. -/
 noncomputable def checkBRowWord (a₂ a₄ : Int) (xnp xnm xden : Nat)
     (ls : List (Nat × Nat × Nat)) : Nat :=
-  ls.rec 0
-    (fun l _ ih ↦ (lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).lor (ih.shiftLeft 1))
+  ls.rec 0 (fun l _ ih ↦ (lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden).lor (ih.shiftLeft 1))
 
-/-- `true` iff bit `j` of `b` matches label `ls[j]`'s descent character at point
-`(xnp - xnm) / xden`, for every `j`, evaluated with the integer coefficients `a₂ a₄`. -/
+/-- `true` iff `b` equals `checkBRowWord`: bit `j` of `b` is label `ls[j]`'s descent character at
+point `(xnp - xnm) / xden` for every `j < ls.length`, and every higher bit of `b` is `0`. -/
 noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List (Nat × Nat × Nat)) :
     Bool :=
   (checkBRowWord a₂ a₄ xnp xnm xden ls).beq b
