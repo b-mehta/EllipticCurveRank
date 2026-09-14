@@ -15,7 +15,7 @@ import ECCompute.ForLean
 # Soundness of the kernel-reducible descent character
 
 The kernel `Nat` builders that evaluate the descent character `λ_{p,θ}`
-(`qrMask`, `qrLookupBool`, `lambdaBitK`, …) live in `ECCompute.Kernel`; this file
+(`qrMask`, `lambdaBitK`, …) live in `ECCompute.Kernel`; this file
 proves them correct.
 
 ## Main declarations
@@ -34,6 +34,10 @@ variable {p a : ℕ} {a₂ a₄ a₆ : ℤ}
 `qrMask` is the reference builder the certificate's supplied mask is checked against;
 `qrLookupBool_iff` shows the bit test decides whether `a` is a nonzero square mod `p`.
 -/
+
+/-- `true` iff bit `a` of the quadratic-residue mask `qm` is
+set, i.e. (for `qm = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
+def qrLookupBool (qm a : ℕ) : Bool := ((qm.shiftRight a).land 1).beq 1
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `m.testBit a`. -/
 theorem shiftRight_land_one_eq_one_iff {m : ℕ} : (m >>> a) &&& 1 = 1 ↔ m.testBit a := by

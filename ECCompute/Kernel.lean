@@ -115,10 +115,6 @@ noncomputable def qrMaskGo (p : Nat) : Nat → Nat :=
 /-- The quadratic-residue bitmask mod `p`: bit `a` is set iff `a` is a nonzero square mod `p`. -/
 noncomputable def qrMask (p : Nat) : Nat := qrMaskGo p ((p.sub 1).div 2)
 
-/-- `true` iff bit `a` of the quadratic-residue mask `qm` is
-set, i.e. (for `qm = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
-noncomputable def qrLookupBool (qm a : Nat) : Bool := ((qm.shiftRight a).land 1).beq 1
-
 /-- Residue in `[0, p)` of `x.num - θ·x.den`, for the kernel. -/
 noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
   ((xp.mod p).add (p.sub ((xm.add (tval.mul xden)).mod p))).mod p
