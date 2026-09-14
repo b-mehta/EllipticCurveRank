@@ -37,7 +37,6 @@ public theorem curve353_hasRankGE_9 : HasRankGE curve353 9 := by
 /-- Curve 353 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve353.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 353. -/
 public theorem curve353_j : curve353.j = -14320544650303169791402548841 / 300733579435137404332500 :=
   j_eq_iff.mpr (by decide +kernel)

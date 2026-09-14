@@ -31,7 +31,6 @@ open WeierstrassCurve
   ⟨1, -1, 1, -6568019580778599489585141337989692763602574718655,
     6357048702469147640200079650140599226292653501480652916481851397620447847⟩
 
-set_option linter.style.longLine false in
 /-- ICARM leaderboard curve 312 has Mordell-Weil rank at least `15`. -/
 public theorem curve312_hasRankGE_15 : HasRankGE curve312 15 := by
   unfold curve312
@@ -40,7 +39,6 @@ public theorem curve312_hasRankGE_15 : HasRankGE curve312 15 := by
 /-- Curve 312 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve312.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 312. -/
 public theorem curve312_j : curve312.j = 102510323371745118594907183909901892780304308669271316267736036322296680112451613253571826020242825507157393976878649328368720252963 / 2210047804093149601165852365406954218789846145616180545895038969403819193492749149764720830803432395722064899167809284105527296 :=
   j_eq_iff.mpr (by decide +kernel)

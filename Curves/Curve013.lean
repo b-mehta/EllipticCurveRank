@@ -1,0 +1,44 @@
+/-
+Copyright (c) 2026 Bhavik Mehta. All rights reserved.
+Released under the GNU General Public License version 3.0 as described in the file LICENSE.
+Authors: Bhavik Mehta
+-/
+module
+
+public import ECCompute.Tactic.CertifyCurve
+public import ECCompute.Soundness.JInvariant
+
+/-!
+# Curve 13 has rank at least 3
+
+The elliptic curve recorded as
+[curve 13](https://elliptic-rank.icarm.cloud/curve/13) on the ICARM Elliptic Curve Rank
+Leaderboard is
+
+  `E : y² = x³ + a₄·x + a₆`,   with
+  `a₄ = -82`   and
+  `a₆ = 0`
+
+over `ℚ`. It has Mordell-Weil rank at least `3`. Submitted to the leaderboard by David Renshaw.
+-/
+
+namespace ECCompute
+
+open WeierstrassCurve
+
+/-- ICARM leaderboard curve 13, `y² = x³ - 82 x` over `ℚ`. -/
+@[expose] public def curve013 : WeierstrassCurve ℚ := ⟨0, 0, 0, -82, 0⟩
+
+/-- ICARM leaderboard curve 13 has Mordell-Weil rank at least `3`, with a single rational
+`2`-torsion point. -/
+public theorem curve013_hasRankGE_3 : HasRankGE curve013 3 := by
+  unfold curve013
+  certify_curve oneTorsion 0 5 "data/curve013.txt" "data/curve013-labels.txt"
+
+/-- Curve 13 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
+public instance : curve013.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
+
+/-- The `j`-invariant of curve 13 is `1728` (it has complex multiplication by `ℤ[i]`). -/
+public theorem curve013_j : curve013.j = 1728 := j_eq_iff.mpr (by decide +kernel)
+
+end ECCompute

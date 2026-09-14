@@ -10,7 +10,6 @@ public import Mathlib.LinearAlgebra.FreeModule.ModN
 
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Algebra.Module.PID
-import Mathlib.FieldTheory.Finiteness
 import Mathlib.Algebra.Module.Torsion.Basic
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import Mathlib.LinearAlgebra.Isomorphisms
@@ -23,13 +22,12 @@ import Mathlib.Data.DFinsupp.FiniteInfinite
 # Torsion, quotients and rank of modules over a product
 
 Module-theoretic facts about torsion submodules, quotients by a product submodule, and the free
-rank of a product: the cardinality of a finite `𝔽₂`-vector space, transport of the range of a
-scalar multiple and of the torsion along a linear equivalence, the splitting of a quotient of a
-binary product, and the free rank of a product with a finite factor.
+rank of a product: transport of the range of a scalar multiple and of the torsion along a linear
+equivalence, the splitting of a quotient of a binary product, and the free rank of a product with
+a finite factor.
 
 ## Main results
 
-* `Module.natCard_eq_two_pow_finrank`: a finite `𝔽₂`-vector space has `2 ^ dimension` elements.
 * `LinearEquiv.map_range_lsmul`, `LinearEquiv.map_torsionBy`: transport of the range of `a • ·`
   and of the `a`-torsion along an `R`-linear equivalence.
 * `Submodule.prodQuotEquiv`: `(M × N) ⧸ (P.prod Q) ≃ₗ (M ⧸ P) × (N ⧸ Q)`.
@@ -45,12 +43,6 @@ section
 open Module
 
 namespace Module
-
-/-- A finite `𝔽₂`-vector space has cardinality `2 ^ dimension`. -/
-public lemma natCard_eq_two_pow_finrank {V : Type*} [AddCommGroup V] [Module (ZMod 2) V]
-    [Finite V] :
-    Nat.card V = 2 ^ finrank (ZMod 2) V := by
-  rw [natCard_eq_pow_finrank (K := ZMod 2), Nat.card_zmod]
 
 /-- A finite `ℤ`-module has free rank zero. -/
 lemma finrank_int_zero_of_finite {D : Type*} [AddCommGroup D] [Finite D] : finrank ℤ D = 0 := by

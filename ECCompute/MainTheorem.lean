@@ -101,10 +101,8 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
   set pt : Fin c.ρ → ℚ × ℚ := fun i ↦ c.points[i]
   set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
   replace hlsP (j : Fin c.ρ) : (ls j).1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
-  replace hlsC (j : Fin c.ρ) : checkLabel c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
-    checkLabels_true hlsC _ (List.getElem_mem _)
-  replace hlsC (j) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
-    descentHyp_of_checkLabel (hlsC j) (hlsP j)
+  replace hlsC (j : Fin c.ρ) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
+    descentHyp_of_checkLabels hlsC (List.getElem_mem _) (hlsP j)
   replace hpt (i : Fin c.ρ) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 :=
     hpt _ (List.getElem_mem _)
   have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
@@ -131,9 +129,9 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hlenB hlenM hinv)
   set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
   have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
-  have hbound : c.ρ ≤ finrank ℤ H + c.t := RankDeduction.rank_ge_le
-    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩)
-    (φ.comp H.subtype.toAddMonoidHom) hindep ((card_torsionBy_le H).trans htors)
-  exact ⟨H, hHfin, Nat.sub_le_iff_le_add.mpr hbound⟩
+  refine ⟨H, hHfin, ?_⟩
+  simpa using RankDeduction.rank_ge_le (H := H) Nat.prime_two
+    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩) (φ.comp H.subtype.toAddMonoidHom)
+    hindep ((card_torsionBy_le H).trans htors)
 
 end ECCompute

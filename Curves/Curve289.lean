@@ -28,7 +28,6 @@ namespace ECCompute
 
 open WeierstrassCurve
 
-set_option linter.style.longLine false in
 /-- ICARM leaderboard curve 289 over `ℚ`. -/
 @[expose] public def curve289 : WeierstrassCurve ℚ :=
   ⟨0, 0, 0, 1,
@@ -42,7 +41,6 @@ public theorem curve289_hasRankGE_1 : HasRankGE curve289 1 := by
 /-- Curve 289 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve289.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 289. -/
 public theorem curve289_j : curve289.j = 6912 / 27000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000108000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000162000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000108000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000031 :=
   j_eq_iff.mpr (by decide +kernel)

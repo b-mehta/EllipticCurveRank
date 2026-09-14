@@ -38,7 +38,6 @@ public theorem curve342_hasRankGE_19 : HasRankGE curve342 19 := by
 /-- Curve 342 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve342.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 342. -/
 public theorem curve342_j : curve342.j = -19072297061661906233771206794438138147139792092705583902100207882252073076156931994881342057 / 14370849162198941469327508393310482958635155172283852397156245276330989449210056441856 :=
   j_eq_iff.mpr (by decide +kernel)

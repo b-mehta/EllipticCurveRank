@@ -38,7 +38,6 @@ public theorem curve238_hasRankGE_15 : HasRankGE curve238 15 := by
 /-- Curve 238 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve238.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 238. -/
 public theorem curve238_j : curve238.j = -1871730154943768040262787649598378913581738832236561400015254281484990737 / 1382730624930385367184147512181586170312381345872576399281800347648 :=
   j_eq_iff.mpr (by decide +kernel)

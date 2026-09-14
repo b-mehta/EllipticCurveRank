@@ -38,7 +38,6 @@ public theorem curve199_hasRankGE_13 : HasRankGE curve199 13 := by
 /-- Curve 199 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve199.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 199. -/
 public theorem curve199_j : curve199.j = -998111122979483578061542693901648305995589525204645301641605323632809980564888443203235113786351649 / 5290724783356970045570091261064369041862691109828850503901233859803837652758778996437693235200 :=
   j_eq_iff.mpr (by decide +kernel)

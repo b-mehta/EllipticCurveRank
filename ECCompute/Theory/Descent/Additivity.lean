@@ -41,8 +41,9 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {x y : ℚ}
       = if xbar p x = θ then psi p (fderiv (R := ZMod p) a₂ a₄ θ) else psi p (xbar p x - θ) := by
   obtain ⟨w, hxden, _⟩ := den_isSquare h.1
   have hw : (w : ZMod p) ≠ 0 := by intro h0; apply hd; rw [hxden]; grind
-  have halpha : x.num - θ * x.den = (w : ZMod p) ^ 2 * (xbar p x - θ) := by
-    rw [num_eq_xbar_mul_den hd, hxden]; grind
+  have hnum : (x.num : ZMod p) = xbar p x * x.den := by
+    rw [xbar, Rat.cast_def, div_mul_cancel₀ _ hd]
+  have halpha : x.num - θ * x.den = (w : ZMod p) ^ 2 * (xbar p x - θ) := by rw [hnum, hxden]; grind
   grind [lambda, psi_mul_sq Fact.out]
 
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/

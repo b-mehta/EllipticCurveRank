@@ -38,7 +38,6 @@ public theorem curve304_hasRankGE_22 : HasRankGE curve304 22 := by
 /-- Curve 304 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve304.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 304. -/
 public theorem curve304_j : curve304.j = 882979629965878142319403592711204222436511549801509539530594582279285465455491783133778542832948806767809 / 3379337256877848416704903412257177388986372653464337778640355908107748274947815216082189778984960000 :=
   j_eq_iff.mpr (by decide +kernel)

@@ -37,7 +37,6 @@ public theorem curve249_hasRankGE_7 : HasRankGE curve249 7 := by
 /-- Curve 249 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve249.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 249. -/
 public theorem curve249_j : curve249.j = -2972199984653541671380695983079424 / 10197911483879944567675 :=
   j_eq_iff.mpr (by decide +kernel)

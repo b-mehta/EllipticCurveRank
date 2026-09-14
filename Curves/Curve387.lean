@@ -39,7 +39,6 @@ public theorem curve387_hasRankGE_21 : HasRankGE curve387 21 := by
 /-- Curve 387 is elliptic (nonzero discriminant), so its `j`-invariant is defined. -/
 public instance : curve387.IsElliptic := isElliptic_of_Δ_ne_zero (by decide +kernel)
 
-set_option linter.style.longLine false in
 /-- The `j`-invariant of curve 387. -/
 public theorem curve387_j : curve387.j = 155681335099790708120116490480138872082430829065269233660262552215276375236422846189440961582975238912084409 / 229147574780948635963792405860493813920311074667067051887844097104668252706217793512705315063603200000 :=
   j_eq_iff.mpr (by decide +kernel)

@@ -68,10 +68,10 @@ theorem εp_x_indep
     εpFinite a₂ a₄ a₆ p θ (.some x₁ y₁ h₁) = εpFinite a₂ a₄ a₆ p θ (.some x₂ y₂ h₂) := by
   subst hx; rfl
 
-/-- For a collinear triple `x₁, x₂, x₃` with `x₁ ≠ x₂` and the given Vieta relations of the secant
-line `y = ℓx + m`, the descent-character value at `x₃` equals the sum of the values at `x₁` and
+/-- For a collinear triple `x₁, x₂, x₃` with the given Vieta relations of the secant line
+`y = ℓx + m`, the descent-character value at `x₃` equals the sum of the values at `x₁` and
 `x₂`. -/
-theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod p} (hne : x₁ ≠ x₂)
+theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod p}
     (hv : Vieta (a₂ : ZMod p) a₄ a₆ ℓ m x₁ x₂ x₃) :
     (if x₃ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₃ - θ))
       = (if x₁ = θ then psi p (fderiv a₂ a₄ θ) else psi p (x₁ - θ))
@@ -86,7 +86,7 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod
   have hfd3 : x₃ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₂ - θ) :=
     fderiv_eq_prod ℓ m ⟨by grind, by grind, by grind⟩ hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
-  · rw [if_neg (by grind), if_pos rfl, if_neg hne.symm, hfd1 rfl,
+  · rw [if_neg (by grind), if_pos rfl, if_neg (by grind), hfd1 rfl,
       psi_mul h.prime (by grind) (by grind)]
     grind
   obtain rfl | c2 := eq_or_ne x₂ θ
@@ -110,7 +110,7 @@ theorem εpFinite_map_add_of_X_ne [Fact p.Prime] (h : DescentHyp a₂ a₄ a₆ 
   have hℓmul : ℓ * (x₁ - x₂) = y₁ - y₂ := by
     rw [hℓdef, slope_of_X_ne hne, div_mul_cancel₀ _ (by grind)]
   have hx3 : x₃ = ℓ ^ 2 - a₂ - x₁ - x₂ := by rw [hx3def, curve_baseChange_addX]
-  exact εp_sum_of_vieta (m := y₁ - ℓ * x₁) h hne (vieta_of_roots hne hx3 (by grind) (by grind))
+  exact εp_sum_of_vieta (m := y₁ - ℓ * x₁) h (vieta_of_roots hne hx3 (by grind) (by grind))
 
 /-- For the double-root triple `x, x, x₃` with the given Vieta relations at a root `θ ≠ x`, the
 descent-character value at `x₃` is `0`. -/

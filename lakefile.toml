@@ -20,3 +20,4 @@ name = "ECCompute"
 
 [[lean_lib]]
 name = "Curves"
+leanOptions = { weak.linter.style.longLine = false }

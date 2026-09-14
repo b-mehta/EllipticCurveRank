@@ -47,9 +47,9 @@ public def computeB (a₂ a₄ : Int) (xs : List (Int × Nat)) (ls : List (Nat �
   xs.map fun x ↦
     bitmaskOf ls.length (fun j ↦ let l := ls[j]!; lambdaEval a₂ a₄ l.1 qs[j]! l.2 x.1 x.2)
 
-/-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse in the
-column-bitmask convention of `F2Invert.toMatCols` (so it feeds `checkInv` as `M`). Returns
-`none` if the matrix is singular. -/
+/-- Invert an `n × n` matrix over `𝔽₂` given as `Nat` row bitmasks, returning the inverse as `Nat`
+row bitmasks (so it feeds `checkInv` as the row-major `M`). Returns `none` if the matrix is
+singular. -/
 public def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
   let mut a := B
   let mut inv : Array Nat := (Array.range n).map (fun i ↦ (1 <<< i : Nat))
@@ -69,6 +69,6 @@ public def invF2 (B : Array Nat) (n : Nat) : Option (List Nat) := Id.run do
         if r2 != col && a[r2]!.testBit col then
           a := a.set! r2 (a[r2]! ^^^ a[col]!)
           inv := inv.set! r2 (inv[r2]! ^^^ inv[col]!)
-  return some <| (List.range n).map fun k ↦ bitmaskOf n (fun j ↦ inv[j]!.testBit k)
+  return some inv.toList
 
 end ECCompute.CertifyEval

@@ -20,7 +20,10 @@ required checks into a `Certificate.Valid`, and applies `hasRankGE_of_certificat
 
 Each data file has one entry per line. A points file has `x y`, with each coordinate either an
 integer or a reduced fraction `a/b`; a labels file has `p θ`, the descent character at the root `θ`
-of the 2-division cubic mod `p`.
+of the 2-division cubic mod `p`. A relative file path is resolved against the directory of the
+file invoking the tactic, then each enclosing directory up to the surrounding package root, so
+the same invocation works wherever the package is checked out (in particular, as a dependency of
+another project).
 
 ```
 theorem hasRankGE_example : HasRankGE curveExample 29 := by
@@ -120,11 +123,33 @@ meta def readGoal (goal : MVarId) :
   return (ρ, curveE,
     ← getRatIntE q1E, ← getRatIntE q2E, ← getRatIntE q3E, ← getRatIntE q4E, ← getRatIntE q6E)
 
-/-- Read `path`, drop blank lines, and parse each remaining line with `parse`. `what` names the
-line kind in the error message. -/
+/-- Whether `dir` is a Lean package root: it contains a lakefile or a `lean-toolchain` file. -/
+meta def isPackageRoot (dir : System.FilePath) : IO Bool := do
+  (["lakefile.toml", "lakefile.lean", "lean-toolchain"].anyM fun f ↦ (dir / f).pathExists)
+
+/-- Resolve a relative data-file `path` against the directory of the file invoking the tactic,
+then each enclosing directory up to the surrounding package root, returning the first candidate
+that exists. An absolute path is returned as given. -/
+meta def resolveDataPath (path : String) : MetaM System.FilePath := do
+  let p := System.FilePath.mk path
+  if p.isAbsolute then return p
+  let src ← IO.FS.realPath (← getFileName)
+  let mut dir? := src.parent
+  repeat
+    match dir? with
+    | some d =>
+      let cand := d / p
+      if ← cand.pathExists then return cand
+      dir? := if ← isPackageRoot d then none else d.parent
+    | none => break
+  throwError "certify_curve: data file '{path}' not found in {src.parent.getD "."} or any \
+    enclosing directory of its package"
+
+/-- Read the data file at `path` (located by `resolveDataPath`), drop blank lines, and parse each
+remaining line with `parse`. `what` names the line kind in the error message. -/
 meta def readEntries {α} (what : String) (parse : String → Option α) (path : String) :
     MetaM (Array α) := do
-  ((← IO.FS.readFile path).splitOn "\n").toArray.filterMapM fun l ↦ do
+  ((← IO.FS.readFile (← resolveDataPath path)).splitOn "\n").toArray.filterMapM fun l ↦ do
     if (strTrim l).isEmpty then return none
     match parse l with
     | some a => return some a
@@ -165,9 +190,20 @@ meta def mkCertExpr (ρ : Nat) (pts : Array (Int × Nat × Int × Nat)) (ls : Ar
       #[ratTy, ratTy, coordExpr xn xd, coordExpr yn yd]
   let pointsE ← mkListLit pairTy ptExprs
   let q := ls.toList.map fun l ↦ CertifyEval.qrMaskEval l.1
+  -- Reduce the big coefficients mod the label-prime product `P` once, host-side, and emit `P` with
+  -- the three residues as flat `Nat` literals the per-label kernel loop reads (`checkLabels`).
+  let P : Nat := ls.toList.foldl (fun acc l ↦ acc * l.1) 1
+  let residue (a : Int) : Nat := (a.emod (Int.ofNat P)).toNat
+  -- The discriminant `Δ = discrInt a₂ a₄ a₆` as an `Int` literal (checked against `discrIntK`).
+  let b2 := 4 * sA2
+  let b4 := 2 * sA4
+  let b6 := 4 * sA6
+  let discr : Int := -(b2 * b2 * (4 * sA2 * sA6 - sA4 * sA4)) - 8 * (b4 * b4 * b4)
+    - 27 * (b6 * b6) + 9 * b2 * b4 * b6
   return mkAppN (mkConst ``Certificate.mk)
-    #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr ρ, pointsE,
-      toExpr ls.toList, toExpr B, toExpr M, toExpr q, toExpr t, toExpr tp]
+    #[toExpr sA2, toExpr sA4, toExpr sA6, toExpr P, toExpr (residue sA2), toExpr (residue sA4),
+      toExpr (residue sA6), toExpr discr, toExpr ρ, pointsE, toExpr ls.toList, toExpr B,
+      toExpr M, toExpr q, toExpr t, toExpr tp]
 
 /-- A `List.length` equality from a kernel-reducible `BEq` check on the length. -/
 public theorem List.length_beq_eq {α : Type*} {l : List α} {n : ℕ}
