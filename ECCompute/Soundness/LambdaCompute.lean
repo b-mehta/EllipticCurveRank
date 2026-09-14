@@ -155,10 +155,9 @@ theorem fderivResK_eq_val (hp : p ≠ 0) (htval : tval = θ) :
 public theorem lambdaBitK_eq {qm : ℕ} :
     lambdaBitK a₂ a₄ p qm tval xp xm xden =
       if lambdaK a₂ a₄ p qm tval xp xm xden then 1 else 0 := by
-  have key (a : ℕ) : qm >>> a % 2 ^^^ 1 = if qrLookupBool qm a then 0 else 1 := by
-    grind [qrLookupBool, Nat.mod_two_eq_zero_or_one]
-  rw [lambdaBitK, lambdaK]
-  cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key] <;> grind
+  simp only [lambdaBitK, lambdaK, qrLookupBool, Bool.rec_eq, Nat.shiftRight_eq', Nat.land_eq,
+    Nat.xor_eq, Nat.mod_eq_mod, Nat.beq_eq_beq, Nat.and_one_is_mod, Bool.not'_eq_not]
+  grind [Nat.mod_two_eq_zero_or_one]
 
 /-- `lambdaK` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
