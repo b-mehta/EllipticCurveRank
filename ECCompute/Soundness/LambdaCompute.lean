@@ -150,6 +150,16 @@ theorem fderivResK_eq_val (hp : p ≠ 0) (htval : tval = θ) :
   have hlt : fderivResK a₂ a₄ p tval < p := by simp only [fderivResK]; exact polyModL_lt hp
   rw [← fderivResK_cast hp htval, ZMod.val_cast_of_lt hlt]
 
+/-- `lambdaBitK` is the `Nat` bit `0`/`1` of the `Bool` descent character `lambdaK`. -/
+@[grind =]
+public theorem lambdaBitK_eq {qm : ℕ} :
+    lambdaBitK a₂ a₄ p qm tval xp xm xden =
+      if lambdaK a₂ a₄ p qm tval xp xm xden then 1 else 0 := by
+  have key (a : ℕ) : qm >>> a % 2 ^^^ 1 = if qrLookupBool qm a then 0 else 1 := by
+    grind [qrLookupBool, Nat.mod_two_eq_zero_or_one]
+  rw [lambdaBitK, lambdaK]
+  cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key] <;> grind
+
 /-- `lambdaK` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
 and `x` has numerator `xp - xm` and denominator `xden`. -/

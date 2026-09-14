@@ -25,6 +25,9 @@ variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)
   {pt : List (ℚ × ℚ)}
 
 @[simp, grind =]
+theorem checkBRowWord_nil : checkBRowWord a₂ a₄ xnp xnm xden [] = 0 := rfl
+
+@[simp, grind =]
 theorem checkBRowWord_cons {l : ℕ × ℕ × ℕ} :
     checkBRowWord a₂ a₄ xnp xnm xden (l :: ls) =
       lambdaBitK a₂ a₄ l.1 l.2.2 l.2.1 xnp xnm xden |||
@@ -37,17 +40,6 @@ theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × �
         (checkBGo a₂ a₄ ls bs ps) := rfl
 
 variable {i j : ℕ}
-
-/-- `lambdaBitK` is the `Nat` bit `0`/`1` of the `Bool` descent character `lambdaK`. -/
-theorem lambdaBitK_eq {p qm tval xp xm xden : ℕ} :
-    lambdaBitK a₂ a₄ p qm tval xp xm xden =
-      if lambdaK a₂ a₄ p qm tval xp xm xden then 1 else 0 := by
-  have key (X : ℕ) : qm >>> X % 2 ^^^ 1 = if qrLookupBool qm X = false then 1 else 0 := by
-    rw [qrLookupBool]
-    rcases Nat.mod_two_eq_zero_or_one (qm >>> X) with h | h <;>
-      simp only [Nat.land_eq, Nat.shiftRight_eq', Nat.and_one_is_mod, h] <;> decide
-  rw [lambdaBitK, lambdaK]
-  cases (xden.mod p).beq 0 <;> cases (alphaResK p tval xp xm xden).beq 0 <;> simp [key]
 
 /-- Bit `j` of the expected row word equals label `j`'s `Bool` descent character. -/
 theorem testBit_checkBRowWord (hj : j < ls.length) :
@@ -70,9 +62,7 @@ theorem testBit_checkBRowWord (hj : j < ls.length) :
 character of label `j`. -/
 theorem checkBRow_true (hb : checkBRow a₂ a₄ xnp xnm xden b ls) (hj : j < ls.length) :
     b.testBit j = lambdaK a₂ a₄ ls[j].1 ls[j].2.2 ls[j].2.1 xnp xnm xden := by
-  rw [checkBRow] at hb
-  rw [← Nat.eq_of_beq_eq_true hb]
-  exact testBit_checkBRowWord hj
+  grind [checkBRow, testBit_checkBRowWord]
 
 /-- Row extraction: if the aggregate check passes, row `i`'s bitmask passes `checkBRow`. -/
 theorem checkBGo_row (h : checkBGo a₂ a₄ ls B pt) (hi : i < B.length) (hip : i < pt.length) :
