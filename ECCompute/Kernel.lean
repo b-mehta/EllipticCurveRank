@@ -127,14 +127,6 @@ noncomputable def alphaResK (p tval xp xm xden : Nat) : Nat :=
 noncomputable def fderivResK (a₂ a₄ : Int) (p tval : Nat) : Nat :=
   polyModL [a₄, Int.mul 2 a₂, 3] p tval
 
-/-- The value of the descent character `λ_{p,θ}` at a point. -/
-noncomputable def lambdaK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Bool :=
-  ((xden.mod p).beq 0).rec
-    (((alphaResK p tval xp xm xden).beq 0).rec
-      ((qrLookupBool qm (alphaResK p tval xp xm xden)).not')
-      ((qrLookupBool qm (fderivResK a₂ a₄ p tval)).not'))
-    false
-
 /-- The descent character `λ_{p,θ}` at a point as a `Nat` bit, `0` or `1`. Spec: `lambdaBitK_eq`. -/
 noncomputable def lambdaBitK (a₂ a₄ : Int) (p qm tval xp xm xden : Nat) : Nat :=
   ((xden.mod p).beq 0).rec
