@@ -1,0 +1,180 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# formalization.yaml (v0.4): repo-root metadata for formalization projects.
+# Projects may add extra YAML keys at any level; readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+
+version: "v0.4"
+
+# project - the formalization itself (not the source).
+project:
+  name: "EllipticCurveRank"
+  description: >
+    Certified lower bounds on the Mordell-Weil rank of elliptic curves over ℚ,
+    in Lean 4 on top of mathlib. Each bound is a term of `HasRankGE E ρ` that
+    reduces in the Lean kernel, developed in the `ECCompute` namespace.
+  authors:
+    - "Bhavik Mehta"
+  responsible_maintainers:
+    - "Bhavik Mehta"
+  license: "GPL-3.0"
+
+# sources - what was formalized.
+sources:
+  - title: "On the computation of Mordell-Weil and 2-Selmer groups of elliptic curves"
+    authors:
+      - "J. E. Cremona"
+    id: "https://johncremona.github.io/papers/filter.pdf"
+    type: "article"
+    location: "§2"
+    relationship: "adapts"
+    note: >
+      The certified rank lower bound uses Cremona's descent homomorphism
+      E(ℚ) → 𝔽₂: for a prime p and a root θ of the curve's reduced cubic mod p,
+      send (x, y) to the square/non-square class of x - θ. Combining several
+      (p, θ) gives E(ℚ) → 𝔽₂^k; the number of independent point images lower-bounds the rank.
+    license: ""
+    author_endorsement: "endorsed"
+  - title: "ICARM Elliptic Curve Rank Leaderboard"
+    authors:
+      - "David Renshaw"
+      - "ICARM"
+    contributors: []
+    id: "https://elliptic-rank.icarm.cloud/"
+    type: "web post"
+    location: "curve 302 (rank ≥ 31) and further leaderboard entries"
+    relationship: "formalizes"
+    note: >
+      The Weierstrass coefficients and the explicit rational points certified
+      here are taken from the leaderboard. EllipticCurveRank does not reprove the curve
+      constructions; it certifies the rank lower bound for the given data.
+    license: ""
+    author_endorsement: "endorsed"
+  - title: "History of elliptic curves rank records"
+    authors:
+      - "Andrej Dujella"
+    contributors: []
+    id: "https://web.math.pmf.unizg.hr/~duje/tors/rankhist.html"
+    type: "web post"
+    relationship: "formalizes"
+    note: >
+      Source of curve coefficients and rational points for some of the certified
+      curves. While using this data a mistake was found and reported to Dujella,
+      who corrected the page.
+    license: ""
+    author_endorsement: "other"
+
+# related_formalizations - prior or parallel formalizations, if known.
+related_formalizations: []
+
+# classification - area of mathematics.
+classification:
+  arxiv:
+    - "math.NT"
+  msc2020:
+    - "11G05"                  # Elliptic curves over global fields
+    - "11Y50"                  # Computer solution of Diophantine equations
+    - "14H52"                  # Elliptic curves (algebraic geometry)
+
+# project status
+status:
+  scope: >
+    Given a Weierstrass curve E/ℚ, a list of rational points, and a descent
+    certificate, produce a kernel-checkable term of `HasRankGE E ρ`: E(ℚ)
+    contains a finitely generated ℤ-submodule of free rank at least ρ, hence
+    rank E(ℚ) ≥ ρ. Certification uses a Cremona 2-descent map and reduces in
+    the Lean kernel via `Lean.reflBoolTrue`; no `native_decide` is used.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms:                      # the standard mathlib axioms; no `native_decide`, no project axioms
+    - "propext"
+    - "Classical.choice"
+    - "Quot.sound"
+  main_results:
+    - declaration: "curve302_hasRankGE_31"
+      file: "ECCompute/Curves/Curve302.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator/curve302_hasRankGE_31.json"
+      literature_dependencies:
+        - statement: "Explicit Weierstrass model and independent rational points for curve 302"
+          source: "ICARM Elliptic Curve Rank Leaderboard"
+    - declaration: "curve273_hasRankGE_30"
+      file: "ECCompute/Curves/Curve273.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: ""
+      literature_dependencies:
+        - statement: "Explicit Weierstrass model and independent rational points for curve 273"
+          source: "ICARM Elliptic Curve Rank Leaderboard"
+    # Nine further curves certified by the same pipeline at lower ranks:
+    #   curve12 (29), curve11 (28), curve10 (24), curve9 (23), curve8 (22),
+    #   curve74 (21), curve7 (20) from Dujella's rank-records list; small demo
+    #   curves curve14 (4), curve13 (3) from the ICARM leaderboard. All in
+    #   ECCompute/Curves/.
+
+# how it was produced.
+automation:
+  methods:
+    - method: "manual"
+      tool_setup: >
+        Bhavik Mehta designed the approach: the kernel-reducible certification
+        strategy (Bool checkers closed in the Lean kernel via `Lean.reflBoolTrue`,
+        no `native_decide`), the finitely-generated-subgroup rank argument that
+        sidesteps Mordell-Weil, and the signed `mp - mn` natural-number encoding
+        used in the descent checkers. He sets the metaprogramming methods the
+        agents follow, decomposes the work into tickets, writes some of the
+        commits and PRs, and reviews and merges all of them (agents cannot merge
+        their own).
+    - method: "agent"
+      models:
+        - "claude-opus-4-8"
+        - "claude-opus-5"
+      framework: "Claude Code"
+      tool_setup: >
+        Claude Code agents implement proofs and metaprogramming within those
+        constraints, authoring most of the PRs, working in git worktrees, and
+        verifying with `lake build`.
+
+# fidelity
+fidelity:
+  divergences: >
+    The rank bound is phrased through a finitely generated subgroup
+    (`HasRankGE`) rather than assuming Mordell-Weil finite generation, which
+    mathlib does not have; the subgroup rank lower-bounds the full rank. A small
+    2-torsion correction is applied to the descent-image count.
+
+# review status
+review:
+  status: "self-assessed"
+  reviewers:
+    - "Bhavik Mehta"
+  notes: >
+    Every certificate reduces in the Lean kernel; correctness rests on the
+    soundness lemmas in ECCompute/Soundness/ plus the kernel checkers in
+    ECCompute/Kernel.lean. CI builds the project on each change.
+
+# alignment
+alignment:
+  namespace: "ECCompute"
+  statements:
+    - source: "rank E(ℚ) ≥ ρ via an independent finitely generated subgroup"
+      lean: "hasRankGE_of_certificate"
+      module: "ECCompute/MainTheorem.lean"
+      status: "proved"
+    - source: "curve 302, rank ≥ 31"
+      lean: "curve302_hasRankGE_31"
+      module: "ECCompute/Curves/Curve302.lean"
+      status: "proved"
+    - source: "curve 273, rank ≥ 30"
+      lean: "curve273_hasRankGE_30"
+      module: "ECCompute/Curves/Curve273.lean"
+      status: "proved"
+
+# acknowledgements
+acknowledgements: >
+  Built on mathlib (leanprover-community). Curve data from the ICARM Elliptic
+  Curve Rank Leaderboard and Andrej Dujella's rank-records page. Descent method
+  due to J. E. Cremona. Much of this work was done at the Lean for the LMFDB
+  workshop, funded by Scalable Theorem Proving via Mathematical Databases
+  through the AI for Math Fund (Renaissance Philanthropy, founding donor XTX
+  Markets).
