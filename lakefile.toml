@@ -21,3 +21,10 @@ name = "ECCompute"
 [[lean_lib]]
 name = "Curves"
 leanOptions = { weak.linter.style.longLine = false }
+
+# Trusted statement module for the leanprover/comparator adversarial check of
+# `curve302_hasRankGE_31`. Kept out of `defaultTargets` (and thus out of `mk_all`) so it never
+# collides with the real `curve302` during a normal build; built on demand by comparator.
+[[lean_lib]]
+name = "Curve302Challenge"
+srcDir = "comparator"

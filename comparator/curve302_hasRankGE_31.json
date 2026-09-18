@@ -1,0 +1,7 @@
+{
+    "challenge_module": "Curve302Challenge",
+    "solution_module": "ECCompute.Curves.Curve302",
+    "theorem_names": ["ECCompute.curve302_hasRankGE_31"],
+    "permitted_axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "enable_nanoda": false
+}
