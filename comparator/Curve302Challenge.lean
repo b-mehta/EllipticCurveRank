@@ -16,11 +16,11 @@ Trusted, independent statement of `ECCompute.curve302_hasRankGE_31` for the
 This module carries its own copies of `curve302` and `HasRankGE`, importing only the mathlib modules
 those statements need, so the statement here depends on nothing from the ECCompute development. The
 `sorry` leaves the proof open; the comparator verifies that the solution module
-`ECCompute.Curves.Curve302` proves exactly this statement, using no axioms beyond `propext`,
+`Curves.Curve302` proves exactly this statement, using no axioms beyond `propext`,
 `Classical.choice`, and `Quot.sound`.
 
 `curve302`, `HasRankGE`, and the target rank must be kept identical to
-`ECCompute/Curves/Curve302.lean` and `ECCompute/MainTheorem.lean`.
+`Curves/Curve302.lean` and `ECCompute/MainTheorem.lean`.
 -/
 
 namespace ECCompute

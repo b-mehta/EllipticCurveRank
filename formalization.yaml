@@ -91,7 +91,7 @@ status:
     - "Quot.sound"
   main_results:
     - declaration: "curve302_hasRankGE_31"
-      file: "ECCompute/Curves/Curve302.lean"
+      file: "Curves/Curve302.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: "comparator/curve302_hasRankGE_31.json"
@@ -99,18 +99,18 @@ status:
         - statement: "Explicit Weierstrass model and independent rational points for curve 302"
           source: "ICARM Elliptic Curve Rank Leaderboard"
     - declaration: "curve273_hasRankGE_30"
-      file: "ECCompute/Curves/Curve273.lean"
+      file: "Curves/Curve273.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: ""
       literature_dependencies:
         - statement: "Explicit Weierstrass model and independent rational points for curve 273"
           source: "ICARM Elliptic Curve Rank Leaderboard"
-    # Nine further curves certified by the same pipeline at lower ranks:
-    #   curve12 (29), curve11 (28), curve10 (24), curve9 (23), curve8 (22),
-    #   curve74 (21), curve7 (20) from Dujella's rank-records list; small demo
-    #   curves curve14 (4), curve13 (3) from the ICARM leaderboard. All in
-    #   ECCompute/Curves/.
+    # The same pipeline certifies the full set of leaderboard curves, each identified by
+    #   its ICARM leaderboard id (Curves/Curve001.lean ... Curves/Curve480.lean). curve 302
+    #   (rank 31) and curve 273 (rank 30), listed above, are the two headline results; the
+    #   original record curves (Nagao, Fermigier, Elkies, ...) came from Dujella's rank-records
+    #   list, the rest from the leaderboard.
 
 # how it was produced.
 automation:
@@ -163,11 +163,11 @@ alignment:
       status: "proved"
     - source: "curve 302, rank ≥ 31"
       lean: "curve302_hasRankGE_31"
-      module: "ECCompute/Curves/Curve302.lean"
+      module: "Curves/Curve302.lean"
       status: "proved"
     - source: "curve 273, rank ≥ 30"
       lean: "curve273_hasRankGE_30"
-      module: "ECCompute/Curves/Curve273.lean"
+      module: "Curves/Curve273.lean"
       status: "proved"
 
 # acknowledgements
