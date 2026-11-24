@@ -14,14 +14,14 @@ import ECCompute.ForLean
 /-!
 # Soundness of the kernel-reducible descent character
 
-The kernel `Bool`/`Nat` builders that evaluate the descent character `λ_{p,θ}`
-(`qrMask`, `qrLookupBool`, `lambdaK`, …) live in `ECCompute.Kernel`; this file
+The kernel `Nat` builders that evaluate the descent character `λ_{p,θ}`
+(`qrMask`, `lambdaBitK`, …) live in `ECCompute.Kernel`; this file
 proves them correct.
 
 ## Main declarations
 
 * `ECCompute.qrLookupBool_iff`: the mask bit test decides whether `a` is a nonzero square mod `p`.
-* `ECCompute.lambdaK_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,
+* `ECCompute.lambdaBitK_eq`: the fully-`Nat` kernel mirror, read into `ZMod 2`,
   agrees with the abstract character `lambda`.
 -/
 
@@ -34,6 +34,10 @@ variable {p a : ℕ} {a₂ a₄ a₆ : ℤ}
 `qrMask` is the reference builder the certificate's supplied mask is checked against;
 `qrLookupBool_iff` shows the bit test decides whether `a` is a nonzero square mod `p`.
 -/
+
+/-- `true` iff bit `a` of the quadratic-residue mask `qm` is
+set, i.e. (for `qm = qrMask p`, `a < p`, `p` odd prime) iff `a` is a nonzero square mod `p`. -/
+def qrLookupBool (qm a : ℕ) : Bool := ((qm.shiftRight a).land 1).beq 1
 
 /-- The kernel bit test `(m >>> a) &&& 1 = 1` is `m.testBit a`. -/
 theorem shiftRight_land_one_eq_one_iff {m : ℕ} : (m >>> a) &&& 1 = 1 ↔ m.testBit a := by
@@ -109,7 +113,7 @@ theorem mask_eq_psi (hp : p.Prime) (hp2 : p ≠ 2) {a : ZMod p} (ha : a ≠ 0) :
 
 /-! ### Fully `Nat` mirror
 
-`lambdaK_eq` proves the kernel-reducible `Nat` builder `lambdaK`,
+`lambdaBitK_eq` proves the kernel-reducible `Nat` builder `lambdaBitK`,
 read into `ZMod 2`, agrees with the abstract character `lambda`. -/
 
 section
@@ -150,20 +154,35 @@ theorem fderivResK_eq_val (hp : p ≠ 0) (htval : tval = θ) :
   have hlt : fderivResK a₂ a₄ p tval < p := by simp only [fderivResK]; exact polyModL_lt hp
   rw [← fderivResK_cast hp htval, ZMod.val_cast_of_lt hlt]
 
-/-- `lambdaK` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
+/-- `lambdaBitK` is a bit: `0` or `1`. -/
+public theorem lambdaBitK_eq_zero_or_one {qm : ℕ} :
+    lambdaBitK a₂ a₄ p qm tval xp xm xden = 0 ∨ lambdaBitK a₂ a₄ p qm tval xp xm xden = 1 := by
+  simp only [lambdaBitK, Bool.rec_eq, Nat.shiftRight_eq', Nat.land_eq, Nat.xor_eq,
+    Nat.mod_eq_mod, Nat.beq_eq_beq, Nat.and_one_is_mod]
+  grind [Nat.mod_two_eq_zero_or_one]
+
+/-- `lambdaBitK` with the mask `qrMask p`, read into `ZMod 2`, equals the abstract
 character `lambda` at the affine point, provided its `Nat` inputs encode the arguments: `θ = tval`,
 and `x` has numerator `xp - xm` and denominator `xden`. -/
-public theorem lambdaK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
+public theorem lambdaBitK_eq (hyp : DescentHyp a₂ a₄ a₆ p θ) {x y : ℚ}
     (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y)
     (htval : tval = θ) (hxnum : x.num = xp - xm) (hxden : xden = x.den) :
-    (if lambdaK a₂ a₄ p (qrMask p) tval xp xm xden then 1 else 0)
-      = lambda θ (.some x y h) := by
+    (lambdaBitK a₂ a₄ p (qrMask p) tval xp xm xden : ZMod 2) = lambda θ (.some x y h) := by
   have hp : p ≠ 0 := hyp.prime.ne_zero
   have hp2 : p ≠ 2 := fun hp ↦ hyp.ne_six (hp ▸ ⟨3, rfl⟩)
   have halpha := alphaResK_eq_val hp htval hxnum hxden
   have hden : xden % p = 0 ↔ (x.den : ZMod p) = 0 := by
     rw [hxden, ← Nat.dvd_iff_mod_eq_zero, ZMod.natCast_eq_zero_iff]
-  rw [lambdaK, lambda]
+  have key (a : ℕ) : ((qrMask p >>> a % 2 ^^^ 1 : ℕ) : ZMod 2) =
+      if qrLookupBool (qrMask p) a then 0 else 1 := by
+    have hbit : (qrMask p >>> a % 2 ^^^ 1 : ℕ) = if qrLookupBool (qrMask p) a then 0 else 1 := by
+      grind [qrLookupBool, Nat.mod_two_eq_zero_or_one]
+    rw [hbit]
+    simp only [apply_ite (Nat.cast : ℕ → ZMod 2), Nat.cast_zero, Nat.cast_one]
+  simp only [lambdaBitK, Bool.rec_eq, Nat.shiftRight_eq', Nat.land_eq, Nat.xor_eq,
+    Nat.mod_eq_mod, Nat.beq_eq_beq, Nat.and_one_is_mod, apply_ite (Nat.cast : ℕ → ZMod 2),
+    Nat.cast_zero, key]
+  rw [lambda]
   grind [mask_eq_psi, hyp.prime, ZMod.val_eq_zero, fderivResK_eq_val, fderiv_ne_zero]
 
 end
