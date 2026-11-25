@@ -170,12 +170,16 @@ noncomputable def checkBRow (a₂ a₄ : Int) (xnp xnm xden b : Nat) (ls : List 
     Bool :=
   (checkBRowWord a₂ a₄ xnp xnm xden ls).beq b
 
-/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`. -/
+/-- `true` iff every row of `B` passes `checkBRow` against its point at the same index in `pt`.
+Each point is the flat encoding `(xnA, xs, xd, ynA, yd)`: the split positive/negative parts of the
+`x` numerator are recovered from the magnitude `xnA` and sign `xs` with `Bool.rec`, so no `Int.neg`
+or `Int.toNat` runs on the per-point path. -/
 noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B : List Nat)
-    (pt : List (Rat × Rat)) : Bool :=
+    (pt : List (Nat × Bool × Nat × Nat × Nat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec true
-      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+      (fun p ps _ ↦ (checkBRow a₂ a₄ (Bool.rec (motive := fun _ ↦ Nat) p.1 0 p.2.1)
+          (Bool.rec (motive := fun _ ↦ Nat) 0 p.1 p.2.1) p.2.2.1 b ls).and'
         (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
@@ -185,28 +189,62 @@ noncomputable def checkMaskList (ls : List (Nat × Nat × Nat)) : Bool :=
 /-- `true` iff every entry of `B` equals the descent character at its point in `pt`, with each
 mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
 noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
-    (pt : List (Rat × Rat)) : Bool :=
+    (pt : List (Nat × Bool × Nat × Nat × Nat)) : Bool :=
   (checkMaskList (toLs ls q)).and'
     (checkBGo a₂ a₄ (toLs ls q) B pt)
 
 /-! ## Point on curve -/
 
-/-- `checkPoint a₂ a₄ a₆ x y` tests the cleared short-model Weierstrass identity
-`yn²·xd³ = xn³·yd² + a₂·xn²·xd·yd² + a₄·xn·xd²·yd² + a₆·xd³·yd²` at `x = xn/xd`, `y = yn/yd`.
-Spec: `checkPoint_iff`. -/
-noncomputable def checkPoint (a₂ a₄ a₆ : Int) (x y : Rat) : Bool :=
-  let xn := x.num; let xd := x.den
-  let yn := y.num; let yd := y.den
+/-- `true` iff the integer `a` is negative (`Int.negSucc`), read off the constructor with `Int.rec`
+so the kernel never routes the sign test through `Decidable`. -/
+noncomputable def intSignNeg (a : Int) : Bool :=
+  Int.rec (motive := fun _ ↦ Bool) (fun _ ↦ false) (fun _ ↦ true) a
+
+/-- The short-model point check on `Nat` magnitudes. `aiA`/`si` are the magnitude and sign
+(`true` = negative) of each coefficient. The point is the flat encoding: `xn`/`sx` the magnitude and
+sign of the `x` numerator, `xd` its denominator, `yn`/`yd` the `y` numerator magnitude and
+denominator (the `y` sign is irrelevant, as `y` enters only squared). Every term of the cleared
+Weierstrass identity `yn²·xd³ = xn³·yd² + a₂·xn²·xd·yd² + a₄·xn·xd²·yd² + a₆·xd³·yd²` is split by
+sign into a positive and a negative `Nat` accumulator; the identity holds iff the two accumulators
+are equal. All the products and sums run on `Nat`, with no `Rat`, `Int.natAbs`, or `Int.toNat` on
+the per-point path. -/
+noncomputable def checkPointShortNat (a₂A a₄A a₆A : Nat) (s₂ s₄ s₆ : Bool)
+    (xn : Nat) (sx : Bool) (xd yn yd : Nat) : Bool :=
   let xd2 := xd.mul xd; let xd3 := xd2.mul xd
   let yd2 := yd.mul yd
   let xn2 := xn.mul xn; let xn3 := xn2.mul xn
   let yn2 := yn.mul yn
-  (yn2.mul xd3).beq'
-    ((((xn3.mul yd2).add (((a₂.mul xn2).mul xd).mul yd2)).add
-        (((a₄.mul xn).mul xd2).mul yd2)).add ((a₆.mul xd3).mul yd2))
+  -- term magnitudes
+  let mL := yn2.mul xd3                          -- yn²·xd³   (always ≥ 0)
+  let m1 := xn3.mul yd2                          -- xn³·yd²,        sign sx
+  let m2 := ((a₂A.mul xn2).mul xd).mul yd2       -- a₂·xn²·xd·yd²,  sign s₂
+  let m3 := ((a₄A.mul xn).mul xd2).mul yd2       -- a₄·xn·xd²·yd²,  sign s₄ xor sx
+  let m4 := (a₆A.mul xd3).mul yd2                -- a₆·xd³·yd²,     sign s₆
+  let s3 := Bool.rec (motive := fun _ ↦ Bool) s₄ s₄.not' sx  -- sign of a₄·xn
+  -- move every term to one side of `L - RHS = 0`: a term counts toward `pos` when its own
+  -- contribution to that difference is positive, toward `neg` otherwise.
+  let pos := mL.add ((Bool.rec (motive := fun _ ↦ Nat) 0 m1 sx).add
+    ((Bool.rec (motive := fun _ ↦ Nat) 0 m2 s₂).add
+      ((Bool.rec (motive := fun _ ↦ Nat) 0 m3 s3).add
+        (Bool.rec (motive := fun _ ↦ Nat) 0 m4 s₆))))
+  let neg := (Bool.rec (motive := fun _ ↦ Nat) m1 0 sx).add
+    ((Bool.rec (motive := fun _ ↦ Nat) m2 0 s₂).add
+      ((Bool.rec (motive := fun _ ↦ Nat) m3 0 s3).add
+        (Bool.rec (motive := fun _ ↦ Nat) m4 0 s₆)))
+  pos.beq neg
 
-/-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩`. -/
-noncomputable def checkPoints (a₂ a₄ a₆ : Int) (pts : List (Rat × Rat)) : Bool :=
-  allList (fun p ↦ checkPoint a₂ a₄ a₆ p.1 p.2) pts
+/-- `true` iff every point in `pts` lies on the short model `⟨0, a₂, 0, a₄, a₆⟩` and both coordinates
+are in lowest terms with positive denominator. Each point is the flat encoding
+`(xnA, xs, xd, ynA, yd)` of `Nat`/`Bool` literals. The per-point check runs entirely on `Nat`; the
+`((·.gcd ·).beq 1).and' (Nat.ble 1 ·)` clauses verify the reduced form the descent character
+`checkB` relies on. -/
+noncomputable def checkPoints (a₂ a₄ a₆ : Int)
+    (pts : List (Nat × Bool × Nat × Nat × Nat)) : Bool :=
+  allList (fun p ↦
+    (checkPointShortNat a₂.natAbs a₄.natAbs a₆.natAbs
+        (intSignNeg a₂) (intSignNeg a₄) (intSignNeg a₆)
+        p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2).and'
+      ((((p.1.gcd p.2.2.1).beq 1).and' (Nat.ble 1 p.2.2.1)).and'
+        (((p.2.2.2.1.gcd p.2.2.2.2).beq 1).and' (Nat.ble 1 p.2.2.2.2)))) pts
 
 end ECCompute
