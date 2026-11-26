@@ -10,6 +10,7 @@ public import Mathlib.Data.ZMod.Basic
 public import Mathlib.Data.Matrix.Basic
 
 import Mathlib.Data.Nat.Bitwise
+import Mathlib.Data.List.GetD
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.BigOperators.Fin
 import ECCompute.ForLean
