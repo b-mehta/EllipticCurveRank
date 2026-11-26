@@ -26,15 +26,13 @@ import Mathlib.Tactic.Linarith
 
 namespace ECCompute
 
-open Internal
-
 section
 variable {x : ℕ}
 
 @[simp, grind =] theorem passes_nil : passes x [] := rfl
 
 @[simp, grind =] theorem passes_cons {a : ℕ} {t : List ℕ} :
-    passes x (a :: t) = ((Nat.ble 1 (x % a)).or' (x.ble a)).and' (passes x t) := rfl
+    passes x (a :: t) = ((Nat.ble 1 (x % a)).or (x.ble a)).and (passes x t) := rfl
 
 /-- `passes x L` holds exactly when every `i ∈ L` fails to be a proper divisor of `x`: either
 `x % i ≠ 0` or `x ≤ i`. -/

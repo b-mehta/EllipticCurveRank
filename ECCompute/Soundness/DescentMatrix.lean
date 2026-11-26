@@ -21,8 +21,6 @@ entry of the certificate matrix `B` equals the kernel-computed descent character
 
 namespace ECCompute
 
-open Internal
-
 variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
   {pt : List (ℚ × ℚ)}
 
@@ -38,7 +36,7 @@ theorem checkBRowWord_cons {l : ℕ × ℕ × ℕ} :
 @[simp, grind =]
 theorem checkBGo_cons_cons {bs : List ℕ} {p : ℚ × ℚ} {ps : List (ℚ × ℚ)} :
     checkBGo a₂ a₄ ls (b :: bs) (p :: ps) =
-      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+      (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and
         (checkBGo a₂ a₄ ls bs ps) := rfl
 
 variable {i j : ℕ}
@@ -81,7 +79,7 @@ public theorem checkB_true {ρ : ℕ} {ls : List (ℕ × ℤ)} {q : List ℕ}
     F2Invert.toMat B ρ i j =
       (lambdaBitK a₂ a₄ ls[j].1 (qrMask ls[j].1) (ls[j].2 % ls[j].1).toNat
         pt[i].1.num.toNat (-pt[i].1.num).toNat pt[i].1.den : ZMod 2) := by
-  rw [checkB, Bool.and'_eq_and, Bool.and_eq_true] at h
+  rw [checkB, Bool.and_eq_true] at h
   set ns := toLs ls q with hnsdef
   have hns : ns.length = ρ := by rw [hnsdef, toLs, List.length_zipWith, hllen, hqlen, Nat.min_self]
   have hgetN : ns[j] = (ls[j].1, (ls[j].2 % ls[j].1).toNat, q[j]) := by simp [hnsdef, toLs]

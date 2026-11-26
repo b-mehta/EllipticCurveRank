@@ -20,25 +20,23 @@ aggregate descent-matrix check, and the point-on-curve check.
 
 namespace ECCompute
 
-open Internal
-
 /-- `true` iff `p m = true` for every `m < n`. -/
-noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool := n.rec true fun m r ↦ (p m).and' r
+noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool := n.rec true fun m r ↦ (p m).and r
 
 /-- `true` iff `p a = true` for every `a ∈ l`. -/
 noncomputable def allList {α : Type} (p : α → Bool) : List α → Bool :=
-  List.rec true fun a _ r ↦ (p a).and' r
+  List.rec true fun a _ r ↦ (p a).and r
 
 /-! ## Primes -/
 
 /-- `true` iff no `i ∈ L` with `i < x` divides `x`. -/
 noncomputable def passes (x : Nat) : List Nat → Bool :=
-  List.rec true (fun i _ r ↦ ((Nat.ble 1 (x.mod i)).or' (x.ble i)).and' r)
+  List.rec true (fun i _ r ↦ ((Nat.ble 1 (x.mod i)).or (x.ble i)).and r)
 
 /-- `true` iff `p` is a prime below `529 = 23²`, certified by trial division by the primes below
 `23` (`ECCompute.passes`). -/
 noncomputable def checkPrime (p : Nat) : Bool :=
-  (Nat.ble 2 p).and' ((p.ble 528).and' (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
+  (Nat.ble 2 p).and ((p.ble 528).and (passes p [2, 3, 5, 7, 11, 13, 17, 19]))
 
 /-- `true` iff every label's prime component passes `checkPrime`. -/
 noncomputable def checkPrimes (labels : List (Nat × Int)) : Bool :=
@@ -64,7 +62,7 @@ noncomputable def polyModK (cs : List Nat) (ℓ r : Nat) : Nat :=
 /-- `true` iff the monic integer polynomial with lower coefficients `cs`
 (implicit leading coefficient `1`) has no root modulo `ℓ`, trying every residue `0, …, ℓ - 1`. -/
 noncomputable def monicHasNoRootMod (cs : List Int) (ℓ : Nat) : Bool :=
-  allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not'
+  allBelow ℓ fun r ↦ ((polyModL (cs ++ [1]) ℓ r).beq 0).not
 
 /-! ## Descent label check
 
@@ -89,8 +87,8 @@ noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (Δ : Int) (p : Nat) (θ 
   let r₂ := a₂r.mod p
   let r₄ := a₄r.mod p
   let r₆ := a₆r.mod p
-  ((Nat.mod 6 p).beq 0).not'.and'
-    (((Δ.emod p).beq' 0).not'.and'
+  ((Nat.mod 6 p).beq 0).not.and
+    (((Δ.emod p).beq' 0).not.and
       ((polyModK [r₆, r₄, r₂, 1] p (θ.emod p).toNat).beq 0))
 
 /-- `true` iff `P` is positive, each of `a₂r, a₄r, a₆r` equals the corresponding coefficient mod
@@ -98,12 +96,12 @@ noncomputable def checkLabel (a₂r a₄r a₆r : Nat) (Δ : Int) (p : Nat) (θ 
 label passes `checkLabel`. Sound by `descentHyp_of_checkLabels`. -/
 noncomputable def checkLabels (a₂ a₄ a₆ : Int) (P a₂r a₄r a₆r : Nat) (Δ : Int)
     (labels : List (Nat × Int)) : Bool :=
-  (Nat.ble 1 P).and'
-    ((a₂r.beq (a₂.emod (Int.ofNat P)).toNat).and'
-      ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and'
-        ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and'
-          ((Δ.beq' (discrIntK a₂ a₄ a₆)).and'
-            (allList (fun l ↦ ((P.mod l.1).beq 0).and' (checkLabel a₂r a₄r a₆r Δ l.1 l.2))
+  (Nat.ble 1 P).and
+    ((a₂r.beq (a₂.emod (Int.ofNat P)).toNat).and
+      ((a₄r.beq (a₄.emod (Int.ofNat P)).toNat).and
+        ((a₆r.beq (a₆.emod (Int.ofNat P)).toNat).and
+          ((Δ.beq' (discrIntK a₂ a₄ a₆)).and
+            (allList (fun l ↦ ((P.mod l.1).beq 0).and (checkLabel a₂r a₄r a₆r Δ l.1 l.2))
               labels)))))
 
 /-! ## Descent character -/
@@ -146,7 +144,7 @@ noncomputable def invRowK (bi : Nat) (M : List Nat) : Nat :=
 /-- Fold over the rows of `B`: row `b` at index `i` must give `invRowK b M = 1 <<< i`. -/
 noncomputable def checkInvGo (M : List Nat) (i : Nat) (B : List Nat) : Bool :=
   B.rec (fun _ ↦ true)
-    (fun b _ ih i ↦ ((invRowK b M).beq (Nat.shiftLeft 1 i)).and' (ih i.succ)) i
+    (fun b _ ih i ↦ ((invRowK b M).beq (Nat.shiftLeft 1 i)).and (ih i.succ)) i
 
 /-- `true` iff `B * M = I` over `𝔽₂`, with `B` and `M` given by rows (each a `Nat` bitmask). -/
 noncomputable def checkInv (B M : List Nat) : Bool := checkInvGo M 0 B
@@ -177,7 +175,7 @@ noncomputable def checkBGo (a₂ a₄ : Int) (ls : List (Nat × Nat × Nat)) (B 
     (pt : List (Rat × Rat)) : Bool :=
   B.rec (fun _ ↦ true)
     (fun b _ ih pt ↦ pt.rec true
-      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and'
+      (fun p ps _ ↦ (checkBRow a₂ a₄ p.1.num.toNat (-p.1.num).toNat p.1.den b ls).and
         (ih ps))) pt
 
 /-- `true` iff each triple's mask equals `qrMask p` for its prime `p`. -/
@@ -188,7 +186,7 @@ noncomputable def checkMaskList (ls : List (Nat × Nat × Nat)) : Bool :=
 mask in `q` checked against `qrMask`. Spec: `checkB_true`. -/
 noncomputable def checkB (a₂ a₄ : Int) (ls : List (Nat × Int)) (q B : List Nat)
     (pt : List (Rat × Rat)) : Bool :=
-  (checkMaskList (toLs ls q)).and'
+  (checkMaskList (toLs ls q)).and
     (checkBGo a₂ a₄ (toLs ls q) B pt)
 
 /-! ## Point on curve -/

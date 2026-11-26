@@ -28,7 +28,7 @@ a passing `checkInv B M`, with a claimed inverse `M` by rows, certifies that the
 
 namespace ECCompute.F2Invert
 
-open Finset Internal
+open Finset
 
 variable {a b : Bool}
 
@@ -66,7 +66,7 @@ theorem bId_invRowK_testBit {ms : List ℕ} {b j : ℕ} :
 variable {n i i' : ℕ} {B M : List ℕ}
 
 @[simp, grind =] theorem checkInvGo_cons {b : ℕ} {bs : List ℕ} :
-    checkInvGo M i (b :: bs) = ((invRowK b M).beq (1 <<< i)).and' (checkInvGo M i.succ bs) := rfl
+    checkInvGo M i (b :: bs) = ((invRowK b M).beq (1 <<< i)).and (checkInvGo M i.succ bs) := rfl
 
 /-- Interpret a `List Nat` of row bitmasks as an `n × n` matrix over `𝔽₂`. -/
 public def toMat (B : List ℕ) (n : ℕ) : Matrix (Fin n) (Fin n) (ZMod 2) :=
