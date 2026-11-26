@@ -173,7 +173,7 @@ section Psi
 variable {a b : ZMod p}
 
 /-- `ψ_p` vanishes on squares. -/
-public theorem psi_of_isSquare (ha : IsSquare a) : psi p a = 0 := if_pos ha
+public theorem psi_of_isSquare (ha : IsSquare a) : psi p a = 0 := ite_eq_left ha
 
 /-- On the nonzero elements of `ZMod p` (`p` prime), `ψ_p` turns products into sums:
 `ψ_p(ab) = ψ_p a + ψ_p b`. -/

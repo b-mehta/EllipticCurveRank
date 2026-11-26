@@ -32,6 +32,8 @@ into a `DescentHyp`.
 
 namespace ECCompute
 
+open Internal
+
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/

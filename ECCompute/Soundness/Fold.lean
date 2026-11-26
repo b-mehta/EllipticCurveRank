@@ -19,6 +19,8 @@ peel one step.
 
 namespace ECCompute
 
+open Internal
+
 section
 variable {n : ℕ} {p : ℕ → Bool}
 

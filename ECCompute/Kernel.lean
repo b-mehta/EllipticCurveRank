@@ -20,6 +20,8 @@ aggregate descent-matrix check, and the point-on-curve check.
 
 namespace ECCompute
 
+open Internal
+
 /-- `true` iff `p m = true` for every `m < n`. -/
 noncomputable def allBelow (n : Nat) (p : Nat → Bool) : Bool := n.rec true fun m r ↦ (p m).and' r
 

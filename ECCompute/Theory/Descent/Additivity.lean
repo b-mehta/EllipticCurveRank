@@ -49,7 +49,7 @@ theorem lambda_some_of_den_ne [Fact p.Prime] {x y : ℚ}
 /-- When `p ∣ x.den` the point reduces to `O` of `E/𝔽ₚ`, where `λ` vanishes. -/
 theorem lambda_some_of_den_zero {x y : ℚ}
     (h : (curveQ a₂ a₄ a₆).toAffine.Nonsingular x y) (hd : (x.den : ZMod p) = 0) :
-    lambda θ (.some x y h) = 0 := by simp only [lambda, if_pos hd]
+    lambda θ (.some x y h) = 0 := by simp only [lambda, ite_eq_left hd]
 
 /-! ### Additivity via the reduction factorization
 
