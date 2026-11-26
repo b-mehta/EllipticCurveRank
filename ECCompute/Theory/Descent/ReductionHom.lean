@@ -320,8 +320,8 @@ theorem den_zero_of_cert (hp : p.Prime) {x₃ : ℚ} {K N M : ℤ}
   have hx3neg : padicValRat p x₃ < 0 := by
     rw [hx3div, padicValRat.div (mod_cast hNum0) hDen3Q, hNumvalQ, padicValRat.of_int, hDenval]
     grind
-  have hden0 : padicValNat p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
-  exact (ZMod.natCast_eq_zero_iff _ p).mpr ((dvd_iff_padicValNat_ne_zero x₃.den_ne_zero).mpr hden0)
+  have hden0 : multiplicity p x₃.den ≠ 0 := by rw [padicValRat_def] at hx3neg; lia
+  exact (ZMod.natCast_eq_zero_iff _ p).mpr ((dvd_iff_multiplicity_ne_zero x₃.den_ne_zero).mpr hden0)
 
 /-- The valuation inequality `v_p(N) < v_p(K)`, with `N ≠ 0` and `K ≠ 0`, for `K = AG² - CE²`,
 `N = ADE - BCG` under `p ∣ E`, `p ∣ G` and `p`-unit `A`, `C`. -/
@@ -351,7 +351,7 @@ theorem crux_of_int_relations (hpZ : Prime (p : ℤ))
   rw [padicValInt.mul hN0 (by lia), padicValInt.mul hK0 hW0,
     padicValInt.eq_zero_of_not_dvd hpW] at hI2
   have : 1 ≤ padicValInt p (A * D * E + B * C * G) := by
-    apply one_le_padicValNat_of_dvd (by grind)
+    apply one_le_multiplicity_of_dvd (by grind)
     rwa [← Int.ofNat_dvd_left]
   grind
 
