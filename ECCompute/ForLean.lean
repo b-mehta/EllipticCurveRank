@@ -11,8 +11,6 @@ module
 
 public section
 
-open Internal
-
 @[simp, grind =] theorem Nat.mod_eq_mod : Nat.mod a b = a % b := rfl
 
 @[simp, grind =] theorem Int.sub_eq : Int.sub a b = a - b := rfl
@@ -26,4 +24,4 @@ theorem Nat.beq_eq_beq : Nat.beq a b = (a == b) := by rw [Bool.eq_iff_iff]; simp
 
 attribute [grind =] Nat.add_eq Nat.mul_eq Nat.ble_eq Nat.shiftRight_eq' Nat.land_eq Nat.xor_eq
 attribute [grind =] Int.add_def Int.mul_def
-attribute [grind =] Bool.and'_eq_and Bool.not'_eq_not Bool.or'_eq_or Bool.rec_eq
+attribute [grind =] Bool.rec_eq
