@@ -19,8 +19,6 @@ peel one step.
 
 namespace ECCompute
 
-open Internal
-
 section
 variable {n : ℕ} {p : ℕ → Bool}
 
@@ -28,14 +26,14 @@ variable {n : ℕ} {p : ℕ → Bool}
 @[simp] theorem allBelow_zero : allBelow 0 p = true := rfl
 
 /-- `allBelow (n + 1) p` peels the top index: it folds `p n` into `allBelow n p`. -/
-@[simp, grind =] theorem allBelow_succ : allBelow (n + 1) p = (p n).and' (allBelow n p) := rfl
+@[simp, grind =] theorem allBelow_succ : allBelow (n + 1) p = (p n).and (allBelow n p) := rfl
 
 /-- `allBelow` is `true` exactly when `p` holds at every `m < n`. -/
 @[grind =] public theorem allBelow_iff : allBelow n p ↔ ∀ m < n, p m := by
   induction n with
   | zero => simp
   | succ k ih =>
-    rw [allBelow_succ, Bool.and'_eq_and, Bool.and_eq_true, ih]
+    rw [allBelow_succ, Bool.and_eq_true, ih]
     grind
 
 end
@@ -47,13 +45,13 @@ variable {α : Type} {p : α → Bool} {l : List α}
 @[simp] theorem allList_nil : allList p [] = true := rfl
 
 /-- `allList` peels the head element, folding `p a` into `allList p l`. -/
-@[simp, grind =] theorem allList_cons {a : α} : allList p (a :: l) = (p a).and' (allList p l) := rfl
+@[simp, grind =] theorem allList_cons {a : α} : allList p (a :: l) = (p a).and (allList p l) := rfl
 
 /-- `allList` computes the universal quantifier over the members of a list. -/
 @[grind =] public theorem allList_iff : allList p l ↔ ∀ a ∈ l, p a := by
   induction l with
   | nil => simp
-  | cons a t ih => rw [allList_cons, Bool.and'_eq_and, Bool.and_eq_true, ih, List.forall_mem_cons]
+  | cons a t ih => rw [allList_cons, Bool.and_eq_true, ih, List.forall_mem_cons]
 
 end
 

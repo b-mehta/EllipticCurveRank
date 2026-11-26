@@ -32,8 +32,6 @@ into a `DescentHyp`.
 
 namespace ECCompute
 
-open Internal
-
 variable {a₂ a₄ a₆ : ℤ} {p : ℕ} {θ : ℤ}
 
 /-- The label residue test reads as the monic cubic `θ³ + a₂θ² + a₄θ + a₆` vanishing mod `p`. -/
@@ -83,7 +81,7 @@ theorem descentHyp_of_checkLabel {P a₂r a₄r a₆r : ℕ} {Δ : ℤ} (hP : P 
   have hr₄' := resP_cast hP hpP h₄
   have hr₆' := resP_cast hP hpP h₆
   rw [checkLabel] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Bool.not'_eq_not, Nat.mod_eq_mod] at h
+  simp only [Bool.and_eq_true, Nat.mod_eq_mod] at h
   obtain ⟨h6', hΔ', hf⟩ := h
   refine ⟨hp, ?_, ?_, ?_⟩
   · -- `p ∤ 6`
@@ -99,7 +97,7 @@ public theorem descentHyp_of_checkLabels {labels : List (ℕ × ℤ)} {P a₂r a
     (h : checkLabels a₂ a₄ a₆ P a₂r a₄r a₆r Δ labels) {l : ℕ × ℤ} (hl : l ∈ labels)
     (hp : l.1.Prime) : DescentHyp a₂ a₄ a₆ l.1 l.2 := by
   rw [checkLabels] at h
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq,
+  simp only [Bool.and_eq_true, Nat.ble_eq, allList_iff, Nat.beq_eq,
     Int.beq'_eq] at h
   obtain ⟨hP, h₂, h₄, h₆, hΔ, hfold⟩ := h
   rw [discrIntK_eq] at hΔ
