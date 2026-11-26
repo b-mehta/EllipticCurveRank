@@ -25,7 +25,7 @@ variable {a₂ a₄ a₆ : ℤ}
 
 /-- The rational coordinate `(xnA, xs, xd)` of a flat point: magnitude `xnA`, sign `xs`
 (`true` = negative), denominator `xd`. -/
-noncomputable def flatCoord (xnA : ℕ) (xs : Bool) (xd : ℕ) : ℚ :=
+public noncomputable def flatCoord (xnA : ℕ) (xs : Bool) (xd : ℕ) : ℚ :=
   (if xs then -(xnA : ℚ) else (xnA : ℚ)) / (xd : ℚ)
 
 /-- `checkPoints` over the flat encoding holds iff every decoded point satisfies the short-model
