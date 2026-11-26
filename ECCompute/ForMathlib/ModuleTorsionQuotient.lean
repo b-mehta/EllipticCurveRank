@@ -163,17 +163,6 @@ variable {H : Type*} [AddCommGroup H] {n : ℕ}
 /-- The `n`-torsion `H[n]` is the kernel of the map `x ↦ n • x`. -/
 lemma torsionBy_eq_ker : Submodule.torsionBy ℤ H n = LinearMap.ker (LinearMap.lsmul ℤ H n) := rfl
 
-theorem isAddTorsion [NeZero n] : IsAddTorsion (ModN H n) := by
-  intro x
-  rw [isOfFinAddOrder_iff_nsmul_eq_zero]
-  refine ⟨n, NeZero.pos _, by simp [← Nat.cast_smul_eq_nsmul (ZMod n)]⟩
-
-public instance [NeZero n] [Module.Finite ℤ H] : Finite (ModN H n) :=
-  Module.finite_of_fg_torsion (ModN H n) (isAddTorsion_iff_isTorsion_int.1 isAddTorsion)
-
-public instance [NeZero n] [Module.Finite ℤ H] : Module.Finite (ZMod n) (ModN H n) :=
-  Module.Finite.of_finite
-
 public instance [NeZero n] [Module.Finite ℤ H] : Finite (Submodule.torsionBy ℤ H n) :=
   Module.finite_of_fg_torsion _
     (Submodule.torsionBy_isTorsion_nonZeroDivisor _ (by simp [NeZero.ne]))
