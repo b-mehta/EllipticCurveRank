@@ -11,6 +11,8 @@ module
 
 public section
 
+open Internal
+
 @[simp, grind =] theorem Nat.mod_eq_mod : Nat.mod a b = a % b := rfl
 
 @[simp, grind =] theorem Int.sub_eq : Int.sub a b = a - b := rfl

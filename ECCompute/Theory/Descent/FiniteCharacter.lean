@@ -86,15 +86,17 @@ theorem εp_sum_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x₃ : ZMod
   have hfd3 : x₃ = θ → fderiv (a₂ : ZMod p) a₄ θ = (x₁ - θ) * (x₂ - θ) :=
     fderiv_eq_prod ℓ m ⟨by grind, by grind, by grind⟩ hθroot
   obtain rfl | c1 := eq_or_ne x₁ θ
-  · rw [if_neg (by grind), if_pos rfl, if_neg (by grind), hfd1 rfl,
+  · rw [ite_eq_right (by grind), ite_eq_left rfl, ite_eq_right (by grind), hfd1 rfl,
       psi_mul h.prime (by grind) (by grind)]
     grind
   obtain rfl | c2 := eq_or_ne x₂ θ
-  · rw [if_neg (by grind), if_neg c1, if_pos rfl, hfd2 rfl, psi_mul h.prime (by grind) (by grind)]
+  · rw [ite_eq_right (by grind), ite_eq_right c1, ite_eq_left rfl, hfd2 rfl,
+      psi_mul h.prime (by grind) (by grind)]
     grind
   obtain rfl | c3 := eq_or_ne x₃ θ
-  · rw [if_pos rfl, if_neg c1, if_neg c2, hfd3 rfl, psi_mul h.prime (by grind) (by grind)]
-  · rw [if_neg c3, if_neg c1, if_neg c2]
+  · rw [ite_eq_left rfl, ite_eq_right c1, ite_eq_right c2, hfd3 rfl,
+      psi_mul h.prime (by grind) (by grind)]
+  · rw [ite_eq_right c3, ite_eq_right c1, ite_eq_right c2]
     grind [psi_collinear h.prime hv h.root c1 c2 c3]
 
 /-- Additivity of `εpFinite` in the secant case: `P = (x₁, y₁)` and `Q = (x₂, y₂)` have
@@ -122,7 +124,7 @@ theorem εp_double_of_vieta (h : DescentHyp a₂ a₄ a₆ p θ) {ℓ m x x₃ :
   obtain rfl | c3 := eq_or_ne x₃ θ
   · rw [fderiv_eq_prod ℓ m (x₂ := x) (x₃ := x) ⟨by grind, by grind, by grind⟩ hθroot rfl]
     simp [psi_of_isSquare]
-  rw [if_neg c3]
+  rw [ite_eq_right c3]
   have hpm : psi p ((x - θ) * (x - θ) * (x₃ - θ)) = 0 := by
     rw [prod_sub_theta_eq_lineSq hv hθroot]
     exact psi_of_isSquare ⟨ℓ * θ + m, by ring⟩

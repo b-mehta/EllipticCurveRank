@@ -21,6 +21,8 @@ entry of the certificate matrix `B` equals the kernel-computed descent character
 
 namespace ECCompute
 
+open Internal
+
 variable {a₂ a₄ : ℤ} {xnp xnm xden b : ℕ} {ls : List (ℕ × ℕ × ℕ)} {B : List ℕ}
   {pt : List (ℚ × ℚ)}
 

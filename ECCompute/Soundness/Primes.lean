@@ -26,6 +26,8 @@ import Mathlib.Tactic.Linarith
 
 namespace ECCompute
 
+open Internal
+
 section
 variable {x : ℕ}
 

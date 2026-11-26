@@ -28,7 +28,7 @@ a passing `checkInv B M`, with a claimed inverse `M` by rows, certifies that the
 
 namespace ECCompute.F2Invert
 
-open Finset
+open Finset Internal
 
 variable {a b : Bool}
 
