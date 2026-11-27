@@ -71,7 +71,7 @@ theorem checkPointShortNat_iff {xn : ℕ} {sx : Bool} {xd yn yd : ℕ} (hxd : 0 
       (⟨0, a₂, 0, a₄, a₆⟩ : WeierstrassCurve ℚ).toAffine.Equation
         ((if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)) ((yn : ℚ) / (yd : ℚ)) :=
   checkPointShortNat_intId.trans
-    (intId_iff_equation (by exact_mod_cast hxd.ne') (by exact_mod_cast hyd.ne'))
+    (intId_iff_equation (by exact mod_cast hxd.ne') (by exact mod_cast hyd.ne'))
 
 /-- `checkPoints` holds iff every listed point, decoded from its flat `(xnA, xs, xd, ynA, yd)`
 encoding, satisfies the short-model equation and is in lowest terms with positive denominators (the
@@ -92,25 +92,27 @@ public theorem checkPoints_iff {pts : List (ℕ × Bool × ℕ × ℕ × ℕ)} :
   · rintro ⟨heq, hcx, hdx, hcy, hdy⟩
     exact ⟨(checkPointShortNat_iff hdx hdy).mpr heq, ⟨hcx, hdx⟩, hcy, hdy⟩
 
-/-- The decoded `x`-coordinate `(if sx then -xn else xn) / xd` of a reduced flat point has the
-signed numerator `if sx then -xn else xn`. -/
+/-- The decoded `x`-coordinate `(if sx then -xn else xn) / xd` as a quotient of integers. -/
+theorem decode_eq {xn xd : ℕ} {sx : Bool} :
+    (if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)
+      = ((if sx then -(xn : ℤ) else (xn : ℤ) : ℤ) : ℚ) / ((xd : ℤ) : ℚ) := by
+  cases sx <;> push_cast <;> ring
+
+/-- The signed `x` numerator and `xd` are coprime when `xn` and `xd` are. -/
+theorem decode_coprime {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) :
+    (if sx then -(xn : ℤ) else (xn : ℤ)).natAbs.Coprime (xd : ℤ).natAbs := by
+  cases sx <;> simpa [Int.natAbs_neg] using hcx
+
+/-- The decoded `x`-coordinate of a reduced flat point has signed numerator `if sx then -xn else xn`. -/
 public theorem decode_num {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) (hdx : 0 < xd) :
     ((if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)).num = if sx then -(xn : ℤ) else (xn : ℤ) := by
-  have hb : (0 : ℤ) < (xd : ℤ) := by exact_mod_cast hdx
-  have key : (if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)
-      = ((if sx then -(xn : ℤ) else (xn : ℤ) : ℤ) : ℚ) / ((xd : ℤ) : ℚ) := by
-    cases sx <;> push_cast <;> ring
-  rw [key, Rat.num_div_eq_of_coprime hb (by cases sx <;> simpa [Int.natAbs_neg] using hcx)]
+  rw [decode_eq, Rat.num_div_eq_of_coprime (by exact mod_cast hdx) (decode_coprime hcx)]
 
 /-- The decoded `x`-coordinate of a reduced flat point has denominator `xd`. -/
 public theorem decode_den {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) (hdx : 0 < xd) :
     ((if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)).den = xd := by
-  have hb : (0 : ℤ) < (xd : ℤ) := by exact_mod_cast hdx
-  have key : (if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)
-      = ((if sx then -(xn : ℤ) else (xn : ℤ) : ℤ) : ℚ) / ((xd : ℤ) : ℚ) := by
-    cases sx <;> push_cast <;> ring
-  rw [key]
-  exact_mod_cast Rat.den_div_eq_of_coprime hb (a := if sx then -(xn : ℤ) else (xn : ℤ))
-    (by cases sx <;> simpa [Int.natAbs_neg] using hcx)
+  rw [decode_eq]
+  exact mod_cast Rat.den_div_eq_of_coprime (by exact mod_cast hdx)
+    (a := if sx then -(xn : ℤ) else (xn : ℤ)) (decode_coprime hcx)
 
 end ECCompute
