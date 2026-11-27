@@ -37,7 +37,7 @@ theorem checkPointShortNat_intId {xn : ℕ} {sx : Bool} {xd yn yd : ℕ} :
   rw [← Nat.cast_inj (R := ℤ)]
   cases a₂ <;> cases a₄ <;> cases a₆ <;> cases sx <;>
     simp only [intSignNeg, Int.natAbs_ofNat', Int.natAbs_negSucc, Nat.succ_eq_add_one,
-      Bool.not'_eq_not, Bool.not_true, Bool.not_false] <;>
+      Bool.not_true, Bool.not_false] <;>
     simp only [Int.ofNat_eq_natCast, Int.negSucc_eq, Nat.mul_eq, Nat.add_eq] <;>
     push_cast <;>
     constructor <;> intro h <;> linear_combination h
@@ -85,7 +85,7 @@ public theorem checkPoints_iff {pts : List (ℕ × Bool × ℕ × ℕ × ℕ)} :
   rw [checkPoints, allList_iff]
   refine forall_congr' fun p => imp_congr_right fun _ => ?_
   obtain ⟨xn, sx, xd, yn, yd⟩ := p
-  simp only [Bool.and'_eq_and, Bool.and_eq_true, Nat.beq_eq, Nat.ble_eq, Nat.Coprime]
+  simp only [Bool.and_eq_true, Nat.beq_eq, Nat.ble_eq, Nat.Coprime]
   constructor
   · rintro ⟨hchk, ⟨hcx, hdx⟩, hcy, hdy⟩
     exact ⟨(checkPointShortNat_iff hdx hdy).mp hchk, hcx, hdx, hcy, hdy⟩
