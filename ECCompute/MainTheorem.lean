@@ -82,9 +82,98 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     (h₄ : 16 * a₄ + 8 * a₁ * a₃ = c.a₄) (h₆ : 64 * a₆ + 16 * a₃ ^ 2 = c.a₆)
     (hc : c.Valid) :
     HasRankGE W (c.ρ - c.t) := by
-  -- Measurement branch: the flat point encoding's soundness route into the main deduction is
-  -- deferred. The per-curve kernel reduction being timed lives in each `certify_curve` proof term,
-  -- independent of this proof.
-  sorry
+  obtain ⟨hlenP, hlenL, hlenB, hlenM, hlenQ, hpt, hlsP, hlsC, hB, hinv, htors⟩ := hc
+  subst hW
+  suffices this : HasRankGE (curveQ c.a₂ c.a₄ c.a₆) (c.ρ - c.t) by
+    set W : WeierstrassCurve ℚ := ⟨a₁, a₂, a₃, a₄, a₆⟩
+    -- Complete the square (`toCharNeTwoNF`) and scale by `2` (the change `⟨1/2, 0, 0, 0⟩`), as a
+    -- single variable change `C`, to land on the certificate's integral short model.
+    set C : VariableChange ℚ := ⟨(Units.mk0 2 two_ne_zero)⁻¹, 0, 0, 0⟩ * W.toCharNeTwoNF with hC
+    have hsm : C • W = curveQ c.a₂ c.a₄ c.a₆ := by
+      rw [hC, mul_smul, ← h₂, ← h₄, ← h₆]
+      ext <;>
+      simp [variableChange_a₁, variableChange_a₂, variableChange_a₃, variableChange_a₄,
+        variableChange_a₆, curve] <;>
+      grind
+    exact hasRankGE_of_addEquiv C.pointAddEquiv (hsm ▸ this)
+  clear h₂ h₄ h₆ a₁ a₂ a₃ a₄ a₆
+  rw [checkPoints_iff] at hpt
+  have hbridge : curveQ c.a₂ c.a₄ c.a₆ = ⟨0, c.a₂, 0, c.a₄, c.a₆⟩ := curve_baseChange_eq
+  -- The `i`th generating point, decoded from its flat `(xnA, xs, xd, ynA, yd)` encoding.
+  set pt : Fin c.ρ → ℚ × ℚ := fun i ↦
+    ((if c.points[i].2.1 then -(c.points[i].1 : ℚ) else (c.points[i].1 : ℚ)) /
+        (c.points[i].2.2.1 : ℚ), (c.points[i].2.2.2.1 : ℚ) / (c.points[i].2.2.2.2 : ℚ)) with hptdef
+  set ls : Fin c.ρ → ℕ × ℤ := fun j ↦ c.labels[j]
+  replace hlsP (j : Fin c.ρ) : (ls j).1.Prime := checkPrimes_true hlsP _ (List.getElem_mem _)
+  replace hlsC (j : Fin c.ρ) : DescentHyp c.a₂ c.a₄ c.a₆ (ls j).1 (ls j).2 :=
+    descentHyp_of_checkLabels hlsC (List.getElem_mem _) (hlsP j)
+  -- Each listed point is in lowest terms with positive denominators.
+  have hco (i : Fin c.ρ) : c.points[i].1.Coprime c.points[i].2.2.1 ∧ 0 < c.points[i].2.2.1
+      ∧ c.points[i].2.2.2.1.Coprime c.points[i].2.2.2.2 ∧ 0 < c.points[i].2.2.2.2 :=
+    (hpt _ (List.getElem_mem _)).2
+  replace hpt (i : Fin c.ρ) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Equation (pt i).1 (pt i).2 := by
+    rw [hbridge]
+    exact (hpt _ (List.getElem_mem _)).1
+  -- The reduced form lets us read the `x` numerator off its flat `(magnitude, sign)` parts.
+  have hxnum (i : Fin c.ρ) : (pt i).1.num =
+      (Bool.rec (motive := fun _ ↦ ℕ) c.points[i].1 0 c.points[i].2.1 : ℤ)
+        - (Bool.rec (motive := fun _ ↦ ℕ) 0 c.points[i].1 c.points[i].2.1 : ℤ) := by
+    obtain ⟨hcx, hdx, -, -⟩ := hco i
+    have hb : (0 : ℤ) < (c.points[i].2.2.1 : ℤ) := by exact_mod_cast hdx
+    cases hs : c.points[i].2.1 with
+    | false =>
+      have he : (pt i).1 = ((c.points[i].1 : ℤ) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
+        simp only [hptdef, hs, if_false]; push_cast; ring
+      rw [he, Rat.num_div_eq_of_coprime hb (by simpa using hcx)]
+      simp [hs]
+    | true =>
+      have he : (pt i).1 = ((-(c.points[i].1 : ℤ)) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
+        simp only [hptdef, hs, if_true]; push_cast; ring
+      rw [he, Rat.num_div_eq_of_coprime hb (by simpa using hcx)]
+      simp [hs]
+  have hxden (i : Fin c.ρ) : c.points[i].2.2.1 = (pt i).1.den := by
+    obtain ⟨hcx, hdx, -, -⟩ := hco i
+    have hb : (0 : ℤ) < (c.points[i].2.2.1 : ℤ) := by exact_mod_cast hdx
+    cases hs : c.points[i].2.1 with
+    | false =>
+      have he : (pt i).1 = ((c.points[i].1 : ℤ) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
+        simp only [hptdef, hs, if_false]; push_cast; ring
+      rw [he]
+      exact_mod_cast (Rat.den_div_eq_of_coprime hb (by simpa using hcx)).symm
+    | true =>
+      have he : (pt i).1 = ((-(c.points[i].1 : ℤ)) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
+        simp only [hptdef, hs, if_true]; push_cast; ring
+      rw [he]
+      exact_mod_cast (Rat.den_div_eq_of_coprime hb (by simpa using hcx)).symm
+  have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
+      (lambdaBitK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
+        (Bool.rec (motive := fun _ ↦ ℕ) c.points[i].1 0 c.points[i].2.1)
+        (Bool.rec (motive := fun _ ↦ ℕ) 0 c.points[i].1 c.points[i].2.1)
+        c.points[i].2.2.1 : ZMod 2) :=
+    checkB_true hlenB hlenP hlenL hlenQ hB
+  set E : Type := (curveQ c.a₂ c.a₄ c.a₆).toAffine.Point
+  set φ : E →+ (Fin c.ρ → ZMod 2) := AddMonoidHom.pi (fun j ↦ lambdaHom (hlsC j)) with hφ
+  rcases Nat.eq_zero_or_pos c.ρ with hρ0 | hρpos
+  · exact ⟨⊥, inferInstance, by simp [hρ0]⟩
+  have hΔ : (curveQ c.a₂ c.a₄ c.a₆).Δ ≠ 0 := fun hΔ0 ↦ (hlsC ⟨0, hρpos⟩).discr (by simp [hΔ0])
+  have hns (i) : (curveQ c.a₂ c.a₄ c.a₆).toAffine.Nonsingular (pt i).1 (pt i).2 :=
+    (Affine.equation_iff_nonsingular_of_Δ_ne_zero hΔ).mp (hpt i)
+  let (eq := hg) g (i : Fin c.ρ) : E := .some (pt i).1 (pt i).2 (hns i)
+  -- The `g i` are the rows of the invertible `B`, so `φ` maps them to an independent family.
+  have hindep : LinearIndependent (ZMod 2) (fun i ↦ φ (g i)) := by
+    have hrow : (fun i ↦ φ (g i)) = (F2Invert.toMat c.B c.ρ).row := by
+      ext i j
+      rw [hφ, AddMonoidHom.pi_apply, lambdaHom_apply, hg,
+        ← lambdaBitK_eq (hlsC j) (hns i) (intResNat_cast (hlsC j).prime.ne_zero)
+          (hxnum i) (hxden i)]
+      simp [hBmat]
+    rw [hrow]
+    exact Matrix.linearIndependent_rows_of_isUnit (F2Invert.checkInv_isUnit hlenB hlenM hinv)
+  set H : Submodule ℤ E := Submodule.span ℤ (Set.range g)
+  have hHfin : Module.Finite ℤ H := Module.Finite.span_of_finite ℤ (Set.finite_range g)
+  refine ⟨H, hHfin, ?_⟩
+  simpa using RankDeduction.rank_ge_le (H := H) Nat.prime_two
+    (fun i ↦ ⟨g i, Submodule.subset_span (Set.mem_range_self i)⟩) (φ.comp H.subtype.toAddMonoidHom)
+    hindep ((card_torsionBy_le H).trans htors)
 
 end ECCompute
