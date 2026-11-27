@@ -119,32 +119,13 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
       (Bool.rec (motive := fun _ ↦ ℕ) c.points[i].1 0 c.points[i].2.1 : ℤ)
         - (Bool.rec (motive := fun _ ↦ ℕ) 0 c.points[i].1 c.points[i].2.1 : ℤ) := by
     obtain ⟨hcx, hdx, -, -⟩ := hco i
-    have hb : (0 : ℤ) < (c.points[i].2.2.1 : ℤ) := by exact_mod_cast hdx
-    cases hs : c.points[i].2.1 with
-    | false =>
-      have he : (pt i).1 = ((c.points[i].1 : ℤ) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
-        simp only [hptdef, hs, if_false]; push_cast; ring
-      rw [he, Rat.num_div_eq_of_coprime hb (by simpa using hcx)]
-      simp [hs]
-    | true =>
-      have he : (pt i).1 = ((-(c.points[i].1 : ℤ)) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
-        simp only [hptdef, hs, if_true]; push_cast; ring
-      rw [he, Rat.num_div_eq_of_coprime hb (by simpa using hcx)]
-      simp [hs]
+    simp only [hptdef]
+    rw [decode_num hcx hdx]
+    cases hs : c.points[i].2.1 <;> simp [hs]
   have hxden (i : Fin c.ρ) : c.points[i].2.2.1 = (pt i).1.den := by
     obtain ⟨hcx, hdx, -, -⟩ := hco i
-    have hb : (0 : ℤ) < (c.points[i].2.2.1 : ℤ) := by exact_mod_cast hdx
-    cases hs : c.points[i].2.1 with
-    | false =>
-      have he : (pt i).1 = ((c.points[i].1 : ℤ) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
-        simp only [hptdef, hs, if_false]; push_cast; ring
-      rw [he]
-      exact_mod_cast (Rat.den_div_eq_of_coprime hb (by simpa using hcx)).symm
-    | true =>
-      have he : (pt i).1 = ((-(c.points[i].1 : ℤ)) : ℚ) / ((c.points[i].2.2.1 : ℤ) : ℚ) := by
-        simp only [hptdef, hs, if_true]; push_cast; ring
-      rw [he]
-      exact_mod_cast (Rat.den_div_eq_of_coprime hb (by simpa using hcx)).symm
+    simp only [hptdef]
+    rw [decode_den hcx hdx]
   have hBmat : ∀ i j, F2Invert.toMat c.B c.ρ i j =
       (lambdaBitK c.a₂ c.a₄ (ls j).1 (qrMask (ls j).1) ((ls j).2 % (ls j).1).toNat
         (Bool.rec (motive := fun _ ↦ ℕ) c.points[i].1 0 c.points[i].2.1)
