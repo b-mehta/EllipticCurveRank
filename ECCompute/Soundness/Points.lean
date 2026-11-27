@@ -103,7 +103,8 @@ theorem decode_coprime {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) :
     (if sx then -(xn : ℤ) else (xn : ℤ)).natAbs.Coprime (xd : ℤ).natAbs := by
   cases sx <;> simpa [Int.natAbs_neg] using hcx
 
-/-- The decoded `x`-coordinate of a reduced flat point has signed numerator `if sx then -xn else xn`. -/
+/-- The decoded `x`-coordinate of a reduced flat point has signed numerator
+`if sx then -xn else xn`. -/
 public theorem decode_num {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) (hdx : 0 < xd) :
     ((if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)).num = if sx then -(xn : ℤ) else (xn : ℤ) := by
   rw [decode_eq, Rat.num_div_eq_of_coprime (by exact mod_cast hdx) (decode_coprime hcx)]

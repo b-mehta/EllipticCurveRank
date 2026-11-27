@@ -47,8 +47,7 @@ public theorem _root_.WeierstrassCurve.ext_of_beq {W W' : WeierstrassCurve ℚ}
 meta def strTrim (s : String) : String := s.trimAscii.toString
 
 /-- Parse a coordinate string `"a"` or `"a/b"` into a *reduced* `(numerator, denominator)`, via a
-host-side `mkRat` normalisation. The emitted term carries only the resulting `Nat`/`Bool` literals
-(`flatPointExpr`); no `mkRat` reaches the certificate. -/
+host-side `mkRat` normalisation. -/
 meta def parseCoord (s : String) : Int × Nat :=
   match (strTrim s).splitOn "/" with
   | [a, b] => let q := mkRat (strTrim a).toInt! (strTrim b).toNat!; (q.num, q.den)
@@ -72,7 +71,7 @@ meta def flatPointTy : Expr :=
 
 /-- The flat point encoding `(xnA, xs, xd, ynA, yd)` as an `Expr` of type `ℕ × Bool × ℕ × ℕ × ℕ`,
 computed host-side from a point's reduced coordinates `x = xn/xd`, `y = yn/yd`: `xnA = |xn|`,
-`xs = decide (xn < 0)`, `xd`, `ynA = |yn|`, `yd`. No `mkRat` reaches the emitted term. -/
+`xs = decide (xn < 0)`, `xd`, `ynA = |yn|`, `yd`. -/
 meta def flatPointExpr (xn : Int) (xd : Nat) (yn : Int) (yd : Nat) : Expr :=
   let n := mkConst ``Nat
   let b := mkConst ``Bool
