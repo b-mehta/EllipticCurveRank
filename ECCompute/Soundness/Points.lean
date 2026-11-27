@@ -92,8 +92,8 @@ public theorem checkPoints_iff {pts : List (ℕ × Bool × ℕ × ℕ × ℕ)} :
   · rintro ⟨heq, hcx, hdx, hcy, hdy⟩
     exact ⟨(checkPointShortNat_iff hdx hdy).mpr heq, ⟨hcx, hdx⟩, hcy, hdy⟩
 
-/-- The decoded `x`-coordinate `(if sx then -xn else xn) / xd` of a reduced flat point has the signed
-numerator `if sx then -xn else xn`. -/
+/-- The decoded `x`-coordinate `(if sx then -xn else xn) / xd` of a reduced flat point has the
+signed numerator `if sx then -xn else xn`. -/
 public theorem decode_num {xn xd : ℕ} {sx : Bool} (hcx : xn.Coprime xd) (hdx : 0 < xd) :
     ((if sx then -(xn : ℚ) else (xn : ℚ)) / (xd : ℚ)).num = if sx then -(xn : ℤ) else (xn : ℤ) := by
   have hb : (0 : ℤ) < (xd : ℤ) := by exact_mod_cast hdx

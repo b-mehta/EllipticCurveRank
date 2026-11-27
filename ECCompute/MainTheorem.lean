@@ -121,7 +121,7 @@ public theorem hasRankGE_of_certificate {a₁ a₂ a₃ a₄ a₆ : ℤ} (c : Ce
     obtain ⟨hcx, hdx, -, -⟩ := hco i
     simp only [hptdef]
     rw [decode_num hcx hdx]
-    cases hs : c.points[i].2.1 <;> simp [hs]
+    cases c.points[i].2.1 <;> simp
   have hxden (i : Fin c.ρ) : c.points[i].2.2.1 = (pt i).1.den := by
     obtain ⟨hcx, hdx, -, -⟩ := hco i
     simp only [hptdef]
