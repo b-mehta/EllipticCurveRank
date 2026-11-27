@@ -88,7 +88,7 @@ theorem checkInvGo_true (hc : checkInvGo M i B) (hi' : i' < B.length) :
     invRowK B[i'] M = 1 <<< (i + i') := by
   induction B generalizing i i' with
   | nil => simp at hi'
-  | cons b bs ih => cases i' <;> grind
+  | cons b bs ih => cases i' <;> grind [ih (i := i + 1)]
 
 /-- If the kernel-reducible checker `checkInv B M` returns `true` (and `B`, `M` have length `n`),
 then the matrix `toMat B n` interpreted over `𝔽₂` is invertible (a unit). -/
